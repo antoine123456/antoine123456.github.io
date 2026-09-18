@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Español Trainer</title>
+<style>
+:root {
+  --navy:  #1e3a5f;
+  --green: #16a34a;
+  --red:   #dc2626;
+  --gold:  #c8a84b;
+  color-scheme: light;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #fff; color: #111;
+  min-height: 100vh;
+}
+
+/* ── HOME ──────────────────────────────────────────────────────────────── */
+#home {
+  max-width: 520px; margin: 0 auto;
+  padding: 52px 24px 80px;
+}
+.h-logo { font-size: 36px; margin-bottom: 6px; }
+.h-title { font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+.h-sub { font-size: 13px; color: #aaa; margin-bottom: 36px; }
+
+.h-songs { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+.h-song {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; border: 1.5px solid #f0f0f0;
+  border-radius: 14px; cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.h-song:hover { border-color: var(--navy); background: #f8faff; }
+.h-song-info { flex: 1; min-width: 0; }
+.h-song-title { font-size: 15px; font-weight: 600; color: #111; }
+.h-song-meta { font-size: 12px; color: #bbb; margin-top: 2px; }
+.h-song-del {
+  padding: 4px 8px; font-size: 12px; color: #ddd;
+  background: none; border: none; cursor: pointer;
+  border-radius: 6px; transition: color .15s, background .15s;
+  flex-shrink: 0;
+}
+.h-song-del:hover { color: var(--red); background: #fff5f5; }
+
+.h-empty { font-size: 14px; color: #ccc; text-align: center; padding: 28px 0; }
+
+/* Import area */
+.h-import-btn {
+  width: 100%; padding: 13px; border: 1.5px dashed #ddd;
+  border-radius: 14px; background: none; font-size: 14px; color: #aaa;
+  cursor: pointer; transition: border-color .15s, color .15s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.h-import-btn:hover { border-color: var(--navy); color: var(--navy); }
+
+/* ── IMPORT MODAL ───────────────────────────────────────────────────────── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.35); z-index: 100;
+  align-items: center; justify-content: center; padding: 24px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: #fff; border-radius: 18px; padding: 28px;
+  width: 100%; max-width: 540px; max-height: 80vh;
+  display: flex; flex-direction: column; gap: 16px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.18);
+}
+.modal h2 { font-size: 17px; font-weight: 700; color: var(--navy); }
+.modal p  { font-size: 13px; color: #888; line-height: 1.6; }
+.modal textarea {
+  flex: 1; min-height: 180px;
+  border: 1.5px solid #e0e0e0; border-radius: 10px;
+  padding: 12px; font-family: "Menlo", "Consolas", monospace;
+  font-size: 12px; resize: none; outline: none; color: #333;
+}
+.modal textarea:focus { border-color: var(--navy); }
+.modal-actions { display: flex; gap: 10px; }
+.btn {
+  padding: 11px 24px; border-radius: 12px; font-size: 14px;
+  font-weight: 600; cursor: pointer; border: none; transition: background .15s;
+}
+.btn-primary { background: var(--navy); color: #fff; }
+.btn-primary:hover { background: #2563eb; }
+.btn-secondary { background: #f3f4f6; color: #555; }
+.btn-secondary:hover { background: #e5e7eb; }
+.btn-file { font-size: 13px; color: var(--navy); text-decoration: underline; cursor: pointer; background: none; border: none; padding: 0; }
+.modal-err { font-size: 12px; color: var(--red); }
+.modal-warning { font-size: 12px; color: var(--red); background: #fef2f2; border-radius: 8px; padding: 8px 10px; line-height: 1.5; }
+.btn:disabled, .btn:disabled:hover { opacity: .45; cursor: not-allowed; background: #f3f4f6; color: #999; }
+
+/* ── TRAINER ────────────────────────────────────────────────────────────── */
+#trainer { min-height: 100vh; display: none; flex-direction: column; }
+.t-topbar { padding: 16px 24px 0; display: flex; align-items: center; gap: 14px; }
+.t-back { background: none; border: none; color: #bbb; cursor: pointer; font-size: 13px; transition: color .15s; }
+.t-back:hover { color: var(--navy); }
+.t-prog { flex: 1; }
+.t-prog-label { font-size: 11px; color: #d0d0d0; text-align: right; margin-bottom: 5px; }
+.t-prog-track { height: 2px; background: #f0f0f0; border-radius: 2px; }
+.t-prog-fill { height: 100%; background: var(--gold); border-radius: 2px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+
+.t-main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 52px 24px 60px; }
+.t-song-info { font-size: 12px; color: #ccc; margin-bottom: 32px; letter-spacing: .3px; }
+
+.t-card { width: 100%; max-width: 720px; transition: opacity .28s ease, transform .28s ease; }
+.t-card.exit { opacity: 0; transform: translateY(-14px); }
+.t-card.snap { opacity: 0; transform: translateY(14px); transition: none; }
+
+/* Word grid */
+.t-words { display: flex; flex-wrap: wrap; gap: 18px 28px; justify-content: center; align-items: flex-start; }
+.word-col { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.wc-src { font-family: Georgia, serif; font-size: clamp(22px, 3.5vw, 34px); font-weight: 400; color: #111; white-space: nowrap; }
+.wc-inp {
+  border: none; border-bottom: 2.5px solid #d0ccc5;
+  background: transparent; font-family: Georgia, serif; font-size: 17px;
+  text-align: center; outline: none; padding: 2px 4px 7px;
+  transition: border-color .2s, color .2s; min-width: 48px;
+}
+.wc-inp:focus  { border-bottom-color: #93aed6; }
+.wc-inp.ok     { border-bottom-color: var(--green); color: var(--green); }
+.wc-inp.err    { border-bottom-color: var(--red);   color: var(--red); }
+.wc-inp::placeholder { color: #ddd; }
+.wc-hint { display: none; font-family: Georgia, serif; font-size: 13px; color: #c9922a; white-space: nowrap; }
+
+.t-actions { margin-top: 36px; display: flex; align-items: center; justify-content: center; gap: 28px; width: 100%; }
+.t-show-ans { font-size: 11px; color: #c9c0b6; cursor: pointer; letter-spacing: .3px; transition: color .15s; }
+.t-show-ans:hover { color: #c9922a; }
+.t-skip { font-size: 11px; color: #d0d0d0; cursor: pointer; letter-spacing: .3px; transition: color .15s; }
+.t-skip:hover { color: #999; }
+
+.t-msg { font-size: 13px; color: #ccc; text-align: center; padding: 28px 0; }
+
+#flash { position: fixed; inset: 0; pointer-events: none; border: 2.5px solid var(--green); border-radius: 10px; opacity: 0; transition: opacity .25s; z-index: 50; }
+#flash.on { opacity: .6; }
+</style>
+</head>
+<body>
+
+<!-- ── HOME ── -->
+<div id="home">
+  <div class="h-logo">🎵</div>
+  <div class="h-title">Español Trainer</div>
+  <div class="h-sub">Traduisez mot à mot les paroles de vos chansons espagnoles</div>
+  <div class="h-songs" id="h-songs"></div>
+  <button class="h-import-btn" onclick="openImport()">＋ Importer une chanson</button>
+</div>
+
+<!-- ── IMPORT MODAL ── -->
+<div class="modal-overlay" id="import-modal">
+  <div class="modal">
+    <h2>Importer une chanson</h2>
+    <p>
+      Collez le JSON généré par <code>preprocess.py</code>, ou chargez un fichier <code>.json</code>.<br>
+      Format : <code>{ "title", "artist", "strophes", "translations" }</code>
+    </p>
+    <p class="modal-warning">⚠️ Cette fonctionnalité n'est pas encore disponible : l'import ne permet pas encore d'ajouter une chanson pour le moment.</p>
+    <textarea id="import-ta" placeholder='{ "title": "...", "artist": "...", "strophes": [...], "translations": {...} }'></textarea>
+    <div class="modal-err" id="import-err"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="doImport()" disabled>Importer</button>
+      <label class="btn btn-secondary" style="cursor:not-allowed; opacity:.45;">
+        Fichier JSON <input type="file" accept=".json" style="display:none" disabled>
+      </label>
+      <button class="btn btn-secondary" onclick="closeImport()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TRAINER ── -->
+<div id="trainer">
+  <div class="t-topbar">
+    <button class="t-back" onclick="goHome()">← Quitter</button>
+    <div class="t-prog">
+      <div class="t-prog-label" id="prog-label">1 / 10</div>
+      <div class="t-prog-track"><div class="t-prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="t-main">
+    <div class="t-song-info" id="t-song-info"></div>
+    <div class="t-card" id="t-card">
+      <div class="t-words" id="t-words"></div>
+      <div class="t-actions">
+        <span class="t-show-ans" onclick="revealAll()">💡 Voir les réponses</span>
+        <span class="t-skip" onclick="advance()">Passer →</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="flash"></div>
+
+<script>
+// ── STORAGE ──────────────────────────────────────────────────────────────────
+var LS_KEY = "espanol_trainer_v1";
+var SONGS_URL = "songs.json";
+var builtinSongs = [];
+var displayedSongs = [];
+
+function loadSongs() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || "[]"); } catch(e) { return []; }
+}
+function saveSongs(arr) {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(arr)); } catch(e) {}
+}
+function loadBuiltinSongs() {
+  return fetch(SONGS_URL)
+    .then(function(r) { return r.ok ? r.json() : []; })
+    .catch(function() { return []; });
+}
+
+// ── HOME ──────────────────────────────────────────────────────────────────────
+function renderHome() {
+  loadBuiltinSongs().then(function(list) {
+    builtinSongs = Array.isArray(list) ? list : [];
+    renderSongList();
+  });
+}
+
+function renderSongList() {
+  displayedSongs = builtinSongs.map(function(s) { return { song: s, builtin: true }; })
+    .concat(loadSongs().map(function(s) { return { song: s, builtin: false }; }));
+  var el = document.getElementById("h-songs");
+  if (!displayedSongs.length) {
+    el.innerHTML = '<div class="h-empty">Aucune chanson disponible.</div>';
+    return;
+  }
+  el.innerHTML = displayedSongs.map(function(entry, i) {
+    var s = entry.song;
+    var n = 0;
+    s.strophes.forEach(function(st) {
+      st.text.split("\n").forEach(function(l) { if (l.trim().length > 1) n++; });
+    });
+    return '<div class="h-song" onclick="startTraining(' + i + ')">'
+      + '<div class="h-song-info">'
+      + '<div class="h-song-title">' + esc(s.title) + '</div>'
+      + '<div class="h-song-meta">' + (s.artist ? esc(s.artist) + " · " : "") + n + " phrases · " + (s.targetLang || "?") + '</div>'
+      + '</div>'
+      + (entry.builtin ? '' : '<button class="h-song-del" onclick="deleteSong(event,' + i + ')">✕</button>')
+      + '</div>';
+  }).join("");
+}
+
+function deleteSong(e, i) {
+  e.stopPropagation();
+  var entry = displayedSongs[i];
+  if (!entry || entry.builtin) return;
+  if (!confirm("Supprimer cette chanson ?")) return;
+  var songs = loadSongs();
+  songs.splice(i - builtinSongs.length, 1);
+  saveSongs(songs);
+  renderSongList();
+}
+
+// ── IMPORT ────────────────────────────────────────────────────────────────────
+function openImport() {
+  document.getElementById("import-ta").value = "";
+  document.getElementById("import-err").textContent = "";
+  document.getElementById("import-modal").classList.add("open");
+}
+function closeImport() {
+  document.getElementById("import-modal").classList.remove("open");
+}
+function loadFile(input) {
+  var file = input.files[0]; if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById("import-ta").value = e.target.result;
+    document.getElementById("import-err").textContent = "";
+  };
+  reader.readAsText(file);
+}
+function doImport() {
+  var raw = document.getElementById("import-ta").value.trim();
+  var errEl = document.getElementById("import-err");
+  errEl.textContent = "";
+  if (!raw) { errEl.textContent = "Aucun contenu."; return; }
+  var data;
+  try { data = JSON.parse(raw); } catch(e) { errEl.textContent = "JSON invalide : " + e.message; return; }
+  // Accept single song or array
+  var incoming = Array.isArray(data) ? data : [data];
+  // Validate basic shape
+  for (var i = 0; i < incoming.length; i++) {
+    var s = incoming[i];
+    if (!s.title || !s.strophes || !s.translations) {
+      errEl.textContent = "Champs manquants : title, strophes, translations requis."; return;
+    }
+  }
+  var songs = loadSongs();
+  incoming.forEach(function(s) {
+    // Assign unique id
+    s.id = Date.now() + Math.random();
+    songs.push(s);
+  });
+  saveSongs(songs);
+  closeImport();
+  renderSongList();
+}
+
+// ── TRAINING STATE ────────────────────────────────────────────────────────────
+var currentSong = null;
+var phrases    = [];
+var idx        = 0;
+var wordRows   = [];
+var advancing  = false;
+
+function startTraining(songIdx) {
+  var entry = displayedSongs[songIdx];
+  if (!entry) return;
+  currentSong = entry.song;
+  phrases = [];
+  currentSong.strophes.forEach(function(s) {
+    s.text.split("\n").forEach(function(line) {
+      line = line.trim();
+      if (line.length > 1) phrases.push({ text: line, label: s.label });
+    });
+  });
+  if (!phrases.length) { alert("Aucune phrase trouvée dans cette chanson."); return; }
+  idx = 0;
+  advancing = false;
+  document.getElementById("home").style.display = "none";
+  document.getElementById("trainer").style.display = "flex";
+  var info = currentSong.title + (currentSong.artist ? " — " + currentSong.artist : "");
+  document.getElementById("t-song-info").textContent = info;
+  showPhrase(0, true);
+}
+
+function goHome() {
+  document.getElementById("trainer").style.display = "none";
+  document.getElementById("home").style.display = "block";
+}
+
+// ── PHRASE DISPLAY ────────────────────────────────────────────────────────────
+function showPhrase(i, instant) {
+  if (i >= phrases.length) { endSession(); return; }
+  idx = i;
+  advancing = false; // safe: previous timers use isConnected guard
+  updateProgress();
+  var phrase = phrases[i];
+  var data = (currentSong.translations || {})[phrase.text];
+  if (!Array.isArray(data) || !data.some(function(e) { return e.t && e.t.length > 0; })) {
+    // No translation available for this line — show message and auto-skip
+    document.getElementById("t-words").innerHTML =
+      '<div class="t-msg">' + esc(phrase.text) + '<br><span style="font-size:11px;color:#ddd">traduction manquante</span></div>';
+    setTimeout(function() { if (!advancing) advance(); }, 1200);
+    return;
+  }
+  if (instant) {
+    renderCard(data);
+  } else {
+    var card = document.getElementById("t-card");
+    card.classList.add("exit");
+    setTimeout(function() {
+      renderCard(data);
+      card.classList.remove("exit");
+      card.classList.add("snap");
+      card.offsetHeight;
+      card.classList.remove("snap");
+      setTimeout(function() { if (wordRows.length) wordRows[0].inp.focus(); }, 280);
+    }, 280);
+  }
+}
+
+function updateProgress() {
+  document.getElementById("prog-label").textContent = (idx + 1) + " / " + phrases.length;
+  document.getElementById("prog-fill").style.width = Math.round(idx / phrases.length * 100) + "%";
+}
+
+function renderCard(data) {
+  buildRows(data);
+  setTimeout(function() { if (wordRows.length) wordRows[0].inp.focus(); }, 60);
+}
+
+// ── WORD GRID ─────────────────────────────────────────────────────────────────
+function buildRows(data) {
+  advancing = false;
+  var section = document.getElementById("t-words");
+  section.innerHTML = "";
+  wordRows = [];
+  if (!Array.isArray(data)) return;
+
+  data.forEach(function(item, i) {
+    var col  = document.createElement("div");   col.className = "word-col";
+    var src  = document.createElement("div");   src.className = "wc-src"; src.textContent = item.w;
+    var inp  = document.createElement("input"); inp.className = "wc-inp";
+    inp.type = "text"; inp.placeholder = "···";
+    inp.autocomplete = "off"; inp.autocorrect = "off"; inp.spellcheck = false;
+    inp.style.width = Math.max((item.w || "").length * 14, 48) + "px";
+    var hint = document.createElement("div"); hint.className = "wc-hint";
+
+    col.append(src, inp, hint);
+    section.appendChild(col);
+
+    var entry = { word: item.w, expected: item.t || [], inp: inp, hint: hint, solved: false, errors: 0, _errTimer: null };
+    wordRows.push(entry);
+    inp.addEventListener("input",   makeCheck(entry, i));
+    inp.addEventListener("keydown", makeKey(i));
+  });
+}
+
+function makeCheck(entry, i) { return function() { liveCheck(entry, i); }; }
+function makeKey(i) {
+  return function(e) { if (e.key === "Enter") { e.preventDefault(); focusNext(i); } };
+}
+function focusNext(i) {
+  for (var j = i + 1; j < wordRows.length; j++) {
+    if (!wordRows[j].solved && wordRows[j].expected.length > 0) { wordRows[j].inp.focus(); return; }
+  }
+  for (var j = 0; j < i && j < wordRows.length; j++) {
+    if (!wordRows[j].solved && wordRows[j].expected.length > 0) { wordRows[j].inp.focus(); return; }
+  }
+  tryComplete();
+}
+
+// ── HINTS ─────────────────────────────────────────────────────────────────────
+function revealHint(entry) {
+  if (!entry.expected.length) return;
+  entry.hint.textContent = entry.expected[0];
+  entry.hint.style.display = "block";
+}
+function revealAll() { wordRows.forEach(function(e) { if (!e.solved) revealHint(e); }); }
+
+// ── VALIDATION ────────────────────────────────────────────────────────────────
+function norm(s) {
+  return s.toLowerCase().trim()
+    .replace(/^[¿¡!.,;:'"«»()\[\]\-–—]+|[¿¡!.,;:'"«»()\[\]\-–—]+$/g, "")
+    .trim();
+}
+function noAccents(s) { return s.normalize("NFD").replace(/[̀-ͯ]/g, ""); }
+function isMatch(input, expected) {
+  var ni = norm(input), ne = norm(expected);
+  return ni === ne || noAccents(ni) === noAccents(ne);
+}
+function check(entry) {
+  if (!entry.expected.length) return null;
+  if (!entry.inp.value.trim()) return null;
+  return entry.expected.some(function(t) { return isMatch(entry.inp.value, t); });
+}
+
+function liveCheck(entry, i) {
+  var r = check(entry);
+  if (r === null) {
+    clearTimeout(entry._errTimer);
+    entry.inp.className = "wc-inp";
+    if (!entry.inp.value.trim()) entry.solved = false;
+    return;
+  }
+  if (r) {
+    clearTimeout(entry._errTimer);
+    entry.inp.className = "wc-inp ok";
+    entry.solved = true;
+    setTimeout(function() {
+      if (!entry.inp.isConnected) return;
+      focusNext(i);
+    }, 220);
+  } else {
+    entry.inp.className = "wc-inp err";
+    entry.solved = false;
+    clearTimeout(entry._errTimer);
+    entry._errTimer = setTimeout(function() {
+      if (!entry.inp.isConnected || entry.solved) return;
+      entry.errors++;
+      if (entry.errors >= 3) revealHint(entry);
+    }, 1500);
+  }
+}
+
+function tryComplete() {
+  if (advancing) return;
+  var checkable = wordRows.filter(function(e) { return e.expected.length > 0; });
+  if (!checkable.length) return;
+  if (checkable.every(function(e) { return e.solved; })) {
+    flash(function() { advance(); });
+  }
+}
+
+function advance() { showPhrase(idx + 1, false); }
+
+function flash(cb) {
+  if (advancing) return;
+  advancing = true;
+  var f = document.getElementById("flash");
+  f.classList.add("on");
+  setTimeout(function() { f.classList.remove("on"); }, 350);
+  setTimeout(function() { cb(); }, 750);
+}
+
+function endSession() {
+  document.getElementById("trainer").style.display = "none";
+  document.getElementById("home").style.display = "block";
+  alert("🎉 Terminé ! " + phrases.length + " phrases traduites.");
+  renderSongList();
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderHome();
+</script>
+</body>
+</html>

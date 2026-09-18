@@ -1,0 +1,2293 @@
+[
+  {
+    "title": "Phrases de Practice",
+    "artist": "Demo",
+    "targetLang": "French",
+    "strophes": [
+      {
+        "label": "Nature et couleurs",
+        "text": "El cielo es azul y las nubes son blancas\nLas flores crecen en el jardín de mi casa\nEl sol brilla todos los días del año"
+      },
+      {
+        "label": "Vie quotidienne",
+        "text": "Me gusta beber café por las mañanas\nVoy al mercado para comprar frutas frescas\nMi familia cena junta cada noche"
+      },
+      {
+        "label": "Voyages",
+        "text": "Quiero viajar a España el próximo verano\nEl tren llega a la estación a las ocho\nLa ciudad tiene muchos lugares bonitos"
+      },
+      {
+        "label": "Sentiments",
+        "text": "Estoy muy feliz cuando hace buen tiempo\nEl amor es como una canción hermosa\nLa vida es bella cuando tienes amigos"
+      }
+    ],
+    "translations": {
+      "El cielo es azul y las nubes son blancas": [
+        {
+          "w": "El",
+          "t": [
+            "le"
+          ]
+        },
+        {
+          "w": "cielo",
+          "t": [
+            "ciel"
+          ]
+        },
+        {
+          "w": "es",
+          "t": [
+            "est"
+          ]
+        },
+        {
+          "w": "azul",
+          "t": [
+            "bleu"
+          ]
+        },
+        {
+          "w": "y",
+          "t": [
+            "et"
+          ]
+        },
+        {
+          "w": "las",
+          "t": [
+            "les"
+          ]
+        },
+        {
+          "w": "nubes",
+          "t": [
+            "nuages"
+          ]
+        },
+        {
+          "w": "son",
+          "t": [
+            "sont"
+          ]
+        },
+        {
+          "w": "blancas",
+          "t": [
+            "blanches"
+          ]
+        }
+      ],
+      "Las flores crecen en el jardín de mi casa": [
+        {
+          "w": "Las",
+          "t": [
+            "les"
+          ]
+        },
+        {
+          "w": "flores",
+          "t": [
+            "fleurs"
+          ]
+        },
+        {
+          "w": "crecen",
+          "t": [
+            "poussent",
+            "grandissent"
+          ]
+        },
+        {
+          "w": "en",
+          "t": [
+            "dans",
+            "en"
+          ]
+        },
+        {
+          "w": "el",
+          "t": [
+            "le"
+          ]
+        },
+        {
+          "w": "jardín",
+          "t": [
+            "jardin"
+          ]
+        },
+        {
+          "w": "de",
+          "t": [
+            "de"
+          ]
+        },
+        {
+          "w": "mi",
+          "t": [
+            "ma",
+            "mon"
+          ]
+        },
+        {
+          "w": "casa",
+          "t": [
+            "maison"
+          ]
+        }
+      ],
+      "El sol brilla todos los días del año": [
+        {
+          "w": "El",
+          "t": [
+            "le"
+          ]
+        },
+        {
+          "w": "sol",
+          "t": [
+            "soleil"
+          ]
+        },
+        {
+          "w": "brilla",
+          "t": [
+            "brille"
+          ]
+        },
+        {
+          "w": "todos",
+          "t": [
+            "tous"
+          ]
+        },
+        {
+          "w": "los",
+          "t": [
+            "les"
+          ]
+        },
+        {
+          "w": "días",
+          "t": [
+            "jours"
+          ]
+        },
+        {
+          "w": "del",
+          "t": [
+            "du"
+          ]
+        },
+        {
+          "w": "año",
+          "t": [
+            "an",
+            "année"
+          ]
+        }
+      ],
+      "Me gusta beber café por las mañanas": [
+        {
+          "w": "Me",
+          "t": [
+            "me"
+          ]
+        },
+        {
+          "w": "gusta",
+          "t": [
+            "plaît",
+            "aime"
+          ]
+        },
+        {
+          "w": "beber",
+          "t": [
+            "boire"
+          ]
+        },
+        {
+          "w": "café",
+          "t": [
+            "café"
+          ]
+        },
+        {
+          "w": "por",
+          "t": [
+            "le",
+            "pendant"
+          ]
+        },
+        {
+          "w": "las",
+          "t": [
+            "les"
+          ]
+        },
+        {
+          "w": "mañanas",
+          "t": [
+            "matins"
+          ]
+        }
+      ],
+      "Voy al mercado para comprar frutas frescas": [
+        {
+          "w": "Voy",
+          "t": [
+            "vais"
+          ]
+        },
+        {
+          "w": "al",
+          "t": [
+            "au"
+          ]
+        },
+        {
+          "w": "mercado",
+          "t": [
+            "marché"
+          ]
+        },
+        {
+          "w": "para",
+          "t": [
+            "pour"
+          ]
+        },
+        {
+          "w": "comprar",
+          "t": [
+            "acheter"
+          ]
+        },
+        {
+          "w": "frutas",
+          "t": [
+            "fruits"
+          ]
+        },
+        {
+          "w": "frescas",
+          "t": [
+            "frais",
+            "fraîches"
+          ]
+        }
+      ],
+      "Mi familia cena junta cada noche": [
+        {
+          "w": "Mi",
+          "t": [
+            "ma",
+            "mon"
+          ]
+        },
+        {
+          "w": "familia",
+          "t": [
+            "famille"
+          ]
+        },
+        {
+          "w": "cena",
+          "t": [
+            "dîne",
+            "soupe"
+          ]
+        },
+        {
+          "w": "junta",
+          "t": [
+            "ensemble"
+          ]
+        },
+        {
+          "w": "cada",
+          "t": [
+            "chaque"
+          ]
+        },
+        {
+          "w": "noche",
+          "t": [
+            "soir",
+            "nuit"
+          ]
+        }
+      ],
+      "Quiero viajar a España el próximo verano": [
+        {
+          "w": "Quiero",
+          "t": [
+            "veux"
+          ]
+        },
+        {
+          "w": "viajar",
+          "t": [
+            "voyager"
+          ]
+        },
+        {
+          "w": "a",
+          "t": [
+            "en"
+          ]
+        },
+        {
+          "w": "España",
+          "t": [
+            "Espagne"
+          ]
+        },
+        {
+          "w": "el",
+          "t": [
+            "le"
+          ]
+        },
+        {
+          "w": "próximo",
+          "t": [
+            "prochain"
+          ]
+        },
+        {
+          "w": "verano",
+          "t": [
+            "été"
+          ]
+        }
+      ],
+      "El tren llega a la estación a las ocho": [
+        {
+          "w": "El",
+          "t": [
+            "le"
+          ]
+        },
+        {
+          "w": "tren",
+          "t": [
+            "train"
+          ]
+        },
+        {
+          "w": "llega",
+          "t": [
+            "arrive"
+          ]
+        },
+        {
+          "w": "a",
+          "t": [
+            "à"
+          ]
+        },
+        {
+          "w": "la",
+          "t": [
+            "la"
+          ]
+        },
+        {
+          "w": "estación",
+          "t": [
+            "gare",
+            "station"
+          ]
+        },
+        {
+          "w": "a",
+          "t": [
+            "à"
+          ]
+        },
+        {
+          "w": "las",
+          "t": [
+            "les"
+          ]
+        },
+        {
+          "w": "ocho",
+          "t": [
+            "huit"
+          ]
+        }
+      ],
+      "La ciudad tiene muchos lugares bonitos": [
+        {
+          "w": "La",
+          "t": [
+            "la"
+          ]
+        },
+        {
+          "w": "ciudad",
+          "t": [
+            "ville"
+          ]
+        },
+        {
+          "w": "tiene",
+          "t": [
+            "a",
+            "possède"
+          ]
+        },
+        {
+          "w": "muchos",
+          "t": [
+            "beaucoup de",
+            "nombreux"
+          ]
+        },
+        {
+          "w": "lugares",
+          "t": [
+            "endroits",
+            "lieux"
+          ]
+        },
+        {
+          "w": "bonitos",
+          "t": [
+            "beaux",
+            "jolis"
+          ]
+        }
+      ],
+      "Estoy muy feliz cuando hace buen tiempo": [
+        {
+          "w": "Estoy",
+          "t": [
+            "suis"
+          ]
+        },
+        {
+          "w": "muy",
+          "t": [
+            "très"
+          ]
+        },
+        {
+          "w": "feliz",
+          "t": [
+            "heureux",
+            "heureuse"
+          ]
+        },
+        {
+          "w": "cuando",
+          "t": [
+            "quand"
+          ]
+        },
+        {
+          "w": "hace",
+          "t": [
+            "fait"
+          ]
+        },
+        {
+          "w": "buen",
+          "t": [
+            "bon",
+            "beau"
+          ]
+        },
+        {
+          "w": "tiempo",
+          "t": [
+            "temps"
+          ]
+        }
+      ],
+      "El amor es como una canción hermosa": [
+        {
+          "w": "El",
+          "t": [
+            "le",
+            "l'"
+          ]
+        },
+        {
+          "w": "amor",
+          "t": [
+            "amour"
+          ]
+        },
+        {
+          "w": "es",
+          "t": [
+            "est"
+          ]
+        },
+        {
+          "w": "como",
+          "t": [
+            "comme"
+          ]
+        },
+        {
+          "w": "una",
+          "t": [
+            "une"
+          ]
+        },
+        {
+          "w": "canción",
+          "t": [
+            "chanson"
+          ]
+        },
+        {
+          "w": "hermosa",
+          "t": [
+            "belle",
+            "magnifique"
+          ]
+        }
+      ],
+      "La vida es bella cuando tienes amigos": [
+        {
+          "w": "La",
+          "t": [
+            "la"
+          ]
+        },
+        {
+          "w": "vida",
+          "t": [
+            "vie"
+          ]
+        },
+        {
+          "w": "es",
+          "t": [
+            "est"
+          ]
+        },
+        {
+          "w": "bella",
+          "t": [
+            "belle"
+          ]
+        },
+        {
+          "w": "cuando",
+          "t": [
+            "quand"
+          ]
+        },
+        {
+          "w": "tienes",
+          "t": [
+            "as",
+            "tu as"
+          ]
+        },
+        {
+          "w": "amigos",
+          "t": [
+            "amis"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "title": "NUEVAYoL",
+    "artist": "Bad Bunny",
+    "targetLang": "French",
+    "strophes": [
+      {
+        "label": "Intro",
+        "text": "Nueva Yol"
+      },
+      {
+        "label": "Coro",
+        "text": "Si te quieres divertir\nCon encanto y con primor\nSolo tienes que vivir (¿Pa' dónde?)\nUn verano en Nueva York (¡Nueva York!)\nSi te quieres divertir\nCon encanto y con primor (¿Pero qué es esto?)\nSolo tienes que vivir (¿Y este frío?)\nUn verano en Nueva York (Un ratito na' má')"
+      },
+      {
+        "label": "Verso 1",
+        "text": "Ey, ey, ey, 4 de julio, 4th de July\nAndo con mi primo, borracho, rulay\nLos mío' en El Bronx saben la que hay\nCon la nota en high por Washington Heights\nWillie Colón, me dicen \"el malo\", ey\nPorque pasan los año' y sigo dando palo'\nVendiendo disco' como cuadro' 'e Frida Kahlo\nEl perico es blanco, sí, sí, el tusi rosita, eh, eh\nNo te confunda', no, no, mejor evita, ey (Ey)\nUn shot de cañita en casa de Toñita y PR se siente cerquita\nSí, sí, sí, tengo el campeonato, nadie me lo quita"
+      },
+      {
+        "label": "Interludio",
+        "text": "The best in the world\nNumber one, the best in the world, ¿okey? Puerto Rico"
+      },
+      {
+        "label": "Verso 2",
+        "text": "¿Cómo Bad Bunny va a ser rey del pop, ey\nCon reggaetón y dembow? Ey\nCon reggaetón y dembow, sí\nCon reggaetón y dembow\n¿Cómo Bad Bunny va a ser rey del pop, ey\nCon reggaetón y dembow?\nMe siento como el Lapiz en \"Capea El Dough\"\nCuando yo nací, fue que nació el flow\nDe la'o a la'o, ping-pong\nUn flow pesa'o, Big Pun\nCon silenciador les robamo' las gata', James Bond, ey\nYo estoy en la mía, no tengo adversario, no\nCon Los Yankee' y Los Met', Juan Soto\nA correr, que otra ve' la sacamo' 'el estadio (Ey)"
+      },
+      {
+        "label": "Coro",
+        "text": "Si te quieres divertir\nCon encanto y con primor\nSolo tienes que vivir (Ya mismo nos vamo')\nUn verano en Nueva— (Un ratito má', un ratito)"
+      },
+      {
+        "label": "Interludio",
+        "text": "Shh, cuida'o, que nadie nos escuche\nShh, cuida'o, que nadie nos escuche\nShh, cuida'o, que nadie nos escuche\nShh, cuida—"
+      },
+      {
+        "label": "Verso 3",
+        "text": "Tú tiene' piquete, mami, yo también\nTú estás buena, yo estoy bueno también\nHuelo rico y ando con los de cien\nSi tú lo quiere', lo tiene' que mover\nTú tiene' piquete, mami, yo también\nTú estás buena, yo estoy bueno también\nHuelo rico y ando con los de cien\nSi tú lo quiere', lo tiene' que mover"
+      },
+      {
+        "label": "Outro",
+        "text": "Lo tiene' que move'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'\nLo tiene' que move'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'\nLo tiene' que move'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'\nLo tiene' que move'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'\nShh"
+      }
+    ],
+    "translations": {
+      "Nueva Yol": [
+        {
+          "w": "Nueva",
+          "t": [
+            "Nouvelle",
+            "New"
+          ]
+        },
+        {
+          "w": "Yol",
+          "t": [
+            "York"
+          ]
+        }
+      ],
+      "Si te quieres divertir": [
+        {
+          "w": "Si",
+          "t": [
+            "Si"
+          ]
+        },
+        {
+          "w": "te",
+          "t": [
+            "te"
+          ]
+        },
+        {
+          "w": "quieres",
+          "t": [
+            "veux"
+          ]
+        },
+        {
+          "w": "divertir",
+          "t": [
+            "t'amuser",
+            "amuser"
+          ]
+        }
+      ],
+      "Con encanto y con primor": [
+        {
+          "w": "Con",
+          "t": [
+            "Avec"
+          ]
+        },
+        {
+          "w": "encanto",
+          "t": [
+            "charme"
+          ]
+        },
+        {
+          "w": "y",
+          "t": [
+            "et"
+          ]
+        },
+        {
+          "w": "con",
+          "t": [
+            "avec"
+          ]
+        },
+        {
+          "w": "primor",
+          "t": [
+            "délicatesse",
+            "finesse"
+          ]
+        }
+      ],
+      "Solo tienes que vivir (¿Pa' dónde?)": [
+        {
+          "w": "Solo",
+          "t": [
+            "Seulement",
+            "Il suffit"
+          ]
+        },
+        {
+          "w": "tienes",
+          "t": [
+            "tu as",
+            "il faut"
+          ]
+        },
+        {
+          "w": "que",
+          "t": [
+            "de"
+          ]
+        },
+        {
+          "w": "vivir",
+          "t": [
+            "vivre"
+          ]
+        },
+        {
+          "w": "¿Pa' dónde?",
+          "t": [
+            "Pour où ?",
+            "Où ça ?"
+          ]
+        }
+      ],
+      "Un verano en Nueva York (¡Nueva York!)": [
+        {
+          "w": "Un",
+          "t": [
+            "Un"
+          ]
+        },
+        {
+          "w": "verano",
+          "t": [
+            "été"
+          ]
+        },
+        {
+          "w": "en",
+          "t": [
+            "à",
+            "en"
+          ]
+        },
+        {
+          "w": "Nueva York",
+          "t": [
+            "New York",
+            "Nueva York"
+          ]
+        },
+        {
+          "w": "¡Nueva York!",
+          "t": [
+            "New York !",
+            "Nueva York !"
+          ]
+        }
+      ],
+      "Con encanto y con primor (¿Pero qué es esto?)": [
+        {
+          "w": "Con",
+          "t": [
+            "Avec"
+          ]
+        },
+        {
+          "w": "encanto",
+          "t": [
+            "charme"
+          ]
+        },
+        {
+          "w": "y",
+          "t": [
+            "et"
+          ]
+        },
+        {
+          "w": "con",
+          "t": [
+            "avec"
+          ]
+        },
+        {
+          "w": "primor",
+          "t": [
+            "délicatesse",
+            "finesse"
+          ]
+        },
+        {
+          "w": "¿Pero qué es esto?",
+          "t": [
+            "Mais qu'est-ce que c'est ?",
+            "Mais c'est quoi ça ?"
+          ]
+        }
+      ],
+      "Solo tienes que vivir (¿Y este frío?)": [
+        {
+          "w": "Solo",
+          "t": [
+            "Seulement",
+            "Il suffit"
+          ]
+        },
+        {
+          "w": "tienes",
+          "t": [
+            "tu as",
+            "il faut"
+          ]
+        },
+        {
+          "w": "que",
+          "t": [
+            "de"
+          ]
+        },
+        {
+          "w": "vivir",
+          "t": [
+            "vivre"
+          ]
+        },
+        {
+          "w": "¿Y este frío?",
+          "t": [
+            "Et ce froid ?"
+          ]
+        }
+      ],
+      "Un verano en Nueva York (Un ratito na' má')": [
+        {
+          "w": "Un",
+          "t": [
+            "Un"
+          ]
+        },
+        {
+          "w": "verano",
+          "t": [
+            "été"
+          ]
+        },
+        {
+          "w": "en",
+          "t": [
+            "à",
+            "en"
+          ]
+        },
+        {
+          "w": "Nueva York",
+          "t": [
+            "New York",
+            "Nueva York"
+          ]
+        },
+        {
+          "w": "Un ratito na' má'",
+          "t": [
+            "Juste un petit moment",
+            "Un petit instant"
+          ]
+        }
+      ],
+      "Ey, ey, ey, 4 de julio, 4th de July": [
+        {
+          "w": "Ey",
+          "t": []
+        },
+        {
+          "w": "4 de julio",
+          "t": [
+            "4 juillet"
+          ]
+        },
+        {
+          "w": "4th de July",
+          "t": [
+            "4th of July",
+            "4 juillet"
+          ]
+        }
+      ],
+      "Ando con mi primo, borracho, rulay": [
+        {
+          "w": "Ando",
+          "t": [
+            "Je traîne",
+            "Je suis"
+          ]
+        },
+        {
+          "w": "con",
+          "t": [
+            "avec"
+          ]
+        },
+        {
+          "w": "mi",
+          "t": [
+            "mon"
+          ]
+        },
+        {
+          "w": "primo",
+          "t": [
+            "cousin"
+          ]
+        },
+        {
+          "w": "borracho",
+          "t": [
+            "bourré",
+            "ivre",
+            "saoul"
+          ]
+        },
+        {
+          "w": "rulay",
+          "t": [
+            "tranquille",
+            "cool"
+          ]
+        }
+      ],
+      "Los mío' en El Bronx saben la que hay": [
+        {
+          "w": "Los",
+          "t": [
+            "Les"
+          ]
+        },
+        {
+          "w": "mío'",
+          "t": [
+            "miens"
+          ]
+        },
+        {
+          "w": "en",
+          "t": [
+            "dans",
+            "au"
+          ]
+        },
+        {
+          "w": "El Bronx",
+          "t": [
+            "Le Bronx"
+          ]
+        },
+        {
+          "w": "saben",
+          "t": [
+            "savent"
+          ]
+        },
+        {
+          "w": "la que hay",
+          "t": [
+            "ce qui se passe",
+            "comment ça se passe"
+          ]
+        }
+      ],
+      "Con la nota en high por Washington Heights": [
+        {
+          "w": "Con",
+          "t": [
+            "Avec"
+          ]
+        },
+        {
+          "w": "la nota",
+          "t": [
+            "l'effet",
+            "le buzz",
+            "l'ivresse"
+          ]
+        },
+        {
+          "w": "en high",
+          "t": [
+            "à fond",
+            "élevé"
+          ]
+        },
+        {
+          "w": "por",
+          "t": [
+            "à",
+            "dans"
+          ]
+        },
+        {
+          "w": "Washington Heights",
+          "t": [
+            "Washington Heights"
+          ]
+        }
+      ],
+      "Willie Colón, me dicen \"el malo\", ey": [
+        {
+          "w": "Willie Colón",
+          "t": []
+        },
+        {
+          "w": "me",
+          "t": [
+            "m'"
+          ]
+        },
+        {
+          "w": "dicen",
+          "t": [
+            "appellent",
+            "disent"
+          ]
+        },
+        {
+          "w": "el malo",
+          "t": [
+            "le méchant",
+            "le bad boy"
+          ]
+        },
+        {
+          "w": "ey",
+          "t": []
+        }
+      ],
+      "Porque pasan los año' y sigo dando palo'": [
+        {
+          "w": "Porque",
+          "t": [
+            "Parce que"
+          ]
+        },
+        {
+          "w": "pasan",
+          "t": [
+            "passent"
+          ]
+        },
+        {
+          "w": "los",
+          "t": [
+            "les"
+          ]
+        },
+        {
+          "w": "año'",
+          "t": [
+            "années",
+            "ans"
+          ]
+        },
+        {
+          "w": "y",
+          "t": [
+            "et"
+          ]
+        },
+        {
+          "w": "sigo",
+          "t": [
+            "je continue"
+          ]
+        },
+        {
+          "w": "dando palo'",
+          "t": [
+            "je frappe fort",
+            "je cartonne",
+            "je fais mal"
+          ]
+        }
+      ],
+      "Vendiendo disco' como cuadro' 'e Frida Kahlo": [
+        {
+          "w": "Vendiendo",
+          "t": [
+            "En vendant"
+          ]
+        },
+        {
+          "w": "disco'",
+          "t": [
+            "disques"
+          ]
+        },
+        {
+          "w": "como",
+          "t": [
+            "comme"
+          ]
+        },
+        {
+          "w": "cuadro'",
+          "t": [
+            "tableaux"
+          ]
+        },
+        {
+          "w": "'e",
+          "t": [
+            "de"
+          ]
+        },
+        {
+          "w": "Frida Kahlo",
+          "t": []
+        }
+      ],
+      "El perico es blanco, sí, sí, el tusi rosita, eh, eh": [
+        {
+          "w": "El perico",
+          "t": [
+            "La coke",
+            "La cocaïne"
+          ]
+        },
+        {
+          "w": "es",
+          "t": [
+            "est"
+          ]
+        },
+        {
+          "w": "blanco",
+          "t": [
+            "blanc",
+            "blanche"
+          ]
+        },
+        {
+          "w": "sí",
+          "t": [
+            "oui"
+          ]
+        },
+        {
+          "w": "el tusi",
+          "t": [
+            "la tusi",
+            "le 2C-B"
+          ]
+        },
+        {
+          "w": "rosita",
+          "t": [
+            "rose",
+            "rosita"
+          ]
+        },
+        {
+          "w": "eh",
+          "t": []
+        }
+      ],
+      "No te confunda', no, no, mejor evita, ey (Ey)": [
+        {
+          "w": "No",
+          "t": [
+            "Ne"
+          ]
+        },
+        {
+          "w": "te",
+          "t": [
+            "te"
+          ]
+        },
+        {
+          "w": "confunda'",
+          "t": [
+            "trompe pas",
+            "confonds pas"
+          ]
+        },
+        {
+          "w": "no",
+          "t": [
+            "non"
+          ]
+        },
+        {
+          "w": "mejor",
+          "t": [
+            "mieux"
+          ]
+        },
+        {
+          "w": "evita",
+          "t": [
+            "évite"
+          ]
+        },
+        {
+          "w": "ey",
+          "t": []
+        }
+      ],
+      "Un shot de cañita en casa de Toñita y PR se siente cerquita": [
+        {
+          "w": "Un shot",
+          "t": [
+            "Un shot",
+            "Un verre"
+          ]
+        },
+        {
+          "w": "de",
+          "t": [
+            "de"
+          ]
+        },
+        {
+          "w": "cañita",
+          "t": [
+            "rhum de canne",
+            "petite canne"
+          ]
+        },
+        {
+          "w": "en",
+          "t": [
+            "chez",
+            "dans"
+          ]
+        },
+        {
+          "w": "casa",
+          "t": [
+            "maison",
+            "chez"
+          ]
+        },
+        {
+          "w": "de",
+          "t": [
+            "de"
+          ]
+        },
+        {
+          "w": "Toñita",
+          "t": []
+        },
+        {
+          "w": "y",
+          "t": [
+            "et"
+          ]
+        },
+        {
+          "w": "PR",
+          "t": [
+            "Porto Rico",
+            "PR"
+          ]
+        },
+        {
+          "w": "se siente",
+          "t": [
+            "se sent"
+          ]
+        },
+        {
+          "w": "cerquita",
+          "t": [
+            "tout près",
+            "proche"
+          ]
+        }
+      ],
+      "Sí, sí, sí, tengo el campeonato, nadie me lo quita": [
+        {
+          "w": "Sí",
+          "t": [
+            "Oui"
+          ]
+        },
+        {
+          "w": "tengo",
+          "t": [
+            "j'ai"
+          ]
+        },
+        {
+          "w": "el campeonato",
+          "t": [
+            "le championnat",
+            "le titre"
+          ]
+        },
+        {
+          "w": "nadie",
+          "t": [
+            "personne"
+          ]
+        },
+        {
+          "w": "me",
+          "t": [
+            "me"
+          ]
+        },
+        {
+          "w": "lo",
+          "t": [
+            "le"
+          ]
+        },
+        {
+          "w": "quita",
+          "t": [
+            "enlève",
+            "retire"
+          ]
+        }
+      ],
+      "The best in the world": [
+        {
+          "w": "The",
+          "t": [
+            "Le"
+          ]
+        },
+        {
+          "w": "best",
+          "t": [
+            "meilleur"
+          ]
+        },
+        {
+          "w": "in",
+          "t": [
+            "du",
+            "dans"
+          ]
+        },
+        {
+          "w": "the world",
+          "t": [
+            "monde"
+          ]
+        }
+      ],
+      "Number one, the best in the world, ¿okey? Puerto Rico": [
+        {
+          "w": "Number one",
+          "t": [
+            "Numéro un"
+          ]
+        },
+        {
+          "w": "the best in the world",
+          "t": [
+            "le meilleur du monde"
+          ]
+        },
+        {
+          "w": "¿okey?",
+          "t": [
+            "ok ?",
+            "d'accord ?"
+          ]
+        },
+        {
+          "w": "Puerto Rico",
+          "t": [
+            "Porto Rico"
+          ]
+        }
+      ],
+      "¿Cómo Bad Bunny va a ser rey del pop, ey": [
+        {
+          "w": "¿Cómo",
+          "t": [
+            "Comment"
+          ]
+        },
+        {
+          "w": "Bad Bunny",
+          "t": []
+        },
+        {
+          "w": "va",
+          "t": [
+            "va"
+          ]
+        },
+        {
+          "w": "a",
+          "t": [
+            "à"
+          ]
+        },
+        {
+          "w": "ser",
+          "t": [
+            "être"
+          ]
+        },
+        {
+          "w": "rey",
+          "t": [
+            "roi"
+          ]
+        },
+        {
+          "w": "del pop",
+          "t": [
+            "de la pop",
+            "du pop"
+          ]
+        },
+        {
+          "w": "ey",
+          "t": []
+        }
+      ],
+      "Con reggaetón y dembow? Ey": [
+        {
+          "w": "Con",
+          "t": [
+            "Avec"
+          ]
+        },
+        {
+          "w": "reggaetón",
+          "t": [
+            "reggaeton"
+          ]
+        },
+        {
+          "w": "y",
+          "t": [
+            "et"
+          ]
+        },
+        {
+          "w": "dembow",
+          "t": [
+            "dembow"
+          ]
+        },
+        {
+          "w": "Ey",
+          "t": []
+        }
+      ],
+      "Con reggaetón y dembow, sí": [
+        {
+          "w": "Con",
+          "t": [
+            "Avec"
+          ]
+        },
+        {
+          "w": "reggaetón",
+          "t": [
+            "reggaeton"
+          ]
+        },
+        {
+          "w": "y",
+          "t": [
+            "et"
+          ]
+        },
+        {
+          "w": "dembow",
+          "t": [
+            "dembow"
+          ]
+        },
+        {
+          "w": "sí",
+          "t": [
+            "oui"
+          ]
+        }
+      ],
+      "Con reggaetón y dembow": [
+        {
+          "w": "Con",
+          "t": [
+            "Avec"
+          ]
+        },
+        {
+          "w": "reggaetón",
+          "t": [
+            "reggaeton"
+          ]
+        },
+        {
+          "w": "y",
+          "t": [
+            "et"
+          ]
+        },
+        {
+          "w": "dembow",
+          "t": [
+            "dembow"
+          ]
+        }
+      ],
+      "Con reggaetón y dembow?": [
+        {
+          "w": "Con",
+          "t": [
+            "Avec"
+          ]
+        },
+        {
+          "w": "reggaetón",
+          "t": [
+            "reggaeton"
+          ]
+        },
+        {
+          "w": "y",
+          "t": [
+            "et"
+          ]
+        },
+        {
+          "w": "dembow",
+          "t": [
+            "dembow"
+          ]
+        }
+      ],
+      "Me siento como el Lapiz en \"Capea El Dough\"": [
+        {
+          "w": "Me",
+          "t": [
+            "Je"
+          ]
+        },
+        {
+          "w": "siento",
+          "t": [
+            "me sens"
+          ]
+        },
+        {
+          "w": "como",
+          "t": [
+            "comme"
+          ]
+        },
+        {
+          "w": "el Lapiz",
+          "t": [
+            "Lapiz",
+            "le crayon"
+          ]
+        },
+        {
+          "w": "en",
+          "t": [
+            "dans"
+          ]
+        },
+        {
+          "w": "Capea El Dough",
+          "t": []
+        }
+      ],
+      "Cuando yo nací, fue que nació el flow": [
+        {
+          "w": "Cuando",
+          "t": [
+            "Quand"
+          ]
+        },
+        {
+          "w": "yo",
+          "t": [
+            "je"
+          ]
+        },
+        {
+          "w": "nací",
+          "t": [
+            "suis né"
+          ]
+        },
+        {
+          "w": "fue",
+          "t": [
+            "c'est"
+          ]
+        },
+        {
+          "w": "que",
+          "t": [
+            "que"
+          ]
+        },
+        {
+          "w": "nació",
+          "t": [
+            "est né"
+          ]
+        },
+        {
+          "w": "el flow",
+          "t": [
+            "le flow",
+            "le style"
+          ]
+        }
+      ],
+      "De la'o a la'o, ping-pong": [
+        {
+          "w": "De",
+          "t": [
+            "De"
+          ]
+        },
+        {
+          "w": "la'o",
+          "t": [
+            "côté"
+          ]
+        },
+        {
+          "w": "a",
+          "t": [
+            "à"
+          ]
+        },
+        {
+          "w": "la'o",
+          "t": [
+            "côté"
+          ]
+        },
+        {
+          "w": "ping-pong",
+          "t": [
+            "ping-pong"
+          ]
+        }
+      ],
+      "Un flow pesa'o, Big Pun": [
+        {
+          "w": "Un",
+          "t": [
+            "Un"
+          ]
+        },
+        {
+          "w": "flow",
+          "t": [
+            "flow",
+            "style"
+          ]
+        },
+        {
+          "w": "pesa'o",
+          "t": [
+            "lourd",
+            "pesant"
+          ]
+        },
+        {
+          "w": "Big Pun",
+          "t": []
+        }
+      ],
+      "Con silenciador les robamo' las gata', James Bond, ey": [
+        {
+          "w": "Con",
+          "t": [
+            "Avec"
+          ]
+        },
+        {
+          "w": "silenciador",
+          "t": [
+            "silencieux"
+          ]
+        },
+        {
+          "w": "les",
+          "t": [
+            "leur"
+          ]
+        },
+        {
+          "w": "robamo'",
+          "t": [
+            "volons",
+            "piquons"
+          ]
+        },
+        {
+          "w": "las gata'",
+          "t": [
+            "les filles",
+            "les meufs"
+          ]
+        },
+        {
+          "w": "James Bond",
+          "t": []
+        },
+        {
+          "w": "ey",
+          "t": []
+        }
+      ],
+      "Yo estoy en la mía, no tengo adversario, no": [
+        {
+          "w": "Yo",
+          "t": [
+            "Je"
+          ]
+        },
+        {
+          "w": "estoy",
+          "t": [
+            "suis"
+          ]
+        },
+        {
+          "w": "en",
+          "t": [
+            "dans"
+          ]
+        },
+        {
+          "w": "la mía",
+          "t": [
+            "la mienne",
+            "mon truc"
+          ]
+        },
+        {
+          "w": "no",
+          "t": [
+            "non",
+            "pas"
+          ]
+        },
+        {
+          "w": "tengo",
+          "t": [
+            "j'ai"
+          ]
+        },
+        {
+          "w": "adversario",
+          "t": [
+            "adversaire"
+          ]
+        },
+        {
+          "w": "no",
+          "t": [
+            "non"
+          ]
+        }
+      ],
+      "Con Los Yankee' y Los Met', Juan Soto": [
+        {
+          "w": "Con",
+          "t": [
+            "Avec"
+          ]
+        },
+        {
+          "w": "Los Yankee'",
+          "t": [
+            "Les Yankees"
+          ]
+        },
+        {
+          "w": "y",
+          "t": [
+            "et"
+          ]
+        },
+        {
+          "w": "Los Met'",
+          "t": [
+            "Les Mets"
+          ]
+        },
+        {
+          "w": "Juan Soto",
+          "t": []
+        }
+      ],
+      "A correr, que otra ve' la sacamo' 'el estadio (Ey)": [
+        {
+          "w": "A",
+          "t": [
+            "À"
+          ]
+        },
+        {
+          "w": "correr",
+          "t": [
+            "courir"
+          ]
+        },
+        {
+          "w": "que",
+          "t": [
+            "que"
+          ]
+        },
+        {
+          "w": "otra ve'",
+          "t": [
+            "encore une fois"
+          ]
+        },
+        {
+          "w": "la",
+          "t": [
+            "la"
+          ]
+        },
+        {
+          "w": "sacamo'",
+          "t": [
+            "sortons",
+            "envoyons"
+          ]
+        },
+        {
+          "w": "'el",
+          "t": [
+            "du"
+          ]
+        },
+        {
+          "w": "estadio",
+          "t": [
+            "stade"
+          ]
+        },
+        {
+          "w": "Ey",
+          "t": []
+        }
+      ],
+      "Solo tienes que vivir (Ya mismo nos vamo')": [
+        {
+          "w": "Solo",
+          "t": [
+            "Seulement",
+            "Il suffit"
+          ]
+        },
+        {
+          "w": "tienes",
+          "t": [
+            "tu as",
+            "il faut"
+          ]
+        },
+        {
+          "w": "que",
+          "t": [
+            "de"
+          ]
+        },
+        {
+          "w": "vivir",
+          "t": [
+            "vivre"
+          ]
+        },
+        {
+          "w": "Ya mismo nos vamo'",
+          "t": [
+            "On y va tout de suite",
+            "On se casse maintenant"
+          ]
+        }
+      ],
+      "Un verano en Nueva— (Un ratito má', un ratito)": [
+        {
+          "w": "Un",
+          "t": [
+            "Un"
+          ]
+        },
+        {
+          "w": "verano",
+          "t": [
+            "été"
+          ]
+        },
+        {
+          "w": "en",
+          "t": [
+            "à",
+            "en"
+          ]
+        },
+        {
+          "w": "Nueva—",
+          "t": [
+            "New—",
+            "Nueva—"
+          ]
+        },
+        {
+          "w": "Un ratito má'",
+          "t": [
+            "Un petit moment de plus"
+          ]
+        },
+        {
+          "w": "un ratito",
+          "t": [
+            "un petit moment"
+          ]
+        }
+      ],
+      "Shh, cuida'o, que nadie nos escuche": [
+        {
+          "w": "Shh",
+          "t": []
+        },
+        {
+          "w": "cuida'o",
+          "t": [
+            "attention",
+            "fais gaffe"
+          ]
+        },
+        {
+          "w": "que",
+          "t": [
+            "que"
+          ]
+        },
+        {
+          "w": "nadie",
+          "t": [
+            "personne"
+          ]
+        },
+        {
+          "w": "nos",
+          "t": [
+            "nous"
+          ]
+        },
+        {
+          "w": "escuche",
+          "t": [
+            "écoute",
+            "entende"
+          ]
+        }
+      ],
+      "Shh, cuida—": [
+        {
+          "w": "Shh",
+          "t": []
+        },
+        {
+          "w": "cuida—",
+          "t": [
+            "atten—",
+            "fais gaff—"
+          ]
+        }
+      ],
+      "Tú tiene' piquete, mami, yo también": [
+        {
+          "w": "Tú",
+          "t": [
+            "Tu"
+          ]
+        },
+        {
+          "w": "tiene'",
+          "t": [
+            "as"
+          ]
+        },
+        {
+          "w": "piquete",
+          "t": [
+            "du style",
+            "de l'allure",
+            "du piquant"
+          ]
+        },
+        {
+          "w": "mami",
+          "t": [
+            "mami",
+            "chérie"
+          ]
+        },
+        {
+          "w": "yo",
+          "t": [
+            "moi"
+          ]
+        },
+        {
+          "w": "también",
+          "t": [
+            "aussi"
+          ]
+        }
+      ],
+      "Tú estás buena, yo estoy bueno también": [
+        {
+          "w": "Tú",
+          "t": [
+            "Tu"
+          ]
+        },
+        {
+          "w": "estás",
+          "t": [
+            "es"
+          ]
+        },
+        {
+          "w": "buena",
+          "t": [
+            "bonne",
+            "belle",
+            "canon"
+          ]
+        },
+        {
+          "w": "yo",
+          "t": [
+            "je"
+          ]
+        },
+        {
+          "w": "estoy",
+          "t": [
+            "suis"
+          ]
+        },
+        {
+          "w": "bueno",
+          "t": [
+            "bon",
+            "beau",
+            "canon"
+          ]
+        },
+        {
+          "w": "también",
+          "t": [
+            "aussi"
+          ]
+        }
+      ],
+      "Huelo rico y ando con los de cien": [
+        {
+          "w": "Huelo",
+          "t": [
+            "Je sens"
+          ]
+        },
+        {
+          "w": "rico",
+          "t": [
+            "bon"
+          ]
+        },
+        {
+          "w": "y",
+          "t": [
+            "et"
+          ]
+        },
+        {
+          "w": "ando",
+          "t": [
+            "je traîne",
+            "je suis"
+          ]
+        },
+        {
+          "w": "con",
+          "t": [
+            "avec"
+          ]
+        },
+        {
+          "w": "los",
+          "t": [
+            "les"
+          ]
+        },
+        {
+          "w": "de",
+          "t": [
+            "de",
+            "des"
+          ]
+        },
+        {
+          "w": "cien",
+          "t": [
+            "cent"
+          ]
+        }
+      ],
+      "Si tú lo quiere', lo tiene' que mover": [
+        {
+          "w": "Si",
+          "t": [
+            "Si"
+          ]
+        },
+        {
+          "w": "tú",
+          "t": [
+            "tu"
+          ]
+        },
+        {
+          "w": "lo",
+          "t": [
+            "le"
+          ]
+        },
+        {
+          "w": "quiere'",
+          "t": [
+            "veux"
+          ]
+        },
+        {
+          "w": "lo",
+          "t": [
+            "le"
+          ]
+        },
+        {
+          "w": "tiene'",
+          "t": [
+            "dois",
+            "as"
+          ]
+        },
+        {
+          "w": "que",
+          "t": [
+            "que",
+            "de"
+          ]
+        },
+        {
+          "w": "mover",
+          "t": [
+            "bouger",
+            "remuer"
+          ]
+        }
+      ],
+      "Lo tiene' que move'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'": [
+        {
+          "w": "Lo",
+          "t": [
+            "Le"
+          ]
+        },
+        {
+          "w": "tiene'",
+          "t": [
+            "dois",
+            "as"
+          ]
+        },
+        {
+          "w": "que",
+          "t": [
+            "que",
+            "de"
+          ]
+        },
+        {
+          "w": "move'",
+          "t": [
+            "bouger",
+            "remuer"
+          ]
+        },
+        {
+          "w": "ve'",
+          "t": [
+            "bouger",
+            "remuer"
+          ]
+        }
+      ],
+      "Lo tiene' que move'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'-ve'": [
+        {
+          "w": "Lo",
+          "t": [
+            "Le"
+          ]
+        },
+        {
+          "w": "tiene'",
+          "t": [
+            "dois",
+            "as"
+          ]
+        },
+        {
+          "w": "que",
+          "t": [
+            "que",
+            "de"
+          ]
+        },
+        {
+          "w": "move'",
+          "t": [
+            "bouger",
+            "remuer"
+          ]
+        },
+        {
+          "w": "ve'",
+          "t": [
+            "bouger",
+            "remuer"
+          ]
+        }
+      ],
+      "Shh": [
+        {
+          "w": "Shh",
+          "t": []
+        }
+      ]
+    }
+  }
+]
