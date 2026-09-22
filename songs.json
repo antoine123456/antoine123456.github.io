@@ -2289,5 +2289,130 @@
         }
       ]
     }
+  },
+  {
+  "title": "Porque Te Vas",
+  "artist": "Jeanette",
+  "targetLang": "French",
+  "strophes": [
+    {
+      "label": "Verso 1",
+      "text": "Hoy en mi ventana brilla el sol y el corazón\nSe pone triste contemplando la ciudad, porque te vas\nComo cada noche desperté, pensando en ti\nY en mi reloj todas las horas vi pasar, porque te vas"
+    },
+    {
+      "label": "Coro",
+      "text": "Todas las promesas de mi amor se irán contigo\nMe olvidarás, me olvidarás\nJunto a la estación yo lloraré igual que un niño\nPorque te vas, porque te vas\nPorque te vas, porque te vas"
+    },
+    {
+      "label": "Verso 2",
+      "text": "Bajo la penumbra de un farol se dormirán\nTodas las cosas que quedaron por decir, se dormirán\nJunto a las manillas de un reloj esperarán\nTodas las horas que quedaron por vivir, esperarán"
+    },
+    {
+      "label": "Coro",
+      "text": "Todas las promesas de mi amor se irán contigo\nMe olvidarás, me olvidarás\nJunto a la estación yo lloraré igual que un niño\nPorque te vas, porque te vas\nPorque te vas, porque te vas"
+    },
+    {
+      "label": "Coro",
+      "text": "Todas las promesas de mi amor se irán contigo\nMe olvidarás, me olvidarás\nJunto a la estación yo lloraré igual que un niño\nPorque te vas, porque te vas\nTodas las promesas de mi amor se irán contigo\nMe olvidarás, me olvidarás\nJunto a la estación yo lloraré igual que un niño"
+    },
+    {
+      "label": "Outro",
+      "text": "Porque te vas, porque te vas\nPorque te vas, porque te vas"
+    }
+  ],
+  "translations": {
+    "Hoy en mi ventana brilla el sol y el corazón": [
+      { "w": "Hoy", "t": ["Aujourd'hui"] },
+      { "w": "en", "t": ["à", "dans"] },
+      { "w": "mi", "t": ["ma"] },
+      { "w": "ventana", "t": ["fenêtre"] },
+      { "w": "brilla", "t": ["brille"] },
+      { "w": "el sol", "t": ["le soleil"] },
+      { "w": "y", "t": ["et"] },
+      { "w": "el corazón", "t": ["le cœur"] }
+    ],
+    "Se pone triste contemplando la ciudad, porque te vas": [
+      { "w": "Se pone", "t": ["devient", "se met à être"] },
+      { "w": "triste", "t": ["triste"] },
+      { "w": "contemplando", "t": ["contemplant", "en contemplant"] },
+      { "w": "la ciudad", "t": ["la ville"] },
+      { "w": "porque", "t": ["parce que"] },
+      { "w": "te vas", "t": ["tu t'en vas", "tu pars"] }
+    ],
+    "Como cada noche desperté, pensando en ti": [
+      { "w": "Como", "t": ["Comme"] },
+      { "w": "cada", "t": ["chaque"] },
+      { "w": "noche", "t": ["nuit"] },
+      { "w": "desperté", "t": ["je me suis réveillé", "je me réveillais"] },
+      { "w": "pensando", "t": ["en pensant", "pensant"] },
+      { "w": "en ti", "t": ["à toi"] }
+    ],
+    "Y en mi reloj todas las horas vi pasar, porque te vas": [
+      { "w": "Y", "t": ["Et"] },
+      { "w": "en", "t": ["sur", "dans"] },
+      { "w": "mi", "t": ["ma"] },
+      { "w": "reloj", "t": ["montre", "horloge"] },
+      { "w": "todas", "t": ["toutes"] },
+      { "w": "las horas", "t": ["les heures"] },
+      { "w": "vi", "t": ["j'ai vu", "je voyais"] },
+      { "w": "pasar", "t": ["passer"] },
+      { "w": "porque", "t": ["parce que"] },
+      { "w": "te vas", "t": ["tu t'en vas", "tu pars"] }
+    ],
+    "Todas las promesas de mi amor se irán contigo": [
+      { "w": "Todas", "t": ["Toutes"] },
+      { "w": "las promesas", "t": ["les promesses"] },
+      { "w": "de", "t": ["de"] },
+      { "w": "mi amor", "t": ["mon amour"] },
+      { "w": "se irán", "t": ["partiront", "s'en iront"] },
+      { "w": "contigo", "t": ["avec toi"] }
+    ],
+    "Me olvidarás, me olvidarás": [
+      { "w": "Me", "t": ["M'"] },
+      { "w": "olvidarás", "t": ["oublieras", "tu oublieras"] }
+    ],
+    "Junto a la estación yo lloraré igual que un niño": [
+      { "w": "Junto a", "t": ["Près de", "À côté de"] },
+      { "w": "la estación", "t": ["la gare"] },
+      { "w": "yo", "t": ["je"] },
+      { "w": "lloraré", "t": ["pleurerai", "je pleurerai"] },
+      { "w": "igual que", "t": ["comme"] },
+      { "w": "un niño", "t": ["un enfant"] }
+    ],
+    "Porque te vas, porque te vas": [
+      { "w": "Porque", "t": ["Parce que"] },
+      { "w": "te vas", "t": ["tu t'en vas", "tu pars"] }
+    ],
+    "Bajo la penumbra de un farol se dormirán": [
+      { "w": "Bajo", "t": ["Sous"] },
+      { "w": "la penumbra", "t": ["la pénombre"] },
+      { "w": "de", "t": ["de"] },
+      { "w": "un farol", "t": ["un réverbère", "un lampadaire"] },
+      { "w": "se dormirán", "t": ["s'endormiront", "dormiront"] }
+    ],
+    "Todas las cosas que quedaron por decir, se dormirán": [
+      { "w": "Todas", "t": ["Toutes"] },
+      { "w": "las cosas", "t": ["les choses"] },
+      { "w": "que", "t": ["qui"] },
+      { "w": "quedaron", "t": ["restèrent", "sont restées"] },
+      { "w": "por decir", "t": ["à dire"] },
+      { "w": "se dormirán", "t": ["s'endormiront", "dormiront"] }
+    ],
+    "Junto a las manillas de un reloj esperarán": [
+      { "w": "Junto a", "t": ["Près de", "À côté de"] },
+      { "w": "las manillas", "t": ["les aiguilles"] },
+      { "w": "de", "t": ["de"] },
+      { "w": "un reloj", "t": ["une montre", "une horloge"] },
+      { "w": "esperarán", "t": ["attendront", "elles attendront"] }
+    ],
+    "Todas las horas que quedaron por vivir, esperarán": [
+      { "w": "Todas", "t": ["Toutes"] },
+      { "w": "las horas", "t": ["les heures"] },
+      { "w": "que", "t": ["qui"] },
+      { "w": "quedaron", "t": ["restèrent", "sont restées"] },
+      { "w": "por vivir", "t": ["à vivre"] },
+      { "w": "esperarán", "t": ["attendront", "elles attendront"] }
+    ]
   }
+}
 ]
