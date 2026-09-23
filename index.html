@@ -117,6 +117,9 @@ body {
 .t-main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 52px 24px 60px; }
 .t-song-info { font-size: 12px; color: #ccc; margin-bottom: 32px; letter-spacing: .3px; }
 
+#t-video { width: 100%; max-width: 480px; margin: -12px auto 28px; }
+#t-video iframe { width: 100%; max-width: 100%; border-radius: 14px; display: block; }
+
 .t-card { width: 100%; max-width: 720px; transition: opacity .28s ease, transform .28s ease; }
 .t-card.exit { opacity: 0; transform: translateY(-14px); }
 .t-card.snap { opacity: 0; transform: translateY(14px); transition: none; }
@@ -249,6 +252,9 @@ Règles :
   </div>
   <div class="t-main">
     <div class="t-song-info" id="t-song-info"></div>
+    <div id="t-video" style="display:none;">
+      <div id="yt-player"></div>
+    </div>
     <div class="t-card" id="t-card">
       <div class="t-words" id="t-words"></div>
       <div class="t-actions">
@@ -398,7 +404,7 @@ function renderSongList() {
     return '<div class="h-song" onclick="startTraining(' + i + ')">'
       + '<div class="h-song-info">'
       + '<div class="h-song-title">' + esc(s.title) + progressBadgeHtml(sp) + '</div>'
-      + '<div class="h-song-meta">' + (s.artist ? esc(s.artist) + " · " : "") + n + " phrases · " + (s.targetLang || "?") + '</div>'
+      + '<div class="h-song-meta">' + (s.artist ? esc(s.artist) + " · " : "") + n + " phrases · " + (s.targetLang || "?") + (s.video && s.video.youtubeId ? " · 🎬" : "") + '</div>'
       + '</div>'
       + (entry.builtin ? '' : '<button class="h-song-del" onclick="deleteSong(event,' + i + ')">✕</button>')
       + '</div>';
@@ -534,6 +540,82 @@ function b64DecodeUnicode(str) {
   }).join(""));
 }
 
+// ── VIDEO SYNC ───────────────────────────────────────────────────────────────
+var ytPlayer = null;
+var ytReadyPromise = null;
+var ytCueTimer = null;
+var videoCues = null; // seconds, aligned with `phrases`
+
+function parseCueTime(v) {
+  if (typeof v === "number") return v;
+  var parts = String(v).trim().split(":").map(Number);
+  var secs = 0;
+  for (var i = 0; i < parts.length; i++) secs = secs * 60 + (parts[i] || 0);
+  return secs;
+}
+function ensureYouTubeApi() {
+  if (window.YT && window.YT.Player) return Promise.resolve();
+  if (ytReadyPromise) return ytReadyPromise;
+  ytReadyPromise = new Promise(function(resolve) {
+    window.onYouTubeIframeAPIReady = resolve;
+    var tag = document.createElement("script");
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(tag);
+  });
+  return ytReadyPromise;
+}
+function setupVideoForSong(song) {
+  clearInterval(ytCueTimer);
+  var box = document.getElementById("t-video");
+  if (!song.video || !song.video.youtubeId || !Array.isArray(song.video.cues)) {
+    videoCues = null;
+    box.style.display = "none";
+    if (ytPlayer) { try { ytPlayer.stopVideo(); } catch(e) {} }
+    return Promise.resolve();
+  }
+  videoCues = song.video.cues.map(parseCueTime);
+  box.style.display = "block";
+  return ensureYouTubeApi().then(function() {
+    return new Promise(function(resolve) {
+      if (ytPlayer) {
+        ytPlayer.cueVideoById(song.video.youtubeId);
+        resolve();
+      } else {
+        ytPlayer = new YT.Player("yt-player", {
+          width: "480", height: "270",
+          videoId: song.video.youtubeId,
+          playerVars: { rel: 0, modestbranding: 1, playsinline: 1 },
+          events: { onReady: function() { resolve(); } }
+        });
+      }
+    });
+  });
+}
+function playCueRange(i) {
+  clearInterval(ytCueTimer);
+  if (!ytPlayer || !videoCues || videoCues[i] == null) return;
+  var start = videoCues[i];
+  var end = (i + 1 < videoCues.length) ? videoCues[i + 1] : null;
+  try {
+    ytPlayer.seekTo(start, true);
+    ytPlayer.playVideo();
+  } catch(e) { return; }
+  if (end != null) {
+    ytCueTimer = setInterval(function() {
+      try {
+        if (ytPlayer.getCurrentTime() >= end - 0.15) {
+          ytPlayer.pauseVideo();
+          clearInterval(ytCueTimer);
+        }
+      } catch(e) { clearInterval(ytCueTimer); }
+    }, 200);
+  }
+}
+function stopVideoPlayback() {
+  clearInterval(ytCueTimer);
+  if (ytPlayer) { try { ytPlayer.pauseVideo(); } catch(e) {} }
+}
+
 // ── TRAINING STATE ────────────────────────────────────────────────────────────
 var currentSong = null;
 var currentKey  = null;
@@ -565,10 +647,13 @@ function startTraining(songIdx) {
   var existing = getSongProgress(currentKey);
   var startIdx = (existing && !existing.completed && existing.resumeIndex > 0 && existing.resumeIndex < phrases.length)
     ? existing.resumeIndex : 0;
-  showPhrase(startIdx, true);
+  setupVideoForSong(currentSong).then(function() {
+    showPhrase(startIdx, true);
+  });
 }
 
 function goHome() {
+  stopVideoPlayback();
   document.getElementById("trainer").style.display = "none";
   document.getElementById("home").style.display = "block";
 }
@@ -580,6 +665,7 @@ function showPhrase(i, instant) {
   advancing = false; // safe: previous timers use isConnected guard
   updateProgress();
   updateResumeIndex(i);
+  playCueRange(i);
   var phrase = phrases[i];
   var data = (currentSong.translations || {})[phrase.text];
   if (!Array.isArray(data) || !data.some(function(e) { return e.t && e.t.length > 0; })) {
@@ -733,6 +819,7 @@ function flash(cb) {
 }
 
 function endSession() {
+  stopVideoPlayback();
   document.getElementById("trainer").style.display = "none";
   document.getElementById("home").style.display = "block";
   recordSongCompletion(!sessionHadMistake);
