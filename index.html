@@ -253,7 +253,9 @@ Règles :
   <div class="t-main">
     <div class="t-song-info" id="t-song-info"></div>
     <div id="t-video" style="display:none;">
-      <div id="yt-player"></div>
+      <iframe id="yt-player" width="480" height="270" frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
     </div>
     <div class="t-card" id="t-card">
       <div class="t-words" id="t-words"></div>
@@ -564,32 +566,42 @@ function ensureYouTubeApi() {
   });
   return ytReadyPromise;
 }
+function withTimeout(promise, ms) {
+  return new Promise(function(resolve) {
+    var done = false;
+    var timer = setTimeout(function() { if (!done) { done = true; resolve(); } }, ms);
+    promise.then(function(v) {
+      if (!done) { done = true; clearTimeout(timer); resolve(v); }
+    });
+  });
+}
 function setupVideoForSong(song) {
   clearInterval(ytCueTimer);
   var box = document.getElementById("t-video");
+  var frame = document.getElementById("yt-player");
   if (!song.video || !song.video.youtubeId || !Array.isArray(song.video.cues)) {
     videoCues = null;
     box.style.display = "none";
-    if (ytPlayer) { try { ytPlayer.stopVideo(); } catch(e) {} }
+    frame.src = "";
+    ytPlayer = null;
     return Promise.resolve();
   }
   videoCues = song.video.cues.map(parseCueTime);
   box.style.display = "block";
-  return ensureYouTubeApi().then(function() {
+  // Set a real, immediately-playable embed src first — the video shows and is
+  // watchable/controllable by hand even if the control API below never loads
+  // (blocked script, slow network, ad-blocker...).
+  frame.src = "https://www.youtube.com/embed/" + song.video.youtubeId +
+    "?enablejsapi=1&rel=0&modestbranding=1&playsinline=1";
+  ytPlayer = null;
+  var wrapPromise = ensureYouTubeApi().then(function() {
     return new Promise(function(resolve) {
-      if (ytPlayer) {
-        ytPlayer.cueVideoById(song.video.youtubeId);
-        resolve();
-      } else {
-        ytPlayer = new YT.Player("yt-player", {
-          width: "480", height: "270",
-          videoId: song.video.youtubeId,
-          playerVars: { rel: 0, modestbranding: 1, playsinline: 1 },
-          events: { onReady: function() { resolve(); } }
-        });
-      }
+      ytPlayer = new YT.Player("yt-player", { events: { onReady: function() { resolve(); } } });
     });
   });
+  // Never block phrase display on the control layer: proceed after 5s even
+  // if it hasn't attached, so a blocked/slow API can't freeze the trainer.
+  return withTimeout(wrapPromise, 5000);
 }
 function playCueRange(i) {
   clearInterval(ytCueTimer);
