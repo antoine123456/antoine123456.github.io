@@ -2291,1592 +2291,371 @@
     }
   },
   {
-    "title": "Porque Te Vas",
-    "artist": "Jeanette",
-    "targetLang": "French",
-    "strophes": [
-      {
-        "label": "Verso 1",
-        "text": "Hoy en mi ventana brilla el sol y el corazón\nSe pone triste contemplando la ciudad, porque te vas\nComo cada noche desperté, pensando en ti\nY en mi reloj todas las horas vi pasar, porque te vas"
-      },
-      {
-        "label": "Coro",
-        "text": "Todas las promesas de mi amor se irán contigo\nMe olvidarás, me olvidarás\nJunto a la estación yo lloraré igual que un niño\nPorque te vas, porque te vas\nPorque te vas, porque te vas"
-      },
-      {
-        "label": "Verso 2",
-        "text": "Bajo la penumbra de un farol se dormirán\nTodas las cosas que quedaron por decir, se dormirán\nJunto a las manillas de un reloj esperarán\nTodas las horas que quedaron por vivir, esperarán"
-      },
-      {
-        "label": "Coro",
-        "text": "Todas las promesas de mi amor se irán contigo\nMe olvidarás, me olvidarás\nJunto a la estación yo lloraré igual que un niño\nPorque te vas, porque te vas\nPorque te vas, porque te vas"
-      },
-      {
-        "label": "Coro",
-        "text": "Todas las promesas de mi amor se irán contigo\nMe olvidarás, me olvidarás\nJunto a la estación yo lloraré igual que un niño\nPorque te vas, porque te vas\nTodas las promesas de mi amor se irán contigo\nMe olvidarás, me olvidarás\nJunto a la estación yo lloraré igual que un niño"
-      },
-      {
-        "label": "Outro",
-        "text": "Porque te vas, porque te vas\nPorque te vas, porque te vas"
-      }
-    ],
-    "translations": {
-      "Hoy en mi ventana brilla el sol y el corazón": [
-        {
-          "w": "Hoy",
-          "t": [
-            "Aujourd'hui"
-          ]
-        },
-        {
-          "w": "en",
-          "t": [
-            "à",
-            "dans"
-          ]
-        },
-        {
-          "w": "mi",
-          "t": [
-            "ma"
-          ]
-        },
-        {
-          "w": "ventana",
-          "t": [
-            "fenêtre"
-          ]
-        },
-        {
-          "w": "brilla",
-          "t": [
-            "brille"
-          ]
-        },
-        {
-          "w": "el sol",
-          "t": [
-            "le soleil"
-          ]
-        },
-        {
-          "w": "y",
-          "t": [
-            "et"
-          ]
-        },
-        {
-          "w": "el corazón",
-          "t": [
-            "le cœur"
-          ]
-        }
-      ],
-      "Se pone triste contemplando la ciudad, porque te vas": [
-        {
-          "w": "Se pone",
-          "t": [
-            "devient",
-            "se met à être"
-          ]
-        },
-        {
-          "w": "triste",
-          "t": [
-            "triste"
-          ]
-        },
-        {
-          "w": "contemplando",
-          "t": [
-            "contemplant",
-            "en contemplant"
-          ]
-        },
-        {
-          "w": "la ciudad",
-          "t": [
-            "la ville"
-          ]
-        },
-        {
-          "w": "porque",
-          "t": [
-            "parce que"
-          ]
-        },
-        {
-          "w": "te vas",
-          "t": [
-            "tu t'en vas",
-            "tu pars"
-          ]
-        }
-      ],
-      "Como cada noche desperté, pensando en ti": [
-        {
-          "w": "Como",
-          "t": [
-            "Comme"
-          ]
-        },
-        {
-          "w": "cada",
-          "t": [
-            "chaque"
-          ]
-        },
-        {
-          "w": "noche",
-          "t": [
-            "nuit"
-          ]
-        },
-        {
-          "w": "desperté",
-          "t": [
-            "je me suis réveillé",
-            "je me réveillais"
-          ]
-        },
-        {
-          "w": "pensando",
-          "t": [
-            "en pensant",
-            "pensant"
-          ]
-        },
-        {
-          "w": "en ti",
-          "t": [
-            "à toi"
-          ]
-        }
-      ],
-      "Y en mi reloj todas las horas vi pasar, porque te vas": [
-        {
-          "w": "Y",
-          "t": [
-            "Et"
-          ]
-        },
-        {
-          "w": "en",
-          "t": [
-            "sur",
-            "dans"
-          ]
-        },
-        {
-          "w": "mi",
-          "t": [
-            "ma"
-          ]
-        },
-        {
-          "w": "reloj",
-          "t": [
-            "montre",
-            "horloge"
-          ]
-        },
-        {
-          "w": "todas",
-          "t": [
-            "toutes"
-          ]
-        },
-        {
-          "w": "las horas",
-          "t": [
-            "les heures"
-          ]
-        },
-        {
-          "w": "vi",
-          "t": [
-            "j'ai vu",
-            "je voyais"
-          ]
-        },
-        {
-          "w": "pasar",
-          "t": [
-            "passer"
-          ]
-        },
-        {
-          "w": "porque",
-          "t": [
-            "parce que"
-          ]
-        },
-        {
-          "w": "te vas",
-          "t": [
-            "tu t'en vas",
-            "tu pars"
-          ]
-        }
-      ],
-      "Todas las promesas de mi amor se irán contigo": [
-        {
-          "w": "Todas",
-          "t": [
-            "Toutes"
-          ]
-        },
-        {
-          "w": "las promesas",
-          "t": [
-            "les promesses"
-          ]
-        },
-        {
-          "w": "de",
-          "t": [
-            "de"
-          ]
-        },
-        {
-          "w": "mi amor",
-          "t": [
-            "mon amour"
-          ]
-        },
-        {
-          "w": "se irán",
-          "t": [
-            "partiront",
-            "s'en iront"
-          ]
-        },
-        {
-          "w": "contigo",
-          "t": [
-            "avec toi"
-          ]
-        }
-      ],
-      "Me olvidarás, me olvidarás": [
-        {
-          "w": "Me",
-          "t": [
-            "M'"
-          ]
-        },
-        {
-          "w": "olvidarás",
-          "t": [
-            "oublieras",
-            "tu oublieras"
-          ]
-        }
-      ],
-      "Junto a la estación yo lloraré igual que un niño": [
-        {
-          "w": "Junto a",
-          "t": [
-            "Près de",
-            "À côté de"
-          ]
-        },
-        {
-          "w": "la estación",
-          "t": [
-            "la gare"
-          ]
-        },
-        {
-          "w": "yo",
-          "t": [
-            "je"
-          ]
-        },
-        {
-          "w": "lloraré",
-          "t": [
-            "pleurerai",
-            "je pleurerai"
-          ]
-        },
-        {
-          "w": "igual que",
-          "t": [
-            "comme"
-          ]
-        },
-        {
-          "w": "un niño",
-          "t": [
-            "un enfant"
-          ]
-        }
-      ],
-      "Porque te vas, porque te vas": [
-        {
-          "w": "Porque",
-          "t": [
-            "Parce que"
-          ]
-        },
-        {
-          "w": "te vas",
-          "t": [
-            "tu t'en vas",
-            "tu pars"
-          ]
-        }
-      ],
-      "Bajo la penumbra de un farol se dormirán": [
-        {
-          "w": "Bajo",
-          "t": [
-            "Sous"
-          ]
-        },
-        {
-          "w": "la penumbra",
-          "t": [
-            "la pénombre"
-          ]
-        },
-        {
-          "w": "de",
-          "t": [
-            "de"
-          ]
-        },
-        {
-          "w": "un farol",
-          "t": [
-            "un réverbère",
-            "un lampadaire"
-          ]
-        },
-        {
-          "w": "se dormirán",
-          "t": [
-            "s'endormiront",
-            "dormiront"
-          ]
-        }
-      ],
-      "Todas las cosas que quedaron por decir, se dormirán": [
-        {
-          "w": "Todas",
-          "t": [
-            "Toutes"
-          ]
-        },
-        {
-          "w": "las cosas",
-          "t": [
-            "les choses"
-          ]
-        },
-        {
-          "w": "que",
-          "t": [
-            "qui"
-          ]
-        },
-        {
-          "w": "quedaron",
-          "t": [
-            "restèrent",
-            "sont restées"
-          ]
-        },
-        {
-          "w": "por decir",
-          "t": [
-            "à dire"
-          ]
-        },
-        {
-          "w": "se dormirán",
-          "t": [
-            "s'endormiront",
-            "dormiront"
-          ]
-        }
-      ],
-      "Junto a las manillas de un reloj esperarán": [
-        {
-          "w": "Junto a",
-          "t": [
-            "Près de",
-            "À côté de"
-          ]
-        },
-        {
-          "w": "las manillas",
-          "t": [
-            "les aiguilles"
-          ]
-        },
-        {
-          "w": "de",
-          "t": [
-            "de"
-          ]
-        },
-        {
-          "w": "un reloj",
-          "t": [
-            "une montre",
-            "une horloge"
-          ]
-        },
-        {
-          "w": "esperarán",
-          "t": [
-            "attendront",
-            "elles attendront"
-          ]
-        }
-      ],
-      "Todas las horas que quedaron por vivir, esperarán": [
-        {
-          "w": "Todas",
-          "t": [
-            "Toutes"
-          ]
-        },
-        {
-          "w": "las horas",
-          "t": [
-            "les heures"
-          ]
-        },
-        {
-          "w": "que",
-          "t": [
-            "qui"
-          ]
-        },
-        {
-          "w": "quedaron",
-          "t": [
-            "restèrent",
-            "sont restées"
-          ]
-        },
-        {
-          "w": "por vivir",
-          "t": [
-            "à vivre"
-          ]
-        },
-        {
-          "w": "esperarán",
-          "t": [
-            "attendront",
-            "elles attendront"
-          ]
-        }
-      ]
+  "title": "Porque Te Vas",
+  "artist": "Jeanette",
+  "targetLang": "French",
+  "strophes": [
+    {
+      "label": "Verso 1",
+      "text": "Hoy en mi ventana brilla el sol y el corazón\nSe pone triste contemplando la ciudad, porque te vas\nComo cada noche desperté, pensando en ti\nY en mi reloj todas las horas vi pasar, porque te vas"
     },
-    "video": {
-      "youtubeId": "TjUhXbGdLYo",
-      "cues": [
-        11,
-        17,
-        27,
-        31,
-        43,
-        48,
-        54,
-        57,
-        65,
-        74,
-        81,
-        92,
-        98,
-        107,
-        112,
-        120,
-        123,
-        129,
-        138,
-        143,
-        150,
-        154,
-        160,
-        165,
-        171,
-        176,
-        180
-      ]
+    {
+      "label": "Coro",
+      "text": "Todas las promesas de mi amor se irán contigo\nMe olvidarás, me olvidarás\nJunto a la estación yo lloraré igual que un niño\nPorque te vas, porque te vas\nPorque te vas, porque te vas"
+    },
+    {
+      "label": "Verso 2",
+      "text": "Bajo la penumbra de un farol se dormirán\nTodas las cosas que quedaron por decir, se dormirán\nJunto a las manillas de un reloj esperarán\nTodas las horas que quedaron por vivir, esperarán"
+    },
+    {
+      "label": "Coro",
+      "text": "Todas las promesas de mi amor se irán contigo\nMe olvidarás, me olvidarás\nJunto a la estación yo lloraré igual que un niño\nPorque te vas, porque te vas\nPorque te vas, porque te vas"
+    },
+    {
+      "label": "Coro",
+      "text": "Todas las promesas de mi amor se irán contigo\nMe olvidarás, me olvidarás\nJunto a la estación yo lloraré igual que un niño\nPorque te vas, porque te vas\nTodas las promesas de mi amor se irán contigo\nMe olvidarás, me olvidarás\nJunto a la estación yo lloraré igual que un niño"
+    },
+    {
+      "label": "Outro",
+      "text": "Porque te vas, porque te vas\nPorque te vas, porque te vas"
     }
-  },
-  {
-    "title": "CANDY",
-    "artist": "ROSALIA",
-    "targetLang": "French",
-    "strophes": [
-      {
-        "label": "Pre-Coro",
-        "text": "Vestí'a con F de Fendi\nBailando Plan B, la de \"Candy\"\nAsí tú te prendaste de mí\nEl día en que yo te conocí"
-      },
-      {
-        "label": "Coro",
-        "text": "Sé que tú no me has olvida'o\nNo me has olvida'o, no me has olvida'o\nSolo tú no me has olvida'o\nNo me has olvida'o, no me has olvida'o"
-      },
-      {
-        "label": "Post-Coro",
-        "text": "Ya no te quiero como antes\nMe rompiste, pero solo en parte'\nLlevaba tu esclava para pensarte\nPero de olvidarte yo ya hice un arte\nMás na', na', na', na', na', na'\nNo queda na', na', na', na', na'\nEntre tú y yo, ya-ya-ya-ya"
-      },
-      {
-        "label": "Verso",
-        "text": "Ya no me acuerdo de tu cara\nLa forma de tu cuerpo ni aunquе la pensara\nHay demasia'o que nos sеpara\nLa vida es bonita pero traicionera"
-      },
-      {
-        "label": "Pre-Coro",
-        "text": "Vestí'a con F de Fendi (Fendi, Fendi, Fendi)\nBailando Plan B, la de \"Candy\" (Candy, candy, candy)\nAsí tú te prendaste de mí (Eh, eh)\nEl día en que yo te conocí"
-      },
-      {
-        "label": "Coro",
-        "text": "Pero tú no me has olvida'o\nNo me has olvida'o, no me has olvida'o\nSolo tú no me has olvida'o\nNo me has olvida'o, no me has olvida'o"
-      },
-      {
-        "label": "Post-Coro",
-        "text": "Na', na', na', na', na'\nNo queda na', na', na', na', na'\nEntre tú y yo, ya-ya-ya-ya\nNa', na', na', na', na'\nNo queda na', na', na', na', na'\nEntre tú y yo, ya-ya-ya-ya"
-      },
-      {
-        "label": "Pre-Coro",
-        "text": "Vestí'a con F de Fendi (Fendi, Fendi, Fendi)\nBailando Plan B, la de \"Candy\" (Candy, candy, candy)\nAsí tú te prendaste de mí (Eh, eh)\nEl día en que yo te conocí (El día en que yo te conocí)\nVestí'a con F de Fendi (Fendi, Fendi, Fendi)\nBailando Plan B, la de \"Candy\" (Candy, candy, candy)\nAsí tú te prendaste de mí (Eh, eh)\nEl día en que yo te conocí (Sí, sí, sí, sí)"
-      },
-      {
-        "label": "Coro",
-        "text": "Pero tú no me has olvida'o\nNo me has olvida'o, no me has olvida'o\nSólo tú no me has olvida'o\nNo me has olvida'o, no me has olvida'o"
-      },
-      {
-        "label": "Outro",
-        "text": "Oh, oh\nNo, ah, ah\nMmm, mmm (No me has olvida'o)"
-      }
+  ],
+  "translations": {
+    "Hoy en mi ventana brilla el sol y el corazón": [
+      { "w": "Hoy", "t": ["Aujourd'hui"] },
+      { "w": "en", "t": ["à", "dans"] },
+      { "w": "mi", "t": ["ma"] },
+      { "w": "ventana", "t": ["fenêtre"] },
+      { "w": "brilla", "t": ["brille"] },
+      { "w": "el sol", "t": ["le soleil"] },
+      { "w": "y", "t": ["et"] },
+      { "w": "el corazón", "t": ["le cœur"] }
     ],
-    "translations": {
-      "Vestí'a con F de Fendi": [
-        {
-          "w": "Vestí'a",
-          "t": [
-            "Habillée",
-            "Vêtue",
-            "Portant une tenue"
-          ]
-        },
-        {
-          "w": "con",
-          "t": [
-            "avec",
-            "en",
-            "portant"
-          ]
-        },
-        {
-          "w": "F",
-          "t": [
-            "F"
-          ]
-        },
-        {
-          "w": "de",
-          "t": [
-            "de",
-            "du"
-          ]
-        },
-        {
-          "w": "Fendi",
-          "t": [
-            "Fendi"
-          ]
-        }
-      ],
-      "Bailando Plan B, la de \"Candy\"": [
-        {
-          "w": "Bailando",
-          "t": [
-            "En dansant",
-            "Dansant",
-            "En train de danser"
-          ]
-        },
-        {
-          "w": "Plan B",
-          "t": [
-            "Plan B"
-          ]
-        },
-        {
-          "w": "la",
-          "t": [
-            "celle",
-            "la"
-          ]
-        },
-        {
-          "w": "de",
-          "t": [
-            "de",
-            "du"
-          ]
-        },
-        {
-          "w": "\"Candy\"",
-          "t": [
-            "\"Candy\"",
-            "« Candy »"
-          ]
-        }
-      ],
-      "Así tú te prendaste de mí": [
-        {
-          "w": "Así",
-          "t": [
-            "Comme ça",
-            "Ainsi",
-            "C'est comme ça que"
-          ]
-        },
-        {
-          "w": "tú",
-          "t": [
-            "tu",
-            "toi"
-          ]
-        },
-        {
-          "w": "te prendaste",
-          "t": [
-            "tu t'es enflammé",
-            "tu t'es accroché",
-            "tu es tombé amoureux",
-            "tu t'es emballé"
-          ]
-        },
-        {
-          "w": "de",
-          "t": [
-            "de",
-            "pour"
-          ]
-        },
-        {
-          "w": "mí",
-          "t": [
-            "moi"
-          ]
-        }
-      ],
-      "El día en que yo te conocí": [
-        {
-          "w": "El día",
-          "t": [
-            "Le jour"
-          ]
-        },
-        {
-          "w": "en que",
-          "t": [
-            "où",
-            "au cours duquel"
-          ]
-        },
-        {
-          "w": "yo",
-          "t": [
-            "je",
-            "moi"
-          ]
-        },
-        {
-          "w": "te",
-          "t": [
-            "t'",
-            "te"
-          ]
-        },
-        {
-          "w": "conocí",
-          "t": [
-            "ai rencontré",
-            "ai connu",
-            "ai fait la connaissance de"
-          ]
-        }
-      ],
-      "Sé que tú no me has olvida'o": [
-        {
-          "w": "Sé",
-          "t": [
-            "Je sais",
-            "Je suis sûr"
-          ]
-        },
-        {
-          "w": "que",
-          "t": [
-            "que"
-          ]
-        },
-        {
-          "w": "tú",
-          "t": [
-            "tu",
-            "toi"
-          ]
-        },
-        {
-          "w": "no",
-          "t": [
-            "ne",
-            "pas"
-          ]
-        },
-        {
-          "w": "me",
-          "t": [
-            "m'",
-            "me"
-          ]
-        },
-        {
-          "w": "has olvida'o",
-          "t": [
-            "as oublié",
-            "as oubliée",
-            "as pas oublié"
-          ]
-        }
-      ],
-      "No me has olvida'o, no me has olvida'o": [
-        {
-          "w": "No",
-          "t": [
-            "Ne",
-            "Pas"
-          ]
-        },
-        {
-          "w": "me",
-          "t": [
-            "m'",
-            "me"
-          ]
-        },
-        {
-          "w": "has olvida'o",
-          "t": [
-            "as oublié",
-            "as oubliée"
-          ]
-        }
-      ],
-      "Solo tú no me has olvida'o": [
-        {
-          "w": "Solo",
-          "t": [
-            "Seulement",
-            "Juste",
-            "Il n'y a que"
-          ]
-        },
-        {
-          "w": "tú",
-          "t": [
-            "toi",
-            "tu"
-          ]
-        },
-        {
-          "w": "no",
-          "t": [
-            "ne",
-            "pas"
-          ]
-        },
-        {
-          "w": "me",
-          "t": [
-            "m'",
-            "me"
-          ]
-        },
-        {
-          "w": "has olvida'o",
-          "t": [
-            "as oublié",
-            "as oubliée"
-          ]
-        }
-      ],
-      "Ya no te quiero como antes": [
-        {
-          "w": "Ya",
-          "t": [
-            "Maintenant",
-            "Désormais",
-            "Plus maintenant"
-          ]
-        },
-        {
-          "w": "no",
-          "t": [
-            "ne",
-            "pas",
-            "plus"
-          ]
-        },
-        {
-          "w": "te",
-          "t": [
-            "t'",
-            "te"
-          ]
-        },
-        {
-          "w": "quiero",
-          "t": [
-            "aime",
-            "aime plus"
-          ]
-        },
-        {
-          "w": "como",
-          "t": [
-            "comme",
-            "autant que"
-          ]
-        },
-        {
-          "w": "antes",
-          "t": [
-            "avant",
-            "auparavant"
-          ]
-        }
-      ],
-      "Me rompiste, pero solo en parte'": [
-        {
-          "w": "Me",
-          "t": [
-            "M'",
-            "Me"
-          ]
-        },
-        {
-          "w": "rompiste",
-          "t": [
-            "as brisé",
-            "as cassé",
-            "as brisée",
-            "as cassée"
-          ]
-        },
-        {
-          "w": "pero",
-          "t": [
-            "mais"
-          ]
-        },
-        {
-          "w": "solo",
-          "t": [
-            "seulement",
-            "juste",
-            "uniquement"
-          ]
-        },
-        {
-          "w": "en",
-          "t": [
-            "en",
-            "par"
-          ]
-        },
-        {
-          "w": "parte'",
-          "t": [
-            "parties",
-            "morceaux",
-            "bouts"
-          ]
-        }
-      ],
-      "Llevaba tu esclava para pensarte": [
-        {
-          "w": "Llevaba",
-          "t": [
-            "Je portais",
-            "J'avais",
-            "J'emportais"
-          ]
-        },
-        {
-          "w": "tu",
-          "t": [
-            "ta",
-            "ton"
-          ]
-        },
-        {
-          "w": "esclava",
-          "t": [
-            "bracelet",
-            "gourmette",
-            "chaîne"
-          ]
-        },
-        {
-          "w": "para",
-          "t": [
-            "pour",
-            "afin de"
-          ]
-        },
-        {
-          "w": "pensarte",
-          "t": [
-            "penser à toi",
-            "te penser"
-          ]
-        }
-      ],
-      "Pero de olvidarte yo ya hice un arte": [
-        {
-          "w": "Pero",
-          "t": [
-            "Mais"
-          ]
-        },
-        {
-          "w": "de",
-          "t": [
-            "de",
-            "d'"
-          ]
-        },
-        {
-          "w": "olvidarte",
-          "t": [
-            "t'oublier",
-            "oublier toi"
-          ]
-        },
-        {
-          "w": "yo",
-          "t": [
-            "je",
-            "moi"
-          ]
-        },
-        {
-          "w": "ya",
-          "t": [
-            "déjà",
-            "maintenant"
-          ]
-        },
-        {
-          "w": "hice",
-          "t": [
-            "ai fait",
-            "ai créé"
-          ]
-        },
-        {
-          "w": "un arte",
-          "t": [
-            "un art",
-            "une œuvre d'art"
-          ]
-        }
-      ],
-      "Más na', na', na', na', na', na'": [
-        {
-          "w": "Más",
-          "t": [
-            "Plus",
-            "Rien de plus"
-          ]
-        },
-        {
-          "w": "na'",
-          "t": [
-            "rien",
-            "plus rien"
-          ]
-        }
-      ],
-      "No queda na', na', na', na', na'": [
-        {
-          "w": "No",
-          "t": [
-            "Ne",
-            "Pas"
-          ]
-        },
-        {
-          "w": "queda",
-          "t": [
-            "reste",
-            "il reste"
-          ]
-        },
-        {
-          "w": "na'",
-          "t": [
-            "rien",
-            "plus rien"
-          ]
-        }
-      ],
-      "Entre tú y yo, ya-ya-ya-ya": [
-        {
-          "w": "Entre",
-          "t": [
-            "Entre"
-          ]
-        },
-        {
-          "w": "tú",
-          "t": [
-            "toi",
-            "tu"
-          ]
-        },
-        {
-          "w": "y",
-          "t": [
-            "et"
-          ]
-        },
-        {
-          "w": "yo",
-          "t": [
-            "moi",
-            "je"
-          ]
-        },
-        {
-          "w": "ya-ya-ya-ya",
-          "t": [
-            "ya-ya-ya-ya",
-            "plus rien"
-          ]
-        }
-      ],
-      "Ya no me acuerdo de tu cara": [
-        {
-          "w": "Ya",
-          "t": [
-            "Maintenant",
-            "Désormais",
-            "Plus"
-          ]
-        },
-        {
-          "w": "no",
-          "t": [
-            "ne",
-            "pas",
-            "plus"
-          ]
-        },
-        {
-          "w": "me",
-          "t": [
-            "m'",
-            "me"
-          ]
-        },
-        {
-          "w": "acuerdo",
-          "t": [
-            "souviens",
-            "rappelle"
-          ]
-        },
-        {
-          "w": "de",
-          "t": [
-            "de",
-            "d'"
-          ]
-        },
-        {
-          "w": "tu",
-          "t": [
-            "ta",
-            "ton"
-          ]
-        },
-        {
-          "w": "cara",
-          "t": [
-            "visage",
-            "face",
-            "tête"
-          ]
-        }
-      ],
-      "La forma de tu cuerpo ni aunquе la pensara": [
-        {
-          "w": "La",
-          "t": [
-            "La"
-          ]
-        },
-        {
-          "w": "forma",
-          "t": [
-            "forme",
-            "silhouette"
-          ]
-        },
-        {
-          "w": "de",
-          "t": [
-            "de",
-            "du"
-          ]
-        },
-        {
-          "w": "tu",
-          "t": [
-            "ton",
-            "ta"
-          ]
-        },
-        {
-          "w": "cuerpo",
-          "t": [
-            "corps"
-          ]
-        },
-        {
-          "w": "ni",
-          "t": [
-            "ni",
-            "même"
-          ]
-        },
-        {
-          "w": "aunquе",
-          "t": [
-            "même si",
-            "bien que"
-          ]
-        },
-        {
-          "w": "la",
-          "t": [
-            "la",
-            "y"
-          ]
-        },
-        {
-          "w": "pensara",
-          "t": [
-            "pensais",
-            "y pensais",
-            "réfléchissais"
-          ]
-        }
-      ],
-      "Hay demasia'o que nos sеpara": [
-        {
-          "w": "Hay",
-          "t": [
-            "Il y a",
-            "Il existe"
-          ]
-        },
-        {
-          "w": "demasia'o",
-          "t": [
-            "trop",
-            "trop de choses",
-            "beaucoup trop"
-          ]
-        },
-        {
-          "w": "que",
-          "t": [
-            "qui",
-            "que"
-          ]
-        },
-        {
-          "w": "nos",
-          "t": [
-            "nous"
-          ]
-        },
-        {
-          "w": "sеpara",
-          "t": [
-            "sépare",
-            "éloigne"
-          ]
-        }
-      ],
-      "La vida es bonita pero traicionera": [
-        {
-          "w": "La vida",
-          "t": [
-            "La vie"
-          ]
-        },
-        {
-          "w": "es",
-          "t": [
-            "est"
-          ]
-        },
-        {
-          "w": "bonita",
-          "t": [
-            "belle",
-            "jolie",
-            "magnifique"
-          ]
-        },
-        {
-          "w": "pero",
-          "t": [
-            "mais"
-          ]
-        },
-        {
-          "w": "traicionera",
-          "t": [
-            "traîtresse",
-            "perfide",
-            "trompeuse"
-          ]
-        }
-      ],
-      "Vestí'a con F de Fendi (Fendi, Fendi, Fendi)": [
-        {
-          "w": "Vestí'a",
-          "t": [
-            "Habillée",
-            "Vêtue",
-            "Portant une tenue"
-          ]
-        },
-        {
-          "w": "con",
-          "t": [
-            "avec",
-            "en",
-            "portant"
-          ]
-        },
-        {
-          "w": "F",
-          "t": [
-            "F"
-          ]
-        },
-        {
-          "w": "de",
-          "t": [
-            "de",
-            "du"
-          ]
-        },
-        {
-          "w": "Fendi",
-          "t": [
-            "Fendi"
-          ]
-        }
-      ],
-      "Bailando Plan B, la de \"Candy\" (Candy, candy, candy)": [
-        {
-          "w": "Bailando",
-          "t": [
-            "En dansant",
-            "Dansant",
-            "En train de danser"
-          ]
-        },
-        {
-          "w": "Plan B",
-          "t": [
-            "Plan B"
-          ]
-        },
-        {
-          "w": "la",
-          "t": [
-            "celle",
-            "la"
-          ]
-        },
-        {
-          "w": "de",
-          "t": [
-            "de",
-            "du"
-          ]
-        },
-        {
-          "w": "\"Candy\"",
-          "t": [
-            "\"Candy\"",
-            "« Candy »"
-          ]
-        }
-      ],
-      "Así tú te prendaste de mí (Eh, eh)": [
-        {
-          "w": "Así",
-          "t": [
-            "Comme ça",
-            "Ainsi",
-            "C'est comme ça que"
-          ]
-        },
-        {
-          "w": "tú",
-          "t": [
-            "tu",
-            "toi"
-          ]
-        },
-        {
-          "w": "te prendaste",
-          "t": [
-            "tu t'es enflammé",
-            "tu t'es accroché",
-            "tu es tombé amoureux",
-            "tu t'es emballé"
-          ]
-        },
-        {
-          "w": "de",
-          "t": [
-            "de",
-            "pour"
-          ]
-        },
-        {
-          "w": "mí",
-          "t": [
-            "moi"
-          ]
-        },
-        {
-          "w": "Eh",
-          "t": []
-        }
-      ],
-      "El día en que yo te conocí (El día en que yo te conocí)": [
-        {
-          "w": "El día",
-          "t": [
-            "Le jour"
-          ]
-        },
-        {
-          "w": "en que",
-          "t": [
-            "où",
-            "au cours duquel"
-          ]
-        },
-        {
-          "w": "yo",
-          "t": [
-            "je",
-            "moi"
-          ]
-        },
-        {
-          "w": "te",
-          "t": [
-            "t'",
-            "te"
-          ]
-        },
-        {
-          "w": "conocí",
-          "t": [
-            "ai rencontré",
-            "ai connu",
-            "ai fait la connaissance de"
-          ]
-        }
-      ],
-      "El día en que yo te conocí (Sí, sí, sí, sí)": [
-        {
-          "w": "El día",
-          "t": [
-            "Le jour"
-          ]
-        },
-        {
-          "w": "en que",
-          "t": [
-            "où",
-            "au cours duquel"
-          ]
-        },
-        {
-          "w": "yo",
-          "t": [
-            "je",
-            "moi"
-          ]
-        },
-        {
-          "w": "te",
-          "t": [
-            "t'",
-            "te"
-          ]
-        },
-        {
-          "w": "conocí",
-          "t": [
-            "ai rencontré",
-            "ai connu",
-            "ai fait la connaissance de"
-          ]
-        },
-        {
-          "w": "Sí",
-          "t": [
-            "Oui",
-            "Si"
-          ]
-        }
-      ],
-      "Pero tú no me has olvida'o": [
-        {
-          "w": "Pero",
-          "t": [
-            "Mais"
-          ]
-        },
-        {
-          "w": "tú",
-          "t": [
-            "tu",
-            "toi"
-          ]
-        },
-        {
-          "w": "no",
-          "t": [
-            "ne",
-            "pas"
-          ]
-        },
-        {
-          "w": "me",
-          "t": [
-            "m'",
-            "me"
-          ]
-        },
-        {
-          "w": "has olvida'o",
-          "t": [
-            "as oublié",
-            "as oubliée"
-          ]
-        }
-      ],
-      "Sólo tú no me has olvida'o": [
-        {
-          "w": "Sólo",
-          "t": [
-            "Seulement",
-            "Juste",
-            "Il n'y a que"
-          ]
-        },
-        {
-          "w": "tú",
-          "t": [
-            "toi",
-            "tu"
-          ]
-        },
-        {
-          "w": "no",
-          "t": [
-            "ne",
-            "pas"
-          ]
-        },
-        {
-          "w": "me",
-          "t": [
-            "m'",
-            "me"
-          ]
-        },
-        {
-          "w": "has olvida'o",
-          "t": [
-            "as oublié",
-            "as oubliée"
-          ]
-        }
-      ],
-      "Oh, oh": [
-        {
-          "w": "Oh",
-          "t": []
-        }
-      ],
-      "No, ah, ah": [
-        {
-          "w": "No",
-          "t": [
-            "Non"
-          ]
-        },
-        {
-          "w": "ah",
-          "t": []
-        }
-      ],
-      "Mmm, mmm (No me has olvida'o)": [
-        {
-          "w": "Mmm",
-          "t": []
-        },
-        {
-          "w": "No",
-          "t": [
-            "Ne",
-            "Pas"
-          ]
-        },
-        {
-          "w": "me",
-          "t": [
-            "m'",
-            "me"
-          ]
-        },
-        {
-          "w": "has olvida'o",
-          "t": [
-            "as oublié",
-            "as oubliée"
-          ]
-        }
-      ]
-    }
+    "Se pone triste contemplando la ciudad, porque te vas": [
+      { "w": "Se pone", "t": ["devient", "se met à être"] },
+      { "w": "triste", "t": ["triste"] },
+      { "w": "contemplando", "t": ["contemplant", "en contemplant"] },
+      { "w": "la ciudad", "t": ["la ville"] },
+      { "w": "porque", "t": ["parce que"] },
+      { "w": "te vas", "t": ["tu t'en vas", "tu pars"] }
+    ],
+    "Como cada noche desperté, pensando en ti": [
+      { "w": "Como", "t": ["Comme"] },
+      { "w": "cada", "t": ["chaque"] },
+      { "w": "noche", "t": ["nuit"] },
+      { "w": "desperté", "t": ["je me suis réveillé", "je me réveillais"] },
+      { "w": "pensando", "t": ["en pensant", "pensant"] },
+      { "w": "en ti", "t": ["à toi"] }
+    ],
+    "Y en mi reloj todas las horas vi pasar, porque te vas": [
+      { "w": "Y", "t": ["Et"] },
+      { "w": "en", "t": ["sur", "dans"] },
+      { "w": "mi", "t": ["ma"] },
+      { "w": "reloj", "t": ["montre", "horloge"] },
+      { "w": "todas", "t": ["toutes"] },
+      { "w": "las horas", "t": ["les heures"] },
+      { "w": "vi", "t": ["j'ai vu", "je voyais"] },
+      { "w": "pasar", "t": ["passer"] },
+      { "w": "porque", "t": ["parce que"] },
+      { "w": "te vas", "t": ["tu t'en vas", "tu pars"] }
+    ],
+    "Todas las promesas de mi amor se irán contigo": [
+      { "w": "Todas", "t": ["Toutes"] },
+      { "w": "las promesas", "t": ["les promesses"] },
+      { "w": "de", "t": ["de"] },
+      { "w": "mi amor", "t": ["mon amour"] },
+      { "w": "se irán", "t": ["partiront", "s'en iront"] },
+      { "w": "contigo", "t": ["avec toi"] }
+    ],
+    "Me olvidarás, me olvidarás": [
+      { "w": "Me", "t": ["M'"] },
+      { "w": "olvidarás", "t": ["oublieras", "tu oublieras"] }
+    ],
+    "Junto a la estación yo lloraré igual que un niño": [
+      { "w": "Junto a", "t": ["Près de", "À côté de"] },
+      { "w": "la estación", "t": ["la gare"] },
+      { "w": "yo", "t": ["je"] },
+      { "w": "lloraré", "t": ["pleurerai", "je pleurerai"] },
+      { "w": "igual que", "t": ["comme"] },
+      { "w": "un niño", "t": ["un enfant"] }
+    ],
+    "Porque te vas, porque te vas": [
+      { "w": "Porque", "t": ["Parce que"] },
+      { "w": "te vas", "t": ["tu t'en vas", "tu pars"] }
+    ],
+    "Bajo la penumbra de un farol se dormirán": [
+      { "w": "Bajo", "t": ["Sous"] },
+      { "w": "la penumbra", "t": ["la pénombre"] },
+      { "w": "de", "t": ["de"] },
+      { "w": "un farol", "t": ["un réverbère", "un lampadaire"] },
+      { "w": "se dormirán", "t": ["s'endormiront", "dormiront"] }
+    ],
+    "Todas las cosas que quedaron por decir, se dormirán": [
+      { "w": "Todas", "t": ["Toutes"] },
+      { "w": "las cosas", "t": ["les choses"] },
+      { "w": "que", "t": ["qui"] },
+      { "w": "quedaron", "t": ["restèrent", "sont restées"] },
+      { "w": "por decir", "t": ["à dire"] },
+      { "w": "se dormirán", "t": ["s'endormiront", "dormiront"] }
+    ],
+    "Junto a las manillas de un reloj esperarán": [
+      { "w": "Junto a", "t": ["Près de", "À côté de"] },
+      { "w": "las manillas", "t": ["les aiguilles"] },
+      { "w": "de", "t": ["de"] },
+      { "w": "un reloj", "t": ["une montre", "une horloge"] },
+      { "w": "esperarán", "t": ["attendront", "elles attendront"] }
+    ],
+    "Todas las horas que quedaron por vivir, esperarán": [
+      { "w": "Todas", "t": ["Toutes"] },
+      { "w": "las horas", "t": ["les heures"] },
+      { "w": "que", "t": ["qui"] },
+      { "w": "quedaron", "t": ["restèrent", "sont restées"] },
+      { "w": "por vivir", "t": ["à vivre"] },
+      { "w": "esperarán", "t": ["attendront", "elles attendront"] }
+    ]
   }
+},
+  {
+  "title": "CANDY",
+  "artist": "ROSALIA",
+  "targetLang": "French",
+  "strophes": [
+    {
+      "label": "Pre-Coro",
+      "text": "Vestí'a con F de Fendi\nBailando Plan B, la de \"Candy\"\nAsí tú te prendaste de mí\nEl día en que yo te conocí"
+    },
+    {
+      "label": "Coro",
+      "text": "Sé que tú no me has olvida'o\nNo me has olvida'o, no me has olvida'o\nSolo tú no me has olvida'o\nNo me has olvida'o, no me has olvida'o"
+    },
+    {
+      "label": "Post-Coro",
+      "text": "Ya no te quiero como antes\nMe rompiste, pero solo en parte'\nLlevaba tu esclava para pensarte\nPero de olvidarte yo ya hice un arte\nMás na', na', na', na', na', na'\nNo queda na', na', na', na', na'\nEntre tú y yo, ya-ya-ya-ya"
+    },
+    {
+      "label": "Verso",
+      "text": "Ya no me acuerdo de tu cara\nLa forma de tu cuerpo ni aunquе la pensara\nHay demasia'o que nos sеpara\nLa vida es bonita pero traicionera"
+    },
+    {
+      "label": "Pre-Coro",
+      "text": "Vestí'a con F de Fendi (Fendi, Fendi, Fendi)\nBailando Plan B, la de \"Candy\" (Candy, candy, candy)\nAsí tú te prendaste de mí (Eh, eh)\nEl día en que yo te conocí"
+    },
+    {
+      "label": "Coro",
+      "text": "Pero tú no me has olvida'o\nNo me has olvida'o, no me has olvida'o\nSolo tú no me has olvida'o\nNo me has olvida'o, no me has olvida'o"
+    },
+    {
+      "label": "Post-Coro",
+      "text": "Na', na', na', na', na'\nNo queda na', na', na', na', na'\nEntre tú y yo, ya-ya-ya-ya\nNa', na', na', na', na'\nNo queda na', na', na', na', na'\nEntre tú y yo, ya-ya-ya-ya"
+    },
+    {
+      "label": "Pre-Coro",
+      "text": "Vestí'a con F de Fendi (Fendi, Fendi, Fendi)\nBailando Plan B, la de \"Candy\" (Candy, candy, candy)\nAsí tú te prendaste de mí (Eh, eh)\nEl día en que yo te conocí (El día en que yo te conocí)\nVestí'a con F de Fendi (Fendi, Fendi, Fendi)\nBailando Plan B, la de \"Candy\" (Candy, candy, candy)\nAsí tú te prendaste de mí (Eh, eh)\nEl día en que yo te conocí (Sí, sí, sí, sí)"
+    },
+    {
+      "label": "Coro",
+      "text": "Pero tú no me has olvida'o\nNo me has olvida'o, no me has olvida'o\nSólo tú no me has olvida'o\nNo me has olvida'o, no me has olvida'o"
+    },
+    {
+      "label": "Outro",
+      "text": "Oh, oh\nNo, ah, ah\nMmm, mmm (No me has olvida'o)"
+    }
+  ],
+  "translations": {
+    "Vestí'a con F de Fendi": [
+      { "w": "Vestí'a", "t": ["Habillée", "Vêtue", "Portant une tenue"] },
+      { "w": "con", "t": ["avec", "en", "portant"] },
+      { "w": "F", "t": ["F"] },
+      { "w": "de", "t": ["de", "du"] },
+      { "w": "Fendi", "t": ["Fendi"] }
+    ],
+    "Bailando Plan B, la de \"Candy\"": [
+      { "w": "Bailando", "t": ["En dansant", "Dansant", "En train de danser"] },
+      { "w": "Plan B", "t": ["Plan B"] },
+      { "w": "la", "t": ["celle", "la"] },
+      { "w": "de", "t": ["de", "du"] },
+      { "w": "\"Candy\"", "t": ["\"Candy\"", "« Candy »"] }
+    ],
+    "Así tú te prendaste de mí": [
+      { "w": "Así", "t": ["Comme ça", "Ainsi", "C'est comme ça que"] },
+      { "w": "tú", "t": ["tu", "toi"] },
+      { "w": "te prendaste", "t": ["tu t'es enflammé", "tu t'es accroché", "tu es tombé amoureux", "tu t'es emballé"] },
+      { "w": "de", "t": ["de", "pour"] },
+      { "w": "mí", "t": ["moi"] }
+    ],
+    "El día en que yo te conocí": [
+      { "w": "El día", "t": ["Le jour"] },
+      { "w": "en que", "t": ["où", "au cours duquel"] },
+      { "w": "yo", "t": ["je", "moi"] },
+      { "w": "te", "t": ["t'", "te"] },
+      { "w": "conocí", "t": ["ai rencontré", "ai connu", "ai fait la connaissance de"] }
+    ],
+    "Sé que tú no me has olvida'o": [
+      { "w": "Sé", "t": ["Je sais", "Je suis sûr"] },
+      { "w": "que", "t": ["que"] },
+      { "w": "tú", "t": ["tu", "toi"] },
+      { "w": "no", "t": ["ne", "pas"] },
+      { "w": "me", "t": ["m'", "me"] },
+      { "w": "has olvida'o", "t": ["as oublié", "as oubliée", "as pas oublié"] }
+    ],
+    "No me has olvida'o, no me has olvida'o": [
+      { "w": "No", "t": ["Ne", "Pas"] },
+      { "w": "me", "t": ["m'", "me"] },
+      { "w": "has olvida'o", "t": ["as oublié", "as oubliée"] }
+    ],
+    "Solo tú no me has olvida'o": [
+      { "w": "Solo", "t": ["Seulement", "Juste", "Il n'y a que"] },
+      { "w": "tú", "t": ["toi", "tu"] },
+      { "w": "no", "t": ["ne", "pas"] },
+      { "w": "me", "t": ["m'", "me"] },
+      { "w": "has olvida'o", "t": ["as oublié", "as oubliée"] }
+    ],
+    "Ya no te quiero como antes": [
+      { "w": "Ya", "t": ["Maintenant", "Désormais", "Plus maintenant"] },
+      { "w": "no", "t": ["ne", "pas", "plus"] },
+      { "w": "te", "t": ["t'", "te"] },
+      { "w": "quiero", "t": ["aime", "aime plus"] },
+      { "w": "como", "t": ["comme", "autant que"] },
+      { "w": "antes", "t": ["avant", "auparavant"] }
+    ],
+    "Me rompiste, pero solo en parte'": [
+      { "w": "Me", "t": ["M'", "Me"] },
+      { "w": "rompiste", "t": ["as brisé", "as cassé", "as brisée", "as cassée"] },
+      { "w": "pero", "t": ["mais"] },
+      { "w": "solo", "t": ["seulement", "juste", "uniquement"] },
+      { "w": "en", "t": ["en", "par"] },
+      { "w": "parte'", "t": ["parties", "morceaux", "bouts"] }
+    ],
+    "Llevaba tu esclava para pensarte": [
+      { "w": "Llevaba", "t": ["Je portais", "J'avais", "J'emportais"] },
+      { "w": "tu", "t": ["ta", "ton"] },
+      { "w": "esclava", "t": ["bracelet", "gourmette", "chaîne"] },
+      { "w": "para", "t": ["pour", "afin de"] },
+      { "w": "pensarte", "t": ["penser à toi", "te penser"] }
+    ],
+    "Pero de olvidarte yo ya hice un arte": [
+      { "w": "Pero", "t": ["Mais"] },
+      { "w": "de", "t": ["de", "d'"] },
+      { "w": "olvidarte", "t": ["t'oublier", "oublier toi"] },
+      { "w": "yo", "t": ["je", "moi"] },
+      { "w": "ya", "t": ["déjà", "maintenant"] },
+      { "w": "hice", "t": ["ai fait", "ai créé"] },
+      { "w": "un arte", "t": ["un art", "une œuvre d'art"] }
+    ],
+    "Más na', na', na', na', na', na'": [
+      { "w": "Más", "t": ["Plus", "Rien de plus"] },
+      { "w": "na'", "t": ["rien", "plus rien"] }
+    ],
+    "No queda na', na', na', na', na'": [
+      { "w": "No", "t": ["Ne", "Pas"] },
+      { "w": "queda", "t": ["reste", "il reste"] },
+      { "w": "na'", "t": ["rien", "plus rien"] }
+    ],
+    "Entre tú y yo, ya-ya-ya-ya": [
+      { "w": "Entre", "t": ["Entre"] },
+      { "w": "tú", "t": ["toi", "tu"] },
+      { "w": "y", "t": ["et"] },
+      { "w": "yo", "t": ["moi", "je"] },
+      { "w": "ya-ya-ya-ya", "t": ["ya-ya-ya-ya", "plus rien"] }
+    ],
+    "Ya no me acuerdo de tu cara": [
+      { "w": "Ya", "t": ["Maintenant", "Désormais", "Plus"] },
+      { "w": "no", "t": ["ne", "pas", "plus"] },
+      { "w": "me", "t": ["m'", "me"] },
+      { "w": "acuerdo", "t": ["souviens", "rappelle"] },
+      { "w": "de", "t": ["de", "d'"] },
+      { "w": "tu", "t": ["ta", "ton"] },
+      { "w": "cara", "t": ["visage", "face", "tête"] }
+    ],
+    "La forma de tu cuerpo ni aunquе la pensara": [
+      { "w": "La", "t": ["La"] },
+      { "w": "forma", "t": ["forme", "silhouette"] },
+      { "w": "de", "t": ["de", "du"] },
+      { "w": "tu", "t": ["ton", "ta"] },
+      { "w": "cuerpo", "t": ["corps"] },
+      { "w": "ni", "t": ["ni", "même"] },
+      { "w": "aunquе", "t": ["même si", "bien que"] },
+      { "w": "la", "t": ["la", "y"] },
+      { "w": "pensara", "t": ["pensais", "y pensais", "réfléchissais"] }
+    ],
+    "Hay demasia'o que nos sеpara": [
+      { "w": "Hay", "t": ["Il y a", "Il existe"] },
+      { "w": "demasia'o", "t": ["trop", "trop de choses", "beaucoup trop"] },
+      { "w": "que", "t": ["qui", "que"] },
+      { "w": "nos", "t": ["nous"] },
+      { "w": "sеpara", "t": ["sépare", "éloigne"] }
+    ],
+    "La vida es bonita pero traicionera": [
+      { "w": "La vida", "t": ["La vie"] },
+      { "w": "es", "t": ["est"] },
+      { "w": "bonita", "t": ["belle", "jolie", "magnifique"] },
+      { "w": "pero", "t": ["mais"] },
+      { "w": "traicionera", "t": ["traîtresse", "perfide", "trompeuse"] }
+    ],
+    "Vestí'a con F de Fendi (Fendi, Fendi, Fendi)": [
+      { "w": "Vestí'a", "t": ["Habillée", "Vêtue", "Portant une tenue"] },
+      { "w": "con", "t": ["avec", "en", "portant"] },
+      { "w": "F", "t": ["F"] },
+      { "w": "de", "t": ["de", "du"] },
+      { "w": "Fendi", "t": ["Fendi"] }
+    ],
+    "Bailando Plan B, la de \"Candy\" (Candy, candy, candy)": [
+      { "w": "Bailando", "t": ["En dansant", "Dansant", "En train de danser"] },
+      { "w": "Plan B", "t": ["Plan B"] },
+      { "w": "la", "t": ["celle", "la"] },
+      { "w": "de", "t": ["de", "du"] },
+      { "w": "\"Candy\"", "t": ["\"Candy\"", "« Candy »"] }
+    ],
+    "Así tú te prendaste de mí (Eh, eh)": [
+      { "w": "Así", "t": ["Comme ça", "Ainsi", "C'est comme ça que"] },
+      { "w": "tú", "t": ["tu", "toi"] },
+      { "w": "te prendaste", "t": ["tu t'es enflammé", "tu t'es accroché", "tu es tombé amoureux", "tu t'es emballé"] },
+      { "w": "de", "t": ["de", "pour"] },
+      { "w": "mí", "t": ["moi"] },
+      { "w": "Eh", "t": [] }
+    ],
+    "El día en que yo te conocí (El día en que yo te conocí)": [
+      { "w": "El día", "t": ["Le jour"] },
+      { "w": "en que", "t": ["où", "au cours duquel"] },
+      { "w": "yo", "t": ["je", "moi"] },
+      { "w": "te", "t": ["t'", "te"] },
+      { "w": "conocí", "t": ["ai rencontré", "ai connu", "ai fait la connaissance de"] }
+    ],
+    "El día en que yo te conocí (Sí, sí, sí, sí)": [
+      { "w": "El día", "t": ["Le jour"] },
+      { "w": "en que", "t": ["où", "au cours duquel"] },
+      { "w": "yo", "t": ["je", "moi"] },
+      { "w": "te", "t": ["t'", "te"] },
+      { "w": "conocí", "t": ["ai rencontré", "ai connu", "ai fait la connaissance de"] },
+      { "w": "Sí", "t": ["Oui", "Si"] }
+    ],
+    "Pero tú no me has olvida'o": [
+      { "w": "Pero", "t": ["Mais"] },
+      { "w": "tú", "t": ["tu", "toi"] },
+      { "w": "no", "t": ["ne", "pas"] },
+      { "w": "me", "t": ["m'", "me"] },
+      { "w": "has olvida'o", "t": ["as oublié", "as oubliée"] }
+    ],
+    "Sólo tú no me has olvida'o": [
+      { "w": "Sólo", "t": ["Seulement", "Juste", "Il n'y a que"] },
+      { "w": "tú", "t": ["toi", "tu"] },
+      { "w": "no", "t": ["ne", "pas"] },
+      { "w": "me", "t": ["m'", "me"] },
+      { "w": "has olvida'o", "t": ["as oublié", "as oubliée"] }
+    ],
+    "Oh, oh": [
+      { "w": "Oh", "t": [] }
+    ],
+    "No, ah, ah": [
+      { "w": "No", "t": ["Non"] },
+      { "w": "ah", "t": [] }
+    ],
+    "Mmm, mmm (No me has olvida'o)": [
+      { "w": "Mmm", "t": [] },
+      { "w": "No", "t": ["Ne", "Pas"] },
+      { "w": "me", "t": ["m'", "me"] },
+      { "w": "has olvida'o", "t": ["as oublié", "as oubliée"] }
+    ]
+  }
+}
 ]

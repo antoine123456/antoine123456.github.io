@@ -62,30 +62,6 @@ Songs are read from `songs.json` and shown directly on the home screen — no im
 
 ---
 
-## Step 3 (optional) — Sync a YouTube video
-
-Add a `video` field to a song entry to embed its YouTube video during training. The video plays through each line, then auto-pauses right before the next one starts — giving you a pause window to fill in the blanks — and resumes once you complete the phrase (or hit **Passer →**):
-
-```json
-{
-  "title": "...",
-  "artist": "...",
-  "strophes": [ ... ],
-  "translations": { ... },
-  "video": {
-    "youtubeId": "VIDEO_ID_HERE",
-    "cues": ["0:11", "0:23", "0:31"]
-  }
-}
-```
-
-- `cues[i]` is the timestamp (seconds, or `"mm:ss"` / `"h:mm:ss"`) at which line *i* of `strophes` starts in the video — one entry per line, in the same order (repeated lines like a chorus need their own entry each time they occur).
-- Easiest way to get these timestamps: open the video on YouTube, click **···** below the player → **Show transcript**, and copy the time shown next to the point where each of your lyric lines begins. No manual tapping or extra tooling needed.
-- If `cues` has fewer entries than the song has lines, sync simply stops applying after the last provided cue — the trainer still works, just without auto-pause for the remaining lines.
-- The YouTube player needs the page served over `http://` or `https://` (a local server or GitHub Pages) — it won't initialize when `index.html` is opened directly as a `file://` URL.
-
----
-
 ## How training works
 
 - Each phrase appears as a row of Spanish words above blank input fields.
