@@ -26,7 +26,16 @@ body {
 }
 .h-logo { font-size: 36px; margin-bottom: 6px; }
 .h-title { font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
-.h-sub { font-size: 13px; color: #aaa; margin-bottom: 36px; }
+.h-sub { font-size: 13px; color: #aaa; margin-bottom: 10px; }
+.h-stats { font-size: 12px; color: #999; margin-bottom: 28px; min-height: 14px; }
+
+.h-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; margin-left: 8px; vertical-align: middle; letter-spacing: .2px; }
+.h-badge-progress { background: #f3f4f6; color: #999; }
+.h-badge-done { background: #eafaf0; color: var(--green); }
+.h-badge-perfect { background: #fdf6e3; color: var(--gold); }
+
+.h-actions-row { display: flex; gap: 10px; }
+.h-actions-row .h-import-btn { flex: 1; }
 
 .h-songs { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
 .h-song {
@@ -70,6 +79,7 @@ body {
   width: 100%; max-width: 540px; max-height: 80vh;
   display: flex; flex-direction: column; gap: 16px;
   box-shadow: 0 24px 60px rgba(0,0,0,.18);
+  overflow-y: auto;
 }
 .modal h2 { font-size: 17px; font-weight: 700; color: var(--navy); }
 .modal p  { font-size: 13px; color: #888; line-height: 1.6; }
@@ -146,8 +156,12 @@ body {
   <div class="h-logo">🎵</div>
   <div class="h-title">Español Trainer</div>
   <div class="h-sub">Traduisez mot à mot les paroles de vos chansons espagnoles</div>
+  <div class="h-stats" id="h-stats"></div>
   <div class="h-songs" id="h-songs"></div>
-  <button class="h-import-btn" onclick="openImport()">＋ Importer une chanson</button>
+  <div class="h-actions-row">
+    <button class="h-import-btn" onclick="openImport()">＋ Importer une chanson</button>
+    <button class="h-import-btn" onclick="openProgress()">📊 Progression</button>
+  </div>
 </div>
 
 <!-- ── IMPORT MODAL ── -->
@@ -155,10 +169,40 @@ body {
   <div class="modal">
     <h2>Importer une chanson</h2>
     <p>
-      Collez le JSON généré par <code>preprocess.py</code>, ou chargez un fichier <code>.json</code>.<br>
-      Format : <code>{ "title", "artist", "strophes", "translations" }</code>
+      Le JSON n'est plus généré par un script local. Copiez le prompt ci-dessous dans un assistant IA (Claude, ChatGPT...), remplacez le texte entre crochets par les paroles de la chanson, puis collez le JSON obtenu en réponse.
     </p>
-    <p class="modal-warning">⚠️ Cette fonctionnalité n'est pas encore disponible : l'import ne permet pas encore d'ajouter une chanson pour le moment.</p>
+    <textarea id="prompt-ta" readonly style="min-height:130px; flex:none; font-size:11px;">Tu es un générateur de données pour "Español Trainer", une appli d'apprentissage de l'espagnol par traduction mot à mot.
+
+Voici des paroles de chanson en espagnol (les strophes sont séparées par une ligne vide) :
+
+[COLLE ICI LES PAROLES DE LA CHANSON]
+
+Génère UNIQUEMENT un objet JSON valide (pas de texte avant/après, pas de balises markdown) avec exactement cette structure :
+
+{
+  "title": "Titre de la chanson",
+  "artist": "Nom de l'artiste",
+  "targetLang": "French",
+  "strophes": [
+    { "label": "Couplet 1", "text": "ligne 1\nligne 2" }
+  ],
+  "translations": {
+    "ligne exacte telle qu'elle apparaît dans strophes": [
+      { "w": "mot ou courte expression en espagnol", "t": ["traduction principale", "variante si utile"] }
+    ]
+  }
+}
+
+Règles :
+- Une clé dans "translations" par ligne UNIQUE des paroles (si une ligne se répète, ex. un refrain, ne la traduis qu'une fois).
+- Découpe chaque ligne en mots ou courtes expressions ("w"), dans l'ordre d'apparition, en couvrant toute la ligne.
+- Donne 1 à 3 traductions correctes et naturelles en français dans "t" (pas de synonymes trop éloignés).
+- Les interjections ou mots difficiles à traduire seuls peuvent avoir "t": [].
+- Regroupe les lignes en strophes avec un "label" pertinent (Intro, Couplet 1, Refrain, Pont, Outro...), dans l'ordre du texte original, refrains répétés inclus.</textarea>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="copyPrompt()">📋 Copier le prompt</button>
+    </div>
+    <p class="modal-warning">⚠️ L'import ci-dessous n'est pas encore fonctionnel : il ne permet pas encore d'ajouter une chanson pour le moment. En attendant, ajoutez le JSON obtenu directement dans <code>songs.json</code>.</p>
     <textarea id="import-ta" placeholder='{ "title": "...", "artist": "...", "strophes": [...], "translations": {...} }'></textarea>
     <div class="modal-err" id="import-err"></div>
     <div class="modal-actions">
@@ -167,6 +211,29 @@ body {
         Fichier JSON <input type="file" accept=".json" style="display:none" disabled>
       </label>
       <button class="btn btn-secondary" onclick="closeImport()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── PROGRESS MODAL ── -->
+<div class="modal-overlay" id="progress-modal">
+  <div class="modal">
+    <h2>Progression</h2>
+    <p id="prog-summary" style="color:#555"></p>
+    <div id="prog-songs" style="font-size:12px; color:#888;"></div>
+    <p>
+      Votre progression est sauvegardée automatiquement dans ce navigateur. Pour la retrouver sur un autre appareil ou navigateur, copiez le code ci-dessous et restaurez-le là-bas.
+    </p>
+    <textarea id="prog-export" readonly style="min-height:70px; flex:none; font-size:11px;"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="copyProgressCode()">📋 Copier le code</button>
+    </div>
+    <textarea id="prog-import-ta" placeholder="Collez ici un code de progression à restaurer..." style="min-height:60px; flex:none;"></textarea>
+    <div class="modal-err" id="prog-err"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="restoreProgressCode()">Restaurer depuis ce code</button>
+      <button class="btn btn-secondary" onclick="resetProgress()">Réinitialiser</button>
+      <button class="btn btn-secondary" onclick="closeProgress()">Fermer</button>
     </div>
   </div>
 </div>
@@ -213,6 +280,97 @@ function loadBuiltinSongs() {
     .catch(function() { return []; });
 }
 
+// ── PROGRESS ─────────────────────────────────────────────────────────────────
+var PROGRESS_KEY = "espanol_trainer_progress_v1";
+
+function loadProgress() {
+  try {
+    var p = JSON.parse(localStorage.getItem(PROGRESS_KEY) || "null");
+    return (p && typeof p === "object" && p.songs) ? p : { songs: {} };
+  } catch(e) { return { songs: {} }; }
+}
+function saveProgress(p) {
+  try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(p)); } catch(e) {}
+}
+function songKeyFor(song) {
+  return song.id ? ("id:" + song.id) : ("ta:" + (song.title || "") + "|" + (song.artist || ""));
+}
+function ensureSongProgress(prog, key, song) {
+  if (!prog.songs[key]) {
+    prog.songs[key] = {
+      title: song.title, artist: song.artist || "",
+      resumeIndex: 0, total: 0,
+      wordsFirstTry: 0, wordsTotal: 0,
+      completed: false, perfect: false,
+      completedAt: null, updatedAt: Date.now()
+    };
+  }
+  return prog.songs[key];
+}
+function getSongProgress(key) {
+  var prog = loadProgress();
+  return prog.songs[key] || null;
+}
+function recordWordResult(firstTry) {
+  if (!currentSong) return;
+  var prog = loadProgress();
+  var sp = ensureSongProgress(prog, currentKey, currentSong);
+  sp.wordsTotal++;
+  if (firstTry) sp.wordsFirstTry++;
+  sp.updatedAt = Date.now();
+  saveProgress(prog);
+}
+function updateResumeIndex(i) {
+  if (!currentSong) return;
+  var prog = loadProgress();
+  var sp = ensureSongProgress(prog, currentKey, currentSong);
+  sp.resumeIndex = i;
+  sp.total = phrases.length;
+  sp.updatedAt = Date.now();
+  saveProgress(prog);
+}
+function recordSongCompletion(perfect) {
+  if (!currentSong) return;
+  var prog = loadProgress();
+  var sp = ensureSongProgress(prog, currentKey, currentSong);
+  var firstTime = !sp.completed;
+  sp.completed = true;
+  if (perfect) sp.perfect = true;
+  if (firstTime) sp.completedAt = Date.now();
+  sp.resumeIndex = 0;
+  sp.updatedAt = Date.now();
+  saveProgress(prog);
+}
+function computeTotals(prog) {
+  var t = { wordsFirstTry: 0, wordsTotal: 0, songsCompleted: 0, songsPerfect: 0 };
+  Object.keys(prog.songs).forEach(function(k) {
+    var sp = prog.songs[k];
+    t.wordsFirstTry += sp.wordsFirstTry || 0;
+    t.wordsTotal += sp.wordsTotal || 0;
+    if (sp.completed) t.songsCompleted++;
+    if (sp.perfect) t.songsPerfect++;
+  });
+  return t;
+}
+function progressBadgeHtml(sp) {
+  if (!sp) return "";
+  if (sp.perfect) return '<span class="h-badge h-badge-perfect">★ Parfaite</span>';
+  if (sp.completed) return '<span class="h-badge h-badge-done">✓ Terminée</span>';
+  if (sp.resumeIndex > 0 && sp.total) {
+    var pct = Math.min(100, Math.round(sp.resumeIndex / sp.total * 100));
+    return '<span class="h-badge h-badge-progress">' + pct + '%</span>';
+  }
+  return "";
+}
+function renderStats() {
+  var el = document.getElementById("h-stats");
+  if (!el) return;
+  var t = computeTotals(loadProgress());
+  if (!t.wordsTotal) { el.textContent = ""; return; }
+  el.textContent = "🎯 " + t.wordsFirstTry + "/" + t.wordsTotal + " mots trouvés du premier coup · ✓ " +
+    t.songsCompleted + " chanson(s) terminée(s) · ★ " + t.songsPerfect + " parfaite(s)";
+}
+
 // ── HOME ──────────────────────────────────────────────────────────────────────
 function renderHome() {
   loadBuiltinSongs().then(function(list) {
@@ -225,6 +383,7 @@ function renderSongList() {
   displayedSongs = builtinSongs.map(function(s) { return { song: s, builtin: true }; })
     .concat(loadSongs().map(function(s) { return { song: s, builtin: false }; }));
   var el = document.getElementById("h-songs");
+  renderStats();
   if (!displayedSongs.length) {
     el.innerHTML = '<div class="h-empty">Aucune chanson disponible.</div>';
     return;
@@ -235,9 +394,10 @@ function renderSongList() {
     s.strophes.forEach(function(st) {
       st.text.split("\n").forEach(function(l) { if (l.trim().length > 1) n++; });
     });
+    var sp = getSongProgress(songKeyFor(s));
     return '<div class="h-song" onclick="startTraining(' + i + ')">'
       + '<div class="h-song-info">'
-      + '<div class="h-song-title">' + esc(s.title) + '</div>'
+      + '<div class="h-song-title">' + esc(s.title) + progressBadgeHtml(sp) + '</div>'
       + '<div class="h-song-meta">' + (s.artist ? esc(s.artist) + " · " : "") + n + " phrases · " + (s.targetLang || "?") + '</div>'
       + '</div>'
       + (entry.builtin ? '' : '<button class="h-song-del" onclick="deleteSong(event,' + i + ')">✕</button>')
@@ -264,6 +424,9 @@ function openImport() {
 }
 function closeImport() {
   document.getElementById("import-modal").classList.remove("open");
+}
+function copyPrompt() {
+  copyTextarea(document.getElementById("prompt-ta"));
 }
 function loadFile(input) {
   var file = input.files[0]; if (!file) return;
@@ -301,8 +464,80 @@ function doImport() {
   renderSongList();
 }
 
+function copyTextarea(ta) {
+  ta.select();
+  ta.setSelectionRange(0, 99999);
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(ta.value).catch(function() {});
+  } else {
+    try { document.execCommand("copy"); } catch(e) {}
+  }
+}
+
+// ── PROGRESS MODAL ───────────────────────────────────────────────────────────
+function openProgress() {
+  refreshProgressModal();
+  document.getElementById("progress-modal").classList.add("open");
+}
+function closeProgress() {
+  document.getElementById("progress-modal").classList.remove("open");
+}
+function refreshProgressModal() {
+  var prog = loadProgress();
+  var t = computeTotals(prog);
+  document.getElementById("prog-summary").textContent = t.wordsTotal
+    ? t.wordsFirstTry + " / " + t.wordsTotal + " mots trouvés du premier coup · " +
+      t.songsCompleted + " chanson(s) terminée(s) · " + t.songsPerfect + " parfaite(s)"
+    : "Aucune progression enregistrée pour l'instant.";
+  var keys = Object.keys(prog.songs);
+  document.getElementById("prog-songs").innerHTML = keys.map(function(k) {
+    var sp = prog.songs[k];
+    var pct = sp.total ? Math.min(100, Math.round(sp.resumeIndex / sp.total * 100)) : 0;
+    var status = sp.perfect ? "★ parfaite" : sp.completed ? "✓ terminée" : (pct + "% en cours");
+    return "· " + esc(sp.title) + (sp.artist ? " — " + esc(sp.artist) : "") + " : " + status;
+  }).join("<br>");
+  document.getElementById("prog-export").value = "ET1-" + b64EncodeUnicode(JSON.stringify(prog));
+  document.getElementById("prog-import-ta").value = "";
+  document.getElementById("prog-err").textContent = "";
+}
+function copyProgressCode() {
+  copyTextarea(document.getElementById("prog-export"));
+}
+function restoreProgressCode() {
+  var errEl = document.getElementById("prog-err");
+  errEl.textContent = "";
+  var raw = document.getElementById("prog-import-ta").value.trim();
+  if (!raw) { errEl.textContent = "Collez un code d'abord."; return; }
+  if (raw.indexOf("ET1-") === 0) raw = raw.slice(4);
+  var data;
+  try { data = JSON.parse(b64DecodeUnicode(raw)); } catch(e) { errEl.textContent = "Code invalide."; return; }
+  if (!data || typeof data !== "object" || !data.songs) { errEl.textContent = "Code invalide."; return; }
+  if (!confirm("Remplacer la progression actuelle de ce navigateur par celle du code ?")) return;
+  saveProgress(data);
+  refreshProgressModal();
+  renderSongList();
+}
+function resetProgress() {
+  if (!confirm("Réinitialiser toute la progression sur ce navigateur ?")) return;
+  saveProgress({ songs: {} });
+  refreshProgressModal();
+  renderSongList();
+}
+function b64EncodeUnicode(str) {
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(_, p1) {
+    return String.fromCharCode(parseInt(p1, 16));
+  }));
+}
+function b64DecodeUnicode(str) {
+  return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
+    return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(""));
+}
+
 // ── TRAINING STATE ────────────────────────────────────────────────────────────
 var currentSong = null;
+var currentKey  = null;
+var sessionHadMistake = false;
 var phrases    = [];
 var idx        = 0;
 var wordRows   = [];
@@ -312,6 +547,8 @@ function startTraining(songIdx) {
   var entry = displayedSongs[songIdx];
   if (!entry) return;
   currentSong = entry.song;
+  currentKey = songKeyFor(currentSong);
+  sessionHadMistake = false;
   phrases = [];
   currentSong.strophes.forEach(function(s) {
     s.text.split("\n").forEach(function(line) {
@@ -320,13 +557,15 @@ function startTraining(songIdx) {
     });
   });
   if (!phrases.length) { alert("Aucune phrase trouvée dans cette chanson."); return; }
-  idx = 0;
   advancing = false;
   document.getElementById("home").style.display = "none";
   document.getElementById("trainer").style.display = "flex";
   var info = currentSong.title + (currentSong.artist ? " — " + currentSong.artist : "");
   document.getElementById("t-song-info").textContent = info;
-  showPhrase(0, true);
+  var existing = getSongProgress(currentKey);
+  var startIdx = (existing && !existing.completed && existing.resumeIndex > 0 && existing.resumeIndex < phrases.length)
+    ? existing.resumeIndex : 0;
+  showPhrase(startIdx, true);
 }
 
 function goHome() {
@@ -340,6 +579,7 @@ function showPhrase(i, instant) {
   idx = i;
   advancing = false; // safe: previous timers use isConnected guard
   updateProgress();
+  updateResumeIndex(i);
   var phrase = phrases[i];
   var data = (currentSong.translations || {})[phrase.text];
   if (!Array.isArray(data) || !data.some(function(e) { return e.t && e.t.length > 0; })) {
@@ -395,7 +635,7 @@ function buildRows(data) {
     col.append(src, inp, hint);
     section.appendChild(col);
 
-    var entry = { word: item.w, expected: item.t || [], inp: inp, hint: hint, solved: false, errors: 0, _errTimer: null };
+    var entry = { word: item.w, expected: item.t || [], inp: inp, hint: hint, solved: false, errors: 0, hadMistake: false, _errTimer: null };
     wordRows.push(entry);
     inp.addEventListener("input",   makeCheck(entry, i));
     inp.addEventListener("keydown", makeKey(i));
@@ -452,6 +692,7 @@ function liveCheck(entry, i) {
   if (r) {
     clearTimeout(entry._errTimer);
     entry.inp.className = "wc-inp ok";
+    if (!entry.solved) recordWordResult(!entry.hadMistake);
     entry.solved = true;
     setTimeout(function() {
       if (!entry.inp.isConnected) return;
@@ -460,6 +701,8 @@ function liveCheck(entry, i) {
   } else {
     entry.inp.className = "wc-inp err";
     entry.solved = false;
+    entry.hadMistake = true;
+    sessionHadMistake = true;
     clearTimeout(entry._errTimer);
     entry._errTimer = setTimeout(function() {
       if (!entry.inp.isConnected || entry.solved) return;
@@ -492,7 +735,9 @@ function flash(cb) {
 function endSession() {
   document.getElementById("trainer").style.display = "none";
   document.getElementById("home").style.display = "block";
-  alert("🎉 Terminé ! " + phrases.length + " phrases traduites.");
+  recordSongCompletion(!sessionHadMistake);
+  alert("🎉 Terminé ! " + phrases.length + " phrases traduites."
+    + (!sessionHadMistake ? "\n★ Parfait, aucune erreur !" : ""));
   renderSongList();
 }
 
