@@ -1,104 +1,61 @@
-# Español Trainer
+# Anki Trainer
 
-Fill-in-the-blank song lyric trainer for Spanish. Each song's word-by-word translations are generated ahead of time with an AI assistant and stored in `songs.json` — no API key or backend needed inside the browser.
+Fill-in-the-blank study app for Anki decks: pre-process a `.apkg` export into JSON, import it in the browser, and type out each word of the answer instead of just flipping the card. Progress uses a simple SM-2-style spaced-repetition schedule, stored in the browser's `localStorage` — no account, no backend.
 
 ## Folder structure
 
 ```
 espanol-trainer/
-├── index.html   ← standalone training app (open in any browser)
-├── songs.json   ← built-in song database, shown automatically on the home screen
+├── index.html    ← standalone study app (open in any browser, or via GitHub Pages)
+├── extract.py    ← stdlib-only CLI: converts a .apkg into JSON for the app
 └── README.md
 ```
 
 ---
 
-## Step 1 — Generate a song's JSON with an AI assistant
+## Step 1 — Export your deck from Anki
 
-Open the app, click **＋ Importer une chanson**, and copy the prompt shown at the top of the modal (also reproduced below). Paste it into an AI assistant (Claude, ChatGPT...), replace the placeholder with the song's lyrics, and run it:
+In Anki: **File → Export...** → format **"Anki Deck Package (.apkg)"** → pick the deck(s) you want.
 
-```
-Tu es un générateur de données pour "Español Trainer", une appli d'apprentissage de l'espagnol par traduction mot à mot.
-
-Voici des paroles de chanson en espagnol (les strophes sont séparées par une ligne vide) :
-
-[COLLE ICI LES PAROLES DE LA CHANSON]
-
-Génère UNIQUEMENT un objet JSON valide (pas de texte avant/après, pas de balises markdown) avec exactement cette structure :
-
-{
-  "title": "Titre de la chanson",
-  "artist": "Nom de l'artiste",
-  "targetLang": "French",
-  "strophes": [
-    { "label": "Couplet 1", "text": "ligne 1\nligne 2" }
-  ],
-  "translations": {
-    "ligne exacte telle qu'elle apparaît dans strophes": [
-      { "w": "mot ou courte expression en espagnol", "t": ["traduction principale", "variante si utile"] }
-    ]
-  }
-}
-
-Règles :
-- Une clé dans "translations" par ligne UNIQUE des paroles (si une ligne se répète, ex. un refrain, ne la traduis qu'une fois).
-- Découpe chaque ligne en mots ou courtes expressions ("w"), dans l'ordre d'apparition, en couvrant toute la ligne.
-- Donne 1 à 3 traductions correctes et naturelles en français dans "t" (pas de synonymes trop éloignés).
-- Les interjections ou mots difficiles à traduire seuls peuvent avoir "t": [].
-- Regroupe les lignes en strophes avec un "label" pertinent (Intro, Couplet 1, Refrain, Pont, Outro...), dans l'ordre du texte original, refrains répétés inclus.
-```
-
-The `strophes` array matters even though `translations` already holds every line: it's what tells the app the **order** the lines play in, groups them under section **labels** (shown during training), and preserves **repeats** (a chorus that comes back twice must appear twice in `strophes.text`, even though it only needs one entry in `translations`). Without it the app would have no way to reconstruct the song's actual structure from a flat translation dictionary.
-
----
-
-## Step 2 — Add to the song database
-
-Open `index.html` in any modern browser (Chrome, Firefox, Safari), or via GitHub Pages.
-
-Songs are read from `songs.json` and shown directly on the home screen — no import needed. To add a song, append its generated JSON object to the array in `songs.json`.
-
-> **Note:** the **Importer une chanson** button on the home screen is a placeholder for now — it is visible but disabled, since it can't yet save a song anywhere durable. Maintain `songs.json` directly instead.
-
----
-
-## How training works
-
-- Each phrase appears as a row of Spanish words above blank input fields.
-- Type the French (or target-language) translation for each word.
-- Accents are optional — `ame` is accepted for `âme`.
-- After 3 wrong attempts on a word, a hint appears.
-- When all words in a phrase are correct, the app advances automatically.
-- Use **💡 Voir les réponses** to reveal all answers, **Passer →** to skip.
-
-## Progress tracking
-
-The app automatically saves progress in the browser's `localStorage`: how far you got in each song (so reopening a song resumes where you left off), how many words you found on the first try, and which songs you've completed — including whether you completed one without a single mistake ("★ Parfaite").
-
-Since this is a static site with no account system, that data lives only in one browser. To carry it to another browser or device, open **📊 Progression** on the home screen and copy the export code — pasting it back in on the other side (via the same panel) restores it there.
-
----
-
-## Publish to GitHub
+## Step 2 — Convert it to JSON
 
 ```bash
-cd espanol-trainer
-git init
-git add .
-git commit -m "feat: initial Español Trainer"
-
-# Create a repo on github.com, then:
-git remote add origin https://github.com/YOUR_USERNAME/espanol-trainer.git
-git branch -M main
-git push -u origin main
+python3 extract.py "My Deck.apkg" --out my_deck.json
 ```
 
-To host the app on GitHub Pages:
-1. Go to repo **Settings → Pages**
-2. Set source to **main branch, / (root)**
-3. The app will be live at `https://YOUR_USERNAME.github.io/espanol-trainer/`
+No dependencies beyond the Python standard library (`zipfile`, `sqlite3`, `json`). It handles:
+- sub-decks (`Parent::Child` naming, shown as a collapsible tree in the app),
+- Basic, Cloze, and custom note types,
+- HTML templates with `{{Field}}` substitution,
+- empty cards / missing templates (skipped, with a warning on stderr).
 
-> `songs.json` must be committed and pushed — it's the built-in song database GitHub Pages serves to every visitor. `.gitignore` already excludes `trainervenv/` and other local-only files.
+For each card it renders the answer side, strips HTML/sound/image tags, and splits what's left into the list of words you'll type — the question side is kept as-is (with its HTML) and shown above the blanks.
+
+## Step 3 — Import into the app
+
+Open `index.html`, click **＋ Importer un fichier .json**, and pick the file `extract.py` produced. Each source you import stays independent (its own progress, own decks), so you can import several exports side by side.
+
+---
+
+## How studying works
+
+- Pick a deck (or a parent deck, which studies all its sub-decks together) from the home screen; badges show how many cards are **new**, **due**, and already **learned**.
+- The question is shown as a card; type each word of the answer into its blank.
+- Accents are optional — `ame` is accepted for `âme`.
+- After 3 wrong attempts on a word, a hint appears; **💡 Voir les réponses** reveals everything, **Passer →** skips.
+- Once every blank on a card is correct, the app rates it automatically from how many mistakes you made (0 → Parfait, 1 → Correct, 2 → Difficile, 3+ → À revoir) and schedules its next review with a lightweight SM-2 algorithm. New cards are capped at 20 per session; cards marked "À revoir" come back later in the same session.
+
+---
+
+## Publish to GitHub Pages
+
+```bash
+git add index.html extract.py README.md
+git commit -m "feat: Anki Trainer"
+git push
+```
+
+Then, in the repo's **Settings → Pages**, set the source to this branch, `/ (root)`. `extract.py` never needs to run in the browser — only `index.html` and the JSON files you import (kept in your own browser's `localStorage`) are needed there.
 
 ---
 
@@ -106,18 +63,16 @@ To host the app on GitHub Pages:
 
 ```json
 {
-  "title": "Song Title",
-  "artist": "Artist Name",
-  "targetLang": "French",
-  "strophes": [
-    { "label": "Couplet 1", "text": "Line one\nLine two" }
-  ],
-  "translations": {
-    "Line one": [
-      { "w": "spanish_word", "t": ["translation1", "variant2"] }
-    ]
-  }
+  "version": 1,
+  "source": "My Deck.apkg",
+  "decks": [
+    {
+      "id": "1234567890",
+      "name": "Parent::Child",
+      "cards": [
+        { "id": "111", "question": "<b>question HTML</b>", "words": ["word1", "word2"], "tags": ["tag1"] }
+      ]
+    }
+  ]
 }
 ```
-
-`t` is an array of accepted translations (case-insensitive, punctuation-stripped). Words with an empty `t: []` are displayed but not checked.

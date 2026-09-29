@@ -1,753 +1,1015 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Español Trainer</title>
-<style>
-:root {
-  --navy:  #1e3a5f;
-  --green: #16a34a;
-  --red:   #dc2626;
-  --gold:  #c8a84b;
-  color-scheme: light;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #fff; color: #111;
-  min-height: 100vh;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anki Trainer</title>
+    <style>
+        :root {
+            --navy: #1e3a5f;
+            --green: #16a34a;
+            --red: #dc2626;
+            --orange: #ea580c;
+            --blue: #2563eb;
+            --gold: #c8a84b;
+        }
 
-/* ── HOME ──────────────────────────────────────────────────────────────── */
-#home {
-  max-width: 520px; margin: 0 auto;
-  padding: 52px 24px 80px;
-}
-.h-logo { font-size: 36px; margin-bottom: 6px; }
-.h-title { font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
-.h-sub { font-size: 13px; color: #aaa; margin-bottom: 10px; }
-.h-stats { font-size: 12px; color: #999; margin-bottom: 28px; min-height: 14px; }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-.h-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; margin-left: 8px; vertical-align: middle; letter-spacing: .2px; }
-.h-badge-progress { background: #f3f4f6; color: #999; }
-.h-badge-done { background: #eafaf0; color: var(--green); }
-.h-badge-perfect { background: #fdf6e3; color: var(--gold); }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #fff;
+            color: #111;
+            min-height: 100vh;
+        }
 
-.h-actions-row { display: flex; gap: 10px; }
-.h-actions-row .h-import-btn { flex: 1; }
+        /* ── HOME ── */
+        #home {
+            max-width: 560px;
+            margin: 0 auto;
+            padding: 52px 24px 80px;
+        }
 
-.h-songs { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
-.h-song {
-  display: flex; align-items: center; gap: 14px;
-  padding: 14px 16px; border: 1.5px solid #f0f0f0;
-  border-radius: 14px; cursor: pointer;
-  transition: border-color .15s, background .15s;
-}
-.h-song:hover { border-color: var(--navy); background: #f8faff; }
-.h-song-info { flex: 1; min-width: 0; }
-.h-song-title { font-size: 15px; font-weight: 600; color: #111; }
-.h-song-meta { font-size: 12px; color: #bbb; margin-top: 2px; }
-.h-song-del {
-  padding: 4px 8px; font-size: 12px; color: #ddd;
-  background: none; border: none; cursor: pointer;
-  border-radius: 6px; transition: color .15s, background .15s;
-  flex-shrink: 0;
-}
-.h-song-del:hover { color: var(--red); background: #fff5f5; }
+        .h-logo {
+            font-size: 36px;
+            margin-bottom: 6px;
+        }
 
-.h-empty { font-size: 14px; color: #ccc; text-align: center; padding: 28px 0; }
+        .h-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 4px;
+        }
 
-/* Import area */
-.h-import-btn {
-  width: 100%; padding: 13px; border: 1.5px dashed #ddd;
-  border-radius: 14px; background: none; font-size: 14px; color: #aaa;
-  cursor: pointer; transition: border-color .15s, color .15s;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-}
-.h-import-btn:hover { border-color: var(--navy); color: var(--navy); }
+        .h-sub {
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 36px;
+        }
 
-/* ── IMPORT MODAL ───────────────────────────────────────────────────────── */
-.modal-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,.35); z-index: 100;
-  align-items: center; justify-content: center; padding: 24px;
-}
-.modal-overlay.open { display: flex; }
-.modal {
-  background: #fff; border-radius: 18px; padding: 28px;
-  width: 100%; max-width: 540px; max-height: 80vh;
-  display: flex; flex-direction: column; gap: 16px;
-  box-shadow: 0 24px 60px rgba(0,0,0,.18);
-  overflow-y: auto;
-}
-.modal h2 { font-size: 17px; font-weight: 700; color: var(--navy); }
-.modal p  { font-size: 13px; color: #888; line-height: 1.6; }
-.modal textarea {
-  flex: 1; min-height: 180px;
-  border: 1.5px solid #e0e0e0; border-radius: 10px;
-  padding: 12px; font-family: "Menlo", "Consolas", monospace;
-  font-size: 12px; resize: none; outline: none; color: #333;
-}
-.modal textarea:focus { border-color: var(--navy); }
-.modal-actions { display: flex; gap: 10px; }
-.btn {
-  padding: 11px 24px; border-radius: 12px; font-size: 14px;
-  font-weight: 600; cursor: pointer; border: none; transition: background .15s;
-}
-.btn-primary { background: var(--navy); color: #fff; }
-.btn-primary:hover { background: #2563eb; }
-.btn-secondary { background: #f3f4f6; color: #555; }
-.btn-secondary:hover { background: #e5e7eb; }
-.btn-file { font-size: 13px; color: var(--navy); text-decoration: underline; cursor: pointer; background: none; border: none; padding: 0; }
-.modal-err { font-size: 12px; color: var(--red); }
-.modal-warning { font-size: 12px; color: var(--red); background: #fef2f2; border-radius: 8px; padding: 8px 10px; line-height: 1.5; }
-.btn:disabled, .btn:disabled:hover { opacity: .45; cursor: not-allowed; background: #f3f4f6; color: #999; }
+        /* Source list */
+        .h-sources {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
 
-/* ── TRAINER ────────────────────────────────────────────────────────────── */
-#trainer { min-height: 100vh; display: none; flex-direction: column; }
-.t-topbar { padding: 16px 24px 0; display: flex; align-items: center; gap: 14px; }
-.t-back { background: none; border: none; color: #bbb; cursor: pointer; font-size: 13px; transition: color .15s; }
-.t-back:hover { color: var(--navy); }
-.t-prog { flex: 1; }
-.t-prog-label { font-size: 11px; color: #d0d0d0; text-align: right; margin-bottom: 5px; }
-.t-prog-track { height: 2px; background: #f0f0f0; border-radius: 2px; }
-.t-prog-fill { height: 100%; background: var(--gold); border-radius: 2px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+        .h-source {
+            border: 1.5px solid #f0f0f0;
+            border-radius: 14px;
+            overflow: hidden;
+            transition: border-color .15s;
+        }
 
-.t-main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 52px 24px 60px; }
-.t-song-info { font-size: 12px; color: #ccc; margin-bottom: 32px; letter-spacing: .3px; }
+        .h-source:hover {
+            border-color: #d8e0f0;
+        }
 
-.t-card { width: 100%; max-width: 720px; transition: opacity .28s ease, transform .28s ease; }
-.t-card.exit { opacity: 0; transform: translateY(-14px); }
-.t-card.snap { opacity: 0; transform: translateY(14px); transition: none; }
+        .h-source-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 16px;
+            cursor: pointer;
+            user-select: none;
+            background: #fff;
+            transition: background .12s;
+        }
 
-/* Word grid */
-.t-words { display: flex; flex-wrap: wrap; gap: 18px 28px; justify-content: center; align-items: flex-start; }
-.word-col { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-.wc-src { font-family: Georgia, serif; font-size: clamp(22px, 3.5vw, 34px); font-weight: 400; color: #111; white-space: nowrap; }
-.wc-inp {
-  border: none; border-bottom: 2.5px solid #d0ccc5;
-  background: transparent; font-family: Georgia, serif; font-size: 17px;
-  text-align: center; outline: none; padding: 2px 4px 7px;
-  transition: border-color .2s, color .2s; min-width: 48px;
-}
-.wc-inp:focus  { border-bottom-color: #93aed6; }
-.wc-inp.ok     { border-bottom-color: var(--green); color: var(--green); }
-.wc-inp.err    { border-bottom-color: var(--red);   color: var(--red); }
-.wc-inp::placeholder { color: #ddd; }
-.wc-hint { display: none; font-family: Georgia, serif; font-size: 13px; color: #c9922a; white-space: nowrap; }
+        .h-source-header:hover {
+            background: #f8faff;
+        }
 
-.t-actions { margin-top: 36px; display: flex; align-items: center; justify-content: center; gap: 28px; width: 100%; }
-.t-show-ans { font-size: 11px; color: #c9c0b6; cursor: pointer; letter-spacing: .3px; transition: color .15s; }
-.t-show-ans:hover { color: #c9922a; }
-.t-skip { font-size: 11px; color: #d0d0d0; cursor: pointer; letter-spacing: .3px; transition: color .15s; }
-.t-skip:hover { color: #999; }
+        .h-source-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #111;
+            flex: 1;
+        }
 
-.t-msg { font-size: 13px; color: #ccc; text-align: center; padding: 28px 0; }
+        .h-source-meta {
+            font-size: 11px;
+            color: #bbb;
+        }
 
-#flash { position: fixed; inset: 0; pointer-events: none; border: 2.5px solid var(--green); border-radius: 10px; opacity: 0; transition: opacity .25s; z-index: 50; }
-#flash.on { opacity: .6; }
-</style>
+        .h-source-del {
+            padding: 3px 8px;
+            font-size: 12px;
+            color: #ddd;
+            background: none;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: color .15s;
+            flex-shrink: 0;
+        }
+
+        .h-source-del:hover {
+            color: var(--red);
+        }
+
+        .h-source-arrow {
+            font-size: 11px;
+            color: #ccc;
+            transition: transform .2s;
+            flex-shrink: 0;
+        }
+
+        .h-source-arrow.open {
+            transform: rotate(90deg);
+        }
+
+        /* Deck tree inside a source */
+        .h-decktree {
+            display: none;
+            border-top: 1px solid #f5f5f5;
+            padding: 8px 0;
+        }
+
+        .h-decktree.open {
+            display: block;
+        }
+
+        .h-deckrow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            cursor: pointer;
+            transition: background .12s;
+        }
+
+        .h-deckrow:hover {
+            background: #f8faff;
+        }
+
+        .h-deckrow-name {
+            font-size: 13px;
+            color: #333;
+            flex: 1;
+        }
+
+        .h-deckrow-name.root-deck {
+            font-weight: 600;
+        }
+
+        .badge {
+            padding: 2px 7px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-new {
+            background: #eff6ff;
+            color: var(--blue);
+        }
+
+        .badge-due {
+            background: #fff7ed;
+            color: var(--orange);
+        }
+
+        .badge-done {
+            background: #f0fdf4;
+            color: var(--green);
+        }
+
+        .h-empty {
+            font-size: 14px;
+            color: #ccc;
+            text-align: center;
+            padding: 28px 0;
+        }
+
+        .h-import-btn {
+            width: 100%;
+            padding: 13px;
+            border: 1.5px dashed #ddd;
+            border-radius: 14px;
+            background: none;
+            font-size: 14px;
+            color: #aaa;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: border-color .15s, color .15s;
+        }
+
+        .h-import-btn:hover {
+            border-color: var(--navy);
+            color: var(--navy);
+        }
+
+        /* ── STUDY ── */
+        #study {
+            min-height: 100vh;
+            display: none;
+            flex-direction: column;
+        }
+
+        .s-topbar {
+            padding: 16px 24px 0;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .s-back {
+            background: none;
+            border: none;
+            color: #bbb;
+            cursor: pointer;
+            font-size: 13px;
+            transition: color .15s;
+        }
+
+        .s-back:hover {
+            color: var(--navy);
+        }
+
+        .s-prog {
+            flex: 1;
+        }
+
+        .s-prog-label {
+            font-size: 11px;
+            color: #d0d0d0;
+            text-align: right;
+            margin-bottom: 5px;
+        }
+
+        .s-prog-track {
+            height: 2px;
+            background: #f0f0f0;
+            border-radius: 2px;
+        }
+
+        .s-prog-fill {
+            height: 100%;
+            background: var(--gold);
+            border-radius: 2px;
+            transition: width .6s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        .s-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 36px 24px 60px;
+        }
+
+        .s-deck-name {
+            font-size: 12px;
+            color: #ccc;
+            margin-bottom: 24px;
+            letter-spacing: .3px;
+        }
+
+        /* Question */
+        .s-question {
+            width: 100%;
+            max-width: 720px;
+            border: 1.5px solid #f0f0f0;
+            border-radius: 18px;
+            padding: 28px 32px;
+            margin-bottom: 32px;
+            font-size: clamp(18px, 2.8vw, 26px);
+            line-height: 1.6;
+            color: #222;
+            text-align: center;
+        }
+
+        .s-question img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 8px 0;
+        }
+
+        .s-question * {
+            font-family: inherit;
+        }
+
+        /* Word inputs */
+        .t-words {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px 28px;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100%;
+            max-width: 720px;
+        }
+
+        .word-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .wc-lbl {
+            font-family: Georgia, serif;
+            font-size: clamp(16px, 2.4vw, 24px);
+            min-height: 32px;
+            color: #ccc;
+        }
+
+        .wc-inp {
+            border: none;
+            border-bottom: 2.5px solid #d0ccc5;
+            background: transparent;
+            font-family: Georgia, serif;
+            font-size: 17px;
+            text-align: center;
+            outline: none;
+            padding: 2px 4px 7px;
+            transition: border-color .2s, color .2s;
+            min-width: 48px;
+        }
+
+        .wc-inp:focus {
+            border-bottom-color: #93aed6;
+        }
+
+        .wc-inp.ok {
+            border-bottom-color: var(--green);
+            color: var(--green);
+        }
+
+        .wc-inp.err {
+            border-bottom-color: var(--red);
+            color: var(--red);
+        }
+
+        .wc-inp::placeholder {
+            color: #ddd;
+        }
+
+        .wc-hint {
+            display: none;
+            font-family: Georgia, serif;
+            font-size: 13px;
+            color: #c9922a;
+        }
+
+        .t-actions {
+            margin-top: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 28px;
+            width: 100%;
+        }
+
+        .t-show-ans {
+            font-size: 11px;
+            color: #c9c0b6;
+            cursor: pointer;
+            letter-spacing: .3px;
+            transition: color .15s;
+        }
+
+        .t-show-ans:hover {
+            color: #c9922a;
+        }
+
+        .t-skip {
+            font-size: 11px;
+            color: #d0d0d0;
+            cursor: pointer;
+            letter-spacing: .3px;
+            transition: color .15s;
+        }
+
+        .t-skip:hover {
+            color: #999;
+        }
+
+        /* Rating pill */
+        .s-pill {
+            position: fixed;
+            bottom: 36px;
+            left: 50%;
+            transform: translateX(-50%) translateY(60px);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            opacity: 0;
+            transition: transform .3s, opacity .3s;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .s-pill.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .pill-easy {
+            background: #eff6ff;
+            color: var(--blue);
+        }
+
+        .pill-good {
+            background: #f0fdf4;
+            color: var(--green);
+        }
+
+        .pill-hard {
+            background: #fff7ed;
+            color: var(--orange);
+        }
+
+        .pill-again {
+            background: #fef2f2;
+            color: var(--red);
+        }
+
+        /* Done */
+        .s-done {
+            text-align: center;
+            padding: 60px 24px;
+            width: 100%;
+        }
+
+        .s-done-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .s-done-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 8px;
+        }
+
+        .s-done-sub {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 28px;
+        }
+
+        .btn-home {
+            padding: 12px 28px;
+            border-radius: 12px;
+            background: var(--navy);
+            color: #fff;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Flash */
+        #flash {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            border: 2.5px solid var(--green);
+            border-radius: 10px;
+            opacity: 0;
+            transition: opacity .25s;
+            z-index: 50;
+        }
+
+        #flash.on {
+            opacity: .6;
+        }
+
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #111;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            transition: transform .3s;
+            z-index: 300;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        #toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
 </head>
+
 <body>
 
-<!-- ── HOME ── -->
-<div id="home">
-  <div class="h-logo">🎵</div>
-  <div class="h-title">Español Trainer</div>
-  <div class="h-sub">Traduisez mot à mot les paroles de vos chansons espagnoles</div>
-  <div class="h-stats" id="h-stats"></div>
-  <div class="h-songs" id="h-songs"></div>
-  <div class="h-actions-row">
-    <button class="h-import-btn" onclick="openImport()">＋ Importer une chanson</button>
-    <button class="h-import-btn" onclick="openProgress()">📊 Progression</button>
-  </div>
-</div>
-
-<!-- ── IMPORT MODAL ── -->
-<div class="modal-overlay" id="import-modal">
-  <div class="modal">
-    <h2>Importer une chanson</h2>
-    <p>
-      Le JSON n'est plus généré par un script local. Copiez le prompt ci-dessous dans un assistant IA (Claude, ChatGPT...), remplacez le texte entre crochets par les paroles de la chanson, puis collez le JSON obtenu en réponse.
-    </p>
-    <textarea id="prompt-ta" readonly style="min-height:130px; flex:none; font-size:11px;">Tu es un générateur de données pour "Español Trainer", une appli d'apprentissage de l'espagnol par traduction mot à mot.
-
-Voici des paroles de chanson en espagnol (les strophes sont séparées par une ligne vide) :
-
-[COLLE ICI LES PAROLES DE LA CHANSON]
-
-Génère UNIQUEMENT un objet JSON valide (pas de texte avant/après, pas de balises markdown) avec exactement cette structure :
-
-{
-  "title": "Titre de la chanson",
-  "artist": "Nom de l'artiste",
-  "targetLang": "French",
-  "strophes": [
-    { "label": "Couplet 1", "text": "ligne 1\nligne 2" }
-  ],
-  "translations": {
-    "ligne exacte telle qu'elle apparaît dans strophes": [
-      { "w": "mot ou courte expression en espagnol", "t": ["traduction principale", "variante si utile"] }
-    ]
-  }
-}
-
-Règles :
-- Une clé dans "translations" par ligne UNIQUE des paroles (si une ligne se répète, ex. un refrain, ne la traduis qu'une fois).
-- Découpe chaque ligne en mots ou courtes expressions ("w"), dans l'ordre d'apparition, en couvrant toute la ligne.
-- Donne 1 à 3 traductions correctes et naturelles en français dans "t" (pas de synonymes trop éloignés).
-- Les interjections ou mots difficiles à traduire seuls peuvent avoir "t": [].
-- Regroupe les lignes en strophes avec un "label" pertinent (Intro, Couplet 1, Refrain, Pont, Outro...), dans l'ordre du texte original, refrains répétés inclus.</textarea>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="copyPrompt()">📋 Copier le prompt</button>
+    <!-- ── HOME ── -->
+    <div id="home">
+        <div class="h-logo">🃏</div>
+        <div class="h-title">Anki Trainer</div>
+        <div class="h-sub">Pré-traitez votre .apkg avec <code>extract_apkg.py</code>, puis importez le JSON ici</div>
+        <div class="h-sources" id="h-sources"></div>
+        <label class="h-import-btn">
+            ＋ Importer un fichier .json
+            <input type="file" accept=".json" style="display:none" onchange="importJSON(this)">
+        </label>
     </div>
-    <p class="modal-warning">⚠️ L'import ci-dessous n'est pas encore fonctionnel : il ne permet pas encore d'ajouter une chanson pour le moment. En attendant, ajoutez le JSON obtenu directement dans <code>songs.json</code>.</p>
-    <textarea id="import-ta" placeholder='{ "title": "...", "artist": "...", "strophes": [...], "translations": {...} }'></textarea>
-    <div class="modal-err" id="import-err"></div>
-    <div class="modal-actions">
-      <button class="btn btn-primary" onclick="doImport()" disabled>Importer</button>
-      <label class="btn btn-secondary" style="cursor:not-allowed; opacity:.45;">
-        Fichier JSON <input type="file" accept=".json" style="display:none" disabled>
-      </label>
-      <button class="btn btn-secondary" onclick="closeImport()">Annuler</button>
+
+    <!-- ── STUDY ── -->
+    <div id="study">
+        <div class="s-topbar">
+            <button class="s-back" onclick="goHome()">← Quitter</button>
+            <div class="s-prog">
+                <div class="s-prog-label" id="prog-label">0 / 0</div>
+                <div class="s-prog-track">
+                    <div class="s-prog-fill" id="prog-fill" style="width:0%"></div>
+                </div>
+            </div>
+        </div>
+        <div class="s-main">
+            <div class="s-deck-name" id="s-deck-name"></div>
+            <div id="s-content"></div>
+        </div>
     </div>
-  </div>
-</div>
 
-<!-- ── PROGRESS MODAL ── -->
-<div class="modal-overlay" id="progress-modal">
-  <div class="modal">
-    <h2>Progression</h2>
-    <p id="prog-summary" style="color:#555"></p>
-    <div id="prog-songs" style="font-size:12px; color:#888;"></div>
-    <p>
-      Votre progression est sauvegardée automatiquement dans ce navigateur. Pour la retrouver sur un autre appareil ou navigateur, copiez le code ci-dessous et restaurez-le là-bas.
-    </p>
-    <textarea id="prog-export" readonly style="min-height:70px; flex:none; font-size:11px;"></textarea>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="copyProgressCode()">📋 Copier le code</button>
-    </div>
-    <textarea id="prog-import-ta" placeholder="Collez ici un code de progression à restaurer..." style="min-height:60px; flex:none;"></textarea>
-    <div class="modal-err" id="prog-err"></div>
-    <div class="modal-actions">
-      <button class="btn btn-primary" onclick="restoreProgressCode()">Restaurer depuis ce code</button>
-      <button class="btn btn-secondary" onclick="resetProgress()">Réinitialiser</button>
-      <button class="btn btn-secondary" onclick="closeProgress()">Fermer</button>
-    </div>
-  </div>
-</div>
+    <div id="flash"></div>
+    <div class="s-pill" id="pill"></div>
+    <div id="toast"></div>
 
-<!-- ── TRAINER ── -->
-<div id="trainer">
-  <div class="t-topbar">
-    <button class="t-back" onclick="goHome()">← Quitter</button>
-    <div class="t-prog">
-      <div class="t-prog-label" id="prog-label">1 / 10</div>
-      <div class="t-prog-track"><div class="t-prog-fill" id="prog-fill" style="width:0%"></div></div>
-    </div>
-  </div>
-  <div class="t-main">
-    <div class="t-song-info" id="t-song-info"></div>
-    <div class="t-card" id="t-card">
-      <div class="t-words" id="t-words"></div>
-      <div class="t-actions">
-        <span class="t-show-ans" onclick="revealAll()">💡 Voir les réponses</span>
-        <span class="t-skip" onclick="advance()">Passer →</span>
-      </div>
-    </div>
-  </div>
-</div>
+    <script>
+        // ═══════════════════════════════════════════════
+        // STORAGE
+        // ═══════════════════════════════════════════════
+        var LS_SOURCES = "ankitrain_v1_sources"; // [{id, name, decks:[{id,name,cardCount}]}]
+        var LS_CARDS = "ankitrain_v1_c_";      // + sourceId → {deckId:[cards]}
+        var LS_SRS = "ankitrain_v1_s_";      // + sourceId → {cardId: srsMeta}
+        var NEW_LIMIT = 20;
+        var TODAY = dayStamp();
 
-<div id="flash"></div>
+        function dayStamp(d) { d = d || new Date(); return Math.floor(d.getTime() / 86400000); }
+        function loadSources() { try { return JSON.parse(localStorage.getItem(LS_SOURCES) || "[]"); } catch (e) { return []; } }
+        function saveSources(s) { try { localStorage.setItem(LS_SOURCES, JSON.stringify(s)); } catch (e) { toast("Erreur stockage"); } }
+        function loadCards(sid) { try { return JSON.parse(localStorage.getItem(LS_CARDS + sid) || "{}"); } catch (e) { return {}; } }
+        function saveCards(sid, c) { try { localStorage.setItem(LS_CARDS + sid, JSON.stringify(c)); } catch (e) { throw new Error("Données trop volumineuses pour le stockage local"); } }
+        function loadSRS(sid) { try { return JSON.parse(localStorage.getItem(LS_SRS + sid) || "{}"); } catch (e) { return {}; } }
+        function saveSRS(sid, s) { try { localStorage.setItem(LS_SRS + sid, JSON.stringify(s)); } catch (e) { } }
 
-<script>
-// ── STORAGE ──────────────────────────────────────────────────────────────────
-var LS_KEY = "espanol_trainer_v1";
-var SONGS_URL = "songs.json";
-var builtinSongs = [];
-var displayedSongs = [];
+        // ═══════════════════════════════════════════════
+        // SM-2
+        // ═══════════════════════════════════════════════
+        function defaultSRS() { return { interval: 0, ease: 2.5, due: TODAY, reps: 0, lapses: 0 }; }
 
-function loadSongs() {
-  try { return JSON.parse(localStorage.getItem(LS_KEY) || "[]"); } catch(e) { return []; }
-}
-function saveSongs(arr) {
-  try { localStorage.setItem(LS_KEY, JSON.stringify(arr)); } catch(e) {}
-}
-function loadBuiltinSongs() {
-  return fetch(SONGS_URL)
-    .then(function(r) { return r.ok ? r.json() : []; })
-    .catch(function() { return []; });
-}
+        // Erreurs → rating : 0=Easy 1=Good 2=Hard 3+=Again
+        function errorsToRating(e) { return e === 0 ? 4 : e === 1 ? 3 : e === 2 ? 2 : 1; }
 
-// ── PROGRESS ─────────────────────────────────────────────────────────────────
-var PROGRESS_KEY = "espanol_trainer_progress_v1";
+        var PILL_LABEL = { 4: "✨ Parfait", 3: "🟢 Correct", 2: "🟠 Difficile", 1: "🔴 À revoir" };
+        var PILL_CLASS = { 4: "pill-easy", 3: "pill-good", 2: "pill-hard", 1: "pill-again" };
 
-function loadProgress() {
-  try {
-    var p = JSON.parse(localStorage.getItem(PROGRESS_KEY) || "null");
-    return (p && typeof p === "object" && p.songs) ? p : { songs: {} };
-  } catch(e) { return { songs: {} }; }
-}
-function saveProgress(p) {
-  try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(p)); } catch(e) {}
-}
-function songKeyFor(song) {
-  return song.id ? ("id:" + song.id) : ("ta:" + (song.title || "") + "|" + (song.artist || ""));
-}
-function ensureSongProgress(prog, key, song) {
-  if (!prog.songs[key]) {
-    prog.songs[key] = {
-      title: song.title, artist: song.artist || "",
-      resumeIndex: 0, total: 0,
-      wordsFirstTry: 0, wordsTotal: 0,
-      completed: false, perfect: false,
-      completedAt: null, updatedAt: Date.now()
-    };
-  }
-  return prog.songs[key];
-}
-function getSongProgress(key) {
-  var prog = loadProgress();
-  return prog.songs[key] || null;
-}
-function recordWordResult(firstTry) {
-  if (!currentSong) return;
-  var prog = loadProgress();
-  var sp = ensureSongProgress(prog, currentKey, currentSong);
-  sp.wordsTotal++;
-  if (firstTry) sp.wordsFirstTry++;
-  sp.updatedAt = Date.now();
-  saveProgress(prog);
-}
-function updateResumeIndex(i) {
-  if (!currentSong) return;
-  var prog = loadProgress();
-  var sp = ensureSongProgress(prog, currentKey, currentSong);
-  sp.resumeIndex = i;
-  sp.total = phrases.length;
-  sp.updatedAt = Date.now();
-  saveProgress(prog);
-}
-function recordSongCompletion(perfect) {
-  if (!currentSong) return;
-  var prog = loadProgress();
-  var sp = ensureSongProgress(prog, currentKey, currentSong);
-  var firstTime = !sp.completed;
-  sp.completed = true;
-  if (perfect) sp.perfect = true;
-  if (firstTime) sp.completedAt = Date.now();
-  sp.resumeIndex = 0;
-  sp.updatedAt = Date.now();
-  saveProgress(prog);
-}
-function computeTotals(prog) {
-  var t = { wordsFirstTry: 0, wordsTotal: 0, songsCompleted: 0, songsPerfect: 0 };
-  Object.keys(prog.songs).forEach(function(k) {
-    var sp = prog.songs[k];
-    t.wordsFirstTry += sp.wordsFirstTry || 0;
-    t.wordsTotal += sp.wordsTotal || 0;
-    if (sp.completed) t.songsCompleted++;
-    if (sp.perfect) t.songsPerfect++;
-  });
-  return t;
-}
-function progressBadgeHtml(sp) {
-  if (!sp) return "";
-  if (sp.perfect) return '<span class="h-badge h-badge-perfect">★ Parfaite</span>';
-  if (sp.completed) return '<span class="h-badge h-badge-done">✓ Terminée</span>';
-  if (sp.resumeIndex > 0 && sp.total) {
-    var pct = Math.min(100, Math.round(sp.resumeIndex / sp.total * 100));
-    return '<span class="h-badge h-badge-progress">' + pct + '%</span>';
-  }
-  return "";
-}
-function renderStats() {
-  var el = document.getElementById("h-stats");
-  if (!el) return;
-  var t = computeTotals(loadProgress());
-  if (!t.wordsTotal) { el.textContent = ""; return; }
-  el.textContent = "🎯 " + t.wordsFirstTry + "/" + t.wordsTotal + " mots trouvés du premier coup · ✓ " +
-    t.songsCompleted + " chanson(s) terminée(s) · ★ " + t.songsPerfect + " parfaite(s)";
-}
+        function applyRating(srs, q) {
+            var s = Object.assign({}, srs);
+            if (q === 1) {
+                s.lapses++; s.ease = Math.max(1.3, s.ease - 0.2);
+                s.interval = 1; s.reps = 0;
+            } else if (q === 2) {
+                s.ease = Math.max(1.3, s.ease - 0.15);
+                s.interval = s.reps < 2 ? Math.max(1, s.interval || 1) : Math.max(1, Math.round(s.interval * 1.2));
+                s.reps++;
+            } else if (q === 3) {
+                s.interval = s.reps === 0 ? 1 : s.reps === 1 ? 4 : Math.max(1, Math.round(s.interval * s.ease));
+                s.reps++;
+            } else {
+                s.ease = Math.min(4.0, s.ease + 0.15);
+                s.interval = s.reps === 0 ? 3 : s.reps === 1 ? 7 : Math.max(1, Math.round(s.interval * s.ease * 1.3));
+                s.reps++;
+            }
+            s.due = TODAY + s.interval;
+            return s;
+        }
 
-// ── HOME ──────────────────────────────────────────────────────────────────────
-function renderHome() {
-  loadBuiltinSongs().then(function(list) {
-    builtinSongs = Array.isArray(list) ? list : [];
-    renderSongList();
-  });
-}
+        // ═══════════════════════════════════════════════
+        // IMPORT JSON
+        // ═══════════════════════════════════════════════
+        function importJSON(input) {
+            var file = input.files[0]; if (!file) return;
+            input.value = "";
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var data;
+                try { data = JSON.parse(e.target.result); } catch (err) { toast("JSON invalide : " + err.message); return; }
+                if (!data.decks || !Array.isArray(data.decks)) { toast("Format invalide — utilisez extract_apkg.py"); return; }
 
-function renderSongList() {
-  displayedSongs = builtinSongs.map(function(s) { return { song: s, builtin: true }; })
-    .concat(loadSongs().map(function(s) { return { song: s, builtin: false }; }));
-  var el = document.getElementById("h-songs");
-  renderStats();
-  if (!displayedSongs.length) {
-    el.innerHTML = '<div class="h-empty">Aucune chanson disponible.</div>';
-    return;
-  }
-  el.innerHTML = displayedSongs.map(function(entry, i) {
-    var s = entry.song;
-    var n = 0;
-    s.strophes.forEach(function(st) {
-      st.text.split("\n").forEach(function(l) { if (l.trim().length > 1) n++; });
-    });
-    var sp = getSongProgress(songKeyFor(s));
-    return '<div class="h-song" onclick="startTraining(' + i + ')">'
-      + '<div class="h-song-info">'
-      + '<div class="h-song-title">' + esc(s.title) + progressBadgeHtml(sp) + '</div>'
-      + '<div class="h-song-meta">' + (s.artist ? esc(s.artist) + " · " : "") + n + " phrases · " + (s.targetLang || "?") + '</div>'
-      + '</div>'
-      + (entry.builtin ? '' : '<button class="h-song-del" onclick="deleteSong(event,' + i + ')">✕</button>')
-      + '</div>';
-  }).join("");
-}
+                var sid = Date.now();
+                var sourceName = data.source || file.name.replace(/\.json$/, "");
 
-function deleteSong(e, i) {
-  e.stopPropagation();
-  var entry = displayedSongs[i];
-  if (!entry || entry.builtin) return;
-  if (!confirm("Supprimer cette chanson ?")) return;
-  var songs = loadSongs();
-  songs.splice(i - builtinSongs.length, 1);
-  saveSongs(songs);
-  renderSongList();
-}
+                // Build index: group cards by deckId
+                var cardsByDeck = {};
+                data.decks.forEach(function (d) {
+                    cardsByDeck[d.id] = d.cards || [];
+                });
 
-// ── IMPORT ────────────────────────────────────────────────────────────────────
-function openImport() {
-  document.getElementById("import-ta").value = "";
-  document.getElementById("import-err").textContent = "";
-  document.getElementById("import-modal").classList.add("open");
-}
-function closeImport() {
-  document.getElementById("import-modal").classList.remove("open");
-}
-function copyPrompt() {
-  copyTextarea(document.getElementById("prompt-ta"));
-}
-function loadFile(input) {
-  var file = input.files[0]; if (!file) return;
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    document.getElementById("import-ta").value = e.target.result;
-    document.getElementById("import-err").textContent = "";
-  };
-  reader.readAsText(file);
-}
-function doImport() {
-  var raw = document.getElementById("import-ta").value.trim();
-  var errEl = document.getElementById("import-err");
-  errEl.textContent = "";
-  if (!raw) { errEl.textContent = "Aucun contenu."; return; }
-  var data;
-  try { data = JSON.parse(raw); } catch(e) { errEl.textContent = "JSON invalide : " + e.message; return; }
-  // Accept single song or array
-  var incoming = Array.isArray(data) ? data : [data];
-  // Validate basic shape
-  for (var i = 0; i < incoming.length; i++) {
-    var s = incoming[i];
-    if (!s.title || !s.strophes || !s.translations) {
-      errEl.textContent = "Champs manquants : title, strophes, translations requis."; return;
-    }
-  }
-  var songs = loadSongs();
-  incoming.forEach(function(s) {
-    // Assign unique id
-    s.id = Date.now() + Math.random();
-    songs.push(s);
-  });
-  saveSongs(songs);
-  closeImport();
-  renderSongList();
-}
+                // Source meta (lightweight — no card content)
+                var decksMeta = data.decks.map(function (d) {
+                    return { id: d.id, name: d.name, cardCount: (d.cards || []).length };
+                });
 
-function copyTextarea(ta) {
-  ta.select();
-  ta.setSelectionRange(0, 99999);
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(ta.value).catch(function() {});
-  } else {
-    try { document.execCommand("copy"); } catch(e) {}
-  }
-}
+                var sources = loadSources();
+                sources.push({ id: sid, name: sourceName, decks: decksMeta });
+                saveSources(sources);
+                saveCards(sid, cardsByDeck);
 
-// ── PROGRESS MODAL ───────────────────────────────────────────────────────────
-function openProgress() {
-  refreshProgressModal();
-  document.getElementById("progress-modal").classList.add("open");
-}
-function closeProgress() {
-  document.getElementById("progress-modal").classList.remove("open");
-}
-function refreshProgressModal() {
-  var prog = loadProgress();
-  var t = computeTotals(prog);
-  document.getElementById("prog-summary").textContent = t.wordsTotal
-    ? t.wordsFirstTry + " / " + t.wordsTotal + " mots trouvés du premier coup · " +
-      t.songsCompleted + " chanson(s) terminée(s) · " + t.songsPerfect + " parfaite(s)"
-    : "Aucune progression enregistrée pour l'instant.";
-  var keys = Object.keys(prog.songs);
-  document.getElementById("prog-songs").innerHTML = keys.map(function(k) {
-    var sp = prog.songs[k];
-    var pct = sp.total ? Math.min(100, Math.round(sp.resumeIndex / sp.total * 100)) : 0;
-    var status = sp.perfect ? "★ parfaite" : sp.completed ? "✓ terminée" : (pct + "% en cours");
-    return "· " + esc(sp.title) + (sp.artist ? " — " + esc(sp.artist) : "") + " : " + status;
-  }).join("<br>");
-  document.getElementById("prog-export").value = "ET1-" + b64EncodeUnicode(JSON.stringify(prog));
-  document.getElementById("prog-import-ta").value = "";
-  document.getElementById("prog-err").textContent = "";
-}
-function copyProgressCode() {
-  copyTextarea(document.getElementById("prog-export"));
-}
-function restoreProgressCode() {
-  var errEl = document.getElementById("prog-err");
-  errEl.textContent = "";
-  var raw = document.getElementById("prog-import-ta").value.trim();
-  if (!raw) { errEl.textContent = "Collez un code d'abord."; return; }
-  if (raw.indexOf("ET1-") === 0) raw = raw.slice(4);
-  var data;
-  try { data = JSON.parse(b64DecodeUnicode(raw)); } catch(e) { errEl.textContent = "Code invalide."; return; }
-  if (!data || typeof data !== "object" || !data.songs) { errEl.textContent = "Code invalide."; return; }
-  if (!confirm("Remplacer la progression actuelle de ce navigateur par celle du code ?")) return;
-  saveProgress(data);
-  refreshProgressModal();
-  renderSongList();
-}
-function resetProgress() {
-  if (!confirm("Réinitialiser toute la progression sur ce navigateur ?")) return;
-  saveProgress({ songs: {} });
-  refreshProgressModal();
-  renderSongList();
-}
-function b64EncodeUnicode(str) {
-  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(_, p1) {
-    return String.fromCharCode(parseInt(p1, 16));
-  }));
-}
-function b64DecodeUnicode(str) {
-  return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
-    return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-  }).join(""));
-}
+                var total = data.decks.reduce(function (n, d) { return n + (d.cards || []).length; }, 0);
+                toast("✓ " + total + " cartes importées (" + data.decks.length + " deck(s))");
+                renderHome();
+            };
+            reader.readAsText(file);
+        }
 
-// ── TRAINING STATE ────────────────────────────────────────────────────────────
-var currentSong = null;
-var currentKey  = null;
-var sessionHadMistake = false;
-var phrases    = [];
-var idx        = 0;
-var wordRows   = [];
-var advancing  = false;
+        // ═══════════════════════════════════════════════
+        // DECK TREE HELPERS
+        // ═══════════════════════════════════════════════
+        function deckShortName(fullName) {
+            var parts = fullName.split("::");
+            return parts[parts.length - 1];
+        }
+        function deckDepth(fullName) {
+            return fullName.split("::").length - 1;
+        }
+        function isChildOf(child, parent) {
+            return child === parent || child.startsWith(parent + "::");
+        }
 
-function startTraining(songIdx) {
-  var entry = displayedSongs[songIdx];
-  if (!entry) return;
-  currentSong = entry.song;
-  currentKey = songKeyFor(currentSong);
-  sessionHadMistake = false;
-  phrases = [];
-  currentSong.strophes.forEach(function(s) {
-    s.text.split("\n").forEach(function(line) {
-      line = line.trim();
-      if (line.length > 1) phrases.push({ text: line, label: s.label });
-    });
-  });
-  if (!phrases.length) { alert("Aucune phrase trouvée dans cette chanson."); return; }
-  advancing = false;
-  document.getElementById("home").style.display = "none";
-  document.getElementById("trainer").style.display = "flex";
-  var info = currentSong.title + (currentSong.artist ? " — " + currentSong.artist : "");
-  document.getElementById("t-song-info").textContent = info;
-  var existing = getSongProgress(currentKey);
-  var startIdx = (existing && !existing.completed && existing.resumeIndex > 0 && existing.resumeIndex < phrases.length)
-    ? existing.resumeIndex : 0;
-  showPhrase(startIdx, true);
-}
+        // Get all deck ids that are children of (or equal to) a given deck name
+        function childDeckIds(decksMeta, deckName) {
+            return decksMeta.filter(function (d) { return isChildOf(d.name, deckName); }).map(function (d) { return d.id; });
+        }
 
-function goHome() {
-  document.getElementById("trainer").style.display = "none";
-  document.getElementById("home").style.display = "block";
-}
+        // SRS stats for a set of card ids
+        function deckStats(cardIds, srs) {
+            var newC = 0, due = 0, learned = 0;
+            cardIds.forEach(function (cid) {
+                var s = srs[cid];
+                if (!s) newC++;
+                else if (s.due <= TODAY) due++;
+                else learned++;
+            });
+            return { new: Math.min(newC, NEW_LIMIT), due: due, learned: learned };
+        }
 
-// ── PHRASE DISPLAY ────────────────────────────────────────────────────────────
-function showPhrase(i, instant) {
-  if (i >= phrases.length) { endSession(); return; }
-  idx = i;
-  advancing = false; // safe: previous timers use isConnected guard
-  updateProgress();
-  updateResumeIndex(i);
-  var phrase = phrases[i];
-  var data = (currentSong.translations || {})[phrase.text];
-  if (!Array.isArray(data) || !data.some(function(e) { return e.t && e.t.length > 0; })) {
-    // No translation available for this line — show message and auto-skip
-    document.getElementById("t-words").innerHTML =
-      '<div class="t-msg">' + esc(phrase.text) + '<br><span style="font-size:11px;color:#ddd">traduction manquante</span></div>';
-    setTimeout(function() { if (!advancing) advance(); }, 1200);
-    return;
-  }
-  if (instant) {
-    renderCard(data);
-  } else {
-    var card = document.getElementById("t-card");
-    card.classList.add("exit");
-    setTimeout(function() {
-      renderCard(data);
-      card.classList.remove("exit");
-      card.classList.add("snap");
-      card.offsetHeight;
-      card.classList.remove("snap");
-      setTimeout(function() { if (wordRows.length) wordRows[0].inp.focus(); }, 280);
-    }, 280);
-  }
-}
+        // Collect all card ids across a set of deck ids
+        function allCardIds(cardsByDeck, deckIds) {
+            var ids = [];
+            deckIds.forEach(function (did) {
+                (cardsByDeck[did] || []).forEach(function (c) { ids.push(c.id); });
+            });
+            return ids;
+        }
 
-function updateProgress() {
-  document.getElementById("prog-label").textContent = (idx + 1) + " / " + phrases.length;
-  document.getElementById("prog-fill").style.width = Math.round(idx / phrases.length * 100) + "%";
-}
+        // ═══════════════════════════════════════════════
+        // HOME
+        // ═══════════════════════════════════════════════
+        function renderHome() {
+            var sources = loadSources();
+            var el = document.getElementById("h-sources");
+            if (!sources.length) {
+                el.innerHTML = '<div class="h-empty">Aucun deck importé.<br>Pré-traitez votre .apkg avec <code>extract_apkg.py</code> puis importez le JSON.</div>';
+                return;
+            }
 
-function renderCard(data) {
-  buildRows(data);
-  setTimeout(function() { if (wordRows.length) wordRows[0].inp.focus(); }, 60);
-}
+            el.innerHTML = sources.map(function (src, si) {
+                var srs = loadSRS(src.id);
+                var cardsByDeck = loadCards(src.id);
+                var total = src.decks.reduce(function (n, d) { return n + d.cardCount; }, 0);
 
-// ── WORD GRID ─────────────────────────────────────────────────────────────────
-function buildRows(data) {
-  advancing = false;
-  var section = document.getElementById("t-words");
-  section.innerHTML = "";
-  wordRows = [];
-  if (!Array.isArray(data)) return;
+                // Detect "root" deck names (those that have children using ::)
+                var rootNames = [];
+                src.decks.forEach(function (d) {
+                    var root = d.name.split("::")[0];
+                    if (rootNames.indexOf(root) === -1) rootNames.push(root);
+                });
+                rootNames.sort();
 
-  data.forEach(function(item, i) {
-    var col  = document.createElement("div");   col.className = "word-col";
-    var src  = document.createElement("div");   src.className = "wc-src"; src.textContent = item.w;
-    var inp  = document.createElement("input"); inp.className = "wc-inp";
-    inp.type = "text"; inp.placeholder = "···";
-    inp.autocomplete = "off"; inp.autocorrect = "off"; inp.spellcheck = false;
-    inp.style.width = Math.max((item.w || "").length * 14, 48) + "px";
-    var hint = document.createElement("div"); hint.className = "wc-hint";
+                var rows = "";
+                rootNames.forEach(function (root) {
+                    var childIds = childDeckIds(src.decks, root);
+                    var cardIds = allCardIds(cardsByDeck, childIds);
+                    var stats = deckStats(cardIds, srs);
 
-    col.append(src, inp, hint);
-    section.appendChild(col);
+                    rows += '<div class="h-deckrow" onclick="startStudy(' + si + ',\'' + esc(root) + '\')">'
+                        + '<div class="h-deckrow-name root-deck">' + esc(root) + '</div>'
+                        + (stats.new ? '<span class="badge badge-new">' + stats.new + ' nvx</span>' : '')
+                        + (stats.due ? '<span class="badge badge-due">' + stats.due + ' dus</span>' : '')
+                        + (stats.learned ? '<span class="badge badge-done">' + stats.learned + ' ok</span>' : '')
+                        + '</div>';
 
-    var entry = { word: item.w, expected: item.t || [], inp: inp, hint: hint, solved: false, errors: 0, hadMistake: false, _errTimer: null };
-    wordRows.push(entry);
-    inp.addEventListener("input",   makeCheck(entry, i));
-    inp.addEventListener("keydown", makeKey(i));
-  });
-}
+                    // Sub-decks
+                    src.decks.filter(function (d) {
+                        return d.name.startsWith(root + "::") && d.name.split("::").length === root.split("::").length + 1;
+                    }).forEach(function (sub) {
+                        var subChildIds = childDeckIds(src.decks, sub.name);
+                        var subCardIds = allCardIds(cardsByDeck, subChildIds);
+                        var subStats = deckStats(subCardIds, srs);
+                        var depth = deckDepth(sub.name);
+                        rows += '<div class="h-deckrow" style="padding-left:' + (16 + depth * 20) + 'px" onclick="startStudy(' + si + ',\'' + esc(sub.name) + '\')">'
+                            + '<span style="color:#ddd;margin-right:6px;font-size:11px">└</span>'
+                            + '<div class="h-deckrow-name">' + esc(deckShortName(sub.name)) + '</div>'
+                            + (subStats.new ? '<span class="badge badge-new">' + subStats.new + ' nvx</span>' : '')
+                            + (subStats.due ? '<span class="badge badge-due">' + subStats.due + ' dus</span>' : '')
+                            + (subStats.learned ? '<span class="badge badge-done">' + subStats.learned + ' ok</span>' : '')
+                            + '</div>';
+                    });
+                });
 
-function makeCheck(entry, i) { return function() { liveCheck(entry, i); }; }
-function makeKey(i) {
-  return function(e) { if (e.key === "Enter") { e.preventDefault(); focusNext(i); } };
-}
-function focusNext(i) {
-  for (var j = i + 1; j < wordRows.length; j++) {
-    if (!wordRows[j].solved && wordRows[j].expected.length > 0) { wordRows[j].inp.focus(); return; }
-  }
-  for (var j = 0; j < i && j < wordRows.length; j++) {
-    if (!wordRows[j].solved && wordRows[j].expected.length > 0) { wordRows[j].inp.focus(); return; }
-  }
-  tryComplete();
-}
+                return '<div class="h-source">'
+                    + '<div class="h-source-header" onclick="toggleSource(this)">'
+                    + '<div class="h-source-name">' + esc(src.name) + '</div>'
+                    + '<div class="h-source-meta">' + total + ' cartes · ' + src.decks.length + ' deck(s)</div>'
+                    + '<button class="h-source-del" onclick="deleteSource(event,' + si + ')">✕</button>'
+                    + '<span class="h-source-arrow open">›</span>'
+                    + '</div>'
+                    + '<div class="h-decktree open">' + rows + '</div>'
+                    + '</div>';
+            }).join("");
+        }
 
-// ── HINTS ─────────────────────────────────────────────────────────────────────
-function revealHint(entry) {
-  if (!entry.expected.length) return;
-  entry.hint.textContent = entry.expected[0];
-  entry.hint.style.display = "block";
-}
-function revealAll() { wordRows.forEach(function(e) { if (!e.solved) revealHint(e); }); }
+        function toggleSource(header) {
+            var arrow = header.querySelector(".h-source-arrow");
+            var tree = header.nextElementSibling;
+            var open = tree.classList.toggle("open");
+            arrow.classList.toggle("open", open);
+        }
 
-// ── VALIDATION ────────────────────────────────────────────────────────────────
-function norm(s) {
-  return s.toLowerCase().trim()
-    .replace(/^[¿¡!.,;:'"«»()\[\]\-–—]+|[¿¡!.,;:'"«»()\[\]\-–—]+$/g, "")
-    .trim();
-}
-function noAccents(s) { return s.normalize("NFD").replace(/[̀-ͯ]/g, ""); }
-function isMatch(input, expected) {
-  var ni = norm(input), ne = norm(expected);
-  return ni === ne || noAccents(ni) === noAccents(ne);
-}
-function check(entry) {
-  if (!entry.expected.length) return null;
-  if (!entry.inp.value.trim()) return null;
-  return entry.expected.some(function(t) { return isMatch(entry.inp.value, t); });
-}
+        function deleteSource(e, si) {
+            e.stopPropagation();
+            if (!confirm("Supprimer cette source et toute la progression ?")) return;
+            var sources = loadSources();
+            var id = sources[si].id;
+            sources.splice(si, 1);
+            saveSources(sources);
+            try { localStorage.removeItem(LS_CARDS + id); } catch (e2) { }
+            try { localStorage.removeItem(LS_SRS + id); } catch (e2) { }
+            renderHome();
+        }
 
-function liveCheck(entry, i) {
-  var r = check(entry);
-  if (r === null) {
-    clearTimeout(entry._errTimer);
-    entry.inp.className = "wc-inp";
-    if (!entry.inp.value.trim()) entry.solved = false;
-    return;
-  }
-  if (r) {
-    clearTimeout(entry._errTimer);
-    entry.inp.className = "wc-inp ok";
-    if (!entry.solved) recordWordResult(!entry.hadMistake);
-    entry.solved = true;
-    setTimeout(function() {
-      if (!entry.inp.isConnected) return;
-      focusNext(i);
-    }, 220);
-  } else {
-    entry.inp.className = "wc-inp err";
-    entry.solved = false;
-    entry.hadMistake = true;
-    sessionHadMistake = true;
-    clearTimeout(entry._errTimer);
-    entry._errTimer = setTimeout(function() {
-      if (!entry.inp.isConnected || entry.solved) return;
-      entry.errors++;
-      if (entry.errors >= 3) revealHint(entry);
-    }, 1500);
-  }
-}
+        // ═══════════════════════════════════════════════
+        // SESSION STATE
+        // ═══════════════════════════════════════════════
+        var sess = { sourceIdx: 0, sourceId: null, deckLabel: "", cards: [], queue: [], qIdx: 0, srs: {}, done: 0 };
+        var wordRows = [];
+        var cardErrors = 0;
+        var advancing = false;
 
-function tryComplete() {
-  if (advancing) return;
-  var checkable = wordRows.filter(function(e) { return e.expected.length > 0; });
-  if (!checkable.length) return;
-  if (checkable.every(function(e) { return e.solved; })) {
-    flash(function() { advance(); });
-  }
-}
+        function startStudy(si, deckName) {
+            var sources = loadSources();
+            var src = sources[si];
+            var cardsByDeck = loadCards(src.id);
+            var srs = loadSRS(src.id);
 
-function advance() { showPhrase(idx + 1, false); }
+            // Collect all cards from deckName and its children
+            var childIds = childDeckIds(src.decks, deckName);
+            var allCards = [];
+            childIds.forEach(function (did) {
+                (cardsByDeck[did] || []).forEach(function (c) { allCards.push(c); });
+            });
 
-function flash(cb) {
-  if (advancing) return;
-  advancing = true;
-  var f = document.getElementById("flash");
-  f.classList.add("on");
-  setTimeout(function() { f.classList.remove("on"); }, 350);
-  setTimeout(function() { cb(); }, 750);
-}
+            // Split new vs due
+            var newCards = [], dueCards = [];
+            allCards.forEach(function (c) {
+                var s = srs[c.id];
+                if (!s) newCards.push(c);
+                else if (s.due <= TODAY) dueCards.push(c);
+            });
+            shuffle(newCards); shuffle(dueCards);
+            newCards = newCards.slice(0, NEW_LIMIT);
+            var queue = dueCards.concat(newCards);
 
-function endSession() {
-  document.getElementById("trainer").style.display = "none";
-  document.getElementById("home").style.display = "block";
-  recordSongCompletion(!sessionHadMistake);
-  alert("🎉 Terminé ! " + phrases.length + " phrases traduites."
-    + (!sessionHadMistake ? "\n★ Parfait, aucune erreur !" : ""));
-  renderSongList();
-}
+            if (!queue.length) { toast("Aucune carte à réviser aujourd'hui 🎉"); return; }
 
-// ── UTILS ─────────────────────────────────────────────────────────────────────
-function esc(s) {
-  return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
+            sess.sourceIdx = si;
+            sess.sourceId = src.id;
+            sess.deckLabel = deckName.split("::").join(" › ");
+            sess.cards = allCards;
+            sess.queue = queue;
+            sess.qIdx = 0;
+            sess.srs = srs;
+            sess.done = 0;
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
-renderHome();
-</script>
+            document.getElementById("home").style.display = "none";
+            document.getElementById("study").style.display = "flex";
+            document.getElementById("s-deck-name").textContent = sess.deckLabel;
+            showCard();
+        }
+
+        function goHome() {
+            saveSRS(sess.sourceId, sess.srs);
+            document.getElementById("study").style.display = "none";
+            document.getElementById("home").style.display = "block";
+            renderHome();
+        }
+
+        // ═══════════════════════════════════════════════
+        // CARD DISPLAY
+        // ═══════════════════════════════════════════════
+        function showCard() {
+            advancing = false; cardErrors = 0; wordRows = [];
+            var card = sess.queue[sess.qIdx];
+            if (!card) { showDone(); return; }
+            updateProgress();
+
+            if (!card.words || !card.words.length) { sess.qIdx++; showCard(); return; }
+
+            document.getElementById("s-content").innerHTML =
+                '<div class="s-question">' + card.question + '</div>'
+                + '<div class="t-words" id="t-words"></div>'
+                + '<div class="t-actions">'
+                + '<span class="t-show-ans" onclick="revealAll()">💡 Voir les réponses</span>'
+                + '<span class="t-skip" onclick="skipCard()">Passer →</span>'
+                + '</div>';
+
+            buildRows(card.words);
+        }
+
+        function updateProgress() {
+            var total = sess.queue.length;
+            var done = Math.min(sess.qIdx, total);
+            document.getElementById("prog-label").textContent = done + " / " + total;
+            document.getElementById("prog-fill").style.width = Math.round(done / total * 100) + "%";
+        }
+
+        // ═══════════════════════════════════════════════
+        // WORD ROWS
+        // ═══════════════════════════════════════════════
+        function buildRows(words) {
+            advancing = false;
+            var section = document.getElementById("t-words"); if (!section) return;
+            section.innerHTML = ""; wordRows = [];
+
+            words.forEach(function (word, i) {
+                var col = document.createElement("div"); col.className = "word-col";
+                var lbl = document.createElement("div"); lbl.className = "wc-lbl";
+                var inp = document.createElement("input"); inp.className = "wc-inp";
+                inp.type = "text"; inp.placeholder = "···";
+                inp.autocomplete = "off"; inp.autocorrect = "off"; inp.spellcheck = false;
+                inp.style.width = Math.max(word.length * 14, 48) + "px";
+                var hint = document.createElement("div"); hint.className = "wc-hint";
+                col.append(lbl, inp, hint);
+                section.appendChild(col);
+
+                var entry = { word: word, expected: [word], inp: inp, lbl: lbl, hint: hint, solved: false, errors: 0, _errTimer: null };
+                wordRows.push(entry);
+                inp.addEventListener("input", makeCheck(entry, i));
+                inp.addEventListener("keydown", makeKey(i));
+            });
+
+            setTimeout(function () { if (wordRows.length) wordRows[0].inp.focus(); }, 60);
+        }
+
+        function makeCheck(entry, i) { return function () { liveCheck(entry, i); }; }
+        function makeKey(i) {
+            return function (e) { if (e.key === "Enter") { e.preventDefault(); focusNext(i); } };
+        }
+
+        function norm(s) {
+            return s.toLowerCase().trim()
+                .replace(/^[¿¡!.,;:'"«»()\[\]\-–—]+|[¿¡!.,;:'"«»()\[\]\-–—]+$/g, "").trim();
+        }
+        function noAcc(s) { return s.normalize("NFD").replace(/[̀-ͯ]/g, ""); }
+        function isMatch(input, expected) { var ni = norm(input), ne = norm(expected); return ni === ne || noAcc(ni) === noAcc(ne); }
+        function check(entry) {
+            if (!entry.inp.value.trim()) return null;
+            return entry.expected.some(function (t) { return isMatch(entry.inp.value, t); });
+        }
+
+        function liveCheck(entry, i) {
+            var r = check(entry);
+            if (r === null) {
+                clearTimeout(entry._errTimer);
+                entry.inp.className = "wc-inp";
+                if (!entry.inp.value.trim()) entry.solved = false;
+                return;
+            }
+            if (r) {
+                clearTimeout(entry._errTimer);
+                entry.inp.className = "wc-inp ok";
+                entry.solved = true;
+                entry.lbl.textContent = entry.word;
+                entry.lbl.style.color = "#16a34a";
+                setTimeout(function () { if (!entry.inp.isConnected) return; focusNext(i); }, 220);
+            } else {
+                entry.inp.className = "wc-inp err";
+                entry.solved = false;
+                clearTimeout(entry._errTimer);
+                entry._errTimer = setTimeout(function () {
+                    if (!entry.inp.isConnected || entry.solved) return;
+                    entry.errors++;
+                    cardErrors = Math.max(cardErrors, entry.errors);
+                    if (entry.errors >= 3) revealHint(entry);
+                }, 1500);
+            }
+        }
+
+        function focusNext(i) {
+            for (var j = i + 1; j < wordRows.length; j++) { if (!wordRows[j].solved) { wordRows[j].inp.focus(); return; } }
+            for (var j = 0; j < i && j < wordRows.length; j++) { if (!wordRows[j].solved) { wordRows[j].inp.focus(); return; } }
+            tryComplete();
+        }
+
+        function revealHint(entry) { entry.hint.textContent = entry.expected[0]; entry.hint.style.display = "block"; }
+        function revealAll() {
+            wordRows.forEach(function (e) {
+                if (!e.solved) { revealHint(e); e.lbl.textContent = e.word; e.lbl.style.color = "#ccc"; cardErrors = Math.max(cardErrors, 3); }
+            });
+        }
+
+        function tryComplete() {
+            if (advancing) return;
+            if (wordRows.every(function (e) { return e.solved; })) {
+                flash(function () { advanceCard(errorsToRating(cardErrors)); });
+            }
+        }
+
+        function skipCard() { advanceCard(1); }
+
+        function advanceCard(q) {
+            if (advancing) return;
+            advancing = true;
+            var card = sess.queue[sess.qIdx];
+            sess.srs[card.id] = applyRating(sess.srs[card.id] || defaultSRS(), q);
+            sess.done++;
+            sess.qIdx++;
+            if (q === 1 && sess.queue.filter(function (c) { return c.id === card.id; }).length < 2) {
+                sess.queue.push(card);
+            }
+            showPill(q);
+            var content = document.getElementById("s-content");
+            content.style.cssText = "opacity:0;transform:translateY(-10px);transition:opacity .22s,transform .22s";
+            setTimeout(function () {
+                content.style.cssText = "opacity:0;transform:translateY(10px);transition:none";
+                content.offsetHeight;
+                content.style.cssText = "opacity:1;transform:translateY(0);transition:opacity .22s,transform .22s";
+                showCard();
+            }, 240);
+        }
+
+        function flash(cb) {
+            var f = document.getElementById("flash");
+            f.classList.add("on");
+            setTimeout(function () { f.classList.remove("on"); }, 350);
+            setTimeout(cb, 400);
+        }
+
+        var _pillTimer;
+        function showPill(q) {
+            var p = document.getElementById("pill");
+            p.className = "s-pill " + PILL_CLASS[q];
+            p.textContent = PILL_LABEL[q];
+            p.classList.add("show");
+            clearTimeout(_pillTimer);
+            _pillTimer = setTimeout(function () { p.classList.remove("show"); }, 1600);
+        }
+
+        function showDone() {
+            saveSRS(sess.sourceId, sess.srs);
+            document.getElementById("s-content").innerHTML =
+                '<div class="s-done">'
+                + '<div class="s-done-icon">🎉</div>'
+                + '<div class="s-done-title">Session terminée !</div>'
+                + '<div class="s-done-sub">' + sess.done + ' cartes révisées aujourd\'hui</div>'
+                + '<button class="btn-home" onclick="goHome()">← Retour</button>'
+                + '</div>';
+            document.getElementById("prog-fill").style.width = "100%";
+            document.getElementById("prog-label").textContent = sess.done + " / " + sess.done;
+        }
+
+        // ═══════════════════════════════════════════════
+        // UTILS
+        // ═══════════════════════════════════════════════
+        function esc(s) { return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/'/g, "&#39;"); }
+        function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+
+        var _toastTimer;
+        function toast(msg) {
+            var el = document.getElementById("toast");
+            el.textContent = msg; el.classList.add("show");
+            clearTimeout(_toastTimer);
+            _toastTimer = setTimeout(function () { el.classList.remove("show"); }, 3500);
+        }
+
+        // ── INIT ──
+        renderHome();
+    </script>
 </body>
+
 </html>
