@@ -69400,6 +69400,29 @@
           "tags": [
             "cuatroloop"
           ]
+        },
+        {
+          "id": "1790692842209",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>hueles rico",
+          "words": [
+            "tu",
+            "sens",
+            "bon"
+          ],
+          "tags": [
+            "cuatroloop"
+          ]
+        },
+        {
+          "id": "1790692842210",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>tu sens bon",
+          "words": [
+            "hueles",
+            "rico"
+          ],
+          "tags": [
+            "cuatroloop"
+          ]
         }
       ]
     }
