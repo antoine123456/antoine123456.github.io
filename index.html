@@ -715,7 +715,7 @@
         var HARD_FACTOR = 1.2;
 
         function defaultSRS() {
-            return { state: "new", step: 0, interval: 0, ease: 2.5, due: TODAY, reps: 0, lapses: 0 };
+            return { state: "new", step: 0, interval: 0, ease: 2.5, due: TODAY, reps: 0, lapses: 0, easyCount: 0 };
         }
 
         // Erreurs sur les mots → note : 0=Facile 1=Correct 2=Difficile 3+=À revoir
@@ -730,6 +730,7 @@
         function applyRating(srs, q, ctx) {
             var s = Object.assign({}, srs);
             s.reps++;
+            if (q === 4) s.easyCount = (s.easyCount || 0) + 1;
             if (s.state === "new") s.state = "learning";
 
             if (s.state === "learning" || s.state === "relearning") {
@@ -1244,7 +1245,7 @@
                     entry.errors++;
                     cardErrors = Math.max(cardErrors, entry.errors);
                     entry.attempts.textContent = "✗".repeat(Math.min(entry.errors, 5));
-                    if (entry.errors >= 3) { revealHint(entry); checkAllRevealed(); }
+                    if (entry.errors >= 3) revealHint(entry);
                 }, 1500);
             }
         }
@@ -1262,6 +1263,9 @@
         }
         // Reveals only the word at the cursor (or the first not-yet-shown one
         // if nothing has focus) — not the whole card at once.
+        // Reveal never auto-advances by itself, even once every blank is
+        // shown — same as real Anki, "Show Answer" only reveals; moving on
+        // always takes an explicit press (a rating button/shortcut).
         function revealCurrent() {
             var entry = wordRows.find(function (e) { return e.inp === document.activeElement && !e.solved && !e.revealed; })
                 || wordRows.find(function (e) { return !e.solved && !e.revealed; });
@@ -1271,14 +1275,6 @@
             entry.lbl.textContent = entry.word;
             entry.lbl.style.color = "#c9922a";
             playCardAudio("a"); // like Anki: audio plays as soon as the answer appears
-            checkAllRevealed();
-        }
-
-        // Once every blank has been either typed correctly or shown via a
-        // hint, move on automatically — no need to also retype what's
-        // already visible.
-        function checkAllRevealed() {
-            if (wordRows.length && wordRows.every(function (e) { return e.solved || e.revealed; })) completeCard();
         }
 
         function completeCard() {
@@ -1327,7 +1323,7 @@
                 var insertAt = Math.min(sess.queue.length, sess.qIdx + offset);
                 sess.queue.splice(insertAt, 0, card);
             }
-            showPill(q);
+            showPill(q, sess.srs[card.id]);
             updateCounts();
             var content = document.getElementById("s-content");
             content.style.cssText = "opacity:0;transform:translateY(-10px);transition:opacity .22s,transform .22s";
@@ -1347,10 +1343,17 @@
         }
 
         var _pillTimer;
-        function showPill(q) {
+        // The rating itself (and scheduling) is unaffected — this only
+        // softens the *label*: "Parfait" is held back until a card has
+        // actually been aced on the first try a few times, not the very
+        // first one.
+        function showPill(q, srs) {
+            var showAsGood = q === 4 && srs && (srs.easyCount || 0) <= 3;
+            var label = showAsGood ? PILL_LABEL[3] : PILL_LABEL[q];
+            var cls = showAsGood ? PILL_CLASS[3] : PILL_CLASS[q];
             var p = document.getElementById("pill");
-            p.className = "s-pill " + PILL_CLASS[q];
-            p.textContent = PILL_LABEL[q];
+            p.className = "s-pill " + cls;
+            p.textContent = label;
             p.classList.add("show");
             clearTimeout(_pillTimer);
             _pillTimer = setTimeout(function () { p.classList.remove("show"); }, 1600);
