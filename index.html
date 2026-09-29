@@ -1401,17 +1401,22 @@
         // is left to reveal, that same shortcut becomes the confirmation to
         // move on: the press that reveals the LAST word just reveals it and
         // stops, so you get to see the fully-revealed card; the NEXT press
-        // (with nothing left to reveal) tags it Again and advances. Solving
-        // even one word by typing takes this path out of consideration; use
-        // the rating buttons for that case instead.
+        // (with nothing left to reveal) advances. If nothing was ever typed
+        // correctly that's tagged Again ("I knew none of this"); if some
+        // words were solved and the rest revealed, it goes through the same
+        // rating logic as completing normally (this used to only handle the
+        // all-revealed case and silently do nothing for a mix of the two).
         function revealCurrent() {
             var entry = wordRows.find(function (e) { return e.inp === document.activeElement && !e.solved && !e.revealed; })
                 || wordRows.find(function (e) { return !e.solved && !e.revealed; });
             if (!entry) {
+                if (advancing) return;
                 var noneSolved = wordRows.length && wordRows.every(function (e) { return !e.solved; });
-                if (noneSolved && !advancing) {
+                if (noneSolved) {
                     advancing = true;
                     playCardAudio("a", function () { flash(function () { advanceCard(1); }); });
+                } else {
+                    completeCard();
                 }
                 return;
             }
