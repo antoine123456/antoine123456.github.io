@@ -176,6 +176,47 @@ def rewrite_img_srcs(html_text: str, collector: MediaCollector, resolve) -> str:
 
 # ── Mode 1 : via le paquet 'anki' (recommandé) ─────────────────────────────────
 
+def extract_srs(card, today: int) -> dict | None:
+    """Convertit l'état de planification réel d'une carte Anki (type/queue/
+    ivl/factor/due/reps/lapses) vers le format interne de l'appli. None pour
+    une carte neuve (elle démarre "new" par défaut, pas besoin d'entrée).
+
+    "due", pour une carte de révision, est stocké par Anki relativement à la
+    date de création de LA COLLECTION D'ORIGINE ; `due - col.sched.today`
+    donne le nombre de jours par rapport à AUJOURD'HUI, indépendamment de
+    cette collection — c'est exactement ce qu'Anki préserve lui-même quand on
+    importe un paquet dans une collection différente, donc fiable ici aussi.
+
+    Les cartes encore en apprentissage/réapprentissage (type 1 ou 3) sont
+    simplifiées en carte de révision avec un intervalle minimal, plutôt que
+    de reconstituer leur état intra-journalier exact (horodatage + champ
+    "left" empaqueté) — même choix, pour la même raison, que
+    reimport_stats.py à l'export : une reconstruction imparfaite de cet état
+    risquerait de fausser silencieusement la planification.
+    """
+    if card.type == 0:  # nouvelle carte : rien à transporter
+        return None
+
+    ease = card.factor / 1000.0 if card.factor else 2.5
+    if card.type == 2:  # révision
+        interval = max(1, card.ivl)
+        due_offset = card.due - today
+    else:  # apprentissage / réapprentissage (type 1 ou 3)
+        interval = max(1, card.ivl or 1)
+        due_offset = 1
+
+    return {
+        'state': 'review',
+        'step': 0,
+        'interval': interval,
+        'ease': round(max(1.3, ease), 3),
+        'dueOffset': due_offset,
+        'reps': card.reps,
+        'lapses': card.lapses,
+        'easyCount': 0,
+    }
+
+
 def process_apkg_via_anki(apkg_path: str, media: MediaCollector) -> list[dict]:
     from anki.collection import Collection
     from anki import import_export_pb2 as pb
@@ -187,10 +228,11 @@ def process_apkg_via_anki(apkg_path: str, media: MediaCollector) -> list[dict]:
         try:
             req = pb.ImportAnkiPackageRequest(
                 package_path=os.path.abspath(apkg_path),
-                options=pb.ImportAnkiPackageOptions(),
+                options=pb.ImportAnkiPackageOptions(with_scheduling=True),
             )
             col.import_anki_package(req)
             media_dir = col.media.dir()
+            today = col.sched.today
 
             deck_map: dict = {}
             for d in col.decks.all_names_and_ids():
@@ -231,6 +273,9 @@ def process_apkg_via_anki(apkg_path: str, media: MediaCollector) -> list[dict]:
                     card_obj['audioQuestion'] = audio_q
                 if audio_a:
                     card_obj['audioAnswer'] = audio_a
+                srs = extract_srs(card, today)
+                if srs:
+                    card_obj['srs'] = srs
                 deck_map[card.did]['cards'].append(card_obj)
         finally:
             col.close()

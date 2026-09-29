@@ -461,6 +461,23 @@
             color: #c9922a;
         }
 
+        .t-flag {
+            font-size: 11px;
+            color: #ddd;
+            cursor: pointer;
+            letter-spacing: .3px;
+            transition: color .15s;
+        }
+
+        .t-flag:hover {
+            color: var(--orange);
+        }
+
+        .t-flag.flagged {
+            color: var(--orange);
+            font-weight: 600;
+        }
+
         .t-key {
             display: inline-block;
             font-size: 9px;
@@ -536,44 +553,20 @@
         .t-rate-easy .t-rate-label { color: var(--blue); }
 
         /* Rating pill */
-        .s-pill {
-            position: fixed;
-            bottom: 36px;
-            left: 50%;
-            transform: translateX(-50%) translateY(60px);
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            opacity: 0;
-            transition: transform .3s, opacity .3s;
-            pointer-events: none;
-            z-index: 50;
-        }
+        /* Feedback is the rating button itself flashing its own color,
+           fading in then out, instead of a separate popup. */
+        .t-rate.rate-flash { animation: rateFlash .7s ease; }
+        .t-rate.rate-flash .t-rate-label,
+        .t-rate.rate-flash .t-rate-time,
+        .t-rate.rate-flash .t-key { color: #fff; }
+        .t-rate.rate-flash.t-rate-again { --flash-color: var(--red); }
+        .t-rate.rate-flash.t-rate-hard { --flash-color: var(--orange); }
+        .t-rate.rate-flash.t-rate-good { --flash-color: var(--green); }
+        .t-rate.rate-flash.t-rate-easy { --flash-color: var(--blue); }
 
-        .s-pill.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-
-        .pill-easy {
-            background: #eff6ff;
-            color: var(--blue);
-        }
-
-        .pill-good {
-            background: #f0fdf4;
-            color: var(--green);
-        }
-
-        .pill-hard {
-            background: #fff7ed;
-            color: var(--orange);
-        }
-
-        .pill-again {
-            background: #fef2f2;
-            color: var(--red);
+        @keyframes rateFlash {
+            0%, 100% { background: #fff; border-color: #eee; }
+            35% { background: var(--flash-color); border-color: var(--flash-color); }
         }
 
         /* Done */
@@ -689,7 +682,6 @@
     </div>
 
     <div id="flash"></div>
-    <div class="s-pill" id="pill"></div>
     <div id="toast"></div>
     <audio id="audio-player" preload="none"></audio>
 
@@ -701,6 +693,7 @@
         var LS_CARDS = "ankitrain_v1_c_";      // + sourceId → {deckId:[cards]}
         var LS_SRS = "ankitrain_v1_s_";      // + sourceId → {cardId: srsMeta}
         var LS_NEWCOUNT = "ankitrain_v1_nc_";     // + sourceId → {day, count}
+        var LS_FLAGGED = "ankitrain_v1_fl_";     // + sourceId → {cardId: questionPlainText}
         var NEW_LIMIT = 20;
         var TODAY = dayStamp();
 
@@ -733,6 +726,43 @@
             saveNewCount(sid, nc);
         }
 
+        // Cards flagged "à corriger" during study, so they can be fixed
+        // directly in real Anki afterward (search "cid:<id>" in its Browse
+        // screen to jump straight to one).
+        function loadFlagged(sid) {
+            try { return JSON.parse(localStorage.getItem(LS_FLAGGED + sid) || "{}"); } catch (e) { return {}; }
+        }
+        function saveFlagged(sid, fl) { try { localStorage.setItem(LS_FLAGGED + sid, JSON.stringify(fl)); } catch (e) { } }
+        function toggleFlagCurrent() {
+            if (!sess.sourceId) return;
+            var card = sess.queue[sess.qIdx];
+            if (!card) return;
+            var fl = loadFlagged(sess.sourceId);
+            if (fl[card.id]) { delete fl[card.id]; toast("Marque retirée"); }
+            else { fl[card.id] = plainText(card.question).slice(0, 200); toast("🚩 Carte marquée à corriger"); }
+            saveFlagged(sess.sourceId, fl);
+            updateFlagIndicator();
+        }
+        function updateFlagIndicator() {
+            var btn = document.getElementById("s-flag-btn");
+            if (!btn || !sess.sourceId) return;
+            var card = sess.queue[sess.qIdx];
+            var flagged = card && loadFlagged(sess.sourceId)[card.id];
+            btn.classList.toggle("flagged", !!flagged);
+        }
+        function showFlaggedList(e, si) {
+            e.stopPropagation();
+            var sources = loadSources();
+            var src = sources[si];
+            var fl = loadFlagged(src.id);
+            var ids = Object.keys(fl);
+            if (!ids.length) { toast("Aucune carte marquée pour cette source."); return; }
+            var lines = ids.map(function (id) { return "cid:" + id + "  —  " + fl[id]; });
+            var text = lines.join("\n");
+            prompt(ids.length + " carte(s) à corriger dans Anki (Parcourir → coller \"cid:X or cid:Y...\" ou chercher une ligne) :",
+                "cid:" + ids.join(" or cid:") + "\n\n" + text);
+        }
+
         // ═══════════════════════════════════════════════
         // SCHEDULER — modeled on Anki's actual default scheduler (new →
         // learning steps → review; lapses → relearning steps), structured
@@ -756,9 +786,6 @@
 
         // Erreurs sur les mots → note : 0=Facile 1=Correct 2=Difficile 3+=À revoir
         function errorsToRating(e) { return e === 0 ? 4 : e === 1 ? 3 : e === 2 ? 2 : 1; }
-
-        var PILL_LABEL = { 4: "✨ Parfait", 3: "🟢 Correct", 2: "🟠 Difficile", 1: "🔴 À revoir" };
-        var PILL_CLASS = { 4: "pill-easy", 3: "pill-good", 2: "pill-hard", 1: "pill-again" };
 
         // q: 1=Again 2=Hard 3=Good 4=Easy. ctx.requeueIn (minutes, approximated
         // as "cards later") is set when the card should come back THIS session;
@@ -852,6 +879,22 @@
             sources.push({ id: sid, name: sourceName, decks: decksMeta });
             saveSources(sources);
             saveCards(sid, cardsByDeck);
+
+            // Seed SRS state for cards that already carry real Anki
+            // scheduling (extract.py's "srs" field, e.g. from a deck
+            // exported with its review history) instead of starting them
+            // all as brand new. "dueOffset" is days-from-today at export
+            // time, translated to our own day-stamp on import.
+            var srs = {};
+            data.decks.forEach(function (d) {
+                (d.cards || []).forEach(function (c) {
+                    if (c.srs) {
+                        srs[c.id] = Object.assign({}, c.srs, { due: TODAY + c.srs.dueOffset });
+                        delete srs[c.id].dueOffset;
+                    }
+                });
+            });
+            if (Object.keys(srs).length) saveSRS(sid, srs);
 
             return data.decks.reduce(function (n, d) { return n + (d.cards || []).length; }, 0);
         }
@@ -1014,6 +1057,7 @@
                     + '<div class="h-source-header" onclick="toggleSource(this)">'
                     + '<div class="h-source-name">' + esc(src.name) + '</div>'
                     + '<div class="h-source-meta">' + total + ' cartes · ' + src.decks.length + ' deck(s)</div>'
+                    + '<button class="h-source-export" onclick="showFlaggedList(event,' + si + ')" title="Cartes marquées à corriger">🚩</button>'
                     + '<button class="h-source-export" onclick="exportStats(event,' + si + ')" title="Exporter les stats">📤</button>'
                     + '<button class="h-source-del" onclick="deleteSource(event,' + si + ')">✕</button>'
                     + '<span class="h-source-arrow open">›</span>'
@@ -1040,6 +1084,7 @@
             try { localStorage.removeItem(LS_CARDS + id); } catch (e2) { }
             try { localStorage.removeItem(LS_SRS + id); } catch (e2) { }
             try { localStorage.removeItem(LS_NEWCOUNT + id); } catch (e2) { }
+            try { localStorage.removeItem(LS_FLAGGED + id); } catch (e2) { }
             renderHome();
         }
 
@@ -1113,7 +1158,7 @@
 
             if (!card.words || !card.words.length) { sess.qIdx++; showCard(); return; }
 
-            var hasAudio = card.audioQuestion && card.audioQuestion.length;
+            var hasAudio = (card.audioQuestion && card.audioQuestion.length) || card.lang;
             var previews = previewIntervals(sess.srs[card.id]);
             document.getElementById("s-content").innerHTML =
                 '<div class="s-question">' + card.question
@@ -1122,11 +1167,13 @@
                 + '<div class="t-words" id="t-words"></div>'
                 + '<div class="t-actions">'
                 + '<span class="t-show-ans" onclick="revealCurrent()">💡 Voir la réponse <span class="t-key">F1</span></span>'
+                + '<span class="t-flag" id="s-flag-btn" onclick="toggleFlagCurrent()" title="Marquer à corriger dans Anki">🚩 <span class="t-key">F6</span></span>'
                 + '</div>'
                 + ratingButtonsHtml(previews);
 
             buildRows(card.words);
-            if (hasAudio) playAudioList(card.audioQuestion);
+            updateFlagIndicator();
+            if (hasAudio) playCardAudio("q");
         }
 
         // Anki-style answer buttons — the interval preview sits above each
@@ -1139,12 +1186,22 @@
                 [4, "easy", "Facile", "F5"],
             ];
             return '<div class="t-ratings">' + defs.map(function (d) {
-                return '<button class="t-rate t-rate-' + d[1] + '" onclick="rate(' + d[0] + ')">'
+                return '<button class="t-rate t-rate-' + d[1] + '" data-q="' + d[0] + '" onclick="rate(' + d[0] + ')">'
                     + '<span class="t-rate-time">' + previews[d[0]] + '</span>'
                     + '<span class="t-rate-label">' + d[2] + '</span>'
                     + '<span class="t-key">' + d[3] + '</span>'
                     + '</button>';
             }).join('') + '</div>';
+        }
+
+        // Plain-color fade-in/fade-out flash on the button that matches the
+        // rating actually applied, instead of a separate popup.
+        function flashRateButton(q) {
+            var btn = document.querySelector('.t-rate[data-q="' + q + '"]');
+            if (!btn) return;
+            btn.classList.remove("rate-flash");
+            void btn.offsetWidth; // restart the animation if it's still running
+            btn.classList.add("rate-flash");
         }
 
         function rate(q) {
@@ -1197,13 +1254,38 @@
             audio.onended = playNext;
             playNext();
         }
+        function plainText(html) {
+            return String(html || "").replace(/<style[\s\S]*?<\/style>/gi, "").replace(/<[^>]*>/g, "").trim();
+        }
+        // Browser text-to-speech fallback for cards with no recorded audio
+        // but a known language — currently words added via cuatroloop/
+        // tresloop, which have no real pronunciation clip to fall back on.
+        function speakText(text, lang, onDone) {
+            if (!text || !window.speechSynthesis) { if (onDone) onDone(); return; }
+            window.speechSynthesis.cancel();
+            var u = new SpeechSynthesisUtterance(text);
+            u.lang = lang === "fr" ? "fr-FR" : "es-ES";
+            if (onDone) { u.onend = onDone; u.onerror = onDone; }
+            window.speechSynthesis.speak(u);
+        }
         function playCardAudio(which, onDone) {
             var card = sess.queue[sess.qIdx];
             if (!card) { if (onDone) onDone(); return; }
             var urls = which === "both"
                 ? (card.audioQuestion || []).concat(card.audioAnswer || [])
                 : (which === "a" ? card.audioAnswer : card.audioQuestion);
-            playAudioList(urls, onDone);
+            if (urls && urls.length) { playAudioList(urls, onDone); return; }
+            if (!card.lang) { if (onDone) onDone(); return; }
+            var otherLang = card.lang === "es" ? "fr" : "es";
+            if (which === "both") {
+                speakText(plainText(card.question), card.lang, function () {
+                    speakText((card.words || []).join(" "), otherLang, onDone);
+                });
+            } else if (which === "a") {
+                speakText((card.words || []).join(" "), otherLang, onDone);
+            } else {
+                speakText(plainText(card.question), card.lang, onDone);
+            }
         }
 
         function updateProgress() {
@@ -1315,10 +1397,13 @@
             entry.revealed = true;
         }
         // Reveals only the word at the cursor (or the first not-yet-shown one
-        // if nothing has focus) — not the whole card at once.
-        // Reveal never auto-advances by itself, even once every blank is
-        // shown — same as real Anki, "Show Answer" only reveals; moving on
-        // always takes an explicit press (a rating button/shortcut).
+        // if nothing has focus) — not the whole card at once. But if F1 has
+        // now been pressed enough times that every blank is visible with
+        // nothing ever solved by typing, that means "I knew none of this" —
+        // tag it Again and move on automatically, same intent as the earlier
+        // "revealing everything should tag it Again" request. Solving even
+        // one word by typing takes this path out of consideration; use the
+        // rating buttons for that case instead.
         function revealCurrent() {
             var entry = wordRows.find(function (e) { return e.inp === document.activeElement && !e.solved && !e.revealed; })
                 || wordRows.find(function (e) { return !e.solved && !e.revealed; });
@@ -1328,6 +1413,13 @@
             entry.lbl.textContent = entry.word;
             entry.lbl.style.color = "#c9922a";
             playCardAudio("a"); // like Anki: audio plays as soon as the answer appears
+
+            var noneSolved = wordRows.every(function (e) { return !e.solved; });
+            var allShown = wordRows.every(function (e) { return e.solved || e.revealed; });
+            if (noneSolved && allShown && !advancing) {
+                advancing = true;
+                playCardAudio("a", function () { flash(function () { advanceCard(1); }); });
+            }
         }
 
         function completeCard() {
@@ -1355,6 +1447,9 @@
             if (e.key === "F1") {
                 e.preventDefault();
                 revealCurrent();
+            } else if (e.key === "F6") {
+                e.preventDefault();
+                toggleFlagCurrent();
             } else if (FKEY_RATING.hasOwnProperty(e.key)) {
                 e.preventDefault();
                 rate(FKEY_RATING[e.key]);
@@ -1378,7 +1473,7 @@
                 var insertAt = Math.min(sess.queue.length, sess.qIdx + offset);
                 sess.queue.splice(insertAt, 0, card);
             }
-            showPill(q, sess.srs[card.id]);
+            flashRateButtonFor(q, sess.srs[card.id]);
             updateCounts();
             var content = document.getElementById("s-content");
             content.style.cssText = "opacity:0;transform:translateY(-10px);transition:opacity .22s,transform .22s";
@@ -1397,21 +1492,13 @@
             setTimeout(cb, 400);
         }
 
-        var _pillTimer;
         // The rating itself (and scheduling) is unaffected — this only
-        // softens the *label*: "Parfait" is held back until a card has
-        // actually been aced on the first try a few times, not the very
-        // first one.
-        function showPill(q, srs) {
+        // softens the *feedback*: flashing "Facile" is held back until a
+        // card has actually been aced on the first try a few times, the
+        // "Correct" button flashes instead for the first three.
+        function flashRateButtonFor(q, srs) {
             var showAsGood = q === 4 && srs && (srs.easyCount || 0) <= 3;
-            var label = showAsGood ? PILL_LABEL[3] : PILL_LABEL[q];
-            var cls = showAsGood ? PILL_CLASS[3] : PILL_CLASS[q];
-            var p = document.getElementById("pill");
-            p.className = "s-pill " + cls;
-            p.textContent = label;
-            p.classList.add("show");
-            clearTimeout(_pillTimer);
-            _pillTimer = setTimeout(function () { p.classList.remove("show"); }, 1600);
+            flashRateButton(showAsGood ? 3 : q);
         }
 
         function showDone() {
