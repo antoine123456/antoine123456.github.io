@@ -113,6 +113,22 @@
             flex-shrink: 0;
         }
 
+        .h-source-export {
+            padding: 3px 8px;
+            font-size: 12px;
+            color: #ddd;
+            background: none;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: color .15s;
+            flex-shrink: 0;
+        }
+
+        .h-source-export:hover {
+            color: var(--navy);
+        }
+
         .h-source-del:hover {
             color: var(--red);
         }
@@ -729,32 +745,75 @@
             reader.onload = function (e) {
                 var data;
                 try { data = JSON.parse(e.target.result); } catch (err) { toast("JSON invalide : " + err.message); return; }
-                if (!data.decks || !Array.isArray(data.decks)) { toast("Format invalide — utilisez extract_apkg.py"); return; }
-
-                var sid = Date.now();
-                var sourceName = data.source || file.name.replace(/\.json$/, "");
-
-                // Build index: group cards by deckId
-                var cardsByDeck = {};
-                data.decks.forEach(function (d) {
-                    cardsByDeck[d.id] = d.cards || [];
-                });
-
-                // Source meta (lightweight — no card content)
-                var decksMeta = data.decks.map(function (d) {
-                    return { id: d.id, name: d.name, cardCount: (d.cards || []).length };
-                });
-
-                var sources = loadSources();
-                sources.push({ id: sid, name: sourceName, decks: decksMeta });
-                saveSources(sources);
-                saveCards(sid, cardsByDeck);
-
-                var total = data.decks.reduce(function (n, d) { return n + (d.cards || []).length; }, 0);
+                var total = importDeckData(data, file.name.replace(/\.json$/, ""));
+                if (total == null) { toast("Format invalide — utilisez extract_apkg.py"); return; }
                 toast("✓ " + total + " cartes importées (" + data.decks.length + " deck(s))");
                 renderHome();
             };
             reader.readAsText(file);
+        }
+
+        // Shared by the file picker and the default-deck auto-load below.
+        // Returns the number of cards imported, or null if the JSON shape
+        // is invalid.
+        function importDeckData(data, fallbackName) {
+            if (!data || !data.decks || !Array.isArray(data.decks)) return null;
+
+            var sid = Date.now();
+            var sourceName = data.source || fallbackName || "Deck";
+
+            var cardsByDeck = {};
+            data.decks.forEach(function (d) { cardsByDeck[d.id] = d.cards || []; });
+
+            var decksMeta = data.decks.map(function (d) {
+                return { id: d.id, name: d.name, cardCount: (d.cards || []).length };
+            });
+
+            var sources = loadSources();
+            sources.push({ id: sid, name: sourceName, decks: decksMeta });
+            saveSources(sources);
+            saveCards(sid, cardsByDeck);
+
+            return data.decks.reduce(function (n, d) { return n + (d.cards || []).length; }, 0);
+        }
+
+        // If no deck has ever been imported yet, try loading a bundled
+        // default.json (+ its default_media/ folder) sitting next to
+        // index.html — same idea as the old lyrics trainer's built-in
+        // songs.json. Silently does nothing if that file isn't there.
+        var DEFAULT_DECK_URL = "default.json";
+        function loadDefaultDeckIfEmpty() {
+            if (loadSources().length) return Promise.resolve(false);
+            return fetch(DEFAULT_DECK_URL)
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (data) {
+                    if (!data) return false;
+                    var total = importDeckData(data, "Deck par défaut");
+                    if (total != null) { toast("✓ Deck par défaut chargé (" + total + " cartes)"); return true; }
+                    return false;
+                })
+                .catch(function () { return false; });
+        }
+
+        // ═══════════════════════════════════════════════
+        // EXPORT STATS (for re-importing progress back into real Anki)
+        // ═══════════════════════════════════════════════
+        function exportStats(e, si) {
+            e.stopPropagation();
+            var sources = loadSources();
+            var src = sources[si];
+            var srs = loadSRS(src.id);
+            if (!Object.keys(srs).length) { toast("Aucune progression à exporter pour cette source."); return; }
+            var payload = { version: 1, source: src.name, exportedAt: new Date().toISOString(), cards: srs };
+            var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement("a");
+            a.href = url;
+            a.download = src.name.replace(/[^a-z0-9_\-]+/gi, "_") + "_stats.json";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
         }
 
         // ═══════════════════════════════════════════════
@@ -860,6 +919,7 @@
                     + '<div class="h-source-header" onclick="toggleSource(this)">'
                     + '<div class="h-source-name">' + esc(src.name) + '</div>'
                     + '<div class="h-source-meta">' + total + ' cartes · ' + src.decks.length + ' deck(s)</div>'
+                    + '<button class="h-source-export" onclick="exportStats(event,' + si + ')" title="Exporter les stats">📤</button>'
                     + '<button class="h-source-del" onclick="deleteSource(event,' + si + ')">✕</button>'
                     + '<span class="h-source-arrow open">›</span>'
                     + '</div>'
@@ -958,6 +1018,7 @@
             if (!card.words || !card.words.length) { sess.qIdx++; showCard(); return; }
 
             var hasAudio = card.audioQuestion && card.audioQuestion.length;
+            var previews = previewIntervals(sess.srs[card.id]);
             document.getElementById("s-content").innerHTML =
                 '<div class="s-question">' + card.question
                 + (hasAudio ? '<button class="s-audio-btn" onclick="playCardAudio(\'q\')">🔊 Écouter</button>' : '')
@@ -967,10 +1028,39 @@
                 + '<span class="t-show-ans" onclick="revealCurrent()">💡 Voir la réponse <span class="t-key">F1</span></span>'
                 + '<span class="t-skip" onclick="skipCard()">Passer →</span>'
                 + '</div>'
-                + '<div class="t-shortcuts">F2 À revoir · F3 Difficile · F4 Correct · F5 Facile</div>';
+                + '<div class="t-shortcuts">'
+                + 'F2 À revoir <b>' + previews[1] + '</b> · '
+                + 'F3 Difficile <b>' + previews[2] + '</b> · '
+                + 'F4 Correct <b>' + previews[3] + '</b> · '
+                + 'F5 Facile <b>' + previews[4] + '</b>'
+                + '</div>';
 
             buildRows(card.words);
             if (hasAudio) playAudioList(card.audioQuestion);
+        }
+
+        // What each rating would do to THIS card right now — shown above the
+        // shortcuts, same idea as the time labels above Anki's own answer
+        // buttons ("<10m", "1j", "2j"...). Doesn't mutate any real state.
+        function formatInterval(days) {
+            if (days < 1) return "<1j";
+            if (days < 30) return days + "j";
+            if (days < 365) return Math.round(days / 30) + "mo";
+            return (days / 365).toFixed(1) + "a";
+        }
+        function formatRequeue(minutes) {
+            if (minutes < 60) return "<" + minutes + "m";
+            return "<" + Math.round(minutes / 60) + "h";
+        }
+        function previewIntervals(srs) {
+            var base = srs || defaultSRS();
+            var out = {};
+            [1, 2, 3, 4].forEach(function (q) {
+                var ctx = { requeueIn: null };
+                var s = applyRating(base, q, ctx);
+                out[q] = ctx.requeueIn ? formatRequeue(ctx.requeueIn) : formatInterval(s.interval);
+            });
+            return out;
         }
 
         // ═══════════════════════════════════════════════
@@ -1116,6 +1206,7 @@
             revealHint(entry);
             entry.lbl.textContent = entry.word;
             entry.lbl.style.color = "#c9922a";
+            playCardAudio("a"); // like Anki: audio plays as soon as the answer appears
         }
 
         function tryComplete() {
@@ -1224,7 +1315,7 @@
         }
 
         // ── INIT ──
-        renderHome();
+        loadDefaultDeckIfEmpty().then(renderHome);
     </script>
 </body>
 

@@ -68,11 +68,20 @@ def strip_html(text: str) -> str:
     return s.result()
 
 
+def strip_sound_tags(html_text: str) -> str:
+    """Retire les balises son (legacy [sound:...] et le nouveau
+    [anki:play:...]) d'un HTML destiné à être AFFICHÉ tel quel — on gère
+    la lecture audio nous-mêmes via audioQuestion/audioAnswer, ces balises
+    ne doivent donc jamais apparaître comme texte à l'écran."""
+    t = re.sub(r'\[sound:[^\]]+\]', '', html_text)
+    t = re.sub(r'\[anki:play:[^\]]+\]', '', t)
+    return t
+
+
 def clean_for_words(html_text: str) -> str:
-    """Retire les références son/image (legacy [sound:...] et le nouveau
-    [anki:play:...]), renvoie le texte brut."""
-    t = re.sub(r'\[sound:[^\]]+\]', ' ', html_text)
-    t = re.sub(r'\[anki:play:[^\]]+\]', ' ', t)
+    """Retire les références son/image, renvoie le texte brut (pour le
+    découpage en mots, pas pour l'affichage)."""
+    t = strip_sound_tags(html_text)
     t = re.sub(r'<img[^>]*>', ' ', t, flags=re.IGNORECASE)
     return strip_html(t)
 
@@ -201,6 +210,7 @@ def process_apkg_via_anki(apkg_path: str, media: MediaCollector) -> list[dict]:
                            if (fn := getattr(tag, 'filename', None))
                            and (rel := media.add(fn, media_dir=media_dir))]
                 q_html = rewrite_img_srcs(q_html, media, lambda fn: {'media_dir': media_dir})
+                q_html = strip_sound_tags(q_html)
 
                 note = card.note()
                 card_obj = {
@@ -359,6 +369,7 @@ def process_db_legacy(db_path: str, media: MediaCollector, media_bytes_fn) -> li
         audio_a = [rel for fn in SOUND_TAG_RE.findall(a_html)
                    if (rel := media.add(fn, data=media_bytes_fn(fn)))]
         q_html = rewrite_img_srcs(q_html, media, resolve)
+        q_html = strip_sound_tags(q_html)
 
         card_obj = {
             'id': str(c['id']),
