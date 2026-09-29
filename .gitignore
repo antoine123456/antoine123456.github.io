@@ -3,9 +3,10 @@ __pycache__/
 *.pyc
 .DS_Store
 
-# extract.py output (personal deck data, not needed in the repo — imported
-# client-side via the file picker, kept in the browser's localStorage)
+# extract.py output is personal deck data and ignored by default, EXCEPT
+# default.json/default_media — the deliberately-committed bundled deck
+# auto-loaded by the app on first run (see README).
 *_extrait.json
 *_media/
-es.json
-espagnol_extrait.json
+!default_media/
+*.apkg

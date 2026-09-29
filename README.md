@@ -1,13 +1,16 @@
 # Anki Trainer
 
-Fill-in-the-blank study app for Anki decks: pre-process a `.apkg` export into JSON, import it in the browser, and type out each word of the answer instead of just flipping the card. Progress uses a simple SM-2-style spaced-repetition schedule, stored in the browser's `localStorage` — no account, no backend.
+Fill-in-the-blank study app for Anki decks: pre-process a `.apkg` export into JSON, import it in the browser, and type out each word of the answer instead of just flipping the card. Scheduling models Anki's actual default algorithm (new → learning steps → review, lapses → relearning), stored in the browser's `localStorage` — no account, no backend.
 
 ## Folder structure
 
 ```
 espanol-trainer/
-├── index.html    ← standalone study app (open in any browser, or via GitHub Pages)
-├── extract.py    ← CLI: converts a .apkg into JSON for the app (pip install anki recommended)
+├── index.html         ← standalone study app (open in any browser, or via GitHub Pages)
+├── extract.py         ← CLI: converts a .apkg into JSON for the app (pip install anki recommended)
+├── reimport_stats.py  ← CLI: writes progress made here back into a .apkg for re-import into real Anki
+├── default.json       ← bundled deck auto-loaded on first run if no source has been imported yet
+├── default_media/     ← its audio/image files
 └── README.md
 ```
 
