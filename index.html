@@ -686,6 +686,7 @@
         var LS_SOURCES = "ankitrain_v1_sources"; // [{id, name, decks:[{id,name,cardCount}]}]
         var LS_CARDS = "ankitrain_v1_c_";      // + sourceId → {deckId:[cards]}
         var LS_SRS = "ankitrain_v1_s_";      // + sourceId → {cardId: srsMeta}
+        var LS_NEWCOUNT = "ankitrain_v1_nc_";     // + sourceId → {day, count}
         var NEW_LIMIT = 20;
         var TODAY = dayStamp();
 
@@ -697,21 +698,42 @@
         function loadSRS(sid) { try { return JSON.parse(localStorage.getItem(LS_SRS + sid) || "{}"); } catch (e) { return {}; } }
         function saveSRS(sid, s) { try { localStorage.setItem(LS_SRS + sid, JSON.stringify(s)); } catch (e) { } }
 
+        // How many new cards have actually been INTRODUCED today (first
+        // rating of a card that was still "new"), persisted per source so
+        // the 20/day limit holds across separate visits/sessions instead of
+        // resetting to a fresh 20 every time you open a deck.
+        function loadNewCount(sid) {
+            try { return JSON.parse(localStorage.getItem(LS_NEWCOUNT + sid) || "null") || { day: TODAY, count: 0 }; }
+            catch (e) { return { day: TODAY, count: 0 }; }
+        }
+        function saveNewCount(sid, nc) { try { localStorage.setItem(LS_NEWCOUNT + sid, JSON.stringify(nc)); } catch (e) { } }
+        function remainingNewToday(sid) {
+            var nc = loadNewCount(sid);
+            var introducedToday = nc.day === TODAY ? nc.count : 0;
+            return Math.max(0, NEW_LIMIT - introducedToday);
+        }
+        function recordNewIntroduced(sid) {
+            var nc = loadNewCount(sid);
+            if (nc.day !== TODAY) { nc.day = TODAY; nc.count = 0; }
+            nc.count++;
+            saveNewCount(sid, nc);
+        }
+
         // ═══════════════════════════════════════════════
-        // SCHEDULER — modeled on Anki's actual default scheduler
-        // (new → learning steps → review; lapses → relearning steps),
-        // not textbook SM-2. Uses Anki's stock defaults: learning steps
-        // 1m/10m, relearning step 10m, graduating interval 1d, easy
-        // interval 4d, starting ease 2.5, easy bonus 1.3, hard factor 1.2.
-        // Within a single browser session there's no real clock wait, so
-        // a "due in N minutes" step is approximated by reinserting the
-        // card N cards further down the current queue instead.
+        // SCHEDULER — modeled on Anki's actual default scheduler (new →
+        // learning steps → review; lapses → relearning steps), structured
+        // after a documented clean-room reference implementation
+        // (github.com/vlopezferrando/simple-spaced-repetition), not
+        // textbook SM-2. Stock defaults: learning 1m then 10m, relearning
+        // 1m then 6m, graduating interval 1d, easy interval 4d, starting
+        // ease 2.5, easy bonus 1.5, hard factor 1.2. Within a single
+        // browser session there's no real clock wait, so a "due in N
+        // minutes" step is approximated by reinserting the card N cards
+        // further down the current queue instead.
         // ═══════════════════════════════════════════════
-        var LEARNING_STEPS_MIN = [1, 10];
-        var RELEARNING_STEPS_MIN = [10];
         var GRADUATING_DAYS = 1;
         var EASY_DAYS = 4;
-        var EASY_BONUS = 1.3;
+        var EASY_BONUS = 1.5;
         var HARD_FACTOR = 1.2;
 
         function defaultSRS() {
@@ -733,35 +755,35 @@
             if (q === 4) s.easyCount = (s.easyCount || 0) + 1;
             if (s.state === "new") s.state = "learning";
 
-            if (s.state === "learning" || s.state === "relearning") {
-                var steps = s.state === "learning" ? LEARNING_STEPS_MIN : RELEARNING_STEPS_MIN;
-                if (q === 1) {
-                    s.step = 0;
-                    ctx.requeueIn = steps[0];
-                } else if (q === 2) {
-                    ctx.requeueIn = steps[s.step];
-                } else if (q === 4) {
-                    // Easy graduates immediately, skipping remaining steps.
+            if (s.state === "learning") {
+                if (q === 1) { s.step = 0; ctx.requeueIn = 1; }
+                else if (q === 2) { s.step = 1; ctx.requeueIn = 6; }
+                else if (q === 4) {
                     s.ease = Math.min(4.0, s.ease + 0.15);
-                    s.interval = EASY_DAYS;
                     s.state = "review"; s.step = 0;
-                    s.due = TODAY + s.interval;
+                    s.interval = EASY_DAYS; s.due = TODAY + s.interval;
+                } else if (s.step === 0) { s.step = 1; ctx.requeueIn = 10; }
+                else {
+                    s.state = "review"; s.step = 0;
+                    s.interval = GRADUATING_DAYS; s.due = TODAY + s.interval;
+                }
+            } else if (s.state === "relearning") {
+                if (q === 1) { s.ease = Math.max(1.3, s.ease - 0.2); ctx.requeueIn = 1; }
+                else if (q === 2) { ctx.requeueIn = 6; }
+                else if (q === 3) {
+                    s.state = "review";
+                    s.interval = GRADUATING_DAYS; s.due = TODAY + s.interval;
                 } else {
-                    s.step++;
-                    if (s.step >= steps.length) {
-                        s.interval = s.state === "relearning" ? Math.max(1, s.interval || 1) : GRADUATING_DAYS;
-                        s.state = "review"; s.step = 0;
-                        s.due = TODAY + s.interval;
-                    } else {
-                        ctx.requeueIn = steps[s.step];
-                    }
+                    s.ease = Math.min(4.0, s.ease + 0.15);
+                    s.state = "review";
+                    s.interval = EASY_DAYS; s.due = TODAY + s.interval;
                 }
             } else { // review
                 if (q === 1) {
                     s.lapses++;
                     s.ease = Math.max(1.3, s.ease - 0.2);
-                    s.state = "relearning"; s.step = 0;
-                    ctx.requeueIn = RELEARNING_STEPS_MIN[0];
+                    s.state = "relearning";
+                    ctx.requeueIn = 1;
                 } else if (q === 2) {
                     s.ease = Math.max(1.3, s.ease - 0.15);
                     s.interval = Math.max(s.interval + 1, Math.round(s.interval * HARD_FACTOR));
@@ -893,11 +915,11 @@
             return roots;
         }
 
-        function renderDeckRows(nodes, si, decksMeta, cardsByDeck, srs) {
+        function renderDeckRows(nodes, si, decksMeta, cardsByDeck, srs, newLimit) {
             return nodes.map(function (node) {
                 var childIds = childDeckIds(decksMeta, node.fullName);
                 var cardIds = allCardIds(cardsByDeck, childIds);
-                var stats = deckStats(cardIds, srs);
+                var stats = deckStats(cardIds, srs, newLimit);
                 var html = '<div class="h-deckrow" style="padding-left:' + (16 + node.depth * 20) + 'px" onclick="startStudy(' + si + ',\'' + esc(node.fullName) + '\')">'
                     + (node.depth > 0 ? '<span style="color:#ddd;margin-right:6px;font-size:11px">└</span>' : '')
                     + '<div class="h-deckrow-name' + (node.depth === 0 ? ' root-deck' : '') + '">' + esc(node.name) + '</div>'
@@ -905,7 +927,7 @@
                     + (stats.due ? '<span class="badge badge-due">' + stats.due + ' dus</span>' : '')
                     + (stats.learned ? '<span class="badge badge-done">' + stats.learned + ' ok</span>' : '')
                     + '</div>';
-                if (node.children.length) html += renderDeckRows(node.children, si, decksMeta, cardsByDeck, srs);
+                if (node.children.length) html += renderDeckRows(node.children, si, decksMeta, cardsByDeck, srs, newLimit);
                 return html;
             }).join("");
         }
@@ -920,7 +942,7 @@
         }
 
         // SRS stats for a set of card ids
-        function deckStats(cardIds, srs) {
+        function deckStats(cardIds, srs, newLimit) {
             var newC = 0, due = 0, learned = 0;
             cardIds.forEach(function (cid) {
                 var s = srs[cid];
@@ -928,7 +950,7 @@
                 else if (s.state === "learning" || s.state === "relearning" || s.due <= TODAY) due++;
                 else learned++;
             });
-            return { new: Math.min(newC, NEW_LIMIT), due: due, learned: learned };
+            return { new: Math.min(newC, newLimit == null ? NEW_LIMIT : newLimit), due: due, learned: learned };
         }
 
         // Collect all card ids across a set of deck ids
@@ -956,7 +978,7 @@
                 var cardsByDeck = loadCards(src.id);
                 var total = src.decks.reduce(function (n, d) { return n + d.cardCount; }, 0);
                 var tree = buildDeckTree(src.decks);
-                var rows = renderDeckRows(tree, si, src.decks, cardsByDeck, srs);
+                var rows = renderDeckRows(tree, si, src.decks, cardsByDeck, srs, remainingNewToday(src.id));
 
                 return '<div class="h-source">'
                     + '<div class="h-source-header" onclick="toggleSource(this)">'
@@ -987,6 +1009,7 @@
             saveSources(sources);
             try { localStorage.removeItem(LS_CARDS + id); } catch (e2) { }
             try { localStorage.removeItem(LS_SRS + id); } catch (e2) { }
+            try { localStorage.removeItem(LS_NEWCOUNT + id); } catch (e2) { }
             renderHome();
         }
 
@@ -1021,7 +1044,7 @@
                 else if (s.state === "learning" || s.state === "relearning" || s.due <= TODAY) dueCards.push(c);
             });
             shuffle(newCards); shuffle(dueCards);
-            newCards = newCards.slice(0, NEW_LIMIT);
+            newCards = newCards.slice(0, remainingNewToday(src.id));
             var queue = dueCards.concat(newCards);
 
             if (!queue.length) { toast("Aucune carte à réviser aujourd'hui 🎉"); return; }
@@ -1310,8 +1333,10 @@
 
         function advanceCard(q) {
             var card = sess.queue[sess.qIdx];
+            var wasNew = !sess.srs[card.id] || sess.srs[card.id].state === "new";
             var ctx = { requeueIn: null };
             sess.srs[card.id] = applyRating(sess.srs[card.id] || defaultSRS(), q, ctx);
+            if (wasNew) recordNewIntroduced(sess.sourceId);
             sess.done++;
             sess.qIdx++;
             if (ctx.requeueIn) {
