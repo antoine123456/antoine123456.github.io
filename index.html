@@ -383,6 +383,13 @@
             color: #c9922a;
         }
 
+        .wc-attempts {
+            font-size: 11px;
+            color: var(--red);
+            letter-spacing: 1px;
+            min-height: 14px;
+        }
+
         .t-actions {
             margin-top: 32px;
             display: flex;
@@ -414,6 +421,26 @@
 
         .t-skip:hover {
             color: #999;
+        }
+
+        .t-key {
+            display: inline-block;
+            font-size: 9px;
+            font-weight: 700;
+            color: #aaa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 1px 4px;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+
+        .t-shortcuts {
+            margin-top: 14px;
+            font-size: 10px;
+            color: #ddd;
+            text-align: center;
+            letter-spacing: .2px;
         }
 
         /* Rating pill */
@@ -659,13 +686,54 @@
         // ═══════════════════════════════════════════════
         // DECK TREE HELPERS
         // ═══════════════════════════════════════════════
-        function deckShortName(fullName) {
-            var parts = fullName.split("::");
-            return parts[parts.length - 1];
+        function naturalCompare(a, b) {
+            return a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" });
         }
-        function deckDepth(fullName) {
-            return fullName.split("::").length - 1;
+
+        // Build a full-depth tree from "::"-separated deck names (any number
+        // of levels, e.g. Root::Child::"Espagnol 7"), sorted numerically so
+        // "Espagnol 2" comes before "Espagnol 10".
+        function buildDeckTree(decksMeta) {
+            var nodes = {}, roots = [];
+            decksMeta.forEach(function (d) {
+                var parts = d.name.split("::");
+                var path = "";
+                for (var i = 0; i < parts.length; i++) {
+                    var parentPath = path;
+                    path = path ? path + "::" + parts[i] : parts[i];
+                    if (!nodes[path]) {
+                        var node = { name: parts[i], fullName: path, depth: i, children: [] };
+                        nodes[path] = node;
+                        if (parentPath) nodes[parentPath].children.push(node);
+                        else roots.push(node);
+                    }
+                }
+            });
+            var sortRec = function (list) {
+                list.sort(function (a, b) { return naturalCompare(a.name, b.name); });
+                list.forEach(function (n) { sortRec(n.children); });
+            };
+            sortRec(roots);
+            return roots;
         }
+
+        function renderDeckRows(nodes, si, decksMeta, cardsByDeck, srs) {
+            return nodes.map(function (node) {
+                var childIds = childDeckIds(decksMeta, node.fullName);
+                var cardIds = allCardIds(cardsByDeck, childIds);
+                var stats = deckStats(cardIds, srs);
+                var html = '<div class="h-deckrow" style="padding-left:' + (16 + node.depth * 20) + 'px" onclick="startStudy(' + si + ',\'' + esc(node.fullName) + '\')">'
+                    + (node.depth > 0 ? '<span style="color:#ddd;margin-right:6px;font-size:11px">└</span>' : '')
+                    + '<div class="h-deckrow-name' + (node.depth === 0 ? ' root-deck' : '') + '">' + esc(node.name) + '</div>'
+                    + (stats.new ? '<span class="badge badge-new">' + stats.new + ' nvx</span>' : '')
+                    + (stats.due ? '<span class="badge badge-due">' + stats.due + ' dus</span>' : '')
+                    + (stats.learned ? '<span class="badge badge-done">' + stats.learned + ' ok</span>' : '')
+                    + '</div>';
+                if (node.children.length) html += renderDeckRows(node.children, si, decksMeta, cardsByDeck, srs);
+                return html;
+            }).join("");
+        }
+
         function isChildOf(child, parent) {
             return child === parent || child.startsWith(parent + "::");
         }
@@ -711,45 +779,8 @@
                 var srs = loadSRS(src.id);
                 var cardsByDeck = loadCards(src.id);
                 var total = src.decks.reduce(function (n, d) { return n + d.cardCount; }, 0);
-
-                // Detect "root" deck names (those that have children using ::)
-                var rootNames = [];
-                src.decks.forEach(function (d) {
-                    var root = d.name.split("::")[0];
-                    if (rootNames.indexOf(root) === -1) rootNames.push(root);
-                });
-                rootNames.sort();
-
-                var rows = "";
-                rootNames.forEach(function (root) {
-                    var childIds = childDeckIds(src.decks, root);
-                    var cardIds = allCardIds(cardsByDeck, childIds);
-                    var stats = deckStats(cardIds, srs);
-
-                    rows += '<div class="h-deckrow" onclick="startStudy(' + si + ',\'' + esc(root) + '\')">'
-                        + '<div class="h-deckrow-name root-deck">' + esc(root) + '</div>'
-                        + (stats.new ? '<span class="badge badge-new">' + stats.new + ' nvx</span>' : '')
-                        + (stats.due ? '<span class="badge badge-due">' + stats.due + ' dus</span>' : '')
-                        + (stats.learned ? '<span class="badge badge-done">' + stats.learned + ' ok</span>' : '')
-                        + '</div>';
-
-                    // Sub-decks
-                    src.decks.filter(function (d) {
-                        return d.name.startsWith(root + "::") && d.name.split("::").length === root.split("::").length + 1;
-                    }).forEach(function (sub) {
-                        var subChildIds = childDeckIds(src.decks, sub.name);
-                        var subCardIds = allCardIds(cardsByDeck, subChildIds);
-                        var subStats = deckStats(subCardIds, srs);
-                        var depth = deckDepth(sub.name);
-                        rows += '<div class="h-deckrow" style="padding-left:' + (16 + depth * 20) + 'px" onclick="startStudy(' + si + ',\'' + esc(sub.name) + '\')">'
-                            + '<span style="color:#ddd;margin-right:6px;font-size:11px">└</span>'
-                            + '<div class="h-deckrow-name">' + esc(deckShortName(sub.name)) + '</div>'
-                            + (subStats.new ? '<span class="badge badge-new">' + subStats.new + ' nvx</span>' : '')
-                            + (subStats.due ? '<span class="badge badge-due">' + subStats.due + ' dus</span>' : '')
-                            + (subStats.learned ? '<span class="badge badge-done">' + subStats.learned + ' ok</span>' : '')
-                            + '</div>';
-                    });
-                });
+                var tree = buildDeckTree(src.decks);
+                var rows = renderDeckRows(tree, si, src.decks, cardsByDeck, srs);
 
                 return '<div class="h-source">'
                     + '<div class="h-source-header" onclick="toggleSource(this)">'
@@ -789,6 +820,7 @@
         var wordRows = [];
         var cardErrors = 0;
         var advancing = false;
+        var revealed = false;
 
         function startStudy(si, deckName) {
             var sources = loadSources();
@@ -842,7 +874,7 @@
         // CARD DISPLAY
         // ═══════════════════════════════════════════════
         function showCard() {
-            advancing = false; cardErrors = 0; wordRows = [];
+            advancing = false; cardErrors = 0; wordRows = []; revealed = false;
             var card = sess.queue[sess.qIdx];
             if (!card) { showDone(); return; }
             updateProgress();
@@ -856,9 +888,10 @@
                 + '</div>'
                 + '<div class="t-words" id="t-words"></div>'
                 + '<div class="t-actions">'
-                + '<span class="t-show-ans" onclick="revealAll()">💡 Voir les réponses</span>'
+                + '<span class="t-show-ans" onclick="revealAll()">💡 Voir les réponses <span class="t-key">F1</span></span>'
                 + '<span class="t-skip" onclick="skipCard()">Passer →</span>'
-                + '</div>';
+                + '</div>'
+                + '<div class="t-shortcuts">F2 Facile · F3 À revoir · F4 Difficile · F5 Correct</div>';
 
             buildRows(card.words);
             if (hasAudio) playAudioList(card.audioQuestion);
@@ -906,10 +939,11 @@
                 inp.autocomplete = "off"; inp.autocorrect = "off"; inp.spellcheck = false;
                 inp.style.width = Math.max(word.length * 14, 48) + "px";
                 var hint = document.createElement("div"); hint.className = "wc-hint";
-                col.append(lbl, inp, hint);
+                var attempts = document.createElement("div"); attempts.className = "wc-attempts";
+                col.append(lbl, inp, hint, attempts);
                 section.appendChild(col);
 
-                var entry = { word: word, expected: [word], inp: inp, lbl: lbl, hint: hint, solved: false, errors: 0, _errTimer: null };
+                var entry = { word: word, expected: [word], inp: inp, lbl: lbl, hint: hint, attempts: attempts, solved: false, errors: 0, _errTimer: null };
                 wordRows.push(entry);
                 inp.addEventListener("input", makeCheck(entry, i));
                 inp.addEventListener("keydown", makeKey(i));
@@ -957,6 +991,7 @@
                     if (!entry.inp.isConnected || entry.solved) return;
                     entry.errors++;
                     cardErrors = Math.max(cardErrors, entry.errors);
+                    entry.attempts.textContent = "✗".repeat(Math.min(entry.errors, 5));
                     if (entry.errors >= 3) revealHint(entry);
                 }, 1500);
             }
@@ -970,8 +1005,9 @@
 
         function revealHint(entry) { entry.hint.textContent = entry.expected[0]; entry.hint.style.display = "block"; }
         function revealAll() {
+            revealed = true;
             wordRows.forEach(function (e) {
-                if (!e.solved) { revealHint(e); e.lbl.textContent = e.word; e.lbl.style.color = "#ccc"; cardErrors = Math.max(cardErrors, 3); }
+                if (!e.solved) { revealHint(e); e.lbl.textContent = e.word; e.lbl.style.color = "#c9922a"; }
             });
             playCardAudio("a");
         }
@@ -980,11 +1016,30 @@
             if (advancing) return;
             if (wordRows.every(function (e) { return e.solved; })) {
                 playCardAudio("a");
-                flash(function () { advanceCard(errorsToRating(cardErrors)); });
+                var q = revealed ? 2 : errorsToRating(cardErrors);
+                flash(function () { advanceCard(q); });
             }
         }
 
-        function skipCard() { advanceCard(1); }
+        function skipCard() { advanceCard(revealed ? 2 : 1); }
+
+        // ═══════════════════════════════════════════════
+        // KEYBOARD SHORTCUTS (study screen only)
+        // ═══════════════════════════════════════════════
+        // F1 = voir la réponse · F2 = Facile · F3 = À revoir · F4 = Difficile · F5 = Correct
+        var FKEY_RATING = { F2: 4, F3: 1, F4: 2, F5: 3 };
+        document.addEventListener("keydown", function (e) {
+            if (document.getElementById("study").style.display !== "flex") return;
+            if (e.key === "F1") {
+                e.preventDefault();
+                revealAll();
+            } else if (FKEY_RATING.hasOwnProperty(e.key)) {
+                e.preventDefault();
+                if (advancing) return;
+                playCardAudio("a");
+                advanceCard(FKEY_RATING[e.key]);
+            }
+        });
 
         function advanceCard(q) {
             if (advancing) return;

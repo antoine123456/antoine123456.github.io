@@ -3,6 +3,9 @@ __pycache__/
 *.pyc
 .DS_Store
 
-# extract.py output (personal deck data, not needed by the app itself)
+# extract.py output (personal deck data, not needed in the repo — imported
+# client-side via the file picker, kept in the browser's localStorage)
 *_extrait.json
+*_media/
+es.json
 espagnol_extrait.json
