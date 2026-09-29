@@ -98,8 +98,16 @@ def card_words_and_question(question_html: str, answer_html: str):
     if idx == -1 and a_text.lower().startswith(q_text.lower()):
         a_text = a_text[len(q_text):].strip()
 
-    words = [w for w in a_text.split() if w and any(ch.isalnum() for ch in w)]
+    words = [strip_punct_edges(w) for w in a_text.split()]
+    words = [w for w in words if w and any(ch.isalnum() for ch in w)]
     return words
+
+
+def strip_punct_edges(w: str) -> str:
+    """Retire la ponctuation en début/fin de mot ("..." avant "cosa", "?"
+    après "crees") tout en gardant celle à l'intérieur (apostrophes,
+    tirets : "qu'est-ce" reste intact)."""
+    return re.sub(r'^\W+|\W+$', '', w, flags=re.UNICODE)
 
 
 # ── Médias (audio/images) ───────────────────────────────────────────────────────
