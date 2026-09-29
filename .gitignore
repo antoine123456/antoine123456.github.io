@@ -2,3 +2,7 @@ trainervenv/
 __pycache__/
 *.pyc
 .DS_Store
+
+# extract.py output (personal deck data, not needed by the app itself)
+*_extrait.json
+espagnol_extrait.json

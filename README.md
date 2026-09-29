@@ -7,7 +7,7 @@ Fill-in-the-blank study app for Anki decks: pre-process a `.apkg` export into JS
 ```
 espanol-trainer/
 ├── index.html    ← standalone study app (open in any browser, or via GitHub Pages)
-├── extract.py    ← stdlib-only CLI: converts a .apkg into JSON for the app
+├── extract.py    ← CLI: converts a .apkg into JSON for the app (pip install anki recommended)
 └── README.md
 ```
 
@@ -20,14 +20,13 @@ In Anki: **File → Export...** → format **"Anki Deck Package (.apkg)"** → p
 ## Step 2 — Convert it to JSON
 
 ```bash
+pip install anki
 python3 extract.py "My Deck.apkg" --out my_deck.json
 ```
 
-No dependencies beyond the Python standard library (`zipfile`, `sqlite3`, `json`). It handles:
-- sub-decks (`Parent::Child` naming, shown as a collapsible tree in the app),
-- Basic, Cloze, and custom note types,
-- HTML templates with `{{Field}}` substitution,
-- empty cards / missing templates (skipped, with a warning on stderr).
+`extract.py` imports the `.apkg` into a throwaway collection and lets Anki's own code render every card, so it handles anything Anki itself handles: sub-decks (`Parent::Child`, shown as a collapsible tree in the app), Basic/Cloze/custom note types, HTML templates, sound/image references, and both the older plain-SQLite `.apkg` format and the newer zstd-compressed one (Anki ≥ 2.1.50).
+
+`pip install anki` is recommended but not required — without it, the script falls back to a stdlib-only reader (`zipfile`/`sqlite3`/`json`) that only understands the **older** `.apkg` format; it will tell you to install `anki` if it hits a newer, incompatible one.
 
 For each card it renders the answer side, strips HTML/sound/image tags, and splits what's left into the list of words you'll type — the question side is kept as-is (with its HTML) and shown above the blanks.
 
