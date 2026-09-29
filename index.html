@@ -228,6 +228,19 @@
             color: var(--navy);
         }
 
+        .h-reset {
+            margin-top: 14px;
+            text-align: center;
+            font-size: 11px;
+            color: #ddd;
+            cursor: pointer;
+            transition: color .15s;
+        }
+
+        .h-reset:hover {
+            color: var(--red);
+        }
+
         /* ── STUDY ── */
         #study {
             min-height: 100vh;
@@ -650,6 +663,7 @@
             ＋ Importer un fichier .json
             <input type="file" accept=".json" style="display:none" onchange="importJSON(this)">
         </label>
+        <div class="h-reset" onclick="resetAppData()">🧹 Effacer les données de cet appareil</div>
     </div>
 
     <!-- ── STUDY ── -->
@@ -860,6 +874,22 @@
                 .catch(function () { return false; });
         }
 
+        // Wipes every localStorage key this app owns (sources, cards, SRS,
+        // daily new-card counters) — the actual fix for "a source imported
+        // before some bug was fixed still shows the bug": there's no other
+        // way to clear that from inside the browser without dev tools.
+        function resetAppData() {
+            if (!confirm("Effacer toutes les sources importées, la progression et les compteurs quotidiens de cet appareil ? Irréversible.")) return;
+            var toRemove = [];
+            for (var i = 0; i < localStorage.length; i++) {
+                var k = localStorage.key(i);
+                if (k && k.indexOf("ankitrain_v1_") === 0) toRemove.push(k);
+            }
+            toRemove.forEach(function (k) { localStorage.removeItem(k); });
+            toast("Données effacées (" + toRemove.length + " entrée(s))");
+            loadDefaultDeckIfEmpty().then(renderHome);
+        }
+
         // ═══════════════════════════════════════════════
         // EXPORT STATS (for re-importing progress back into real Anki)
         // ═══════════════════════════════════════════════
@@ -925,7 +955,7 @@
                     + '<div class="h-deckrow-name' + (node.depth === 0 ? ' root-deck' : '') + '">' + esc(node.name) + '</div>'
                     + (stats.new ? '<span class="badge badge-new">' + stats.new + ' nvx</span>' : '')
                     + (stats.due ? '<span class="badge badge-due">' + stats.due + ' dus</span>' : '')
-                    + (stats.learned ? '<span class="badge badge-done">' + stats.learned + ' ok</span>' : '')
+                    + (stats.learned ? '<span class="badge badge-done">' + stats.learned + ' appris</span>' : '')
                     + '</div>';
                 if (node.children.length) html += renderDeckRows(node.children, si, decksMeta, cardsByDeck, srs, newLimit);
                 return html;
@@ -1104,8 +1134,8 @@
         function ratingButtonsHtml(previews) {
             var defs = [
                 [1, "again", "À revoir", "F2"],
-                [2, "hard", "Difficile", "F3"],
-                [3, "good", "Correct", "F4"],
+                [3, "good", "Correct", "F3"],
+                [2, "hard", "Difficile", "F4"],
                 [4, "easy", "Facile", "F5"],
             ];
             return '<div class="t-ratings">' + defs.map(function (d) {
@@ -1315,11 +1345,11 @@
         // ═══════════════════════════════════════════════
         // KEYBOARD SHORTCUTS (study screen only)
         // ═══════════════════════════════════════════════
-        // F1 = voir la réponse (au curseur) · F2 = À revoir · F3 = Difficile
-        // · F4 = Correct · F5 = Facile — "Facile" is deliberately the
+        // F1 = voir la réponse (au curseur) · F2 = À revoir · F3 = Correct
+        // · F4 = Difficile · F5 = Facile — "Facile" is deliberately the
         // farthest from F1 since it schedules the longest interval, so a
         // stray key-repeat or mis-click right after reveal can't trigger it.
-        var FKEY_RATING = { F2: 1, F3: 2, F4: 3, F5: 4 };
+        var FKEY_RATING = { F2: 1, F3: 3, F4: 2, F5: 4 };
         document.addEventListener("keydown", function (e) {
             if (document.getElementById("study").style.display !== "flex") return;
             if (e.key === "F1") {
