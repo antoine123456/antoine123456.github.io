@@ -1397,29 +1397,29 @@
             entry.revealed = true;
         }
         // Reveals only the word at the cursor (or the first not-yet-shown one
-        // if nothing has focus) — not the whole card at once. But if F1 has
-        // now been pressed enough times that every blank is visible with
-        // nothing ever solved by typing, that means "I knew none of this" —
-        // tag it Again and move on automatically, same intent as the earlier
-        // "revealing everything should tag it Again" request. Solving even
-        // one word by typing takes this path out of consideration; use the
-        // rating buttons for that case instead.
+        // if nothing has focus) — not the whole card at once. Once nothing
+        // is left to reveal, that same shortcut becomes the confirmation to
+        // move on: the press that reveals the LAST word just reveals it and
+        // stops, so you get to see the fully-revealed card; the NEXT press
+        // (with nothing left to reveal) tags it Again and advances. Solving
+        // even one word by typing takes this path out of consideration; use
+        // the rating buttons for that case instead.
         function revealCurrent() {
             var entry = wordRows.find(function (e) { return e.inp === document.activeElement && !e.solved && !e.revealed; })
                 || wordRows.find(function (e) { return !e.solved && !e.revealed; });
-            if (!entry) return;
+            if (!entry) {
+                var noneSolved = wordRows.length && wordRows.every(function (e) { return !e.solved; });
+                if (noneSolved && !advancing) {
+                    advancing = true;
+                    playCardAudio("a", function () { flash(function () { advanceCard(1); }); });
+                }
+                return;
+            }
             revealed = true;
             revealHint(entry);
             entry.lbl.textContent = entry.word;
             entry.lbl.style.color = "#c9922a";
             playCardAudio("a"); // like Anki: audio plays as soon as the answer appears
-
-            var noneSolved = wordRows.every(function (e) { return !e.solved; });
-            var allShown = wordRows.every(function (e) { return e.solved || e.revealed; });
-            if (noneSolved && allShown && !advancing) {
-                advancing = true;
-                playCardAudio("a", function () { flash(function () { advanceCard(1); }); });
-            }
         }
 
         function completeCard() {
@@ -1476,13 +1476,13 @@
             flashRateButtonFor(q, sess.srs[card.id]);
             updateCounts();
             var content = document.getElementById("s-content");
-            content.style.cssText = "opacity:0;transform:translateY(-10px);transition:opacity .22s,transform .22s";
+            content.style.cssText = "opacity:0;transform:translateY(-10px);transition:opacity .4s,transform .4s";
             setTimeout(function () {
                 content.style.cssText = "opacity:0;transform:translateY(10px);transition:none";
                 content.offsetHeight;
-                content.style.cssText = "opacity:1;transform:translateY(0);transition:opacity .22s,transform .22s";
+                content.style.cssText = "opacity:1;transform:translateY(0);transition:opacity .4s,transform .4s";
                 showCard();
-            }, 240);
+            }, 400);
         }
 
         function flash(cb) {
