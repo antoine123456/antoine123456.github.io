@@ -302,6 +302,24 @@
             font-family: inherit;
         }
 
+        .s-audio-btn {
+            display: block;
+            margin: 10px auto 0;
+            background: none;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 14px;
+            color: var(--navy);
+            cursor: pointer;
+            transition: border-color .15s, background .15s;
+        }
+
+        .s-audio-btn:hover {
+            border-color: var(--navy);
+            background: #f8faff;
+        }
+
         /* Word inputs */
         .t-words {
             display: flex;
@@ -548,6 +566,7 @@
     <div id="flash"></div>
     <div class="s-pill" id="pill"></div>
     <div id="toast"></div>
+    <audio id="audio-player" preload="none"></audio>
 
     <script>
         // ═══════════════════════════════════════════════
@@ -830,8 +849,11 @@
 
             if (!card.words || !card.words.length) { sess.qIdx++; showCard(); return; }
 
+            var hasAudio = card.audioQuestion && card.audioQuestion.length;
             document.getElementById("s-content").innerHTML =
-                '<div class="s-question">' + card.question + '</div>'
+                '<div class="s-question">' + card.question
+                + (hasAudio ? '<button class="s-audio-btn" onclick="playCardAudio(\'q\')">🔊 Écouter</button>' : '')
+                + '</div>'
                 + '<div class="t-words" id="t-words"></div>'
                 + '<div class="t-actions">'
                 + '<span class="t-show-ans" onclick="revealAll()">💡 Voir les réponses</span>'
@@ -839,6 +861,26 @@
                 + '</div>';
 
             buildRows(card.words);
+            if (hasAudio) playAudioList(card.audioQuestion);
+        }
+
+        // ═══════════════════════════════════════════════
+        // AUDIO
+        // ═══════════════════════════════════════════════
+        function playAudioList(urls) {
+            if (!urls || !urls.length) return;
+            var audio = document.getElementById("audio-player");
+            var i = 0;
+            audio.onended = function () {
+                if (i < urls.length) { audio.src = urls[i++]; audio.play().catch(function () { }); }
+            };
+            audio.src = urls[i++];
+            audio.play().catch(function () { });
+        }
+        function playCardAudio(which) {
+            var card = sess.queue[sess.qIdx];
+            if (!card) return;
+            playAudioList(which === "a" ? card.audioAnswer : card.audioQuestion);
         }
 
         function updateProgress() {
@@ -931,11 +973,13 @@
             wordRows.forEach(function (e) {
                 if (!e.solved) { revealHint(e); e.lbl.textContent = e.word; e.lbl.style.color = "#ccc"; cardErrors = Math.max(cardErrors, 3); }
             });
+            playCardAudio("a");
         }
 
         function tryComplete() {
             if (advancing) return;
             if (wordRows.every(function (e) { return e.solved; })) {
+                playCardAudio("a");
                 flash(function () { advanceCard(errorsToRating(cardErrors)); });
             }
         }

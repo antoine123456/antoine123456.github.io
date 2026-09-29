@@ -25,6 +25,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import sqlite3
 import subprocess
 import sys
@@ -92,9 +93,73 @@ def card_words_and_question(question_html: str, answer_html: str):
     return words
 
 
+# ── Médias (audio/images) ───────────────────────────────────────────────────────
+
+IMG_SRC_RE = re.compile(r'(<img[^>]*\bsrc=["\'])([^"\']+)(["\'])', re.IGNORECASE)
+SOUND_TAG_RE = re.compile(r'\[sound:([^\]]+)\]')
+
+
+class MediaCollector:
+    """Copie à la demande les fichiers médias référencés par les cartes vers
+    `out_dir`, en mémorisant ce qui a déjà été copié (ou constaté manquant)
+    pour ne jamais copier deux fois le même fichier."""
+
+    def __init__(self, out_dir: str, subdir_name: str):
+        self.out_dir = out_dir
+        self.subdir_name = subdir_name
+        self._cache: dict = {}   # filename -> relative path, or None si absent
+        self.missing = 0
+
+    def _copy_from_disk(self, filename: str, media_dir: str):
+        return os.path.join(media_dir, filename) if media_dir else None
+
+    def add(self, filename: str, *, media_dir: str = None, data: bytes = None) -> str | None:
+        if not filename:
+            return None
+        if filename in self._cache:
+            return self._cache[filename]
+
+        try:
+            if data is not None:
+                payload = data
+            elif media_dir:
+                src = os.path.join(media_dir, filename)
+                if not os.path.isfile(src):
+                    raise FileNotFoundError(src)
+                with open(src, 'rb') as f:
+                    payload = f.read()
+            else:
+                raise FileNotFoundError(filename)
+        except (FileNotFoundError, OSError):
+            self._cache[filename] = None
+            self.missing += 1
+            return None
+
+        os.makedirs(os.path.join(self.out_dir, self.subdir_name), exist_ok=True)
+        dst = os.path.join(self.out_dir, self.subdir_name, filename)
+        with open(dst, 'wb') as f:
+            f.write(payload)
+        rel = f"{self.subdir_name}/{filename}"
+        self._cache[filename] = rel
+        return rel
+
+    @property
+    def copied_count(self) -> int:
+        return sum(1 for v in self._cache.values() if v)
+
+
+def rewrite_img_srcs(html_text: str, collector: MediaCollector, resolve) -> str:
+    """resolve(filename) -> kwargs dict for collector.add() (media_dir=... or data=...)."""
+    def _sub(m):
+        filename = m.group(2)
+        rel = collector.add(filename, **resolve(filename))
+        return m.group(1) + (rel or filename) + m.group(3)
+    return IMG_SRC_RE.sub(_sub, html_text)
+
+
 # ── Mode 1 : via le paquet 'anki' (recommandé) ─────────────────────────────────
 
-def process_apkg_via_anki(apkg_path: str) -> list[dict]:
+def process_apkg_via_anki(apkg_path: str, media: MediaCollector) -> list[dict]:
     from anki.collection import Collection
     from anki import import_export_pb2 as pb
 
@@ -108,6 +173,7 @@ def process_apkg_via_anki(apkg_path: str) -> list[dict]:
                 options=pb.ImportAnkiPackageOptions(),
             )
             col.import_anki_package(req)
+            media_dir = col.media.dir()
 
             deck_map: dict = {}
             for d in col.decks.all_names_and_ids():
@@ -127,13 +193,27 @@ def process_apkg_via_anki(apkg_path: str) -> list[dict]:
                 if not words:
                     skipped += 1
                     continue
+
+                audio_q = [rel for tag in card.question_av_tags()
+                           if (fn := getattr(tag, 'filename', None))
+                           and (rel := media.add(fn, media_dir=media_dir))]
+                audio_a = [rel for tag in card.answer_av_tags()
+                           if (fn := getattr(tag, 'filename', None))
+                           and (rel := media.add(fn, media_dir=media_dir))]
+                q_html = rewrite_img_srcs(q_html, media, lambda fn: {'media_dir': media_dir})
+
                 note = card.note()
-                deck_map[card.did]['cards'].append({
+                card_obj = {
                     'id': str(cid),
                     'question': q_html,
                     'words': words,
                     'tags': list(note.tags),
-                })
+                }
+                if audio_q:
+                    card_obj['audioQuestion'] = audio_q
+                if audio_a:
+                    card_obj['audioAnswer'] = audio_a
+                deck_map[card.did]['cards'].append(card_obj)
         finally:
             col.close()
 
@@ -206,7 +286,7 @@ def build_field_map(model: dict, fields: list) -> dict:
     return fm
 
 
-def process_db_legacy(db_path: str) -> list[dict]:
+def process_db_legacy(db_path: str, media: MediaCollector, media_bytes_fn) -> list[dict]:
     con = sqlite3.connect(f'file:{db_path}?mode=ro', uri=True)
     con.row_factory = sqlite3.Row
     cur = con.cursor()
@@ -273,12 +353,24 @@ def process_db_legacy(db_path: str) -> list[dict]:
             skipped += 1
             continue
 
-        deck_map[did]['cards'].append({
+        resolve = lambda fn: {'data': media_bytes_fn(fn)}  # noqa: E731
+        audio_q = [rel for fn in SOUND_TAG_RE.findall(q_html)
+                   if (rel := media.add(fn, data=media_bytes_fn(fn)))]
+        audio_a = [rel for fn in SOUND_TAG_RE.findall(a_html)
+                   if (rel := media.add(fn, data=media_bytes_fn(fn)))]
+        q_html = rewrite_img_srcs(q_html, media, resolve)
+
+        card_obj = {
             'id': str(c['id']),
             'question': q_html,
             'words': words,
             'tags': note['tags'],
-        })
+        }
+        if audio_q:
+            card_obj['audioQuestion'] = audio_q
+        if audio_a:
+            card_obj['audioAnswer'] = audio_a
+        deck_map[did]['cards'].append(card_obj)
 
     if skipped:
         print(f"  ⚠  {skipped} carte(s) ignorée(s) (template vide ou réponse non parseable)",
@@ -287,7 +379,20 @@ def process_db_legacy(db_path: str) -> list[dict]:
     return sorted([d for d in deck_map.values() if d['cards']], key=lambda d: d['name'])
 
 
-def process_apkg_legacy(apkg_path: str) -> list[dict]:
+def build_legacy_media_lookup(z: zipfile.ZipFile) -> dict:
+    """{filename: zip member name} à partir du manifeste 'media' (JSON legacy
+    uniquement — les manifestes zstd/protobuf des exports récents ne sont pas
+    supportés ici ; utilisez le paquet 'anki' pour ceux-là)."""
+    if 'media' not in z.namelist():
+        return {}
+    try:
+        manifest = json.loads(z.read('media') or b'{}')
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return {}
+    return {filename: num for num, filename in manifest.items()}
+
+
+def process_apkg_legacy(apkg_path: str, media: MediaCollector) -> list[dict]:
     with tempfile.TemporaryDirectory() as tmp:
         with zipfile.ZipFile(apkg_path, 'r') as z:
             names = z.namelist()
@@ -319,7 +424,18 @@ def process_apkg_legacy(apkg_path: str) -> list[dict]:
                 z.extract(uncompressed_name, tmp)
                 db_path = os.path.join(tmp, uncompressed_name)
 
-        return process_db_legacy(db_path)
+            lookup = build_legacy_media_lookup(z)
+
+            def media_bytes_fn(filename, _z=z, _lookup=lookup):
+                num = _lookup.get(filename)
+                if num is None or num not in _z.namelist():
+                    return None
+                try:
+                    return _z.read(num)
+                except KeyError:
+                    return None
+
+            return process_db_legacy(db_path, media, media_bytes_fn)
 
 
 # ── Main ─────────────────────────────────────────────────────────────────────
@@ -335,17 +451,21 @@ def main():
     if not os.path.exists(args.apkg):
         sys.exit(f"Fichier introuvable : {args.apkg}")
 
+    out_dir = os.path.dirname(os.path.abspath(args.out)) or '.'
+    out_stem = os.path.splitext(os.path.basename(args.out))[0]
+    media = MediaCollector(out_dir, out_stem + '_media')
+
     print(f"Ouverture de {os.path.basename(args.apkg)}…")
     try:
         import anki  # noqa: F401
         print("Extraction des cartes (via le paquet 'anki')…")
-        decks = process_apkg_via_anki(args.apkg)
+        decks = process_apkg_via_anki(args.apkg, media)
     except ImportError:
         print("  ℹ paquet 'anki' non installé — repli sur le lecteur stdlib "
               "(fonctionne uniquement avec les exports Anki plus anciens ; "
               "pip install anki pour un support complet)", file=sys.stderr)
         print("Extraction des cartes…")
-        decks = process_apkg_legacy(args.apkg)
+        decks = process_apkg_legacy(args.apkg, media)
 
     total = sum(len(d['cards']) for d in decks)
     print(f"\n✓ {total} cartes dans {len(decks)} deck(s) :")
@@ -353,6 +473,16 @@ def main():
         indent = "  " * d['name'].count('::')
         print(
             f"   {indent}· {d['name'].split('::')[-1]}  ({len(d['cards'])} cartes)")
+
+    if media.copied_count:
+        print(f"\n🔊 {media.copied_count} fichier(s) média copié(s) dans "
+              f"{out_stem}_media/ — gardez ce dossier à côté du .json et de "
+              f"index.html.")
+    elif media.missing:
+        print(f"\n⚠  {media.missing} référence(s) média trouvée(s) mais aucun "
+              f"fichier correspondant dans l'archive — réexportez depuis Anki "
+              f"avec 'Inclure les médias' coché si vous voulez le son/les images.",
+              file=sys.stderr)
 
     output = {
         'version': 1,
