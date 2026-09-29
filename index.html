@@ -268,7 +268,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 36px 24px 60px;
+            padding: 36px 24px 84px;
         }
 
         .s-deck-name {
@@ -277,6 +277,27 @@
             margin-bottom: 24px;
             letter-spacing: .3px;
         }
+
+        /* Bottom counters, à la AnkiDroid: new (blue) / learning (red) / review (green) */
+        .s-counts {
+            position: fixed;
+            left: 0; right: 0; bottom: 0;
+            display: flex;
+            justify-content: center;
+            gap: 26px;
+            padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px));
+            background: #fff;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .s-count {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .s-count-new { color: #2563eb; }
+        .s-count-learn { color: var(--red); }
+        .s-count-review { color: var(--green); }
 
         /* Question */
         .s-question {
@@ -588,6 +609,11 @@
             <div class="s-deck-name" id="s-deck-name"></div>
             <div id="s-content"></div>
         </div>
+        <div class="s-counts">
+            <span class="s-count s-count-new" id="cnt-new">0</span>
+            <span class="s-count s-count-learn" id="cnt-learn">0</span>
+            <span class="s-count s-count-review" id="cnt-review">0</span>
+        </div>
     </div>
 
     <div id="flash"></div>
@@ -614,34 +640,82 @@
         function saveSRS(sid, s) { try { localStorage.setItem(LS_SRS + sid, JSON.stringify(s)); } catch (e) { } }
 
         // ═══════════════════════════════════════════════
-        // SM-2
+        // SCHEDULER — modeled on Anki's actual default scheduler
+        // (new → learning steps → review; lapses → relearning steps),
+        // not textbook SM-2. Uses Anki's stock defaults: learning steps
+        // 1m/10m, relearning step 10m, graduating interval 1d, easy
+        // interval 4d, starting ease 2.5, easy bonus 1.3, hard factor 1.2.
+        // Within a single browser session there's no real clock wait, so
+        // a "due in N minutes" step is approximated by reinserting the
+        // card N cards further down the current queue instead.
         // ═══════════════════════════════════════════════
-        function defaultSRS() { return { interval: 0, ease: 2.5, due: TODAY, reps: 0, lapses: 0 }; }
+        var LEARNING_STEPS_MIN = [1, 10];
+        var RELEARNING_STEPS_MIN = [10];
+        var GRADUATING_DAYS = 1;
+        var EASY_DAYS = 4;
+        var EASY_BONUS = 1.3;
+        var HARD_FACTOR = 1.2;
 
-        // Erreurs → rating : 0=Easy 1=Good 2=Hard 3+=Again
+        function defaultSRS() {
+            return { state: "new", step: 0, interval: 0, ease: 2.5, due: TODAY, reps: 0, lapses: 0 };
+        }
+
+        // Erreurs sur les mots → note : 0=Facile 1=Correct 2=Difficile 3+=À revoir
         function errorsToRating(e) { return e === 0 ? 4 : e === 1 ? 3 : e === 2 ? 2 : 1; }
 
         var PILL_LABEL = { 4: "✨ Parfait", 3: "🟢 Correct", 2: "🟠 Difficile", 1: "🔴 À revoir" };
         var PILL_CLASS = { 4: "pill-easy", 3: "pill-good", 2: "pill-hard", 1: "pill-again" };
 
-        function applyRating(srs, q) {
+        // q: 1=Again 2=Hard 3=Good 4=Easy. ctx.requeueIn (minutes, approximated
+        // as "cards later") is set when the card should come back THIS session;
+        // left null once it graduates out to day-based review scheduling.
+        function applyRating(srs, q, ctx) {
             var s = Object.assign({}, srs);
-            if (q === 1) {
-                s.lapses++; s.ease = Math.max(1.3, s.ease - 0.2);
-                s.interval = 1; s.reps = 0;
-            } else if (q === 2) {
-                s.ease = Math.max(1.3, s.ease - 0.15);
-                s.interval = s.reps < 2 ? Math.max(1, s.interval || 1) : Math.max(1, Math.round(s.interval * 1.2));
-                s.reps++;
-            } else if (q === 3) {
-                s.interval = s.reps === 0 ? 1 : s.reps === 1 ? 4 : Math.max(1, Math.round(s.interval * s.ease));
-                s.reps++;
-            } else {
-                s.ease = Math.min(4.0, s.ease + 0.15);
-                s.interval = s.reps === 0 ? 3 : s.reps === 1 ? 7 : Math.max(1, Math.round(s.interval * s.ease * 1.3));
-                s.reps++;
+            s.reps++;
+            if (s.state === "new") s.state = "learning";
+
+            if (s.state === "learning" || s.state === "relearning") {
+                var steps = s.state === "learning" ? LEARNING_STEPS_MIN : RELEARNING_STEPS_MIN;
+                if (q === 1) {
+                    s.step = 0;
+                    ctx.requeueIn = steps[0];
+                } else if (q === 2) {
+                    ctx.requeueIn = steps[s.step];
+                } else if (q === 4) {
+                    // Easy graduates immediately, skipping remaining steps.
+                    s.ease = Math.min(4.0, s.ease + 0.15);
+                    s.interval = EASY_DAYS;
+                    s.state = "review"; s.step = 0;
+                    s.due = TODAY + s.interval;
+                } else {
+                    s.step++;
+                    if (s.step >= steps.length) {
+                        s.interval = s.state === "relearning" ? Math.max(1, s.interval || 1) : GRADUATING_DAYS;
+                        s.state = "review"; s.step = 0;
+                        s.due = TODAY + s.interval;
+                    } else {
+                        ctx.requeueIn = steps[s.step];
+                    }
+                }
+            } else { // review
+                if (q === 1) {
+                    s.lapses++;
+                    s.ease = Math.max(1.3, s.ease - 0.2);
+                    s.state = "relearning"; s.step = 0;
+                    ctx.requeueIn = RELEARNING_STEPS_MIN[0];
+                } else if (q === 2) {
+                    s.ease = Math.max(1.3, s.ease - 0.15);
+                    s.interval = Math.max(s.interval + 1, Math.round(s.interval * HARD_FACTOR));
+                    s.due = TODAY + s.interval;
+                } else if (q === 3) {
+                    s.interval = Math.max(1, Math.round(s.interval * s.ease));
+                    s.due = TODAY + s.interval;
+                } else {
+                    s.ease = Math.min(4.0, s.ease + 0.15);
+                    s.interval = Math.max(1, Math.round(s.interval * s.ease * EASY_BONUS));
+                    s.due = TODAY + s.interval;
+                }
             }
-            s.due = TODAY + s.interval;
             return s;
         }
 
@@ -748,8 +822,8 @@
             var newC = 0, due = 0, learned = 0;
             cardIds.forEach(function (cid) {
                 var s = srs[cid];
-                if (!s) newC++;
-                else if (s.due <= TODAY) due++;
+                if (!s || s.state === "new") newC++;
+                else if (s.state === "learning" || s.state === "relearning" || s.due <= TODAY) due++;
                 else learned++;
             });
             return { new: Math.min(newC, NEW_LIMIT), due: due, learned: learned };
@@ -835,12 +909,13 @@
                 (cardsByDeck[did] || []).forEach(function (c) { allCards.push(c); });
             });
 
-            // Split new vs due
+            // Split new vs due (learning/relearning cards are always "due" —
+            // they're mid-way through short-term steps, not day-scheduled yet)
             var newCards = [], dueCards = [];
             allCards.forEach(function (c) {
                 var s = srs[c.id];
-                if (!s) newCards.push(c);
-                else if (s.due <= TODAY) dueCards.push(c);
+                if (!s || s.state === "new") newCards.push(c);
+                else if (s.state === "learning" || s.state === "relearning" || s.due <= TODAY) dueCards.push(c);
             });
             shuffle(newCards); shuffle(dueCards);
             newCards = newCards.slice(0, NEW_LIMIT);
@@ -878,6 +953,7 @@
             var card = sess.queue[sess.qIdx];
             if (!card) { showDone(); return; }
             updateProgress();
+            updateCounts();
 
             if (!card.words || !card.words.length) { sess.qIdx++; showCard(); return; }
 
@@ -888,10 +964,10 @@
                 + '</div>'
                 + '<div class="t-words" id="t-words"></div>'
                 + '<div class="t-actions">'
-                + '<span class="t-show-ans" onclick="revealAll()">💡 Voir les réponses <span class="t-key">F1</span></span>'
+                + '<span class="t-show-ans" onclick="revealCurrent()">💡 Voir la réponse <span class="t-key">F1</span></span>'
                 + '<span class="t-skip" onclick="skipCard()">Passer →</span>'
                 + '</div>'
-                + '<div class="t-shortcuts">F2 Facile · F3 À revoir · F4 Difficile · F5 Correct</div>';
+                + '<div class="t-shortcuts">F2 À revoir · F3 Difficile · F4 Correct · F5 Facile</div>';
 
             buildRows(card.words);
             if (hasAudio) playAudioList(card.audioQuestion);
@@ -900,20 +976,30 @@
         // ═══════════════════════════════════════════════
         // AUDIO
         // ═══════════════════════════════════════════════
-        function playAudioList(urls) {
-            if (!urls || !urls.length) return;
+        // onDone fires once the whole list has played (or immediately if
+        // there's nothing to play, or if playback is blocked/fails) so
+        // callers can wait for it before switching to the next card —
+        // otherwise the next card's question audio cuts this one off.
+        function playAudioList(urls, onDone) {
             var audio = document.getElementById("audio-player");
+            if (!urls || !urls.length) { if (onDone) onDone(); return; }
             var i = 0;
-            audio.onended = function () {
-                if (i < urls.length) { audio.src = urls[i++]; audio.play().catch(function () { }); }
-            };
-            audio.src = urls[i++];
-            audio.play().catch(function () { });
+            function playNext() {
+                if (i >= urls.length) { audio.onended = null; if (onDone) onDone(); return; }
+                audio.src = urls[i++];
+                var p = audio.play();
+                if (p && p.catch) p.catch(playNext);
+            }
+            audio.onended = playNext;
+            playNext();
         }
-        function playCardAudio(which) {
+        function playCardAudio(which, onDone) {
             var card = sess.queue[sess.qIdx];
-            if (!card) return;
-            playAudioList(which === "a" ? card.audioAnswer : card.audioQuestion);
+            if (!card) { if (onDone) onDone(); return; }
+            var urls = which === "both"
+                ? (card.audioQuestion || []).concat(card.audioAnswer || [])
+                : (which === "a" ? card.audioAnswer : card.audioQuestion);
+            playAudioList(urls, onDone);
         }
 
         function updateProgress() {
@@ -921,6 +1007,22 @@
             var done = Math.min(sess.qIdx, total);
             document.getElementById("prog-label").textContent = done + " / " + total;
             document.getElementById("prog-fill").style.width = Math.round(done / total * 100) + "%";
+        }
+
+        // Cards left in the queue (from the current position on), grouped by
+        // scheduler state — new (blue) / learning+relearning (red) / review (green).
+        function updateCounts() {
+            var counts = { new: 0, learning: 0, review: 0 };
+            for (var i = sess.qIdx; i < sess.queue.length; i++) {
+                var s = sess.srs[sess.queue[i].id];
+                var state = s ? s.state : "new";
+                if (state === "new") counts.new++;
+                else if (state === "learning" || state === "relearning") counts.learning++;
+                else counts.review++;
+            }
+            document.getElementById("cnt-new").textContent = counts.new;
+            document.getElementById("cnt-learn").textContent = counts.learning;
+            document.getElementById("cnt-review").textContent = counts.review;
         }
 
         // ═══════════════════════════════════════════════
@@ -1004,54 +1106,69 @@
         }
 
         function revealHint(entry) { entry.hint.textContent = entry.expected[0]; entry.hint.style.display = "block"; }
-        function revealAll() {
+        // Reveals only the word at the cursor (or the first unsolved one if
+        // nothing has focus) — not the whole card at once.
+        function revealCurrent() {
+            var entry = wordRows.find(function (e) { return e.inp === document.activeElement && !e.solved; })
+                || wordRows.find(function (e) { return !e.solved; });
+            if (!entry) return;
             revealed = true;
-            wordRows.forEach(function (e) {
-                if (!e.solved) { revealHint(e); e.lbl.textContent = e.word; e.lbl.style.color = "#c9922a"; }
-            });
-            playCardAudio("a");
+            revealHint(entry);
+            entry.lbl.textContent = entry.word;
+            entry.lbl.style.color = "#c9922a";
         }
 
         function tryComplete() {
             if (advancing) return;
             if (wordRows.every(function (e) { return e.solved; })) {
-                playCardAudio("a");
+                advancing = true;
                 var q = revealed ? 2 : errorsToRating(cardErrors);
-                flash(function () { advanceCard(q); });
+                playCardAudio("a", function () { flash(function () { advanceCard(q); }); });
             }
         }
 
-        function skipCard() { advanceCard(revealed ? 2 : 1); }
+        function skipCard() {
+            if (advancing) return;
+            advancing = true;
+            var q = revealed ? 2 : 1;
+            playCardAudio("a", function () { advanceCard(q); });
+        }
 
         // ═══════════════════════════════════════════════
         // KEYBOARD SHORTCUTS (study screen only)
         // ═══════════════════════════════════════════════
-        // F1 = voir la réponse · F2 = Facile · F3 = À revoir · F4 = Difficile · F5 = Correct
-        var FKEY_RATING = { F2: 4, F3: 1, F4: 2, F5: 3 };
+        // F1 = voir la réponse (au curseur) · F2 = À revoir · F3 = Difficile
+        // · F4 = Correct · F5 = Facile — "Facile" is deliberately the
+        // farthest from F1 since it schedules the longest interval, so a
+        // stray key-repeat or mis-click right after reveal can't trigger it.
+        var FKEY_RATING = { F2: 1, F3: 2, F4: 3, F5: 4 };
         document.addEventListener("keydown", function (e) {
             if (document.getElementById("study").style.display !== "flex") return;
             if (e.key === "F1") {
                 e.preventDefault();
-                revealAll();
+                revealCurrent();
             } else if (FKEY_RATING.hasOwnProperty(e.key)) {
                 e.preventDefault();
                 if (advancing) return;
-                playCardAudio("a");
-                advanceCard(FKEY_RATING[e.key]);
+                advancing = true;
+                // Manual shortcuts play both sides' audio — whichever field
+                // actually carries the pronunciation, you get to hear it.
+                playCardAudio("both", function () { advanceCard(FKEY_RATING[e.key]); });
             }
         });
 
         function advanceCard(q) {
-            if (advancing) return;
-            advancing = true;
             var card = sess.queue[sess.qIdx];
-            sess.srs[card.id] = applyRating(sess.srs[card.id] || defaultSRS(), q);
+            var ctx = { requeueIn: null };
+            sess.srs[card.id] = applyRating(sess.srs[card.id] || defaultSRS(), q, ctx);
             sess.done++;
             sess.qIdx++;
-            if (q === 1 && sess.queue.filter(function (c) { return c.id === card.id; }).length < 2) {
-                sess.queue.push(card);
+            if (ctx.requeueIn) {
+                var insertAt = Math.min(sess.queue.length, sess.qIdx + Math.max(1, Math.round(ctx.requeueIn)));
+                sess.queue.splice(insertAt, 0, card);
             }
             showPill(q);
+            updateCounts();
             var content = document.getElementById("s-content");
             content.style.cssText = "opacity:0;transform:translateY(-10px);transition:opacity .22s,transform .22s";
             setTimeout(function () {

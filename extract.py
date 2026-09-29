@@ -89,7 +89,7 @@ def card_words_and_question(question_html: str, answer_html: str):
     if idx == -1 and a_text.lower().startswith(q_text.lower()):
         a_text = a_text[len(q_text):].strip()
 
-    words = [w for w in a_text.split() if w]
+    words = [w for w in a_text.split() if w and any(ch.isalnum() for ch in w)]
     return words
 
 
