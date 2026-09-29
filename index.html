@@ -13,6 +13,77 @@
             --orange: #ea580c;
             --blue: #2563eb;
             --gold: #c8a84b;
+
+            --bg: #fff;
+            --surface: #fff;
+            --surface-hover: #f8faff;
+            --text: #111;
+            --text-2: #999;
+            --text-3: #ccc;
+            --border: #f0f0f0;
+            --border-2: #e5e7eb;
+            --input-line: #d0ccc5;
+
+            --tint-blue: #eff6ff;
+            --tint-green: #f0fdf4;
+            --tint-orange: #fff7ed;
+            --tint-red: #fef2f2;
+            --border-tint-blue: #cfe0fb;
+            --border-tint-green: #cdebd8;
+            --border-tint-orange: #fde3c8;
+            --border-tint-red: #fde2e2;
+
+            color-scheme: light;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --navy: #85aee0;
+                --bg: #131417;
+                --surface: #1b1d21;
+                --surface-hover: #24272c;
+                --text: #e8e9eb;
+                --text-2: #8b8f96;
+                --text-3: #52565d;
+                --border: #26292e;
+                --border-2: #34383f;
+                --input-line: #4d4842;
+
+                --tint-blue: rgba(37, 99, 235, .18);
+                --tint-green: rgba(22, 163, 74, .18);
+                --tint-orange: rgba(234, 88, 12, .18);
+                --tint-red: rgba(220, 38, 38, .18);
+                --border-tint-blue: #2a3c5c;
+                --border-tint-green: #1f4430;
+                --border-tint-orange: #593c20;
+                --border-tint-red: #59292a;
+
+                color-scheme: dark;
+            }
+        }
+
+        :root[data-theme="dark"] {
+            --navy: #85aee0;
+            --bg: #131417;
+            --surface: #1b1d21;
+            --surface-hover: #24272c;
+            --text: #e8e9eb;
+            --text-2: #8b8f96;
+            --text-3: #52565d;
+            --border: #26292e;
+            --border-2: #34383f;
+            --input-line: #4d4842;
+
+            --tint-blue: rgba(37, 99, 235, .18);
+            --tint-green: rgba(22, 163, 74, .18);
+            --tint-orange: rgba(234, 88, 12, .18);
+            --tint-red: rgba(220, 38, 38, .18);
+            --border-tint-blue: #2a3c5c;
+            --border-tint-green: #1f4430;
+            --border-tint-orange: #593c20;
+            --border-tint-red: #59292a;
+
+            color-scheme: dark;
         }
 
         *,
@@ -25,16 +96,40 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background: #fff;
-            color: #111;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
         }
 
         /* ── HOME ── */
         #home {
+            position: relative;
             max-width: 560px;
             margin: 0 auto;
             padding: 52px 24px 80px;
+        }
+
+        .h-theme-toggle {
+            position: absolute;
+            top: env(safe-area-inset-top, 0px);
+            right: 24px;
+            margin-top: 16px;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 1.5px solid var(--border);
+            background: var(--surface);
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color .15s, background .15s;
+        }
+
+        .h-theme-toggle:hover {
+            border-color: var(--navy);
+            background: var(--surface-hover);
         }
 
         .h-logo {
@@ -51,7 +146,7 @@
 
         .h-sub {
             font-size: 13px;
-            color: #aaa;
+            color: var(--text-2);
             margin-bottom: 36px;
         }
 
@@ -64,14 +159,14 @@
         }
 
         .h-source {
-            border: 1.5px solid #f0f0f0;
+            border: 1.5px solid var(--border);
             border-radius: 14px;
             overflow: hidden;
             transition: border-color .15s;
         }
 
         .h-source:hover {
-            border-color: #d8e0f0;
+            border-color: var(--border-tint-blue);
         }
 
         .h-source-header {
@@ -81,30 +176,30 @@
             padding: 13px 16px;
             cursor: pointer;
             user-select: none;
-            background: #fff;
+            background: var(--surface);
             transition: background .12s;
         }
 
         .h-source-header:hover {
-            background: #f8faff;
+            background: var(--surface-hover);
         }
 
         .h-source-name {
             font-size: 14px;
             font-weight: 600;
-            color: #111;
+            color: var(--text);
             flex: 1;
         }
 
         .h-source-meta {
             font-size: 11px;
-            color: #bbb;
+            color: var(--text-2);
         }
 
         .h-source-del {
             padding: 3px 8px;
             font-size: 12px;
-            color: #ddd;
+            color: var(--text-3);
             background: none;
             border: none;
             cursor: pointer;
@@ -116,7 +211,7 @@
         .h-source-export {
             padding: 3px 8px;
             font-size: 12px;
-            color: #ddd;
+            color: var(--text-3);
             background: none;
             border: none;
             cursor: pointer;
@@ -135,7 +230,7 @@
 
         .h-source-arrow {
             font-size: 11px;
-            color: #ccc;
+            color: var(--text-3);
             transition: transform .2s;
             flex-shrink: 0;
         }
@@ -147,7 +242,7 @@
         /* Deck tree inside a source */
         .h-decktree {
             display: none;
-            border-top: 1px solid #f5f5f5;
+            border-top: 1px solid var(--border);
             padding: 8px 0;
         }
 
@@ -165,12 +260,12 @@
         }
 
         .h-deckrow:hover {
-            background: #f8faff;
+            background: var(--surface-hover);
         }
 
         .h-deckrow-name {
             font-size: 13px;
-            color: #333;
+            color: var(--text);
             flex: 1;
         }
 
@@ -186,23 +281,23 @@
         }
 
         .badge-new {
-            background: #eff6ff;
+            background: var(--tint-blue);
             color: var(--blue);
         }
 
         .badge-due {
-            background: #fff7ed;
+            background: var(--tint-orange);
             color: var(--orange);
         }
 
         .badge-done {
-            background: #f0fdf4;
+            background: var(--tint-green);
             color: var(--green);
         }
 
         .h-empty {
             font-size: 14px;
-            color: #ccc;
+            color: var(--text-3);
             text-align: center;
             padding: 28px 0;
         }
@@ -210,11 +305,11 @@
         .h-import-btn {
             width: 100%;
             padding: 13px;
-            border: 1.5px dashed #ddd;
+            border: 1.5px dashed var(--text-3);
             border-radius: 14px;
             background: none;
             font-size: 14px;
-            color: #aaa;
+            color: var(--text-2);
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -232,7 +327,7 @@
             margin-top: 14px;
             text-align: center;
             font-size: 11px;
-            color: #ddd;
+            color: var(--text-3);
             cursor: pointer;
             transition: color .15s;
         }
@@ -258,7 +353,7 @@
         .s-back {
             background: none;
             border: none;
-            color: #bbb;
+            color: var(--text-2);
             cursor: pointer;
             font-size: 13px;
             transition: color .15s;
@@ -274,14 +369,14 @@
 
         .s-prog-label {
             font-size: 11px;
-            color: #d0d0d0;
+            color: var(--text-3);
             text-align: right;
             margin-bottom: 5px;
         }
 
         .s-prog-track {
             height: 2px;
-            background: #f0f0f0;
+            background: var(--border);
             border-radius: 2px;
         }
 
@@ -302,7 +397,7 @@
 
         .s-deck-name {
             font-size: 12px;
-            color: #ccc;
+            color: var(--text-3);
             margin-bottom: 24px;
             letter-spacing: .3px;
         }
@@ -315,8 +410,8 @@
             justify-content: center;
             gap: 26px;
             padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px));
-            background: #fff;
-            border-top: 1px solid #f0f0f0;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
         }
 
         .s-count {
@@ -324,7 +419,7 @@
             font-weight: 700;
         }
 
-        .s-count-new { color: #2563eb; }
+        .s-count-new { color: var(--blue); }
         .s-count-learn { color: var(--red); }
         .s-count-review { color: var(--green); }
 
@@ -332,13 +427,13 @@
         .s-question {
             width: 100%;
             max-width: 720px;
-            border: 1.5px solid #f0f0f0;
+            border: 1.5px solid var(--border);
             border-radius: 18px;
             padding: 28px 32px;
             margin-bottom: 32px;
             font-size: clamp(18px, 2.8vw, 26px);
             line-height: 1.6;
-            color: #222;
+            color: var(--text);
             text-align: center;
         }
 
@@ -356,7 +451,7 @@
             display: block;
             margin: 10px auto 0;
             background: none;
-            border: 1.5px solid #e5e7eb;
+            border: 1.5px solid var(--border-2);
             border-radius: 20px;
             padding: 5px 14px;
             font-size: 14px;
@@ -367,7 +462,7 @@
 
         .s-audio-btn:hover {
             border-color: var(--navy);
-            background: #f8faff;
+            background: var(--surface-hover);
         }
 
         /* Word inputs */
@@ -392,13 +487,14 @@
             font-family: Georgia, serif;
             font-size: clamp(16px, 2.4vw, 24px);
             min-height: 32px;
-            color: #ccc;
+            color: var(--text-3);
         }
 
         .wc-inp {
             border: none;
-            border-bottom: 2.5px solid #d0ccc5;
+            border-bottom: 2.5px solid var(--input-line);
             background: transparent;
+            color: var(--text);
             font-family: Georgia, serif;
             font-size: 17px;
             text-align: center;
@@ -423,14 +519,14 @@
         }
 
         .wc-inp::placeholder {
-            color: #ddd;
+            color: var(--text-3);
         }
 
         .wc-hint {
             display: none;
             font-family: Georgia, serif;
             font-size: 13px;
-            color: #c9922a;
+            color: var(--gold);
         }
 
         .wc-attempts {
@@ -451,19 +547,19 @@
 
         .t-show-ans {
             font-size: 11px;
-            color: #c9c0b6;
+            color: var(--text-2);
             cursor: pointer;
             letter-spacing: .3px;
             transition: color .15s;
         }
 
         .t-show-ans:hover {
-            color: #c9922a;
+            color: var(--gold);
         }
 
         .t-flag {
             font-size: 11px;
-            color: #ddd;
+            color: var(--text-3);
             cursor: pointer;
             letter-spacing: .3px;
             transition: color .15s;
@@ -482,8 +578,8 @@
             display: inline-block;
             font-size: 9px;
             font-weight: 700;
-            color: #aaa;
-            border: 1px solid #ddd;
+            color: var(--text-2);
+            border: 1px solid var(--text-3);
             border-radius: 4px;
             padding: 1px 4px;
             margin-left: 4px;
@@ -506,9 +602,9 @@
             gap: 3px;
             min-width: 92px;
             padding: 8px 14px;
-            border: 1.5px solid #eee;
+            border: 1.5px solid var(--border-2);
             border-radius: 12px;
-            background: #fff;
+            background: var(--surface);
             cursor: pointer;
             transition: border-color .15s, background .15s, transform .1s;
         }
@@ -528,7 +624,7 @@
 
         .t-rate-time {
             font-size: 11px;
-            color: #bbb;
+            color: var(--text-2);
         }
 
         .t-rate-label {
@@ -536,23 +632,22 @@
             font-weight: 600;
         }
 
-        .t-rate-again { border-color: #fde2e2; }
-        .t-rate-again:hover { background: #fef2f2; border-color: var(--red); }
+        .t-rate-again { border-color: var(--border-tint-red); }
+        .t-rate-again:hover { background: var(--tint-red); border-color: var(--red); }
         .t-rate-again .t-rate-label { color: var(--red); }
 
-        .t-rate-hard { border-color: #fde3c8; }
-        .t-rate-hard:hover { background: #fff7ed; border-color: var(--orange); }
+        .t-rate-hard { border-color: var(--border-tint-orange); }
+        .t-rate-hard:hover { background: var(--tint-orange); border-color: var(--orange); }
         .t-rate-hard .t-rate-label { color: var(--orange); }
 
-        .t-rate-good { border-color: #cdebd8; }
-        .t-rate-good:hover { background: #f0fdf4; border-color: var(--green); }
+        .t-rate-good { border-color: var(--border-tint-green); }
+        .t-rate-good:hover { background: var(--tint-green); border-color: var(--green); }
         .t-rate-good .t-rate-label { color: var(--green); }
 
-        .t-rate-easy { border-color: #cfe0fb; }
-        .t-rate-easy:hover { background: #eff6ff; border-color: var(--blue); }
+        .t-rate-easy { border-color: var(--border-tint-blue); }
+        .t-rate-easy:hover { background: var(--tint-blue); border-color: var(--blue); }
         .t-rate-easy .t-rate-label { color: var(--blue); }
 
-        /* Rating pill */
         /* Feedback is the rating button itself flashing its own color,
            fading in then out, instead of a separate popup. */
         .t-rate.rate-flash { animation: rateFlash .7s ease; }
@@ -565,7 +660,7 @@
         .t-rate.rate-flash.t-rate-easy { --flash-color: var(--blue); }
 
         @keyframes rateFlash {
-            0%, 100% { background: #fff; border-color: #eee; }
+            0%, 100% { background: var(--surface); border-color: var(--border-2); }
             35% { background: var(--flash-color); border-color: var(--flash-color); }
         }
 
@@ -590,14 +685,14 @@
 
         .s-done-sub {
             font-size: 14px;
-            color: #aaa;
+            color: var(--text-2);
             margin-bottom: 28px;
         }
 
         .btn-home {
             padding: 12px 28px;
             border-radius: 12px;
-            background: var(--navy);
+            background: var(--blue);
             color: #fff;
             border: none;
             font-size: 14px;
@@ -648,6 +743,7 @@
 
     <!-- ── HOME ── -->
     <div id="home">
+        <button class="h-theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Basculer clair/sombre">🌙</button>
         <div class="h-logo">🃏</div>
         <div class="h-title">Anki Trainer</div>
         <div class="h-sub">Pré-traitez votre .apkg avec <code>extract_apkg.py</code>, puis importez le JSON ici</div>
@@ -694,7 +790,37 @@
         var LS_SRS = "ankitrain_v1_s_";      // + sourceId → {cardId: srsMeta}
         var LS_NEWCOUNT = "ankitrain_v1_nc_";     // + sourceId → {day, count}
         var LS_FLAGGED = "ankitrain_v1_fl_";     // + sourceId → {cardId: questionPlainText}
+        var LS_THEME = "ankitrain_v1_theme";    // "light" | "dark" | absent (follow system)
         var NEW_LIMIT = 20;
+
+        // Manual override on top of the CSS @media(prefers-color-scheme)
+        // default. Absent = follow the system/browser setting.
+        function applyTheme() {
+            var saved = null;
+            try { saved = localStorage.getItem(LS_THEME); } catch (e) { }
+            if (saved === "light" || saved === "dark") {
+                document.documentElement.setAttribute("data-theme", saved);
+            } else {
+                document.documentElement.removeAttribute("data-theme");
+            }
+        }
+        function isDarkNow() {
+            var saved = null;
+            try { saved = localStorage.getItem(LS_THEME); } catch (e) { }
+            if (saved === "light" || saved === "dark") return saved === "dark";
+            return !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        }
+        function toggleTheme() {
+            var next = isDarkNow() ? "light" : "dark";
+            try { localStorage.setItem(LS_THEME, next); } catch (e) { }
+            applyTheme();
+            updateThemeToggleIcon();
+        }
+        function updateThemeToggleIcon() {
+            var btn = document.getElementById("theme-toggle");
+            if (btn) btn.textContent = isDarkNow() ? "☀️" : "🌙";
+        }
+        applyTheme();
         var TODAY = dayStamp();
 
         function dayStamp(d) { d = d || new Date(); return Math.floor(d.getTime() / 86400000); }
@@ -1180,7 +1306,7 @@
                 [1, "again", "À revoir", "F2"],
                 [3, "good", "Correct", "F3"],
                 [2, "hard", "Difficile", "F4"],
-                [4, "easy", "Facile", "F5"],
+                [4, "easy", "Facile", "F7"],
             ];
             return '<div class="t-ratings">' + defs.map(function (d) {
                 return '<button class="t-rate t-rate-' + d[1] + '" data-q="' + d[0] + '" onclick="rate(' + d[0] + ')">'
@@ -1204,7 +1330,20 @@
         function rate(q) {
             if (advancing) return;
             advancing = true;
+            flashForPendingRating(q);
             playCardAudio("both", function () { advanceCard(q); });
+        }
+
+        // The button/color feedback should feel instant — it used to only
+        // fire from inside advanceCard(), which runs after any audio has
+        // finished playing, so it could lag a second or more behind the
+        // actual press. Flash right away; the card-change transition
+        // (below, in advanceCard) is what's allowed to take its time.
+        function flashForPendingRating(q) {
+            var card = sess.queue[sess.qIdx];
+            if (!card) return;
+            var previewSrs = applyRating(sess.srs[card.id] || defaultSRS(), q, { requeueIn: null });
+            flashRateButtonFor(q, previewSrs);
         }
 
         // What each rating would do to THIS card right now — shown above the
@@ -1413,7 +1552,7 @@
         }
 
         // Difficile/Facile are only ever a manual, deliberate call (the
-        // rating buttons/F4/F5) — never inferred from mistakes. Automatic
+        // rating buttons/F4/F7) — never inferred from mistakes. Automatic
         // completion only ever lands on one of two outcomes: needed a hint
         // at any point this card -> À revoir, got there entirely on your
         // own -> Correct. The attempt counters (✗) are still shown per
@@ -1422,6 +1561,7 @@
             if (advancing) return;
             advancing = true;
             var q = revealed ? 1 : 3;
+            flashForPendingRating(q);
             playCardAudio("a", function () { flash(function () { advanceCard(q); }); });
         }
 
@@ -1434,10 +1574,12 @@
         // KEYBOARD SHORTCUTS (study screen only)
         // ═══════════════════════════════════════════════
         // F1 = voir la réponse (au curseur) · F2 = À revoir · F3 = Correct
-        // · F4 = Difficile · F5 = Facile — "Facile" is deliberately the
+        // · F4 = Difficile · F7 = Facile (not F5/F6: F5 reloads the page in
+        // most browsers and preventDefault() can't reliably stop that; F6
+        // is already the flag shortcut) — "Facile" is deliberately the
         // farthest from F1 since it schedules the longest interval, so a
         // stray key-repeat or mis-click right after reveal can't trigger it.
-        var FKEY_RATING = { F2: 1, F3: 3, F4: 2, F5: 4 };
+        var FKEY_RATING = { F2: 1, F3: 3, F4: 2, F7: 4 };
         document.addEventListener("keydown", function (e) {
             if (document.getElementById("study").style.display !== "flex") return;
             if (e.key === "F1") {
@@ -1469,7 +1611,6 @@
                 var insertAt = Math.min(sess.queue.length, sess.qIdx + offset);
                 sess.queue.splice(insertAt, 0, card);
             }
-            flashRateButtonFor(q, sess.srs[card.id]);
             updateCounts();
             var content = document.getElementById("s-content");
             content.style.cssText = "opacity:0;transform:translateY(-10px);transition:opacity .4s,transform .4s";
@@ -1525,6 +1666,7 @@
         }
 
         // ── INIT ──
+        updateThemeToggleIcon();
         loadDefaultDeckIfEmpty().then(renderHome);
     </script>
 </body>
