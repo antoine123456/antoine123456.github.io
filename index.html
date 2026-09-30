@@ -8,7 +8,6 @@
     <!-- Compat SDK (not the modular one) so it plugs into the existing
          ES5-style script block below with no bundler/build step. -->
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <style>
         :root {
@@ -149,24 +148,9 @@
             max-width: calc(100% - 48px - 44px);
         }
 
-        .auth-avatar {
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-        }
-
-        .auth-name {
+        .user-picker {
             font-size: 12px;
-            color: var(--text-2);
-            max-width: 140px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .auth-btn {
-            font-size: 12px;
-            padding: 6px 12px;
+            padding: 6px 10px;
             border-radius: 20px;
             border: 1.5px solid var(--border-2);
             background: var(--surface);
@@ -175,14 +159,9 @@
             transition: border-color .15s, background .15s;
         }
 
-        .auth-btn:hover {
+        .user-picker:hover {
             border-color: var(--navy);
             color: var(--navy);
-        }
-
-        .auth-btn-primary {
-            color: var(--navy);
-            border-color: var(--navy);
         }
 
         .sync-status {
@@ -848,11 +827,13 @@
         // ═══════════════════════════════════════════════
         // FIREBASE (optional — Google sign-in + cloud sync)
         // ═══════════════════════════════════════════════
-        // Paste your own project's values here to enable sign-in/sync. Not
-        // a secret: this is meant to be public in client code — the real
-        // access control is the Firestore security rules (see README),
-        // which only let a signed-in user read/write their own
-        // users/{uid} subtree.
+        // Paste your own project's values here to enable sync. Not a secret:
+        // this is meant to be public in client code. No Google sign-in on
+        // this branch — a name is picked from a plain dropdown instead (see
+        // KNOWN_USERS below), so the Firestore rules must allow read/write
+        // to those specific ids without requiring request.auth (see README
+        // — this is a deliberate, documented security trade-off, not an
+        // oversight).
         var FIREBASE_CONFIG = {
             apiKey: "AIzaSyDMn9fYdjo3rpo2k1Q89pQ2dsIi12c0kJk",
             authDomain: "type-in-anki.firebaseapp.com",
@@ -865,11 +846,10 @@
             && FIREBASE_CONFIG.apiKey.indexOf("PASTE") === -1
             && window.firebase);
 
-        var fbAuth = null, fbDb = null, fbUser = null;
+        var fbDb = null, fbUser = null;
         if (FIREBASE_ENABLED) {
             try {
                 firebase.initializeApp(FIREBASE_CONFIG);
-                fbAuth = firebase.auth();
                 fbDb = firebase.firestore();
                 try { fbDb.enablePersistence({ synchronizeTabs: true }).catch(function () { }); } catch (e) { }
             } catch (e) {
@@ -877,6 +857,15 @@
                 console.error("Firebase init failed:", e);
             }
         }
+
+        // Edit this list to add/rename people — must match the slugified
+        // name the console tool uses (see cli_firestore.py: same
+        // lowercase-and-dashes rule) so words added via cuatroloop/tresloop
+        // land under the same id picked here.
+        var KNOWN_USERS = [
+            { id: "quang", name: "Quang" }
+        ];
+        var LS_PICKED_USER = "ankitrain_v1_pickeduser";
 
         // ═══════════════════════════════════════════════
         // STORAGE
@@ -1401,49 +1390,41 @@
             toRemove.forEach(function (k) { localStorage.removeItem(k); });
         }
 
-        function signIn() {
-            if (!FIREBASE_ENABLED) return;
-            var provider = new firebase.auth.GoogleAuthProvider();
-            fbAuth.signInWithPopup(provider).catch(function (err) {
-                console.error("sign-in failed:", err);
-                toast("Connexion impossible : " + (err && err.message ? err.message : "erreur inconnue"));
-            });
-        }
-        function signOutUser() {
-            if (!FIREBASE_ENABLED) return;
-            flushSync();
-            fbAuth.signOut().then(function () {
+        // No Google sign-in on this branch: picking a name from the
+        // dropdown just sets fbUser directly (no server-side proof of who's
+        // really picking — see the KNOWN_USERS comment above).
+        function pickUser(id) {
+            var u = null;
+            for (var i = 0; i < KNOWN_USERS.length; i++) { if (KNOWN_USERS[i].id === id) { u = KNOWN_USERS[i]; break; } }
+            fbUser = u ? { uid: u.id, displayName: u.name } : null;
+            try { localStorage.setItem(LS_PICKED_USER, id || ""); } catch (e) { }
+            renderAuthUI();
+            if (fbUser) {
+                setSyncStatus("syncing");
+                fetchAndMergeFromFirestore()
+                    .then(function () { setSyncStatus("synced"); loadDefaultDeckIfEmpty().then(renderHome); })
+                    .catch(function (err) { console.error("initial sync failed:", err); setSyncStatus("error"); renderHome(); });
+            } else {
                 clearLocalSyncedData();
                 loadDefaultDeckIfEmpty().then(renderHome);
-            });
+            }
         }
-
         function renderAuthUI() {
             var el = document.getElementById("auth-box");
             if (!el) return;
             if (!FIREBASE_ENABLED) { el.innerHTML = ""; return; }
-            if (fbUser) {
-                el.innerHTML =
-                    '<img class="auth-avatar" src="' + esc(fbUser.photoURL || "") + '" onerror="this.style.display=\'none\'">'
-                    + '<span class="auth-name">' + esc(fbUser.displayName || fbUser.email || "") + '</span>'
-                    + '<button class="auth-btn" onclick="signOutUser()">Se déconnecter</button>'
-                    + '<span class="sync-status" id="sync-status"></span>';
-            } else {
-                el.innerHTML = '<button class="auth-btn auth-btn-primary" onclick="signIn()">Se connecter avec Google</button>';
-            }
+            var options = '<option value="">— Personne —</option>' + KNOWN_USERS.map(function (u) {
+                return '<option value="' + esc(u.id) + '"' + (fbUser && fbUser.uid === u.id ? " selected" : "") + '>' + esc(u.name) + '</option>';
+            }).join("");
+            el.innerHTML =
+                '<select class="user-picker" onchange="pickUser(this.value)">' + options + '</select>'
+                + (fbUser ? '<span class="sync-status" id="sync-status"></span>' : '');
         }
 
         if (FIREBASE_ENABLED) {
-            fbAuth.onAuthStateChanged(function (user) {
-                fbUser = user;
-                renderAuthUI();
-                if (user) {
-                    setSyncStatus("syncing");
-                    fetchAndMergeFromFirestore()
-                        .then(function () { setSyncStatus("synced"); loadDefaultDeckIfEmpty().then(renderHome); })
-                        .catch(function (err) { console.error("initial sync failed:", err); setSyncStatus("error"); renderHome(); });
-                }
-            });
+            var savedUserId = null;
+            try { savedUserId = localStorage.getItem(LS_PICKED_USER); } catch (e) { }
+            if (savedUserId) pickUser(savedUserId); else renderAuthUI();
         }
 
         // ═══════════════════════════════════════════════

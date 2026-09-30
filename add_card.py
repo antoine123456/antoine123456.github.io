@@ -6,9 +6,10 @@ les fonctions bash `cuatroloop`/`tresloop` (voir ~/.bashrc et la section
 "Outil en ligne de commande" du README).
 
 Au premier lancement, demande la clé de compte de service Firebase puis
-propose de créer un utilisateur (nom + uid). Pas de "log in" Google ici —
-juste un menu, mémorisé localement pour les fois suivantes tant qu'un seul
-utilisateur existe.
+propose de créer un utilisateur (juste un nom — l'id est dérivé du nom, voir
+slugify() dans cli_firestore.py, pour matcher KNOWN_USERS d'index.html). Pas
+de "log in" Google ici : juste un menu, mémorisé localement pour les fois
+suivantes tant qu'un seul utilisateur existe.
 
 Usage :
     python3 add_card.py <mot1> <mot2> [lang1: es|fr]

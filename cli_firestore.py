@@ -14,6 +14,7 @@ choisi une fois et mémorisé localement.
 
 import json
 import os
+import re
 import sys
 import time
 
@@ -71,15 +72,25 @@ def ensure_service_account(cfg):
     save_config(cfg)
 
 
+def slugify(name):
+    """Même règle que KNOWN_USERS côté index.html (minuscules + tirets), pour
+    que le même nom donne le même id des deux côtés sans rien copier-coller."""
+    return re.sub(r"[^a-z0-9]+", "-", name.strip().lower()).strip("-")
+
+
 def add_user_interactive(cfg):
     print("Nouvel utilisateur :")
     name = input("  nom (ex: Quang) : ").strip()
-    uid = input("  uid Firebase (Authentication -> Users dans la console Firebase) : ").strip()
-    if not name or not uid:
-        sys.exit("nom ou uid vide, abandon")
+    if not name:
+        sys.exit("nom vide, abandon")
+    uid = slugify(name)
+    if not uid:
+        sys.exit("nom invalide (aucune lettre/chiffre), abandon")
     cfg.setdefault("users", []).append({"name": name, "uid": uid})
     cfg["lastUser"] = name
     save_config(cfg)
+    print("-> ajouté aussi KNOWN_USERS dans index.html si ce n'est pas déjà fait :")
+    print('   { id: "' + uid + '", name: "' + name + '" }')
     return uid
 
 

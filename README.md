@@ -1,6 +1,6 @@
 # Anki Trainer
 
-Fill-in-the-blank study app for Anki decks: pre-process a `.apkg` export into JSON, import it in the browser, and type out each word of the answer instead of just flipping the card. Scheduling models Anki's actual default algorithm (new → learning steps → review, lapses → relearning). Progress lives in the browser's `localStorage` by default — no account needed — with an optional Google sign-in to sync it across devices via Firebase (see "Sync (optional)" below).
+Fill-in-the-blank study app for Anki decks: pre-process a `.apkg` export into JSON, import it in the browser, and type out each word of the answer instead of just flipping the card. Scheduling models Anki's actual default algorithm (new → learning steps → review, lapses → relearning). Progress lives in the browser's `localStorage` by default — no account needed — with an optional name pick to sync it across devices via Firebase (see "Sync (optional)" below).
 
 ## Folder structure
 
@@ -66,31 +66,41 @@ Then, in the repo's **Settings → Pages**, set the source to this branch, `/ (r
 
 ## Sync (optional)
 
-Signing in with Google mirrors your progress to Firestore in the background, so it follows you between devices/browsers. Studying still works offline and without ever signing in — `localStorage` remains the source of truth the app actually reads from; sync just keeps a cloud copy in step with it.
+Picking a name from the dropdown in the top-left mirrors your progress to Firestore in the background, so it follows you between devices/browsers. Studying still works offline and without ever picking a name — `localStorage` remains the source of truth the app actually reads from; sync just keeps a cloud copy in step with it.
 
-`index.html` already has a working `FIREBASE_CONFIG` pointing at this project's own Firebase project, loaded via the **compat** SDK (`<script>` tags from `gstatic.com`, not the npm/modular package — there's no bundler here, it's a plain static file). If you fork this and want your own:
+**This branch (`production`) has no Google sign-in.** A script/CLI can't do a browser OAuth popup, and juggling two different identity systems (real accounts in the browser, none in the console tool) wasn't worth it — so both sides just use a plain picked/typed name instead, edited directly into a small `KNOWN_USERS` list:
 
-1. Create a project at [console.firebase.google.com](https://console.firebase.google.com), then **Build → Authentication → Sign-in method** → enable **Google**.
-2. **Authentication → Settings → Authorized domains** → add your GitHub Pages domain (e.g. `yourname.github.io`) — sign-in fails silently without this.
-3. **Build → Firestore Database** → create a database (production mode).
-4. **Firestore → Rules**, publish:
+```js
+var KNOWN_USERS = [
+    { id: "quang", name: "Quang" }
+];
+```
+
+Add a person by adding a `{ id, name }` entry here — `id` must be the *slugified* name (lowercase, non-alphanumeric runs collapsed to `-`), matching exactly what `cli_firestore.py`'s `slugify()` computes for the console tool, so a name picked in the browser and the same name typed into the console tool land in the same Firestore data.
+
+**Security trade-off, spelled out:** because there's no real authentication behind this, the Firestore rules can't check "is this really that person" the way `request.auth.uid == uid` did — they can only check "is this one of the known ids." That means anyone who has the site's URL and knows (or guesses) an id in `KNOWN_USERS` can read and overwrite that person's saved progress. Given this app only ever holds flashcard study progress for a couple of people, that's a reasonable trade for dropping the sign-in popup — but it *is* a real reduction from before, and it doesn't scale to a public/many-user deployment.
+
+Setup, if you fork this:
+
+1. Create a project at [console.firebase.google.com](https://console.firebase.google.com), then **Build → Firestore Database** → create a database (production mode). No Authentication setup needed on this branch.
+2. **Firestore → Rules**, publish (fill in your own ids from `KNOWN_USERS`):
    ```
    rules_version = '2';
    service cloud.firestore {
      match /databases/{database}/documents {
        match /users/{uid} {
-         allow read, write: if request.auth != null && request.auth.uid == uid;
+         allow read, write: if uid in ["quang"];
          match /{document=**} {
-           allow read, write: if request.auth != null && request.auth.uid == uid;
+           allow read, write: if uid in ["quang"];
          }
        }
      }
    }
    ```
-   This is the only access rule that matters: a signed-in user can only ever read/write their own `users/{uid}` subtree.
-5. **Project settings → General → Your apps** → register a web app → copy the `firebaseConfig` object into `FIREBASE_CONFIG` near the top of `index.html`'s `<script>`.
+   Only ids in that list can be read or written — anyone else's guess is rejected. (On the `main` branch, which still uses real Google sign-in, the rule is the auth-based `request.auth.uid == uid` instead — the two branches are not compatible security models, so don't mix their rules.)
+3. **Project settings → General → Your apps** → register a web app → copy the `firebaseConfig` object into `FIREBASE_CONFIG` near the top of `index.html`'s `<script>`.
 
-Without a valid config (or offline/blocked), the app falls back to `localStorage`-only exactly as before — no sign-in button appears, nothing else changes.
+Without a valid config (or offline/blocked), the app falls back to `localStorage`-only exactly as before — no dropdown appears, nothing else changes.
 
 ### Data layout
 
@@ -102,7 +112,7 @@ users/{uid}/sources/{sourceId}/cardChunks/{n}   { data, index, total }   (user-i
 
 The bundled `default.json` deck's card *content* is never duplicated into Firestore (it's already static), only its progress (`srs`/`newCount`/`flagged`) — under the fixed source id `"default"` so it matches across devices. User-imported decks' card content is chunked (each doc kept well under Firestore's 1 MiB limit) since it isn't available anywhere else in the cloud.
 
-On first sign-in: if the cloud has nothing yet, your local data is uploaded as-is. If both sides have data, they're merged — per-card SRS keeps whichever side was reviewed more recently (`lastReview` timestamp), flagged cards are unioned — and a timestamped backup of your pre-merge local data is saved under a separate `localStorage` key first. On sign-out, the local copy of *that account's* data is cleared (so a shared computer doesn't leak it to the next person); nothing in the cloud is touched.
+The first time a name is picked: if the cloud has nothing yet, your local data is uploaded as-is. If both sides have data, they're merged — per-card SRS keeps whichever side was reviewed more recently (`lastReview` timestamp), flagged cards are unioned — and a timestamped backup of your pre-merge local data is saved under a separate `localStorage` key first. Picking "— Personne —" clears the local copy of *that person's* data (so a shared computer doesn't leak it to the next person); nothing in the cloud is touched.
 
 ---
 
@@ -118,11 +128,15 @@ Each word goes straight into **a personal "Perso" deck in Firestore**
 is the bundled deck shipped to every visitor of the site, so it can't hold
 one person's personal vocabulary — each user picked from the tool's menu
 gets their own separate Perso deck instead, which only shows up when that
-same account signs in with Google in the app.
+same name is picked from the dropdown in the app (see "Sync (optional)").
 
-There's no "log in" step here — a script can't do a Google sign-in popup —
-so the tool identifies who a word is for with a plain menu (pick a name,
-mapped to that person's already-known Firebase `uid`) instead.
+There's no "log in" step, on either side — the console tool identifies who a
+word is for with a plain menu (pick a name, or add one). The id used in
+Firestore is derived straight from the name (`slugify()` in
+`cli_firestore.py`: lowercase, non-alphanumeric runs collapsed to `-`) — the
+exact same rule the app's `KNOWN_USERS` list uses — so typing the same name
+on both sides lines them up automatically, no `uid` to look up or copy
+anywhere.
 
 ### Install
 
@@ -141,10 +155,10 @@ The first time `add_card.py` runs (i.e. the first word you add), it asks:
    the public `apiKey` baked into `index.html` — it's the Admin SDK key, and
    it can read/write *any* user's data, not just your own. **Never commit it,
    never share it, keep the downloaded file outside this repo.**
-2. **A name and Firebase `uid`** for the person these words are for. Find a
-   `uid` in the Firebase console under **Authentication → Users** (after
-   that person has signed into the app with Google at least once) — you
-   only need to look it up this one time, it's then remembered by name.
+2. **A name** for the person these words are for — nothing else. The
+   Firestore id is derived from it automatically (see above), and if that
+   name isn't in `index.html`'s `KNOWN_USERS` yet, `add_card.py` prints the
+   exact entry to add so the app's dropdown can pick it up too.
 
 All of this is cached in `~/.espanol_trainer_cli.json` (never committed to
 git — it lives outside the repo, in your home folder).
