@@ -1330,7 +1330,18 @@
         function rate(q) {
             if (advancing) return;
             advancing = true;
+            flashForPendingRating(q);
             playCardAudio("both", function () { advanceCard(q); });
+        }
+
+        // Highlight the button the instant the decision is made (press, or
+        // completing the card), not after any audio has finished playing —
+        // that's a separate, later step (the card-change transition).
+        function flashForPendingRating(q) {
+            var card = sess.queue[sess.qIdx];
+            if (!card) return;
+            var previewSrs = applyRating(sess.srs[card.id] || defaultSRS(), q, { requeueIn: null });
+            flashRateButtonFor(q, previewSrs);
         }
 
         // What each rating would do to THIS card right now — shown above the
@@ -1548,6 +1559,7 @@
             if (advancing) return;
             advancing = true;
             var q = revealed ? 1 : 3;
+            flashForPendingRating(q);
             playCardAudio("a", function () { flash(function () { advanceCard(q); }); });
         }
 
@@ -1597,7 +1609,6 @@
                 var insertAt = Math.min(sess.queue.length, sess.qIdx + offset);
                 sess.queue.splice(insertAt, 0, card);
             }
-            flashRateButtonFor(q, sess.srs[card.id]);
             updateCounts();
             var content = document.getElementById("s-content");
             content.style.cssText = "opacity:0;transform:translateY(-10px);transition:opacity .4s,transform .4s";
