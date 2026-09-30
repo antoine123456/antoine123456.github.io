@@ -21,7 +21,7 @@ espanol-trainer/
 
 ## Step 1 — Export your deck from Anki
 
-In Anki: **File → Export...** → format **"Anki Deck Package (.apkg)"** → pick the deck(s) you want.
+In Anki: **File → Export...** + check "with stats"→ format **"Anki Deck Package (.apkg)"** → pick the deck(s) you want.
 
 ## Step 2 — Convert it to JSON
 
