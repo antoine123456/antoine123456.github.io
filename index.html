@@ -5,6 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anki Trainer</title>
+    <!-- Compat SDK (not the modular one) so it plugs into the existing
+         ES5-style script block below with no bundler/build step. -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <style>
         :root {
             --navy: #1e3a5f;
@@ -131,6 +136,63 @@
             border-color: var(--navy);
             background: var(--surface-hover);
         }
+
+        .auth-box {
+            position: absolute;
+            top: env(safe-area-inset-top, 0px);
+            left: 24px;
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            max-width: calc(100% - 48px - 44px);
+        }
+
+        .auth-avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+        }
+
+        .auth-name {
+            font-size: 12px;
+            color: var(--text-2);
+            max-width: 140px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .auth-btn {
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1.5px solid var(--border-2);
+            background: var(--surface);
+            color: var(--text-2);
+            cursor: pointer;
+            transition: border-color .15s, background .15s;
+        }
+
+        .auth-btn:hover {
+            border-color: var(--navy);
+            color: var(--navy);
+        }
+
+        .auth-btn-primary {
+            color: var(--navy);
+            border-color: var(--navy);
+        }
+
+        .sync-status {
+            font-size: 11px;
+            color: var(--text-2);
+        }
+
+        .sync-status.sync-error { color: var(--red); }
+        .sync-status.sync-offline { color: var(--orange); }
+        .sync-status.sync-hidden { display: none; }
 
         .h-logo {
             font-size: 36px;
@@ -744,6 +806,7 @@
     <!-- ── HOME ── -->
     <div id="home">
         <button class="h-theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Basculer clair/sombre">🌙</button>
+        <div class="auth-box" id="auth-box"></div>
         <div class="h-logo">🃏</div>
         <div class="h-title">Anki Trainer</div>
         <div class="h-sub">Pré-traitez votre .apkg avec <code>extract_apkg.py</code>, puis importez le JSON ici</div>
@@ -782,6 +845,39 @@
     <audio id="audio-player" preload="none"></audio>
 
     <script>
+        // ═══════════════════════════════════════════════
+        // FIREBASE (optional — Google sign-in + cloud sync)
+        // ═══════════════════════════════════════════════
+        // Paste your own project's values here to enable sign-in/sync. Not
+        // a secret: this is meant to be public in client code — the real
+        // access control is the Firestore security rules (see README),
+        // which only let a signed-in user read/write their own
+        // users/{uid} subtree.
+        var FIREBASE_CONFIG = {
+            apiKey: "AIzaSyDMn9fYdjo3rpo2k1Q89pQ2dsIi12c0kJk",
+            authDomain: "type-in-anki.firebaseapp.com",
+            projectId: "type-in-anki",
+            storageBucket: "type-in-anki.firebasestorage.app",
+            messagingSenderId: "295848150298",
+            appId: "1:295848150298:web:24c322ba3faa57374158a3"
+        };
+        var FIREBASE_ENABLED = !!(FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey
+            && FIREBASE_CONFIG.apiKey.indexOf("PASTE") === -1
+            && window.firebase);
+
+        var fbAuth = null, fbDb = null, fbUser = null;
+        if (FIREBASE_ENABLED) {
+            try {
+                firebase.initializeApp(FIREBASE_CONFIG);
+                fbAuth = firebase.auth();
+                fbDb = firebase.firestore();
+                try { fbDb.enablePersistence({ synchronizeTabs: true }).catch(function () { }); } catch (e) { }
+            } catch (e) {
+                FIREBASE_ENABLED = false;
+                console.error("Firebase init failed:", e);
+            }
+        }
+
         // ═══════════════════════════════════════════════
         // STORAGE
         // ═══════════════════════════════════════════════
@@ -825,11 +921,11 @@
 
         function dayStamp(d) { d = d || new Date(); return Math.floor(d.getTime() / 86400000); }
         function loadSources() { try { return JSON.parse(localStorage.getItem(LS_SOURCES) || "[]"); } catch (e) { return []; } }
-        function saveSources(s) { try { localStorage.setItem(LS_SOURCES, JSON.stringify(s)); } catch (e) { toast("Erreur stockage"); } }
+        function saveSources(s) { try { localStorage.setItem(LS_SOURCES, JSON.stringify(s)); } catch (e) { toast("Erreur stockage"); } scheduleSync(); }
         function loadCards(sid) { try { return JSON.parse(localStorage.getItem(LS_CARDS + sid) || "{}"); } catch (e) { return {}; } }
-        function saveCards(sid, c) { try { localStorage.setItem(LS_CARDS + sid, JSON.stringify(c)); } catch (e) { throw new Error("Données trop volumineuses pour le stockage local"); } }
+        function saveCards(sid, c) { try { localStorage.setItem(LS_CARDS + sid, JSON.stringify(c)); } catch (e) { throw new Error("Données trop volumineuses pour le stockage local"); } scheduleSync(); }
         function loadSRS(sid) { try { return JSON.parse(localStorage.getItem(LS_SRS + sid) || "{}"); } catch (e) { return {}; } }
-        function saveSRS(sid, s) { try { localStorage.setItem(LS_SRS + sid, JSON.stringify(s)); } catch (e) { } }
+        function saveSRS(sid, s) { try { localStorage.setItem(LS_SRS + sid, JSON.stringify(s)); } catch (e) { } scheduleSync(); }
 
         // How many new cards have actually been INTRODUCED today (first
         // rating of a card that was still "new"), persisted per source so
@@ -839,7 +935,7 @@
             try { return JSON.parse(localStorage.getItem(LS_NEWCOUNT + sid) || "null") || { day: TODAY, count: 0 }; }
             catch (e) { return { day: TODAY, count: 0 }; }
         }
-        function saveNewCount(sid, nc) { try { localStorage.setItem(LS_NEWCOUNT + sid, JSON.stringify(nc)); } catch (e) { } }
+        function saveNewCount(sid, nc) { try { localStorage.setItem(LS_NEWCOUNT + sid, JSON.stringify(nc)); } catch (e) { } scheduleSync(); }
         function remainingNewToday(sid) {
             var nc = loadNewCount(sid);
             var introducedToday = nc.day === TODAY ? nc.count : 0;
@@ -858,7 +954,7 @@
         function loadFlagged(sid) {
             try { return JSON.parse(localStorage.getItem(LS_FLAGGED + sid) || "{}"); } catch (e) { return {}; }
         }
-        function saveFlagged(sid, fl) { try { localStorage.setItem(LS_FLAGGED + sid, JSON.stringify(fl)); } catch (e) { } }
+        function saveFlagged(sid, fl) { try { localStorage.setItem(LS_FLAGGED + sid, JSON.stringify(fl)); } catch (e) { } scheduleSync(); }
         function toggleFlagCurrent() {
             if (!sess.sourceId) return;
             var card = sess.queue[sess.qIdx];
@@ -985,10 +1081,10 @@
         // Shared by the file picker and the default-deck auto-load below.
         // Returns the number of cards imported, or null if the JSON shape
         // is invalid.
-        function importDeckData(data, fallbackName) {
+        function importDeckData(data, fallbackName, forcedId, isDefault) {
             if (!data || !data.decks || !Array.isArray(data.decks)) return null;
 
-            var sid = Date.now();
+            var sid = forcedId || Date.now();
             var sourceName = data.source || fallbackName || "Deck";
 
             var cardsByDeck = {};
@@ -999,7 +1095,7 @@
             });
 
             var sources = loadSources();
-            sources.push({ id: sid, name: sourceName, decks: decksMeta });
+            sources.push({ id: sid, name: sourceName, decks: decksMeta, isDefault: !!isDefault });
             saveSources(sources);
             saveCards(sid, cardsByDeck);
 
@@ -1033,7 +1129,9 @@
                 .then(function (r) { return r.ok ? r.json() : null; })
                 .then(function (data) {
                     if (!data) return false;
-                    var total = importDeckData(data, "Deck par défaut");
+                    // Stable id (not Date.now()) so cloud sync recognizes
+                    // this same bundled deck across different devices.
+                    var total = importDeckData(data, "Deck par défaut", "default", true);
                     if (total != null) { toast("✓ Deck par défaut chargé (" + total + " cartes)"); return true; }
                     return false;
                 })
@@ -1053,7 +1151,299 @@
             }
             toRemove.forEach(function (k) { localStorage.removeItem(k); });
             toast("Données effacées (" + toRemove.length + " entrée(s))");
+            if (fbUser) wipeFirestoreForUser();
             loadDefaultDeckIfEmpty().then(renderHome);
+        }
+
+        // ═══════════════════════════════════════════════
+        // CLOUD SYNC (Firebase Auth + Firestore) — optional
+        // ═══════════════════════════════════════════════
+        // Everything above (load*/save*) stays synchronous, localStorage-
+        // only, and unchanged in shape. This layer just watches saves and
+        // mirrors them to Firestore in the background when signed in, and
+        // does the reverse (cloud -> localStorage) on sign-in. If
+        // FIREBASE_ENABLED is false none of this ever runs.
+        var SYNC_DEBOUNCE_MS = 1500;
+        var syncTimer = null;
+        var syncInProgress = false;
+        var syncPending = false;
+
+        function setSyncStatus(state) {
+            // state: "synced" | "syncing" | "offline" | "error" | "" (hidden)
+            var el = document.getElementById("sync-status");
+            if (!el) return;
+            var labels = { synced: "✓ Synchronisé", syncing: "↻ Synchronisation…", offline: "⚠ Hors ligne", error: "⚠ Erreur de sync" };
+            el.textContent = labels[state] || "";
+            el.className = "sync-status sync-" + (state || "hidden");
+        }
+
+        function scheduleSync() {
+            if (!FIREBASE_ENABLED || !fbUser) return;
+            setSyncStatus(navigator.onLine === false ? "offline" : "syncing");
+            clearTimeout(syncTimer);
+            syncTimer = setTimeout(flushSync, SYNC_DEBOUNCE_MS);
+        }
+        function flushSync() {
+            if (!FIREBASE_ENABLED || !fbUser) return;
+            if (syncInProgress) { syncPending = true; return; }
+            syncInProgress = true;
+            pushAllToFirestore()
+                .then(function () { setSyncStatus("synced"); })
+                .catch(function (err) { console.error("sync push failed:", err); setSyncStatus("error"); })
+                .then(function () {
+                    syncInProgress = false;
+                    if (syncPending) { syncPending = false; flushSync(); }
+                });
+        }
+        document.addEventListener("visibilitychange", function () {
+            if (document.visibilityState === "hidden") { clearTimeout(syncTimer); flushSync(); }
+        });
+        window.addEventListener("pagehide", function () { clearTimeout(syncTimer); flushSync(); });
+        window.addEventListener("online", function () { if (fbUser) scheduleSync(); });
+        window.addEventListener("offline", function () { if (fbUser) setSyncStatus("offline"); });
+
+        // Firestore docs are capped at 1 MiB; split a big JSON string into
+        // chunks comfortably under that so a large imported deck's card
+        // content never risks hitting the limit.
+        function chunkString(str, size) {
+            var out = [];
+            for (var i = 0; i < str.length; i += size) out.push(str.slice(i, i + size));
+            return out.length ? out : [""];
+        }
+
+        function pushAllToFirestore() {
+            if (!FIREBASE_ENABLED || !fbUser || !fbDb) return Promise.resolve();
+            var sources = loadSources();
+            var userRef = fbDb.collection("users").doc(fbUser.uid);
+            var batch = fbDb.batch();
+
+            batch.set(userRef, {
+                sources: sources.map(function (s) { return { id: String(s.id), name: s.name, decks: s.decks, isDefault: !!s.isDefault }; }),
+                theme: (function () { try { return localStorage.getItem(LS_THEME); } catch (e) { return null; } })(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+
+            sources.forEach(function (src) {
+                var srcRef = userRef.collection("sources").doc(String(src.id));
+                batch.set(srcRef, {
+                    srs: loadSRS(src.id),
+                    newCount: loadNewCount(src.id),
+                    flagged: loadFlagged(src.id),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            });
+
+            return batch.commit().then(function () {
+                // Card content for user-imported sources only — the bundled
+                // default deck is already static/served from default.json,
+                // no need to duplicate its content in Firestore.
+                var cardWrites = [];
+                sources.forEach(function (src) {
+                    if (src.isDefault) return;
+                    var json = JSON.stringify(loadCards(src.id));
+                    var chunks = chunkString(json, 900000);
+                    var chunkCol = userRef.collection("sources").doc(String(src.id)).collection("cardChunks");
+                    chunks.forEach(function (chunk, i) {
+                        cardWrites.push(chunkCol.doc(String(i)).set({ data: chunk, index: i, total: chunks.length }));
+                    });
+                });
+                return Promise.all(cardWrites);
+            });
+        }
+
+        function fetchSourceCards(userRef, sourceId) {
+            return userRef.collection("sources").doc(String(sourceId)).collection("cardChunks")
+                .orderBy("index").get().then(function (snap) {
+                    if (snap.empty) return null;
+                    var parts = [];
+                    snap.forEach(function (doc) { parts.push(doc.data().data); });
+                    try { return JSON.parse(parts.join("")); } catch (e) { return null; }
+                });
+        }
+
+        function backupLocalData() {
+            var dump = { sources: loadSources(), perSource: {} };
+            dump.sources.forEach(function (s) {
+                dump.perSource[s.id] = { cards: loadCards(s.id), srs: loadSRS(s.id), newCount: loadNewCount(s.id), flagged: loadFlagged(s.id) };
+            });
+            try { localStorage.setItem("ankitrain_v1_backup_" + Date.now(), JSON.stringify(dump)); } catch (e) { }
+        }
+
+        // Keeps whichever SRS entry was reviewed more recently. Entries
+        // from before lastReview existed are treated as older than any
+        // timestamped entry, per spec.
+        function mergeSRS(localSRS, cloudSRS) {
+            var out = Object.assign({}, localSRS);
+            Object.keys(cloudSRS || {}).forEach(function (cid) {
+                var l = out[cid], c = cloudSRS[cid];
+                if (!l) { out[cid] = c; return; }
+                var lt = l.lastReview || 0, ct = c.lastReview || 0;
+                if (ct > lt) out[cid] = c;
+            });
+            return out;
+        }
+        function mergeFlagged(localFl, cloudFl) {
+            return Object.assign({}, cloudFl || {}, localFl || {}); // union, local text wins on conflict
+        }
+
+        function fetchAndMergeFromFirestore() {
+            if (!FIREBASE_ENABLED || !fbUser || !fbDb) return Promise.resolve();
+            var userRef = fbDb.collection("users").doc(fbUser.uid);
+            return userRef.get().then(function (userDoc) {
+                var cloud = userDoc.exists ? userDoc.data() : null;
+                var localSources = loadSources();
+
+                if (!cloud || !cloud.sources || !cloud.sources.length) {
+                    // Nothing in the cloud yet — upload whatever's local, if any.
+                    return localSources.length ? pushAllToFirestore() : Promise.resolve();
+                }
+
+                backupLocalData();
+
+                if (!localSources.length) {
+                    // Cloud has data, nothing local — pull everything down.
+                    return Promise.all(cloud.sources.map(function (cs) {
+                        var srcRef = userRef.collection("sources").doc(cs.id);
+                        return Promise.all([srcRef.get(), fetchSourceCards(userRef, cs.id)]).then(function (r) {
+                            var meta = r[0].exists ? r[0].data() : { srs: {}, newCount: {}, flagged: {} };
+                            var cards = r[1] || (cs.isDefault ? null : {});
+                            var sid = cs.isDefault ? "default" : cs.id;
+                            localSources.push({ id: sid, name: cs.name, decks: cs.decks, isDefault: !!cs.isDefault });
+                            if (cards) saveCardsRaw(sid, cards);
+                            saveSRSRaw(sid, meta.srs || {});
+                            saveNewCountRaw(sid, meta.newCount || { day: TODAY, count: 0 });
+                            saveFlaggedRaw(sid, meta.flagged || {});
+                        });
+                    })).then(function () {
+                        saveSourcesRaw(localSources);
+                        if (cloud.theme) { try { localStorage.setItem(LS_THEME, cloud.theme); } catch (e) { } applyTheme(); updateThemeToggleIcon(); }
+                    });
+                }
+
+                // Both sides have data: merge by source name (local ids are
+                // per-device/Date.now()-based and won't match across
+                // devices; the bundled default deck uses the stable id
+                // "default" specifically so it always matches).
+                var byName = {};
+                localSources.forEach(function (s) { byName[s.name] = s; });
+
+                var work = cloud.sources.map(function (cs) {
+                    var local = byName[cs.name];
+                    var srcRef = userRef.collection("sources").doc(cs.id);
+                    return Promise.all([srcRef.get(), local ? null : fetchSourceCards(userRef, cs.id)]).then(function (r) {
+                        var meta = r[0].exists ? r[0].data() : { srs: {}, newCount: {}, flagged: {} };
+                        if (local) {
+                            saveSRSRaw(local.id, mergeSRS(loadSRS(local.id), meta.srs || {}));
+                            saveFlaggedRaw(local.id, mergeFlagged(loadFlagged(local.id), meta.flagged || {}));
+                            // Higher of the two daily counters for today, so
+                            // the limit can't be bypassed by switching devices.
+                            var localNc = loadNewCount(local.id), cloudNc = meta.newCount || { day: TODAY, count: 0 };
+                            var merged = (cloudNc.day === TODAY && cloudNc.count > (localNc.day === TODAY ? localNc.count : 0))
+                                ? cloudNc : localNc;
+                            saveNewCountRaw(local.id, merged);
+                        } else if (r[1]) {
+                            var sid = cs.isDefault ? "default" : cs.id;
+                            localSources.push({ id: sid, name: cs.name, decks: cs.decks, isDefault: !!cs.isDefault });
+                            saveCardsRaw(sid, r[1]);
+                            saveSRSRaw(sid, meta.srs || {});
+                            saveNewCountRaw(sid, meta.newCount || { day: TODAY, count: 0 });
+                            saveFlaggedRaw(sid, meta.flagged || {});
+                        }
+                    });
+                });
+
+                return Promise.all(work).then(function () {
+                    saveSourcesRaw(localSources);
+                    if (cloud.theme) { try { localStorage.setItem(LS_THEME, cloud.theme); } catch (e) { } applyTheme(); updateThemeToggleIcon(); }
+                    return pushAllToFirestore(); // write the merged result back
+                });
+            });
+        }
+
+        // "Raw" localStorage writes used only while merging — they skip
+        // scheduleSync() so pulling from the cloud doesn't immediately try
+        // to push straight back before the merge as a whole is done (the
+        // final pushAllToFirestore() call above covers that).
+        function saveSourcesRaw(s) { try { localStorage.setItem(LS_SOURCES, JSON.stringify(s)); } catch (e) { } }
+        function saveCardsRaw(sid, c) { try { localStorage.setItem(LS_CARDS + sid, JSON.stringify(c)); } catch (e) { } }
+        function saveSRSRaw(sid, s) { try { localStorage.setItem(LS_SRS + sid, JSON.stringify(s)); } catch (e) { } }
+        function saveNewCountRaw(sid, nc) { try { localStorage.setItem(LS_NEWCOUNT + sid, JSON.stringify(nc)); } catch (e) { } }
+        function saveFlaggedRaw(sid, fl) { try { localStorage.setItem(LS_FLAGGED + sid, JSON.stringify(fl)); } catch (e) { } }
+
+        function deleteSourceFromFirestore(sourceId) {
+            if (!FIREBASE_ENABLED || !fbUser || !fbDb) return Promise.resolve();
+            var srcRef = fbDb.collection("users").doc(fbUser.uid).collection("sources").doc(String(sourceId));
+            return srcRef.collection("cardChunks").get().then(function (snap) {
+                var batch = fbDb.batch();
+                snap.forEach(function (doc) { batch.delete(doc.ref); });
+                batch.delete(srcRef);
+                return batch.commit();
+            }).catch(function (err) { console.error("Firestore source delete failed:", err); });
+        }
+        function wipeFirestoreForUser() {
+            if (!FIREBASE_ENABLED || !fbUser || !fbDb) return Promise.resolve();
+            var userRef = fbDb.collection("users").doc(fbUser.uid);
+            return userRef.collection("sources").get().then(function (snap) {
+                return Promise.all(snap.docs.map(function (d) { return deleteSourceFromFirestore(d.id); }));
+            }).then(function () { return userRef.delete(); })
+                .catch(function (err) { console.error("Firestore wipe failed:", err); });
+        }
+
+        // Clears the localStorage keys that hold another person's data —
+        // run on sign-out so a shared/public device doesn't leak the
+        // previous account's progress to whoever uses it next.
+        function clearLocalSyncedData() {
+            var toRemove = [];
+            for (var i = 0; i < localStorage.length; i++) {
+                var k = localStorage.key(i);
+                if (k && k.indexOf("ankitrain_v1_") === 0 && k.indexOf("ankitrain_v1_backup_") !== 0) toRemove.push(k);
+            }
+            toRemove.forEach(function (k) { localStorage.removeItem(k); });
+        }
+
+        function signIn() {
+            if (!FIREBASE_ENABLED) return;
+            var provider = new firebase.auth.GoogleAuthProvider();
+            fbAuth.signInWithPopup(provider).catch(function (err) {
+                console.error("sign-in failed:", err);
+                toast("Connexion impossible : " + (err && err.message ? err.message : "erreur inconnue"));
+            });
+        }
+        function signOutUser() {
+            if (!FIREBASE_ENABLED) return;
+            flushSync();
+            fbAuth.signOut().then(function () {
+                clearLocalSyncedData();
+                loadDefaultDeckIfEmpty().then(renderHome);
+            });
+        }
+
+        function renderAuthUI() {
+            var el = document.getElementById("auth-box");
+            if (!el) return;
+            if (!FIREBASE_ENABLED) { el.innerHTML = ""; return; }
+            if (fbUser) {
+                el.innerHTML =
+                    '<img class="auth-avatar" src="' + esc(fbUser.photoURL || "") + '" onerror="this.style.display=\'none\'">'
+                    + '<span class="auth-name">' + esc(fbUser.displayName || fbUser.email || "") + '</span>'
+                    + '<button class="auth-btn" onclick="signOutUser()">Se déconnecter</button>'
+                    + '<span class="sync-status" id="sync-status"></span>';
+            } else {
+                el.innerHTML = '<button class="auth-btn auth-btn-primary" onclick="signIn()">Se connecter avec Google</button>';
+            }
+        }
+
+        if (FIREBASE_ENABLED) {
+            fbAuth.onAuthStateChanged(function (user) {
+                fbUser = user;
+                renderAuthUI();
+                if (user) {
+                    setSyncStatus("syncing");
+                    fetchAndMergeFromFirestore()
+                        .then(function () { setSyncStatus("synced"); loadDefaultDeckIfEmpty().then(renderHome); })
+                        .catch(function (err) { console.error("initial sync failed:", err); setSyncStatus("error"); renderHome(); });
+                }
+            });
         }
 
         // ═══════════════════════════════════════════════
@@ -1208,6 +1598,7 @@
             try { localStorage.removeItem(LS_SRS + id); } catch (e2) { }
             try { localStorage.removeItem(LS_NEWCOUNT + id); } catch (e2) { }
             try { localStorage.removeItem(LS_FLAGGED + id); } catch (e2) { }
+            if (fbUser) deleteSourceFromFirestore(id);
             renderHome();
         }
 
@@ -1597,6 +1988,7 @@
             var wasNew = !sess.srs[card.id] || sess.srs[card.id].state === "new";
             var ctx = { requeueIn: null };
             sess.srs[card.id] = applyRating(sess.srs[card.id] || defaultSRS(), q, ctx);
+            sess.srs[card.id].lastReview = Date.now(); // for cross-device merge on sign-in
             if (wasNew) recordNewIntroduced(sess.sourceId);
             sess.done++;
             sess.qIdx++;

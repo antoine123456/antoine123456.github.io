@@ -1,6 +1,6 @@
 # Anki Trainer
 
-Fill-in-the-blank study app for Anki decks: pre-process a `.apkg` export into JSON, import it in the browser, and type out each word of the answer instead of just flipping the card. Scheduling models Anki's actual default algorithm (new → learning steps → review, lapses → relearning), stored in the browser's `localStorage` — no account, no backend.
+Fill-in-the-blank study app for Anki decks: pre-process a `.apkg` export into JSON, import it in the browser, and type out each word of the answer instead of just flipping the card. Scheduling models Anki's actual default algorithm (new → learning steps → review, lapses → relearning). Progress lives in the browser's `localStorage` by default — no account needed — with an optional Google sign-in to sync it across devices via Firebase (see "Sync (optional)" below).
 
 ## Folder structure
 
@@ -58,6 +58,48 @@ git push
 ```
 
 Then, in the repo's **Settings → Pages**, set the source to this branch, `/ (root)`. `extract.py` never needs to run in the browser — only `index.html` and the JSON files you import (kept in your own browser's `localStorage`) are needed there.
+
+---
+
+## Sync (optional)
+
+Signing in with Google mirrors your progress to Firestore in the background, so it follows you between devices/browsers. Studying still works offline and without ever signing in — `localStorage` remains the source of truth the app actually reads from; sync just keeps a cloud copy in step with it.
+
+`index.html` already has a working `FIREBASE_CONFIG` pointing at this project's own Firebase project, loaded via the **compat** SDK (`<script>` tags from `gstatic.com`, not the npm/modular package — there's no bundler here, it's a plain static file). If you fork this and want your own:
+
+1. Create a project at [console.firebase.google.com](https://console.firebase.google.com), then **Build → Authentication → Sign-in method** → enable **Google**.
+2. **Authentication → Settings → Authorized domains** → add your GitHub Pages domain (e.g. `yourname.github.io`) — sign-in fails silently without this.
+3. **Build → Firestore Database** → create a database (production mode).
+4. **Firestore → Rules**, publish:
+   ```
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /users/{uid} {
+         allow read, write: if request.auth != null && request.auth.uid == uid;
+         match /{document=**} {
+           allow read, write: if request.auth != null && request.auth.uid == uid;
+         }
+       }
+     }
+   }
+   ```
+   This is the only access rule that matters: a signed-in user can only ever read/write their own `users/{uid}` subtree.
+5. **Project settings → General → Your apps** → register a web app → copy the `firebaseConfig` object into `FIREBASE_CONFIG` near the top of `index.html`'s `<script>`.
+
+Without a valid config (or offline/blocked), the app falls back to `localStorage`-only exactly as before — no sign-in button appears, nothing else changes.
+
+### Data layout
+
+```
+users/{uid}                              { sources: [...meta], theme, updatedAt }
+users/{uid}/sources/{sourceId}           { srs, newCount, flagged, updatedAt }
+users/{uid}/sources/{sourceId}/cardChunks/{n}   { data, index, total }   (user-imported decks only)
+```
+
+The bundled `default.json` deck's card *content* is never duplicated into Firestore (it's already static), only its progress (`srs`/`newCount`/`flagged`) — under the fixed source id `"default"` so it matches across devices. User-imported decks' card content is chunked (each doc kept well under Firestore's 1 MiB limit) since it isn't available anywhere else in the cloud.
+
+On first sign-in: if the cloud has nothing yet, your local data is uploaded as-is. If both sides have data, they're merged — per-card SRS keeps whichever side was reviewed more recently (`lastReview` timestamp), flagged cards are unioned — and a timestamped backup of your pre-merge local data is saved under a separate `localStorage` key first. On sign-out, the local copy of *that account's* data is cleared (so a shared computer doesn't leak it to the next person); nothing in the cloud is touched.
 
 ---
 
