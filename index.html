@@ -136,34 +136,6 @@
             background: var(--surface-hover);
         }
 
-        .auth-box {
-            position: absolute;
-            top: env(safe-area-inset-top, 0px);
-            left: 24px;
-            margin-top: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-            max-width: calc(100% - 48px - 44px);
-        }
-
-        .user-picker {
-            font-size: 12px;
-            padding: 6px 10px;
-            border-radius: 20px;
-            border: 1.5px solid var(--border-2);
-            background: var(--surface);
-            color: var(--text-2);
-            cursor: pointer;
-            transition: border-color .15s, background .15s;
-        }
-
-        .user-picker:hover {
-            border-color: var(--navy);
-            color: var(--navy);
-        }
-
         .sync-status {
             font-size: 11px;
             color: var(--text-2);
@@ -785,7 +757,6 @@
     <!-- ── HOME ── -->
     <div id="home">
         <button class="h-theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Basculer clair/sombre">🌙</button>
-        <div class="auth-box" id="auth-box"></div>
         <div class="h-logo">🃏</div>
         <div class="h-title">Anki Trainer</div>
         <div class="h-sub">Pré-traitez votre .apkg avec <code>extract_apkg.py</code>, puis importez le JSON ici</div>
@@ -828,12 +799,19 @@
         // FIREBASE (optional — Google sign-in + cloud sync)
         // ═══════════════════════════════════════════════
         // Paste your own project's values here to enable sync. Not a secret:
-        // this is meant to be public in client code. No Google sign-in on
-        // this branch — a name is picked from a plain dropdown instead (see
-        // KNOWN_USERS below), so the Firestore rules must allow read/write
-        // to those specific ids without requiring request.auth (see README
-        // — this is a deliberate, documented security trade-off, not an
-        // oversight).
+        // this is meant to be public in client code.
+        //
+        // There is currently no way to actually sign in — a name-picking
+        // dropdown was tried and dropped (no real auth behind it meant every
+        // id needed manual allow-listing in the Firestore rules for each
+        // new person, not worth it), and real Google sign-in is intended
+        // for later (see the `auth` branch, which already has a working
+        // implementation). Everything below stays wired up and dormant in
+        // the meantime: fbUser is never set, so scheduleSync()/flushSync()
+        // (guarded by `if (!fbUser) return`) never fire, and the app is
+        // pure localStorage — but the Firestore database, its users/{uid}
+        // schema, and all the push/merge logic are ready to go the moment
+        // something sets fbUser again.
         var FIREBASE_CONFIG = {
             apiKey: "AIzaSyDMn9fYdjo3rpo2k1Q89pQ2dsIi12c0kJk",
             authDomain: "type-in-anki.firebaseapp.com",
@@ -857,15 +835,6 @@
                 console.error("Firebase init failed:", e);
             }
         }
-
-        // Edit this list to add/rename people — must match the slugified
-        // name the console tool uses (see cli_firestore.py: same
-        // lowercase-and-dashes rule) so words added via cuatroloop/tresloop
-        // land under the same id picked here.
-        var KNOWN_USERS = [
-            { id: "quang", name: "Quang" }
-        ];
-        var LS_PICKED_USER = "ankitrain_v1_pickeduser";
 
         // ═══════════════════════════════════════════════
         // STORAGE
@@ -1390,42 +1359,6 @@
             toRemove.forEach(function (k) { localStorage.removeItem(k); });
         }
 
-        // No Google sign-in on this branch: picking a name from the
-        // dropdown just sets fbUser directly (no server-side proof of who's
-        // really picking — see the KNOWN_USERS comment above).
-        function pickUser(id) {
-            var u = null;
-            for (var i = 0; i < KNOWN_USERS.length; i++) { if (KNOWN_USERS[i].id === id) { u = KNOWN_USERS[i]; break; } }
-            fbUser = u ? { uid: u.id, displayName: u.name } : null;
-            try { localStorage.setItem(LS_PICKED_USER, id || ""); } catch (e) { }
-            renderAuthUI();
-            if (fbUser) {
-                setSyncStatus("syncing");
-                fetchAndMergeFromFirestore()
-                    .then(function () { setSyncStatus("synced"); loadDefaultDeckIfEmpty().then(renderHome); })
-                    .catch(function (err) { console.error("initial sync failed:", err); setSyncStatus("error"); renderHome(); });
-            } else {
-                clearLocalSyncedData();
-                loadDefaultDeckIfEmpty().then(renderHome);
-            }
-        }
-        function renderAuthUI() {
-            var el = document.getElementById("auth-box");
-            if (!el) return;
-            if (!FIREBASE_ENABLED) { el.innerHTML = ""; return; }
-            var options = '<option value="">— Personne —</option>' + KNOWN_USERS.map(function (u) {
-                return '<option value="' + esc(u.id) + '"' + (fbUser && fbUser.uid === u.id ? " selected" : "") + '>' + esc(u.name) + '</option>';
-            }).join("");
-            el.innerHTML =
-                '<select class="user-picker" onchange="pickUser(this.value)">' + options + '</select>'
-                + (fbUser ? '<span class="sync-status" id="sync-status"></span>' : '');
-        }
-
-        if (FIREBASE_ENABLED) {
-            var savedUserId = null;
-            try { savedUserId = localStorage.getItem(LS_PICKED_USER); } catch (e) { }
-            if (savedUserId) pickUser(savedUserId); else renderAuthUI();
-        }
 
         // ═══════════════════════════════════════════════
         // EXPORT STATS (for re-importing progress back into real Anki)

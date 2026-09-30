@@ -1,6 +1,6 @@
 # Anki Trainer
 
-Fill-in-the-blank study app for Anki decks: pre-process a `.apkg` export into JSON, import it in the browser, and type out each word of the answer instead of just flipping the card. Scheduling models Anki's actual default algorithm (new → learning steps → review, lapses → relearning). Progress lives in the browser's `localStorage` by default — no account needed — with an optional name pick to sync it across devices via Firebase (see "Sync (optional)" below).
+Fill-in-the-blank study app for Anki decks: pre-process a `.apkg` export into JSON, import it in the browser, and type out each word of the answer instead of just flipping the card. Scheduling models Anki's actual default algorithm (new → learning steps → review, lapses → relearning). Progress lives in the browser's `localStorage` — no account, no sync, nothing leaves the browser right now (see "Sync (planned)" below for why the Firestore backend already exists but isn't wired up to anything yet).
 
 ## Folder structure
 
@@ -11,9 +11,7 @@ espanol-trainer/
 ├── reimport_stats.py  ← CLI: writes progress made here back into a .apkg for re-import into real Anki
 ├── default.json       ← bundled deck auto-loaded on first run if no source has been imported yet
 ├── default_media/     ← its audio/image files
-├── add_card.py        ← console tool: adds one word pair to *your own* Perso deck (see below)
-├── cli_firestore.py   ← shared Firestore logic used by add_card.py / migrate_perso.py
-├── migrate_perso.py   ← one-off: re-import old shared "perso" words into your personal deck
+├── add_card.py        ← console tool: adds one word pair to the shared "perso" deck (see below)
 └── README.md
 ```
 
@@ -64,45 +62,16 @@ Then, in the repo's **Settings → Pages**, set the source to this branch, `/ (r
 
 ---
 
-## Sync (optional)
+## Sync (planned)
 
-Picking a name from the dropdown in the top-left mirrors your progress to Firestore in the background, so it follows you between devices/browsers. Studying still works offline and without ever picking a name — `localStorage` remains the source of truth the app actually reads from; sync just keeps a cloud copy in step with it.
+There's no sync right now — `localStorage` is the only place progress lives, same as the app worked before any of this. Two identity models were tried and both set aside for now:
 
-**This branch (`production`) has no Google sign-in.** A script/CLI can't do a browser OAuth popup, and juggling two different identity systems (real accounts in the browser, none in the console tool) wasn't worth it — so both sides just use a plain picked/typed name instead, edited directly into a small `KNOWN_USERS` list:
+- **Google sign-in** — works, but was parked to avoid dealing with Firebase Auth setup (Authorized domains, OAuth consent screen) right away. Kept intact on a separate branch, **`auth`**, exactly as it was built — this is the intended eventual path.
+- **A plain name-picking dropdown** (no real auth, just a picked name mapped to a Firestore id) — built as a quicker stand-in, then abandoned: without real authentication behind it, every new person needed a manual Firestore-rules edit to actually get working sync, which didn't seem worth it over just waiting for Google sign-in.
 
-```js
-var KNOWN_USERS = [
-    { id: "quang", name: "Quang" }
-];
-```
+What's left in place on purpose: a Firestore database already exists for this project (`type-in-anki`), and `index.html` still initializes `firebase.firestore()` and carries the full push/merge sync engine (`scheduleSync`, `fetchAndMergeFromFirestore`, chunking, etc.) — all of it dormant, since nothing ever sets `fbUser` anymore. The `users/{uid}` schema below is written to assume a real Firebase Auth `uid`, so switching back to the `auth` branch (or merging its sign-in code back into this one) drops straight into a working sync with no schema migration needed. Nothing has ever been written to it under this scheme, so there's nothing to migrate away from either.
 
-Add a person by adding a `{ id, name }` entry here — `id` must be the *slugified* name (lowercase, non-alphanumeric runs collapsed to `-`), matching exactly what `cli_firestore.py`'s `slugify()` computes for the console tool, so a name picked in the browser and the same name typed into the console tool land in the same Firestore data.
-
-**Security trade-off, spelled out:** because there's no real authentication behind this, the Firestore rules can't check "is this really that person" the way `request.auth.uid == uid` did — they can only check "is this one of the known ids." That means anyone who has the site's URL and knows (or guesses) an id in `KNOWN_USERS` can read and overwrite that person's saved progress. Given this app only ever holds flashcard study progress for a couple of people, that's a reasonable trade for dropping the sign-in popup — but it *is* a real reduction from before, and it doesn't scale to a public/many-user deployment.
-
-Setup, if you fork this:
-
-1. Create a project at [console.firebase.google.com](https://console.firebase.google.com), then **Build → Firestore Database** → create a database (production mode). No Authentication setup needed on this branch.
-2. **Firestore → Rules**, publish (fill in your own ids from `KNOWN_USERS`):
-   ```
-   rules_version = '2';
-   service cloud.firestore {
-     match /databases/{database}/documents {
-       match /users/{uid} {
-         allow read, write: if uid in ["quang"];
-         match /{document=**} {
-           allow read, write: if uid in ["quang"];
-         }
-       }
-     }
-   }
-   ```
-   Only ids in that list can be read or written — anyone else's guess is rejected. (On the `main` branch, which still uses real Google sign-in, the rule is the auth-based `request.auth.uid == uid` instead — the two branches are not compatible security models, so don't mix their rules.)
-3. **Project settings → General → Your apps** → register a web app → copy the `firebaseConfig` object into `FIREBASE_CONFIG` near the top of `index.html`'s `<script>`.
-
-Without a valid config (or offline/blocked), the app falls back to `localStorage`-only exactly as before — no dropdown appears, nothing else changes.
-
-### Data layout
+### Data layout (dormant, ready for when sign-in returns)
 
 ```
 users/{uid}                              { sources: [...meta], theme, updatedAt }
@@ -112,7 +81,7 @@ users/{uid}/sources/{sourceId}/cardChunks/{n}   { data, index, total }   (user-i
 
 The bundled `default.json` deck's card *content* is never duplicated into Firestore (it's already static), only its progress (`srs`/`newCount`/`flagged`) — under the fixed source id `"default"` so it matches across devices. User-imported decks' card content is chunked (each doc kept well under Firestore's 1 MiB limit) since it isn't available anywhere else in the cloud.
 
-The first time a name is picked: if the cloud has nothing yet, your local data is uploaded as-is. If both sides have data, they're merged — per-card SRS keeps whichever side was reviewed more recently (`lastReview` timestamp), flagged cards are unioned — and a timestamped backup of your pre-merge local data is saved under a separate `localStorage` key first. Picking "— Personne —" clears the local copy of *that person's* data (so a shared computer doesn't leak it to the next person); nothing in the cloud is touched.
+The first time someone signs in: if the cloud has nothing yet, their local data is uploaded as-is. If both sides have data, they're merged — per-card SRS keeps whichever side was reviewed more recently (`lastReview` timestamp), flagged cards are unioned — and a timestamped backup of pre-merge local data is saved under a separate `localStorage` key first. On sign-out, the local copy of *that account's* data is cleared (so a shared computer doesn't leak it to the next person); nothing in the cloud is touched. (See the `auth` branch for the actual sign-in/sign-out UI this pairs with — the setup steps, Firestore rules, etc. live in its own README.)
 
 ---
 
@@ -123,55 +92,22 @@ line from stdin, translate each with [`translate-shell`](https://github.com/soim
 (the `trans` CLI), and add the pair as a flashcard — without touching Anki or
 re-running `extract.py`. `cuatroloop` translates ES→FR, `tresloop` FR→ES.
 
-Each word goes straight into **a personal "Perso" deck in Firestore**
-(`add_card.py` → `cli_firestore.py`), not into `default.json`. `default.json`
-is the bundled deck shipped to every visitor of the site, so it can't hold
-one person's personal vocabulary — each user picked from the tool's menu
-gets their own separate Perso deck instead, which only shows up when that
-same name is picked from the dropdown in the app (see "Sync (optional)").
-
-There's no "log in" step, on either side — the console tool identifies who a
-word is for with a plain menu (pick a name, or add one). The id used in
-Firestore is derived straight from the name (`slugify()` in
-`cli_firestore.py`: lowercase, non-alphanumeric runs collapsed to `-`) — the
-exact same rule the app's `KNOWN_USERS` list uses — so typing the same name
-on both sides lines them up automatically, no `uid` to look up or copy
-anywhere.
+Each word goes into the `perso` sub-deck inside `default.json` — the same
+deck everyone who loads the site gets, since there's no per-person account
+system right now (see "Sync (planned)" above). Once real sign-in is back,
+this can move to a per-user deck in Firestore instead; for now it's one
+shared deck, same as this app worked originally.
 
 ### Install
 
 ```bash
 brew install translate-shell   # provides `trans`
-pip install firebase-admin     # lets add_card.py write to Firestore
 ```
-
-### One-time setup
-
-The first time `add_card.py` runs (i.e. the first word you add), it asks:
-
-1. **Path to a Firebase service-account key (JSON).** Get one from the
-   Firebase console: **⚙️ Project settings → Service accounts → Generate
-   new private key**. This is a different, far more powerful credential than
-   the public `apiKey` baked into `index.html` — it's the Admin SDK key, and
-   it can read/write *any* user's data, not just your own. **Never commit it,
-   never share it, keep the downloaded file outside this repo.**
-2. **A name** for the person these words are for — nothing else. The
-   Firestore id is derived from it automatically (see above), and if that
-   name isn't in `index.html`'s `KNOWN_USERS` yet, `add_card.py` prints the
-   exact entry to add so the app's dropdown can pick it up too.
-
-All of this is cached in `~/.espanol_trainer_cli.json` (never committed to
-git — it lives outside the repo, in your home folder).
-
-With a single user configured, every future word just goes to them
-automatically — no prompt. Type **`user`** as a line in `cuatroloop`/
-`tresloop` (instead of a word to translate) any time to reopen the menu and
-add another person or switch who new words go to.
 
 ### Usage
 
 ```bash
-echo "casa" | cuatroloop     # adds casa <-> maison to the current user's Perso deck
+echo "casa" | cuatroloop     # adds casa <-> maison to the shared perso deck
 ```
 
 or interactively, one word per line, `Ctrl-D` to stop:
@@ -180,17 +116,12 @@ or interactively, one word per line, `Ctrl-D` to stop:
 cuatroloop
 ```
 
+Type **`commit`** as a line (instead of a word to translate) to commit and
+push `default.json` right away, with a message noting which loop added the
+words.
+
 Words that already exist in that deck (matched case-insensitively against
 either side of the pair) are silently skipped instead of duplicated.
-
-### Migrating old shared words
-
-Before this change, all `cuatroloop`/`tresloop` additions went into a
-`perso` sub-deck shared by every visitor via `default.json`. That deck is
-still there, untouched, for now. `migrate_perso.py` re-adds that same list
-of word pairs into a personal deck through the setup above — run it once
-(`python3 migrate_perso.py`) whenever you're ready, then the shared copy in
-`default.json` can be removed.
 
 ---
 

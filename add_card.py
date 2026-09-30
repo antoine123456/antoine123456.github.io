@@ -1,48 +1,86 @@
 #!/usr/bin/env python3
 """
-add_card.py — Ajoute une paire de cartes (mot1 <-> mot2) au deck "Perso"
-PERSONNEL choisi via un petit menu, directement dans Firestore. Utilisé par
-les fonctions bash `cuatroloop`/`tresloop` (voir ~/.bashrc et la section
-"Outil en ligne de commande" du README).
-
-Au premier lancement, demande la clé de compte de service Firebase puis
-propose de créer un utilisateur (juste un nom — l'id est dérivé du nom, voir
-slugify() dans cli_firestore.py, pour matcher KNOWN_USERS d'index.html). Pas
-de "log in" Google ici : juste un menu, mémorisé localement pour les fois
-suivantes tant qu'un seul utilisateur existe.
+add_card.py — Ajoute une paire de cartes (ES→FR et FR→ES) au deck "perso"
+de default.json. Utilisé par la fonction bash `cuatroloop` (voir ~/.bashrc) :
+chaque mot traduit avec `trans` est ajouté ici sans repasser par extract.py.
 
 Usage :
     python3 add_card.py <mot1> <mot2> [lang1: es|fr]
-    python3 add_card.py --user        # rouvre le menu pour changer d'utilisateur
 
-lang1 est la langue du premier mot ("es" ou "fr", "es" par défaut — c'est le
-cas de cuatroloop) ; le second mot est supposé être dans l'autre langue.
+lang1 est la langue du premier mot ("es" ou "fr", "es" par défaut — c'est
+le cas de cuatroloop) ; le second mot est supposé être dans l'autre langue.
 Sert uniquement à choisir la voix pour la synthèse vocale côté appli.
 """
 
+import json
+import os
 import sys
+import time
 
-from cli_firestore import add_pair, get_client
+DEFAULT_JSON = os.path.join(os.path.dirname(os.path.abspath(__file__)), "default.json")
+
+# Même bloc de style que les autres cartes "perso" existantes, pour que les
+# nouvelles cartes aient un rendu identique dans l'appli.
+STYLE = (
+    "<style>.card {\n"
+    "    font-family: arial;\n"
+    "    font-size: 20px;\n"
+    "    text-align: center;\n"
+    "    color: black;\n"
+    "    background-color: white;\n"
+    "}\n</style>"
+)
+
+
+def _norm_front(card):
+    q = card.get("question", "")
+    if q.startswith(STYLE):
+        q = q[len(STYLE):]
+    return q.strip().lower()
 
 
 def main():
-    if len(sys.argv) == 2 and sys.argv[1] == "--user":
-        get_client(force_menu=True)
-        return
-
     if len(sys.argv) not in (3, 4):
         sys.exit("usage: add_card.py <mot1> <mot2> [lang1: es|fr]")
     w1, w2 = sys.argv[1].strip(), sys.argv[2].strip()
     lang1 = sys.argv[3].strip() if len(sys.argv) == 4 else "es"
+    lang2 = "fr" if lang1 == "es" else "es"
     if not w1 or not w2:
         sys.exit("mot ou traduction vide, rien d'ajouté")
 
-    db, uid = get_client()
-    total = add_pair(db, uid, w1, w2, lang1)
-    if total is None:
+    with open(DEFAULT_JSON, encoding="utf-8") as f:
+        data = json.load(f)
+
+    deck = next((d for d in data["decks"] if d["name"].split("::")[-1] == "perso"), None)
+    if deck is None:
+        root = data["decks"][0]["name"].split("::")[0] if data["decks"] else "Perso"
+        deck = {"id": str(int(time.time() * 1000)), "name": root + "::perso", "cards": []}
+        data["decks"].append(deck)
+
+    existing = {_norm_front(c) for c in deck["cards"]}
+    if w1.lower() in existing or w2.lower() in existing:
         print("perso: déjà présent, rien ajouté")
-    else:
-        print("perso: " + str(total) + " carte(s) au total")
+        return
+
+    base_id = int(time.time() * 1000)
+    deck["cards"].append({
+        "id": str(base_id),
+        "question": STYLE + w1,
+        "words": w2.split(),
+        "tags": ["cuatroloop"],
+        "lang": lang1,
+    })
+    deck["cards"].append({
+        "id": str(base_id + 1),
+        "question": STYLE + w2,
+        "words": w1.split(),
+        "tags": ["cuatroloop"],
+        "lang": lang2,
+    })
+
+    with open(DEFAULT_JSON, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    print("perso: " + str(len(deck["cards"])) + " carte(s) au total")
 
 
 if __name__ == "__main__":
