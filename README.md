@@ -125,6 +125,11 @@ either side of the pair) are silently skipped instead of duplicated.
 
 ---
 
+## Future work
+
+- **Bottom-bar study controls, closer to real Anki.** Right now the rating buttons sit wherever they sit; in real Anki they live in a fixed bottom bar, showing a single control (with the new/due counts) that transitions into the 4 rating buttons once the answer is revealed. Worth doing if the current layout ever actually feels uncomfortable in practice, not just because it's different.
+- **Lighter reveal for typed-correct words.** When a card is completed by typing alone (no reveal used), consider only highlighting the rectangle around each solved word instead of the current display — mirrors how little real Anki shows you when you already knew the answer.
+
 ## JSON format reference
 
 ```json
