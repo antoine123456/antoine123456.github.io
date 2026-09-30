@@ -11,6 +11,9 @@ espanol-trainer/
 ├── reimport_stats.py  ← CLI: writes progress made here back into a .apkg for re-import into real Anki
 ├── default.json       ← bundled deck auto-loaded on first run if no source has been imported yet
 ├── default_media/     ← its audio/image files
+├── add_card.py        ← console tool: adds one word pair to *your own* Perso deck (see below)
+├── cli_firestore.py   ← shared Firestore logic used by add_card.py / migrate_perso.py
+├── migrate_perso.py   ← one-off: re-import old shared "perso" words into your personal deck
 └── README.md
 ```
 
@@ -100,6 +103,80 @@ users/{uid}/sources/{sourceId}/cardChunks/{n}   { data, index, total }   (user-i
 The bundled `default.json` deck's card *content* is never duplicated into Firestore (it's already static), only its progress (`srs`/`newCount`/`flagged`) — under the fixed source id `"default"` so it matches across devices. User-imported decks' card content is chunked (each doc kept well under Firestore's 1 MiB limit) since it isn't available anywhere else in the cloud.
 
 On first sign-in: if the cloud has nothing yet, your local data is uploaded as-is. If both sides have data, they're merged — per-card SRS keeps whichever side was reviewed more recently (`lastReview` timestamp), flagged cards are unioned — and a timestamped backup of your pre-merge local data is saved under a separate `localStorage` key first. On sign-out, the local copy of *that account's* data is cleared (so a shared computer doesn't leak it to the next person); nothing in the cloud is touched.
+
+---
+
+## Console tool (`cuatroloop` / `tresloop`)
+
+A pair of shell functions (defined in `~/.bashrc`) that read words one per
+line from stdin, translate each with [`translate-shell`](https://github.com/soimort/translate-shell)
+(the `trans` CLI), and add the pair as a flashcard — without touching Anki or
+re-running `extract.py`. `cuatroloop` translates ES→FR, `tresloop` FR→ES.
+
+Each word goes straight into **a personal "Perso" deck in Firestore**
+(`add_card.py` → `cli_firestore.py`), not into `default.json`. `default.json`
+is the bundled deck shipped to every visitor of the site, so it can't hold
+one person's personal vocabulary — each user picked from the tool's menu
+gets their own separate Perso deck instead, which only shows up when that
+same account signs in with Google in the app.
+
+There's no "log in" step here — a script can't do a Google sign-in popup —
+so the tool identifies who a word is for with a plain menu (pick a name,
+mapped to that person's already-known Firebase `uid`) instead.
+
+### Install
+
+```bash
+brew install translate-shell   # provides `trans`
+pip install firebase-admin     # lets add_card.py write to Firestore
+```
+
+### One-time setup
+
+The first time `add_card.py` runs (i.e. the first word you add), it asks:
+
+1. **Path to a Firebase service-account key (JSON).** Get one from the
+   Firebase console: **⚙️ Project settings → Service accounts → Generate
+   new private key**. This is a different, far more powerful credential than
+   the public `apiKey` baked into `index.html` — it's the Admin SDK key, and
+   it can read/write *any* user's data, not just your own. **Never commit it,
+   never share it, keep the downloaded file outside this repo.**
+2. **A name and Firebase `uid`** for the person these words are for. Find a
+   `uid` in the Firebase console under **Authentication → Users** (after
+   that person has signed into the app with Google at least once) — you
+   only need to look it up this one time, it's then remembered by name.
+
+All of this is cached in `~/.espanol_trainer_cli.json` (never committed to
+git — it lives outside the repo, in your home folder).
+
+With a single user configured, every future word just goes to them
+automatically — no prompt. Type **`user`** as a line in `cuatroloop`/
+`tresloop` (instead of a word to translate) any time to reopen the menu and
+add another person or switch who new words go to.
+
+### Usage
+
+```bash
+echo "casa" | cuatroloop     # adds casa <-> maison to the current user's Perso deck
+```
+
+or interactively, one word per line, `Ctrl-D` to stop:
+
+```bash
+cuatroloop
+```
+
+Words that already exist in that deck (matched case-insensitively against
+either side of the pair) are silently skipped instead of duplicated.
+
+### Migrating old shared words
+
+Before this change, all `cuatroloop`/`tresloop` additions went into a
+`perso` sub-deck shared by every visitor via `default.json`. That deck is
+still there, untouched, for now. `migrate_perso.py` re-adds that same list
+of word pairs into a personal deck through the setup above — run it once
+(`python3 migrate_perso.py`) whenever you're ready, then the shared copy in
+`default.json` can be removed.
 
 ---
 
