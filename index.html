@@ -813,14 +813,47 @@
             border-color: #93aed6;
         }
 
-        #b-content {
-            width: 100%;
-            max-width: 720px;
+        /* Carousel: one slide per card, front + back shown together;
+           neighbours peek on both sides, native swipe / trackpad scroll. */
+        .b-track {
+            width: calc(100% + 48px);
+            margin: 0 -24px 18px;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            padding: 4px max(24px, calc(50% - 280px)) 12px;
+            scrollbar-width: none;
         }
 
-        .b-card {
+        .b-track::-webkit-scrollbar {
+            display: none;
+        }
+
+        .b-slide {
+            flex: 0 0 min(560px, calc(100% - 48px));
+            scroll-snap-align: center;
+            margin: 0 !important;
+            min-height: 220px;
+            opacity: .45;
+            transition: opacity .25s;
+        }
+
+        .b-slide.active {
+            opacity: 1;
+        }
+
+        .b-slide-audio {
+            display: block;
+            margin: 14px auto 0;
+            background: none;
+            border: 1.5px solid var(--border-2);
+            border-radius: 10px;
+            padding: 5px 12px;
+            font-size: 13px;
             cursor: pointer;
-            user-select: none;
         }
 
         .b-sep {
@@ -838,10 +871,6 @@
             content: "";
             flex: 1;
             border-top: 1px solid var(--border-2);
-        }
-
-        .b-back.hidden {
-            visibility: hidden;
         }
 
         .b-nav {
@@ -952,7 +981,7 @@
         <div class="s-main">
             <div class="s-deck-name" id="b-deck-name"></div>
             <input class="b-search" id="b-search" type="search" placeholder="🔎 Rechercher…" oninput="filterBrowse(this.value)">
-            <div id="b-content"></div>
+            <div id="b-content" style="width:100%"></div>
         </div>
     </div>
 
@@ -1808,11 +1837,11 @@
         }
 
         // ═══════════════════════════════════════════════
-        // BROWSE — fiche par fiche, recto → verso, lecture seule (aucun
+        // BROWSE — carrousel, recto + verso affichés, lecture seule (aucun
         // effet sur le SRS). Verso = card.answer (extract.py récent), sinon
         // les mots à taper pour les JSON plus anciens.
         // ═══════════════════════════════════════════════
-        var browse = { all: [], list: [], idx: 0, flipped: false };
+        var browse = { all: [], list: [], idx: 0, observer: null };
 
         function openBrowse(si, deckName) {
             var src = loadSources()[si];
@@ -1828,8 +1857,6 @@
                 return { card: c, back: back, text: (plainText(c.question) + " " + plainText(back) + " " + (c.words || []).join(" ")).toLowerCase() };
             });
             browse.list = browse.all;
-            browse.idx = 0;
-            browse.flipped = false;
             document.getElementById("b-search").value = "";
             document.getElementById("b-deck-name").textContent = deckName.split("::").join(" › ");
             document.getElementById("home").style.display = "none";
@@ -1839,6 +1866,8 @@
 
         function closeBrowse() {
             document.getElementById("audio-player").pause();
+            if (browse.observer) browse.observer.disconnect();
+            document.getElementById("b-content").innerHTML = "";
             document.getElementById("browse").style.display = "none";
             document.getElementById("home").style.display = "block";
         }
@@ -1849,52 +1878,91 @@
                 var t = noAcc(b.text);
                 return terms.every(function (term) { return t.indexOf(term) !== -1; });
             });
-            browse.idx = 0;
-            browse.flipped = false;
             renderBrowse();
         }
 
+        // Builds empty slide shells for the whole list; each one is filled
+        // (front + back, via the Shadow DOM renderer) only when it gets
+        // near the viewport, so 1000+ card decks stay light.
         function renderBrowse() {
             var n = browse.list.length;
-            document.getElementById("b-count").textContent = (n ? browse.idx + 1 : 0) + " / " + n;
             var el = document.getElementById("b-content");
-            if (!n) { el.innerHTML = '<div class="h-empty">Aucune carte ne correspond.</div>'; return; }
-            var b = browse.list[browse.idx], c = b.card;
-            var hasAudio = (c.audioQuestion && c.audioQuestion.length) || (c.audioAnswer && c.audioAnswer.length);
-            el.innerHTML =
-                '<div class="s-question b-card" onclick="flipBrowse()">'
-                + '<div class="b-front"></div>'
-                + '<div class="b-sep">verso</div>'
-                + '<div class="b-back' + (browse.flipped ? '' : ' hidden') + '"></div>'
-                + '</div>'
+            if (browse.observer) browse.observer.disconnect();
+            browse.idx = 0;
+            if (!n) {
+                el.innerHTML = '<div class="h-empty">Aucune carte ne correspond.</div>';
+                updateBrowseCount();
+                return;
+            }
+            var slides = browse.list.map(function (b, i) {
+                return '<div class="s-question b-slide' + (i === 0 ? ' active' : '') + '" data-i="' + i + '"></div>';
+            }).join("");
+            el.innerHTML = '<div class="b-track" id="b-track">' + slides + '</div>'
                 + '<div class="b-nav">'
-                + '<button onclick="stepBrowse(-1)"' + (browse.idx === 0 ? ' disabled' : '') + '>‹ Préc.</button>'
-                + '<span class="b-hint">Espace : retourner</span>'
-                + (hasAudio ? '<button onclick="playBrowseAudio()" title="Écouter">🔊</button>' : '')
-                + '<button onclick="stepBrowse(1)"' + (browse.idx === n - 1 ? ' disabled' : '') + '>Suiv. ›</button>'
+                + '<button id="b-prev" onclick="stepBrowse(-1)">‹ Préc.</button>'
+                + '<span class="b-hint">← → pour défiler</span>'
+                + '<button id="b-next" onclick="stepBrowse(1)">Suiv. ›</button>'
                 + '</div>';
-            var css = cardStyle(browse.sid, c);
-            mountCardHtml(el.querySelector(".b-front"), c.question, css);
-            mountCardHtml(el.querySelector(".b-back"), b.back, css);
+            var track = document.getElementById("b-track");
+            browse.observer = new IntersectionObserver(function (entries) {
+                entries.forEach(function (en) {
+                    if (en.isIntersecting) fillSlide(en.target);
+                });
+            }, { root: track, rootMargin: "0px 150%" });
+            track.querySelectorAll(".b-slide").forEach(function (sl) { browse.observer.observe(sl); });
+            track.addEventListener("scroll", onBrowseScroll, { passive: true });
+            updateBrowseCount();
         }
 
-        function flipBrowse() {
-            browse.flipped = !browse.flipped;
-            renderBrowse();
+        function fillSlide(sl) {
+            if (sl.dataset.filled) return;
+            sl.dataset.filled = "1";
+            var b = browse.list[+sl.dataset.i], c = b.card;
+            var hasAudio = (c.audioQuestion && c.audioQuestion.length) || (c.audioAnswer && c.audioAnswer.length);
+            sl.innerHTML = '<div class="b-front"></div><div class="b-sep">verso</div><div class="b-back"></div>'
+                + (hasAudio ? '<button class="b-slide-audio" onclick="playBrowseAudio(' + sl.dataset.i + ')" title="Écouter">🔊</button>' : '');
+            var css = cardStyle(browse.sid, c);
+            mountCardHtml(sl.querySelector(".b-front"), c.question, css);
+            mountCardHtml(sl.querySelector(".b-back"), b.back, css);
+        }
+
+        // Current slide = the one whose centre is closest to the track's.
+        function onBrowseScroll() {
+            var track = document.getElementById("b-track");
+            if (!track) return;
+            var mid = track.scrollLeft + track.clientWidth / 2, best = 0, bestD = Infinity;
+            var slides = track.children;
+            for (var i = 0; i < slides.length; i++) {
+                var d = Math.abs(slides[i].offsetLeft + slides[i].offsetWidth / 2 - mid);
+                if (d < bestD) { bestD = d; best = i; }
+                else if (d > bestD) break;
+            }
+            if (best === browse.idx) return;
+            slides[browse.idx] && slides[browse.idx].classList.remove("active");
+            slides[best].classList.add("active");
+            browse.idx = best;
+            document.getElementById("audio-player").pause();
+            updateBrowseCount();
+        }
+
+        function updateBrowseCount() {
+            var n = browse.list.length;
+            document.getElementById("b-count").textContent = (n ? browse.idx + 1 : 0) + " / " + n;
+            var prev = document.getElementById("b-prev"), next = document.getElementById("b-next");
+            if (prev) prev.disabled = browse.idx === 0;
+            if (next) next.disabled = browse.idx >= n - 1;
         }
 
         function stepBrowse(d) {
-            var i = browse.idx + d;
-            if (i < 0 || i >= browse.list.length) return;
-            document.getElementById("audio-player").pause();
-            browse.idx = i;
-            browse.flipped = false;
-            renderBrowse();
+            var track = document.getElementById("b-track");
+            var target = track && track.children[browse.idx + d];
+            if (!target) return;
+            track.scrollTo({ left: target.offsetLeft + target.offsetWidth / 2 - track.clientWidth / 2 });
         }
 
-        function playBrowseAudio() {
-            var c = browse.list[browse.idx].card;
-            playAudioList(browse.flipped ? (c.audioAnswer || []) : (c.audioQuestion || []));
+        function playBrowseAudio(i) {
+            var c = browse.list[i].card;
+            playAudioList((c.audioQuestion || []).concat(c.audioAnswer || []));
         }
 
         document.addEventListener("keydown", function (e) {
@@ -1905,9 +1973,6 @@
                 if (inSearch) e.target.blur(); else closeBrowse();
             } else if (inSearch) {
                 if (e.key === "Enter") { e.preventDefault(); e.target.blur(); }
-            } else if (e.key === " " || e.key === "Enter") {
-                e.preventDefault();
-                flipBrowse();
             } else if (e.key === "ArrowLeft") {
                 e.preventDefault();
                 stepBrowse(-1);

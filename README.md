@@ -87,7 +87,7 @@ ankisync() {
 - The question is shown as a card; type each word of the answer into its blank.
 - Accents are optional — `ame` is accepted for `âme`.
 - After 3 wrong attempts on a word, a hint appears; **💡 Voir les réponses** reveals everything, **Passer →** skips.
-- **🔍** on any deck row opens a read-only card browser: one card at a time, front first; **Space** (or a tap) flips to the back, **← / →** move, the search box filters on both sides (accents ignored), **Esc** goes back. Nothing you do there touches scheduling. JSON made before `answer` existed shows the typed words as the back.
+- **🔍** on any deck row opens a read-only card carousel: every card shows its front and back together; swipe (or **← / →**, ‹ ›) to move, the search box filters on both sides (accents ignored), **Esc** goes back. Nothing you do there touches scheduling. JSON made before `answer` existed shows the typed words as the back.
 - Once every blank on a card is correct, the app rates it automatically from how many mistakes you made (0 → Parfait, 1 → Correct, 2 → Difficile, 3+ → À revoir) and schedules its next review with a lightweight SM-2 algorithm. New cards are capped at 20 per session; cards marked "À revoir" come back later in the same session.
 
 ---
