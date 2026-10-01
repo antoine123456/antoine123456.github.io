@@ -87,6 +87,8 @@ ankisync() {
 - The question is shown as a card; type each word of the answer into its blank, inside the card under its "verso" line.
 - The **⌨️ Saisie / 🃏 Mode normal** toggle at the top of the study screen (remembered per browser) switches to plain Anki-style review: **Space** shows the back in the card, then rate with the buttons, **1–4** or **F2/F3/F4/F7** (**Space** again = Correct).
 - Accents are optional — `ame` is accepted for `âme`.
+- The bottom bar holds the actions as pills: **💡 Indice** (F1) shows the word at the cursor, **Voir la réponse** (F8) shows the whole answer. Once every missing word is shown (or after F8), the bar turns into the 4 rating pills (À revoir · Difficile · Correct · Facile, F2/F4/F3/F7) and the rating is yours to pick.
+- The rating's color lights up the card (red / orange / green / blue) when it's automatic or from the keyboard; clicking or tapping a pill only lights up that pill.
 - After 3 wrong attempts on a word, a hint appears; **💡 Voir les réponses** reveals everything, **Passer →** skips.
 - **🔍** on any deck row opens a read-only card browser: decks with pictures get a carousel (front and back together; swipe, mouse wheel, **← / →** or ‹ › to move), word/sentence decks a dense `front | back` list; the search box filters on both sides (accents ignored), **Esc** goes back. Nothing you do there touches scheduling. JSON made before `answer` existed shows the typed words as the back.
 - Once every blank on a card is correct, the app rates it automatically from how many mistakes you made (0 → Parfait, 1 → Correct, 2 → Difficile, 3+ → À revoir) and schedules its next review with a lightweight SM-2 algorithm. New cards are capped at 20 per session; cards marked "À revoir" come back later in the same session.

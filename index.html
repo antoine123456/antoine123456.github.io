@@ -422,7 +422,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 36px 24px 84px;
+            padding: 36px 24px 150px;
         }
 
         .s-deck-name {
@@ -432,16 +432,67 @@
             letter-spacing: .3px;
         }
 
-        /* Bottom counters, à la AnkiDroid: new (blue) / learning (red) / review (green) */
-        .s-counts {
+        /* Fixed bottom bar: action pills (hint / answer, then ratings)
+           above the counters, à la AnkiDroid: new (blue) / learning (red)
+           / review (green) */
+        .s-bottom {
             position: fixed;
             left: 0; right: 0; bottom: 0;
+            padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            z-index: 20;
+        }
+
+        .s-actions {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            max-width: 720px;
+            margin: 0 auto 10px;
+        }
+
+        .s-actions:empty {
+            display: none;
+        }
+
+        .s-pill {
+            flex: 1 1 0;
+            max-width: 260px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 14px;
+            border: 1.5px solid var(--border-2);
+            border-radius: 999px;
+            background: var(--surface);
+            color: var(--text-2);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color .15s, background .15s, color .15s;
+        }
+
+        .s-pill:hover {
+            border-color: var(--navy);
+            color: var(--navy);
+        }
+
+        .s-pill-hint:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .s-pill .t-key {
+            margin-left: 2px;
+        }
+
+        .s-counts {
             display: flex;
             justify-content: center;
             gap: 26px;
-            padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px));
-            background: var(--surface);
-            border-top: 1px solid var(--border);
         }
 
         .s-count {
@@ -576,18 +627,6 @@
             width: 100%;
         }
 
-        .t-show-ans {
-            font-size: 11px;
-            color: var(--text-2);
-            cursor: pointer;
-            letter-spacing: .3px;
-            transition: color .15s;
-        }
-
-        .t-show-ans:hover {
-            color: var(--gold);
-        }
-
         .t-flag {
             font-size: 11px;
             color: var(--text-3);
@@ -619,24 +658,26 @@
 
         /* Anki-style answer buttons, à la anki_ui_after.png */
         .t-ratings {
-            margin-top: 22px;
             display: flex;
-            gap: 10px;
+            gap: 8px;
             justify-content: center;
-            flex-wrap: wrap;
+            width: 100%;
         }
 
         .t-rate {
+            flex: 1 1 0;
+            max-width: 170px;
+            min-width: 0;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 3px;
-            min-width: 92px;
-            padding: 8px 14px;
+            justify-content: center;
+            gap: 6px;
+            padding: 9px 10px;
             border: 1.5px solid var(--border-2);
-            border-radius: 12px;
+            border-radius: 999px;
             background: var(--surface);
             cursor: pointer;
+            white-space: nowrap;
             transition: border-color .15s, background .15s, transform .1s;
         }
 
@@ -650,8 +691,21 @@
 
         .t-rate .t-key {
             margin-left: 0;
-            margin-top: 2px;
         }
+
+        @media (max-width: 520px) {
+            .t-rate { flex-direction: column; gap: 1px; padding: 6px 4px; border-radius: 18px; }
+            .t-rate .t-key { display: none; }
+            .s-pill { font-size: 13px; padding: 10px 8px; }
+        }
+
+        /* Card highlighted in the rating's color (automatic or keyboard
+           rating; a click/tap only lights up the button pressed). */
+        .s-question { transition: border-color .2s, background .2s; }
+        .s-question.rated-again { border-color: var(--red); background: var(--tint-red); }
+        .s-question.rated-hard { border-color: var(--orange); background: var(--tint-orange); }
+        .s-question.rated-good { border-color: var(--green); background: var(--tint-green); }
+        .s-question.rated-easy { border-color: var(--blue); background: var(--tint-blue); }
 
         .t-rate-time {
             font-size: 11px;
@@ -731,21 +785,6 @@
             cursor: pointer;
         }
 
-        /* Flash */
-        #flash {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            border: 2.5px solid var(--green);
-            border-radius: 10px;
-            opacity: 0;
-            transition: opacity .25s;
-            z-index: 50;
-        }
-
-        #flash.on {
-            opacity: .6;
-        }
 
         /* Verso shown after a card whose back holds more than the typed words */
         /* Verso, shown inside the question card under a separator line
@@ -761,30 +800,6 @@
             margin-top: 18px;
         }
 
-        .s-flip-btn {
-            margin: 4px auto 0;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: none;
-            border: 1.5px solid var(--border-2);
-            border-radius: 12px;
-            padding: 9px 20px;
-            color: var(--text-2);
-            font-size: 14px;
-            cursor: pointer;
-            transition: border-color .15s, color .15s;
-        }
-
-        .s-flip-btn:hover {
-            border-color: var(--navy);
-            color: var(--navy);
-        }
-
-        .t-ratings.waiting {
-            visibility: hidden;
-        }
-
         .s-mode-toggle {
             background: none;
             border: 1.5px solid var(--border-2);
@@ -798,22 +813,6 @@
         }
 
         .s-mode-toggle:hover {
-            border-color: var(--navy);
-            color: var(--navy);
-        }
-
-        .s-next-btn {
-            margin-top: 14px;
-            background: none;
-            border: 1.5px solid var(--border-2);
-            border-radius: 10px;
-            padding: 7px 16px;
-            color: var(--text-2);
-            font-size: 13px;
-            cursor: pointer;
-        }
-
-        .s-next-btn:hover {
             border-color: var(--navy);
             color: var(--navy);
         }
@@ -1052,14 +1051,16 @@
             <div class="s-deck-name" id="s-deck-name"></div>
             <div id="s-content"></div>
         </div>
-        <div class="s-counts">
-            <span class="s-count s-count-new" id="cnt-new">0</span>
-            <span class="s-count s-count-learn" id="cnt-learn">0</span>
-            <span class="s-count s-count-review" id="cnt-review">0</span>
+        <div class="s-bottom">
+            <div class="s-actions" id="s-actions"></div>
+            <div class="s-counts">
+                <span class="s-count s-count-new" id="cnt-new">0</span>
+                <span class="s-count s-count-learn" id="cnt-learn">0</span>
+                <span class="s-count s-count-review" id="cnt-review">0</span>
+            </div>
         </div>
     </div>
 
-    <div id="flash"></div>
     <div id="toast"></div>
     <!-- ── BROWSE ── -->
     <div id="browse">
@@ -1899,6 +1900,7 @@
 
         function goHome() {
             pendingNext = null;
+            setBarState("");
             saveSRS(sess.sourceId, sess.srs);
             document.getElementById("study").style.display = "none";
             document.getElementById("home").style.display = "block";
@@ -2133,47 +2135,77 @@
             if (!flip && (!card.words || !card.words.length)) { sess.qIdx++; showCard(); return; }
 
             var hasAudio = (card.audioQuestion && card.audioQuestion.length) || card.lang;
-            var previews = previewIntervals(sess.srs[card.id]);
             // One card: recto, a "verso" line, then the blanks to type
-            // (type-in mode) or the hidden back + "show" button (normal mode).
+            // (type-in mode) or the hidden back (normal mode). The actions
+            // (hint / answer, then ratings) live in the bottom bar.
             document.getElementById("s-content").innerHTML =
                 '<div class="s-question"><div class="s-card-body"></div>'
                 + (hasAudio ? '<button class="s-audio-btn" onclick="playCardAudio(\'q\')">🔊 Écouter</button>' : '')
                 + '<div class="b-sep">verso</div>'
                 + (flip
                     ? '<div class="s-verso-body" id="s-verso-body"></div>'
-                    + '<button class="s-flip-btn" id="s-flip-btn" onclick="flipCard()">Afficher la réponse <span class="t-key">Espace</span></button>'
                     : '<div class="t-words" id="t-words"></div><div class="s-verso-extra" id="s-verso-extra"></div>')
                 + '</div>'
                 + '<div class="t-actions">'
-                + (flip ? '' : '<span class="t-show-ans" onclick="revealCurrent()">💡 Voir la réponse <span class="t-key">F1</span></span>')
                 + '<span class="t-flag" id="s-flag-btn" onclick="toggleFlagCurrent()" title="Marquer à corriger dans Anki">🚩 <span class="t-key">F6</span></span>'
-                + '</div>'
-                + ratingButtonsHtml(previews);
+                + '</div>';
             mountCardHtml(document.querySelector("#s-content .s-card-body"), card.question, cardStyle(sess.sourceId, card));
 
-            if (flip) document.querySelector("#s-content .t-ratings").classList.add("waiting");
-            else buildRows(card.words);
+            setBarState("question");
+            if (!flip) buildRows(card.words);
             updateFlagIndicator();
             if (hasAudio) playCardAudio("q");
         }
 
-        // Anki-style answer buttons — the interval preview sits above each
-        // one, same layout as Anki's own reviewer.
+        // Anki-style answer buttons (Anki's order), shown as pills in the
+        // bottom bar once the answer is out. The interval preview sits next
+        // to each label. A click/tap passes viaButton=true.
         function ratingButtonsHtml(previews) {
+            var flip = studyMode() === "flip";
             var defs = [
-                [1, "again", "À revoir", "F2"],
-                [3, "good", "Correct", "F3"],
-                [2, "hard", "Difficile", "F4"],
-                [4, "easy", "Facile", "F7"],
+                [1, "again", "À revoir", flip ? "1" : "F2"],
+                [2, "hard", "Difficile", flip ? "2" : "F4"],
+                [3, "good", "Correct", flip ? "3" : "F3"],
+                [4, "easy", "Facile", flip ? "4" : "F7"],
             ];
             return '<div class="t-ratings">' + defs.map(function (d) {
-                return '<button class="t-rate t-rate-' + d[1] + '" data-q="' + d[0] + '" onclick="rate(' + d[0] + ')">'
-                    + '<span class="t-rate-time">' + previews[d[0]] + '</span>'
+                return '<button class="t-rate t-rate-' + d[1] + '" data-q="' + d[0] + '" onclick="rate(' + d[0] + ', true)">'
                     + '<span class="t-rate-label">' + d[2] + '</span>'
+                    + '<span class="t-rate-time">' + previews[d[0]] + '</span>'
                     + '<span class="t-key">' + d[3] + '</span>'
                     + '</button>';
             }).join('') + '</div>';
+        }
+
+        // Bottom bar: "question" (hint + full answer, or "show answer" in
+        // normal mode) → "rating" (the 4 rating pills) → "next" (rich back
+        // on screen after an automatic rating) — or "" (empty).
+        var barState = "";
+        function setBarState(state) {
+            barState = state;
+            var el = document.getElementById("s-actions");
+            if (!el) return;
+            var card = sess.queue[sess.qIdx];
+            var html = "";
+            if (state === "question") {
+                html = studyMode() === "flip"
+                    ? '<button class="s-pill" onclick="flipCard()">Afficher la réponse <span class="t-key">Espace</span></button>'
+                    : '<button class="s-pill s-pill-hint" onclick="revealCurrent()">💡 Indice <span class="t-key">F1</span></button>'
+                    + '<button class="s-pill" onclick="showFullAnswer()">Voir la réponse <span class="t-key">F8</span></button>';
+            } else if (state === "rating" && card) {
+                html = ratingButtonsHtml(previewIntervals(sess.srs[card.id]));
+            } else if (state === "next") {
+                html = '<button class="s-pill" onclick="continueAfterAnswer()">Suivant → <span class="t-key">Entrée</span></button>';
+            }
+            el.innerHTML = html;
+        }
+
+        // Card border + tint in the rating's color.
+        function highlightCard(q) {
+            var el = document.querySelector("#s-content .s-question");
+            if (!el) return;
+            el.classList.remove("rated-again", "rated-hard", "rated-good", "rated-easy");
+            el.classList.add("rated-" + { 1: "again", 2: "hard", 3: "good", 4: "easy" }[q]);
         }
 
         // Plain-color fade-in/fade-out flash on the button that matches the
@@ -2186,29 +2218,32 @@
             btn.classList.add("rate-flash");
         }
 
-        function rate(q) {
+        function rate(q, viaButton) {
             if (advancing) return;
             if (studyMode() === "flip") {
                 if (!flipShown) return;
                 advancing = true;
-                flashForPendingRating(q);
+                flashForPendingRating(q, viaButton);
                 document.getElementById("audio-player").pause();
                 setTimeout(function () { advanceCard(q); }, 150);
                 return;
             }
             advancing = true;
-            flashForPendingRating(q);
+            flashForPendingRating(q, viaButton);
             playCardAudio("both", function () { advanceCard(q); });
         }
 
         // Highlight the button the instant the decision is made (press, or
         // completing the card), not after any audio has finished playing —
         // that's a separate, later step (the card-change transition).
-        function flashForPendingRating(q) {
+        // Clicked/tapped → only that button lights up; automatic or
+        // keyboard rating → the card itself takes the rating's color.
+        function flashForPendingRating(q, viaButton) {
             var card = sess.queue[sess.qIdx];
             if (!card) return;
             var previewSrs = applyRating(sess.srs[card.id] || defaultSRS(), q, { requeueIn: null });
-            flashRateButtonFor(q, previewSrs);
+            var shown = shownRating(q, previewSrs);
+            if (viaButton) flashRateButton(shown); else highlightCard(shown);
         }
 
         // What each rating would do to THIS card right now — shown above the
@@ -2397,23 +2432,44 @@
             entry.hint.style.display = "block";
             entry.revealed = true;
         }
-        // Reveals only the word at the cursor (or the first not-yet-shown one
-        // if nothing has focus) — not the whole card at once. Once nothing
-        // is left to reveal, that same shortcut becomes the confirmation to
-        // move on: the press that reveals the LAST word just reveals it and
-        // stops, so you get to see the fully-revealed card; the NEXT press
-        // (with nothing left to reveal) advances via completeCard(), which
-        // always rates À revoir once any reveal was used this card — no
-        // matter how many other words were typed correctly on their own.
+        // "💡 Indice": reveals only the word at the cursor (or the first
+        // not-yet-shown one if nothing has focus). Once every missing word
+        // is shown, the bottom bar switches to the rating pills and the
+        // rating is yours to pick (no more automatic rating).
         function revealCurrent() {
+            if (advancing || barState === "rating") return;
             var entry = wordRows.find(function (e) { return e.inp === document.activeElement && !e.solved && !e.revealed; })
                 || wordRows.find(function (e) { return !e.solved && !e.revealed; });
-            if (!entry) { completeCard(); return; }
+            if (!entry) { setBarState("rating"); return; }
             revealed = true;
+            showHintFor(entry);
+            // Every missing word now shown → time to rate it yourself.
+            if (!wordRows.some(function (e) { return !e.solved && !e.revealed; })) {
+                setBarState("rating");
+                playCardAudio("a"); // like Anki: audio plays as soon as the answer appears
+            }
+        }
+        function showHintFor(entry) {
             revealHint(entry);
             entry.lbl.textContent = entry.word;
             entry.lbl.style.color = "#c9922a";
-            playCardAudio("a"); // like Anki: audio plays as soon as the answer appears
+        }
+
+        // "Voir la réponse": the whole answer at once, then rating pills.
+        function showFullAnswer() {
+            if (advancing || barState === "rating") return;
+            if (studyMode() === "flip") { flipCard(); return; }
+            var card = sess.queue[sess.qIdx];
+            if (!card) return;
+            wordRows.forEach(function (e) { if (!e.solved && !e.revealed) { revealed = true; showHintFor(e); } });
+            if (hasRichAnswer(card)) {
+                var extra = document.getElementById("s-verso-extra");
+                extra.innerHTML = '<div class="s-verso-body"></div>';
+                mountCardHtml(extra.querySelector(".s-verso-body"), card.answer, cardStyle(sess.sourceId, card));
+            }
+            if (document.activeElement) document.activeElement.blur();
+            setBarState("rating");
+            playCardAudio("a");
         }
 
         // Difficile/Facile are only ever a manual, deliberate call (the
@@ -2435,10 +2491,10 @@
             // Rich back (meaning, example sentence, image…): show it under
             // the blanks, in the card, and wait for Entrée / « Suivant → ».
             var extra = document.getElementById("s-verso-extra");
-            extra.innerHTML = '<div class="s-verso-body"></div>'
-                + '<button class="s-next-btn" onclick="continueAfterAnswer()">Suivant → <span class="t-key">Entrée</span></button>';
+            extra.innerHTML = '<div class="s-verso-body"></div>';
             mountCardHtml(extra.querySelector(".s-verso-body"), card.answer, cardStyle(sess.sourceId, card));
             if (document.activeElement) document.activeElement.blur();
+            setBarState("next");
             pendingNext = function () { flash(function () { advanceCard(q); }); };
             playCardAudio("a");
         }
@@ -2465,9 +2521,7 @@
             flipShown = true;
             var back = card.answer != null ? card.answer : esc((card.words || []).join(" "));
             mountCardHtml(document.getElementById("s-verso-body"), back, cardStyle(sess.sourceId, card));
-            var btn = document.getElementById("s-flip-btn");
-            if (btn) btn.remove();
-            document.querySelector("#s-content .t-ratings").classList.remove("waiting");
+            setBarState("rating");
             playCardAudio("a");
         }
 
@@ -2480,14 +2534,14 @@
         }
 
         function tryComplete() {
-            if (advancing) return;
+            if (advancing || barState === "rating") return;
             if (wordRows.every(function (e) { return e.solved; })) completeCard();
         }
 
         // ═══════════════════════════════════════════════
         // KEYBOARD SHORTCUTS (study screen only)
         // ═══════════════════════════════════════════════
-        // F1 = voir la réponse (au curseur) · F2 = À revoir · F3 = Correct
+        // F1 = indice (mot au curseur) · F8 = toute la réponse · F2 = À revoir · F3 = Correct
         // · F4 = Difficile · F7 = Facile (not F5/F6: F5 reloads the page in
         // most browsers and preventDefault() can't reliably stop that; F6
         // is already the flag shortcut) — "Facile" is deliberately the
@@ -2509,6 +2563,9 @@
             } else if (e.key === "F1") {
                 e.preventDefault();
                 revealCurrent();
+            } else if (e.key === "F8") {
+                e.preventDefault();
+                showFullAnswer();
             } else if (e.key === "F6") {
                 e.preventDefault();
                 toggleFlagCurrent();
@@ -2547,23 +2604,22 @@
             }, 400);
         }
 
+        // Short pause so the rating color is seen before the card changes.
         function flash(cb) {
-            var f = document.getElementById("flash");
-            f.classList.add("on");
-            setTimeout(function () { f.classList.remove("on"); }, 350);
             setTimeout(cb, 400);
         }
 
         // The rating itself (and scheduling) is unaffected — this only
-        // softens the *feedback*: flashing "Facile" is held back until a
-        // card has actually been aced on the first try a few times, the
-        // "Correct" button flashes instead for the first three.
-        function flashRateButtonFor(q, srs) {
+        // softens the *feedback*: showing "Facile" is held back until a
+        // card has actually been aced on the first try a few times,
+        // "Correct" is shown instead for the first three.
+        function shownRating(q, srs) {
             var showAsGood = q === 4 && srs && (srs.easyCount || 0) <= 3;
-            flashRateButton(showAsGood ? 3 : q);
+            return showAsGood ? 3 : q;
         }
 
         function showDone() {
+            setBarState("");
             saveSRS(sess.sourceId, sess.srs);
             document.getElementById("s-content").innerHTML =
                 '<div class="s-done">'
