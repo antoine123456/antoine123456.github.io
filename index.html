@@ -740,8 +740,15 @@
                 flex: none;
             }
 
-            body.kb-open #study .s-bottom {
+            /* Keyboard up: only the hint / answer pills stay (no counters,
+               no rating pills — those show once the keyboard is down). */
+            body.kb-open #study .s-bottom:not([data-state="question"]),
+            body.kb-open #study .s-counts {
                 display: none;
+            }
+
+            body.kb-open #study .s-actions {
+                margin-bottom: 0;
             }
 
             .s-pill .t-key {
@@ -2243,6 +2250,8 @@
         var barState = "";
         function setBarState(state) {
             barState = state;
+            var bottom = document.querySelector("#study .s-bottom");
+            if (bottom) bottom.dataset.state = state;
             var el = document.getElementById("s-actions");
             if (!el) return;
             var card = sess.queue[sess.qIdx];
@@ -2250,7 +2259,7 @@
             if (state === "question") {
                 html = studyMode() === "flip"
                     ? '<button class="s-pill" onclick="flipCard()">Afficher la réponse <span class="t-key">Espace</span></button>'
-                    : '<button class="s-pill s-pill-hint" onclick="revealCurrent()">💡 Indice <span class="t-key">F1</span></button>'
+                    : '<button class="s-pill s-pill-hint" onpointerdown="event.preventDefault()" onmousedown="event.preventDefault()" onclick="hintFromPill()">💡 Indice <span class="t-key">F1</span></button>'
                     + '<button class="s-pill" onclick="showFullAnswer()">Voir la réponse <span class="t-key">F8</span></button>';
             } else if (state === "rating" && card) {
                 html = ratingButtonsHtml(previewIntervals(sess.srs[card.id]));
@@ -2505,7 +2514,7 @@
                 || wordRows.find(function (e) { return !e.solved && !e.revealed; });
             // Nothing left to reveal: one more F1 = rate (À revoir, since
             // hints were used) and move on.
-            if (!entry) { completeCard(); return; }
+            if (!entry) { completeCard(); return null; }
             revealed = true;
             showHintFor(entry);
             // Every missing word now shown → time to rate it yourself.
@@ -2513,6 +2522,14 @@
                 setBarState("rating");
                 playCardAudio("a"); // like Anki: audio plays as soon as the answer appears
             }
+            return entry;
+        }
+        // Tapping "💡 Indice": the pill doesn't take the focus (so the phone
+        // keyboard stays up), and the cursor goes to the hinted word — done
+        // inside the tap, so iOS reopens the keyboard if it was down.
+        function hintFromPill() {
+            var entry = revealCurrent();
+            if (entry && !advancing && entry.inp.isConnected) entry.inp.focus();
         }
         function showHintFor(entry) {
             revealHint(entry);

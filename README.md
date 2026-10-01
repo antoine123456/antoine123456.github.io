@@ -88,7 +88,7 @@ ankisync() {
 - The **⌨️ Saisie / 🃏 Mode normal** toggle at the top of the study screen (remembered per browser) switches to plain Anki-style review: **Space** shows the back in the card, then rate with the buttons, **1–4** or **F2/F3/F4/F7** (**Space** again = Correct).
 - Accents are optional — `ame` is accepted for `âme`.
 - The bottom bar holds the actions as pills: **💡 Indice** (F1) shows the word at the cursor, **Voir la réponse** (F8) shows the whole answer. Once every missing word is shown (or after F8), the bar turns into the 4 rating pills (À revoir · Difficile · Correct · Facile, F2/F4/F3/F7); typing the words or pressing F1 once more still rates À revoir and moves on.
-- On phones the card has a fixed shape sized to what the keyboard leaves visible: the recto half and the type-in/verso half each scroll on their own around a fixed "verso" line, and the bottom bar (pills + counters) shows only while the keyboard is down.
+- On phones the card has a fixed shape sized to what the keyboard leaves visible: the recto half and the type-in/verso half each scroll on their own around a fixed "verso" line, and while the keyboard is up only the 💡 Indice / Voir la réponse pills stay (tapping Indice keeps the keyboard up); counters and rating pills show once it is down.
 - **F6** (no on-screen button) marks the card to fix in Anki; 🚩 on the home screen lists the marked cards.
 - The rating's color lights up the card (red / orange / green / blue) when it's automatic or from the keyboard; clicking or tapping a pill only lights up that pill.
 - After 3 wrong attempts on a word, a hint appears; **💡 Voir les réponses** reveals everything, **Passer →** skips.
