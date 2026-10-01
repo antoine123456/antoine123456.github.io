@@ -75416,6 +75416,28 @@
             "cuatroloop"
           ],
           "lang": "es"
+        },
+        {
+          "id": "1790861860077",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>\u001b[A\u001b[A\u001b[B",
+          "words": [
+            "[Au001b[Au001b[B"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1790861860078",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>[Au001b[Au001b[B",
+          "words": [
+            "\u001b[A\u001b[A\u001b[B"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
         }
       ]
     }
