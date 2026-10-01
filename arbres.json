@@ -1,0 +1,392 @@
+{
+  "version": 1,
+  "source": "Arbres",
+  "decks": [
+    {
+      "id": "1778569706935",
+      "name": "Arbres",
+      "cards": [
+        {
+          "id": "1778569733290",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3f/2020_year._Herbarium._Tilia_cordata._img-007.jpg/960px-2020_year._Herbarium._Tilia_cordata._img-007.jpg\">",
+          "answer": "Tilleul",
+          "words": [
+            "Tilleul"
+          ],
+          "tags": [
+            "commun"
+          ],
+          "srs": {
+            "state": "review",
+            "step": 0,
+            "interval": 1,
+            "ease": 2.5,
+            "dueOffset": 1,
+            "reps": 3,
+            "lapses": 0,
+            "easyCount": 0
+          }
+        },
+        {
+          "id": "1778570118104",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/1/14/Betula_pendula_tree.jpg/960px-Betula_pendula_tree.jpg\">",
+          "answer": "Boulot blanc",
+          "words": [
+            "Boulot",
+            "blanc"
+          ],
+          "tags": [
+            "commun"
+          ],
+          "srs": {
+            "state": "review",
+            "step": 0,
+            "interval": 1,
+            "ease": 2.5,
+            "dueOffset": 1,
+            "reps": 2,
+            "lapses": 0,
+            "easyCount": 0
+          }
+        },
+        {
+          "id": "1778570178827",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/7/78/GinkgoLeaves.jpg/960px-GinkgoLeaves.jpg\">",
+          "answer": "Gingko biloba",
+          "words": [
+            "Gingko",
+            "biloba"
+          ],
+          "tags": [
+            "commun"
+          ],
+          "srs": {
+            "state": "review",
+            "step": 0,
+            "interval": 1,
+            "ease": 2.5,
+            "dueOffset": 1,
+            "reps": 4,
+            "lapses": 0,
+            "easyCount": 0
+          }
+        },
+        {
+          "id": "1790845645153",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Upright_English_Oak_Quercus_robur_cv._Fastigiata_Leaves_2600px.jpg/960px-Upright_English_Oak_Quercus_robur_cv._Fastigiata_Leaves_2600px.jpg\">",
+          "answer": "Chêne pédonculé",
+          "words": [
+            "Chêne",
+            "pédonculé"
+          ],
+          "tags": [
+            "commun"
+          ],
+          "srs": {
+            "state": "review",
+            "step": 0,
+            "interval": 1,
+            "ease": 2.5,
+            "dueOffset": 1,
+            "reps": 2,
+            "lapses": 0,
+            "easyCount": 0
+          }
+        },
+        {
+          "id": "1790845645154",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/Copper_Beech_Fagus_sylvatica_f._purpurea_Autumn_Leaves_Closeup_3008px.jpg/960px-Copper_Beech_Fagus_sylvatica_f._purpurea_Autumn_Leaves_Closeup_3008px.jpg\">",
+          "answer": "Hêtre",
+          "words": [
+            "Hêtre"
+          ],
+          "tags": [
+            "commun"
+          ],
+          "srs": {
+            "state": "review",
+            "step": 0,
+            "interval": 1,
+            "ease": 2.5,
+            "dueOffset": 1,
+            "reps": 1,
+            "lapses": 0,
+            "easyCount": 0
+          }
+        },
+        {
+          "id": "1790845645155",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/7/71/Maple_leaves.jpg/960px-Maple_leaves.jpg\">",
+          "answer": "Érable sycomore",
+          "words": [
+            "Érable",
+            "sycomore"
+          ],
+          "tags": [
+            "commun"
+          ],
+          "srs": {
+            "state": "review",
+            "step": 0,
+            "interval": 1,
+            "ease": 2.5,
+            "dueOffset": 1,
+            "reps": 1,
+            "lapses": 0,
+            "easyCount": 0
+          }
+        },
+        {
+          "id": "1790845645156",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8a/Platanus_acerifolia_leaves_%282%29.jpg/960px-Platanus_acerifolia_leaves_%282%29.jpg\">",
+          "answer": "Platane",
+          "words": [
+            "Platane"
+          ],
+          "tags": [
+            "commun"
+          ],
+          "srs": {
+            "state": "review",
+            "step": 0,
+            "interval": 1,
+            "ease": 2.5,
+            "dueOffset": 1,
+            "reps": 1,
+            "lapses": 0,
+            "easyCount": 0
+          }
+        },
+        {
+          "id": "1790845645157",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/0/05/Aesculus_hippocastanum-1.jpg/960px-Aesculus_hippocastanum-1.jpg\">",
+          "answer": "Marronnier d'Inde",
+          "words": [
+            "Marronnier",
+            "d'Inde"
+          ],
+          "tags": [
+            "commun"
+          ],
+          "srs": {
+            "state": "review",
+            "step": 0,
+            "interval": 1,
+            "ease": 2.5,
+            "dueOffset": 1,
+            "reps": 2,
+            "lapses": 0,
+            "easyCount": 0
+          }
+        },
+        {
+          "id": "1790845645158",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/2020_year._Herbarium._Fraxinus._img-015.jpg/960px-2020_year._Herbarium._Fraxinus._img-015.jpg\">",
+          "answer": "Frêne",
+          "words": [
+            "Frêne"
+          ],
+          "tags": [
+            "commun"
+          ],
+          "srs": {
+            "state": "review",
+            "step": 0,
+            "interval": 1,
+            "ease": 2.5,
+            "dueOffset": 1,
+            "reps": 2,
+            "lapses": 0,
+            "easyCount": 0
+          }
+        },
+        {
+          "id": "1790845645159",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3b/Carpinus_betulus_leaves_02.05.2011_p.jpg/960px-Carpinus_betulus_leaves_02.05.2011_p.jpg\">",
+          "answer": "Charme",
+          "words": [
+            "Charme"
+          ],
+          "tags": [
+            "commun"
+          ],
+          "srs": {
+            "state": "review",
+            "step": 0,
+            "interval": 1,
+            "ease": 2.5,
+            "dueOffset": 1,
+            "reps": 2,
+            "lapses": 0,
+            "easyCount": 0
+          }
+        },
+        {
+          "id": "1790845645160",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/3/38/Castanea_sativa_leaves_and_immature_fruit.jpg/960px-Castanea_sativa_leaves_and_immature_fruit.jpg\">",
+          "answer": "Châtaignier",
+          "words": [
+            "Châtaignier"
+          ],
+          "tags": [
+            "commun"
+          ],
+          "srs": {
+            "state": "review",
+            "step": 0,
+            "interval": 1,
+            "ease": 2.5,
+            "dueOffset": 1,
+            "reps": 2,
+            "lapses": 0,
+            "easyCount": 0
+          }
+        },
+        {
+          "id": "1790845645161",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/3/39/Juglans_regia_011.JPG/960px-Juglans_regia_011.JPG\">",
+          "answer": "Noyer",
+          "words": [
+            "Noyer"
+          ],
+          "tags": [
+            "commun"
+          ],
+          "srs": {
+            "state": "review",
+            "step": 0,
+            "interval": 1,
+            "ease": 2.5,
+            "dueOffset": 1,
+            "reps": 1,
+            "lapses": 0,
+            "easyCount": 0
+          }
+        },
+        {
+          "id": "1790845645162",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/1/11/Salix_babylonica_%28Saule_pleureur%29_-_20150810_10h23_%2811045%29.jpg/960px-Salix_babylonica_%28Saule_pleureur%29_-_20150810_10h23_%2811045%29.jpg\">",
+          "answer": "Saule pleureur",
+          "words": [
+            "Saule",
+            "pleureur"
+          ],
+          "tags": [
+            "commun"
+          ],
+          "srs": {
+            "state": "review",
+            "step": 0,
+            "interval": 1,
+            "ease": 2.5,
+            "dueOffset": 1,
+            "reps": 1,
+            "lapses": 0,
+            "easyCount": 0
+          }
+        },
+        {
+          "id": "1790845645163",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/1/19/Pinus_sylvestris_2020_G2.jpg/960px-Pinus_sylvestris_2020_G2.jpg\">",
+          "answer": "Pin sylvestre",
+          "words": [
+            "Pin",
+            "sylvestre"
+          ],
+          "tags": [
+            "commun"
+          ],
+          "srs": {
+            "state": "review",
+            "step": 0,
+            "interval": 1,
+            "ease": 2.5,
+            "dueOffset": 1,
+            "reps": 2,
+            "lapses": 0,
+            "easyCount": 0
+          }
+        },
+        {
+          "id": "1790845645164",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style><img src=\"https://upload.wikimedia.org/wikipedia/commons/7/74/Yew_Berries_%28Taxus_baccata%29_-_geograph.org.uk_-_7335800.jpg\">",
+          "answer": "If",
+          "words": [
+            "If"
+          ],
+          "tags": [
+            "commun"
+          ],
+          "srs": {
+            "state": "review",
+            "step": 0,
+            "interval": 1,
+            "ease": 2.5,
+            "dueOffset": 1,
+            "reps": 1,
+            "lapses": 0,
+            "easyCount": 0
+          }
+        },
+        {
+          "id": "1790845645165",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/Alnus_glutinosa_kz32.jpg/960px-Alnus_glutinosa_kz32.jpg\">",
+          "answer": "Aulne glutineux",
+          "words": [
+            "Aulne",
+            "glutineux"
+          ],
+          "tags": [
+            "commun"
+          ],
+          "srs": {
+            "state": "review",
+            "step": 0,
+            "interval": 1,
+            "ease": 2.5,
+            "dueOffset": 1,
+            "reps": 1,
+            "lapses": 0,
+            "easyCount": 0
+          }
+        },
+        {
+          "id": "1790845645166",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/0/09/Robinia_pseudoacacia_3.jpg/960px-Robinia_pseudoacacia_3.jpg\">",
+          "answer": "Robinier faux-acacia",
+          "words": [
+            "Robinier",
+            "faux-acacia"
+          ],
+          "tags": [
+            "commun"
+          ]
+        },
+        {
+          "id": "1790845645167",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0e/2020_year._Herbarium._Acer_platanoides._img-014.jpg/960px-2020_year._Herbarium._Acer_platanoides._img-014.jpg\">",
+          "answer": "Érable plane",
+          "words": [
+            "Érable",
+            "plane"
+          ],
+          "tags": [
+            "commun"
+          ]
+        },
+        {
+          "id": "1790845645168",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/Populus_nigra_kz03.jpg/960px-Populus_nigra_kz03.jpg\">",
+          "answer": "Peuplier noir",
+          "words": [
+            "Peuplier",
+            "noir"
+          ],
+          "tags": [
+            "commun"
+          ]
+        }
+      ]
+    }
+  ]
+}
