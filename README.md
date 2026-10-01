@@ -8,6 +8,7 @@ Fill-in-the-blank study app for Anki decks: pre-process a `.apkg` export into JS
 espanol-trainer/
 ├── index.html         ← standalone study app (open in any browser, or via GitHub Pages)
 ├── extract.py         ← CLI: converts a .apkg into JSON for the app (pip install anki recommended)
+├── sync_to_anki.py    ← CLI: one command pushes downloaded progress straight into your local Anki collection
 ├── reimport_stats.py  ← CLI: writes progress made here back into a .apkg for re-import into real Anki
 ├── default.json       ← bundled deck auto-loaded on first run if no source has been imported yet
 ├── default_media/     ← its audio/image files
@@ -37,6 +38,36 @@ For each card it renders the answer side, strips HTML/sound/image tags, and spli
 ## Step 3 — Import into the app
 
 Open `index.html`, click **＋ Importer un fichier .json**, and pick the file `extract.py` produced. Each source you import stays independent (its own progress, own decks), so you can import several exports side by side.
+
+## Step 4 — Push your progress back into Anki
+
+Click 📤 next to the source to download its stats, then run:
+
+```bash
+ankisync                           # shell function in ~/.bashrc (see below)
+# or: trainervenv/bin/python sync_to_anki.py   (Anki must be closed)
+```
+
+`ankisync` quits Anki if it's open, runs `sync_to_anki.py` on every `~/Downloads/*_stats*.json`, then reopens Anki so its normal sync sends everything to AnkiWeb. The script writes straight into your local Anki collection (auto-detected profile; a backup is made first), so there's no `.apkg` to re-import. Only cards you actually studied in the app are pushed, and a card you've since reviewed in Anki is left alone. Each pushed card gets a "Manual" entry in Anki's review history, so re-running the command over old downloads is harmless. `ankisync --dry-run` previews.
+
+Words added with `add_card.py` / `cuatroloop` are created in Anki first: one "Basic (and reversed card)" note per pair in the `perso` deck, with the app's card ids so their progress syncs too. A word is skipped if a note with the same front already exists in Anki, or if its "translation" is identical to the word (e.g. `orage → orage`).
+
+```bash
+ankisync() {
+  local repo="/Users/quang/Documents/espanol-trainer"
+  local was_open=0
+  if pgrep -if "Anki.app/Contents/MacOS" >/dev/null; then
+    was_open=1
+    osascript -e 'quit app "Anki"'
+    while pgrep -if "Anki.app/Contents/MacOS" >/dev/null; do sleep 0.5; done
+  fi
+  "$repo/trainervenv/bin/python" "$repo/sync_to_anki.py" "$@" || return
+  case " $* " in *" --dry-run "*) [ $was_open = 1 ] && open -a Anki; return ;; esac
+  open -a Anki
+}
+```
+
+`reimport_stats.py` still exists for the `.apkg` route, e.g. on a machine without your Anki profile.
 
 ---
 
