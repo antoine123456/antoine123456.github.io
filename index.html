@@ -1157,7 +1157,9 @@
             reader.onload = function (e) {
                 var data;
                 try { data = JSON.parse(e.target.result); } catch (err) { toast("JSON invalide : " + err.message); return; }
-                var total = importDeckData(data, file.name.replace(/\.json$/, ""));
+                var total;
+                try { total = importDeckData(data, file.name.replace(/\.json$/, "")); }
+                catch (err) { toast("Import impossible : " + err.message); return; }
                 if (total == null) { toast("Format invalide — utilisez extract_apkg.py"); return; }
                 toast("✓ " + total + " cartes importées (" + data.decks.length + " deck(s))");
                 renderHome();
@@ -1181,10 +1183,12 @@
                 return { id: d.id, name: d.name, cardCount: (d.cards || []).length };
             });
 
+            // Cards first: if they don't fit in localStorage, saveCards
+            // throws before an empty source gets listed on the home screen.
+            saveCards(sid, cardsByDeck);
             var sources = loadSources();
             sources.push({ id: sid, name: sourceName, decks: decksMeta, isDefault: !!isDefault });
             saveSources(sources);
-            saveCards(sid, cardsByDeck);
 
             // Seed SRS state for cards that already carry real Anki
             // scheduling (extract.py's "srs" field, e.g. from a deck
