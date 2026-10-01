@@ -58,7 +58,7 @@ ankisync                           # shell function in ~/.bashrc (see below)
 # or: trainervenv/bin/python sync_to_anki.py   (Anki must be closed)
 ```
 
-`ankisync` quits Anki if it's open, runs `sync_to_anki.py` on every `~/Downloads/*_stats*.json`, then reopens Anki so its normal sync sends everything to AnkiWeb. The script writes straight into your local Anki collection (auto-detected profile; a backup is made first), so there's no `.apkg` to re-import. Only cards you actually studied in the app are pushed, and a card you've since reviewed in Anki is left alone. Each pushed card gets a "Manual" entry in Anki's review history, so re-running the command over old downloads is harmless. `ankisync --dry-run` previews.
+`ankisync` quits Anki if it's open, runs `sync_to_anki.py` on every `~/Downloads/*_stats*.json`, then reopens Anki so its normal sync sends everything to AnkiWeb. The script writes straight into your local Anki collection (auto-detected profile; a backup is made first), so there's no `.apkg` to re-import. Only cards you actually studied in the app are pushed, and a card you've since reviewed in Anki is left alone. Each pushed card gets a "Manual" entry in Anki's review history, so re-running the command over old downloads is harmless. Cards started for the first time today (in the app or in Anki) are also counted against Anki's daily new-card limit, per deck and its parents, so Anki doesn't offer another 20 new cards on top of what you already did in the app. `ankisync --dry-run` previews.
 
 Words added with `add_card.py` / `cuatroloop` are created in Anki first: one "Basic (and reversed card)" note per pair in the `perso` deck, with the app's card ids so their progress syncs too. A word is skipped if a note with the same front already exists in Anki, or if its "translation" is identical to the word (e.g. `orage → orage`).
 
@@ -66,10 +66,10 @@ Words added with `add_card.py` / `cuatroloop` are created in Anki first: one "Ba
 ankisync() {
   local repo="/Users/quang/Documents/espanol-trainer"
   local was_open=0
-  if pgrep -if "Anki.app/Contents/MacOS" >/dev/null; then
+  if pgrep -if "Anki.app/Contents/MacOS|aqt\.run" >/dev/null; then
     was_open=1
     osascript -e 'quit app "Anki"'
-    while pgrep -if "Anki.app/Contents/MacOS" >/dev/null; do sleep 0.5; done
+    while pgrep -if "Anki.app/Contents/MacOS|aqt\.run" >/dev/null; do sleep 0.5; done
   fi
   "$repo/trainervenv/bin/python" "$repo/sync_to_anki.py" "$@" || return
   case " $* " in *" --dry-run "*) [ $was_open = 1 ] && open -a Anki; return ;; esac

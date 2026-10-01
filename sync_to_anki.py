@@ -62,7 +62,8 @@ def find_collection(profile):
 
 def anki_is_running():
     try:
-        out = subprocess.run(["pgrep", "-if", "Anki.app/Contents/MacOS"],
+        # Anki.app's own binary, or the newer launcher's Python running aqt
+        out = subprocess.run(["pgrep", "-if", r"Anki.app/Contents/MacOS|aqt\.run"],
                              capture_output=True, text=True)
         return out.returncode == 0
     except FileNotFoundError:
@@ -147,6 +148,42 @@ def add_perso_notes(col, dry_run):
     if skipped:
         print(f"  = perso : {len(skipped)} ignorée(s) (déjà dans Anki, ou traduction identique) : "
               + ", ".join(skipped))
+
+
+def count_new_studied_today(col, dry_run):
+    """Les cartes découvertes aujourd'hui dans Anki Trainer arrivent ici comme
+    cartes de révision (entrée « Manuel »), donc Anki ne les décompte pas de
+    sa limite de nouvelles cartes du jour et en propose encore 20. On remet
+    son compteur « nouvelles vues aujourd'hui » (par deck, parents compris) au
+    nombre de cartes dont la toute première révision date d'aujourd'hui —
+    dans l'appli ou dans Anki. Jamais à la baisse, donc relançable sans risque."""
+    today = col.sched.today
+    start_ms = (col.sched.day_cutoff - 86400) * 1000
+    rows = col.db.all(
+        "select c.did, count(*) from cards c"
+        " join (select cid, min(id) first from revlog group by cid) r on r.cid = c.id"
+        " where r.first >= ? group by c.did", start_ms)
+    per_deck = {}
+    for did, n in rows:
+        name = col.decks.name(did)
+        parts = name.split("::")
+        for i in range(1, len(parts) + 1):  # le deck et tous ses parents
+            key = "::".join(parts[:i])
+            per_deck[key] = per_deck.get(key, 0) + n
+
+    changed = []
+    for name, n in sorted(per_deck.items()):
+        deck = col.decks.by_name(name)
+        if not deck or deck.get("dyn"):
+            continue
+        day, done = deck.get("newToday", [today, 0])
+        current = done if day == today else 0
+        if n > current:
+            changed.append((name, n))
+            if not dry_run:
+                deck["newToday"] = [today, n]
+                col.decks.save(deck)
+    return changed
 
 
 def main():
@@ -234,6 +271,7 @@ def main():
                 " values (?, ?, ?, 0, ?, ?, ?, 0, ?)",
                 rid, cid, -1, interval, last_ivl, card.factor, REVLOG_MANUAL,
             )
+        new_today = count_new_studied_today(col, args.dry_run)
     finally:
         col.close()
 
@@ -244,6 +282,8 @@ def main():
         print(f"  = {newer_in_anki} déjà à jour (révisées plus récemment dans Anki, ou déjà synchronisées)")
     if missing:
         print(f"  ⚠ {missing} id(s) de carte absents de cette collection", file=sys.stderr)
+    for name, n in new_today:
+        print(f"  ✓ {name} : {n} nouvelle(s) carte(s) comptée(s) comme déjà vue(s) aujourd'hui")
     if updated and not args.dry_run:
         print("\n→ Ouvre Anki et synchronise : la progression part sur AnkiWeb.")
 
