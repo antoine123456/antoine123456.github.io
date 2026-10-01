@@ -308,6 +308,23 @@
             color: var(--green);
         }
 
+        .h-custom-btn {
+            padding: 2px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1.5px solid var(--border-2);
+            background: var(--surface);
+            color: var(--text-2);
+            cursor: pointer;
+            transition: border-color .15s, background .15s;
+        }
+
+        .h-custom-btn:hover {
+            border-color: var(--navy);
+            color: var(--navy);
+        }
+
         .h-empty {
             font-size: 14px;
             color: var(--text-3);
@@ -1420,12 +1437,16 @@
                 var childIds = childDeckIds(decksMeta, node.fullName);
                 var cardIds = allCardIds(cardsByDeck, childIds);
                 var stats = deckStats(cardIds, srs, newLimit);
+                var customLimit = stats.new + 20;
                 var html = '<div class="h-deckrow" style="padding-left:' + (16 + node.depth * 20) + 'px" onclick="startStudy(' + si + ',\'' + esc(node.fullName) + '\')">'
                     + (node.depth > 0 ? '<span style="color:#ddd;margin-right:6px;font-size:11px">└</span>' : '')
                     + '<div class="h-deckrow-name' + (node.depth === 0 ? ' root-deck' : '') + '">' + esc(node.name) + '</div>'
                     + (stats.new ? '<span class="badge badge-new">' + stats.new + ' nvx</span>' : '')
                     + (stats.due ? '<span class="badge badge-due">' + stats.due + ' dus</span>' : '')
                     + (stats.learned ? '<span class="badge badge-done">' + stats.learned + ' appris</span>' : '')
+                    + (stats.trueNew > stats.new
+                        ? '<button class="h-custom-btn" title="Étudier 20 cartes de plus que la limite du jour" onclick="event.stopPropagation(); startStudy(' + si + ',\'' + esc(node.fullName) + '\',' + customLimit + ')">+20</button>'
+                        : '')
                     + '</div>';
                 if (node.children.length) html += renderDeckRows(node.children, si, decksMeta, cardsByDeck, srs, newLimit);
                 return html;
@@ -1450,7 +1471,7 @@
                 else if (s.state === "learning" || s.state === "relearning" || s.due <= TODAY) due++;
                 else learned++;
             });
-            return { new: Math.min(newC, newLimit == null ? NEW_LIMIT : newLimit), due: due, learned: learned };
+            return { new: Math.min(newC, newLimit == null ? NEW_LIMIT : newLimit), due: due, learned: learned, trueNew: newC };
         }
 
         // Collect all card ids across a set of deck ids
@@ -1525,7 +1546,7 @@
         var advancing = false;
         var revealed = false;
 
-        function startStudy(si, deckName) {
+        function startStudy(si, deckName, customNewLimit) {
             var sources = loadSources();
             var src = sources[si];
             var cardsByDeck = loadCards(src.id);
@@ -1547,7 +1568,8 @@
                 else if (s.state === "learning" || s.state === "relearning" || s.due <= TODAY) dueCards.push(c);
             });
             shuffle(newCards); shuffle(dueCards);
-            newCards = newCards.slice(0, remainingNewToday(src.id));
+            var newLimit = customNewLimit != null ? customNewLimit : remainingNewToday(src.id);
+            newCards = newCards.slice(0, newLimit);
             var queue = dueCards.concat(newCards);
 
             if (!queue.length) { toast("Aucune carte à réviser aujourd'hui 🎉"); return; }
