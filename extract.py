@@ -231,6 +231,20 @@ def extract_srs(card, today: int) -> dict | None:
     }
 
 
+# Champ à taper, par type de note, quand « tout le verso » n'a pas de sens à
+# taper (ex. Refold : hanzi + pinyin + sens + phrase d'exemple → on ne
+# demande que le pinyin). Les autres types gardent la règle générique.
+TYPE_FIELD = {"Refold Mandarin 1k": "Pinyin"}
+
+
+def typed_field_words(note) -> list | None:
+    field = TYPE_FIELD.get(note.note_type()['name'])
+    if not field or field not in note.keys():
+        return None
+    words = [strip_punct_edges(w) for w in strip_html(note[field]).split()]
+    return [w for w in words if w] or None
+
+
 def deck_selected(name: str, deck_filter: list | None) -> bool:
     """True si `name` est l'un des decks demandés ou l'un de leurs sous-decks."""
     if not deck_filter:
@@ -260,7 +274,8 @@ def process_collection(col, media: MediaCollector, deck_filter: list | None = No
             continue
         q_html = card.question()
         a_html = card.answer()
-        words = card_words_and_question(q_html, a_html)
+        note = card.note()
+        words = typed_field_words(note) or card_words_and_question(q_html, a_html)
         if not words:
             skipped += 1
             continue
@@ -274,7 +289,6 @@ def process_collection(col, media: MediaCollector, deck_filter: list | None = No
         q_html = strip_sound_tags(rewrite_img_srcs(q_html, media, resolve))
         ans_html = strip_sound_tags(rewrite_img_srcs(answer_part(a_html), media, resolve)).strip()
 
-        note = card.note()
         card_obj = {
             'id': str(cid),
             'question': q_html,
@@ -545,6 +559,33 @@ def process_apkg_legacy(apkg_path: str, media: MediaCollector) -> list[dict]:
             return process_db_legacy(db_path, media, media_bytes_fn)
 
 
+# ── Styles partagés ─────────────────────────────────────────────────────────
+
+STYLE_RE = re.compile(r'<style[^>]*>[\s\S]*?</style>', re.IGNORECASE)
+
+
+def hoist_styles(decks: list) -> list:
+    """Anki recopie le CSS du type de note dans chaque recto ET verso rendu
+    (~2 Ko pour Refold × 1000 cartes × 2 ≈ 4 Mo) — assez pour dépasser le
+    quota localStorage du navigateur. On le sort des cartes : une seule copie
+    par CSS distinct dans `styles`, chaque carte ne garde que son index."""
+    styles, index = [], {}
+    for d in decks:
+        for c in d['cards']:
+            found = STYLE_RE.findall(c['question']) + STYLE_RE.findall(c.get('answer', ''))
+            c['question'] = STYLE_RE.sub('', c['question'])
+            if 'answer' in c:
+                c['answer'] = STYLE_RE.sub('', c['answer']).strip()
+            if not found:
+                continue
+            css = ''.join(dict.fromkeys(found))  # dédoublonné, ordre conservé
+            if css not in index:
+                index[css] = len(styles)
+                styles.append(css)
+            c['style'] = index[css]
+    return styles
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 def main():
@@ -617,6 +658,7 @@ def main():
         'version': 1,
         'source': source_name,
         'decks': decks,
+        'styles': hoist_styles(decks),
     }
     with open(args.out, 'w', encoding='utf-8') as f:
         json.dump(output, f, ensure_ascii=False, indent=2)

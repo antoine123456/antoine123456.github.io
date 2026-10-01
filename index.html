@@ -747,6 +747,41 @@
             opacity: .6;
         }
 
+        /* Verso shown after a card whose back holds more than the typed words */
+        .s-answer {
+            display: none;
+            width: 100%;
+            max-width: 720px;
+            border: 1.5px solid var(--border-tint-green);
+            border-radius: 18px;
+            padding: 20px 28px;
+            margin: 8px 0 24px;
+            font-size: clamp(16px, 2.4vw, 20px);
+            line-height: 1.6;
+            color: var(--text);
+            text-align: center;
+        }
+
+        .s-answer.on {
+            display: block;
+        }
+
+        .s-next-btn {
+            margin-top: 14px;
+            background: none;
+            border: 1.5px solid var(--border-2);
+            border-radius: 10px;
+            padding: 7px 16px;
+            color: var(--text-2);
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .s-next-btn:hover {
+            border-color: var(--navy);
+            color: var(--navy);
+        }
+
         /* ── BROWSE (recto → verso, lecture seule) ── */
         #browse {
             min-height: 100vh;
@@ -973,6 +1008,7 @@
         var LS_SRS = "ankitrain_v1_s_";      // + sourceId → {cardId: srsMeta}
         var LS_NEWCOUNT = "ankitrain_v1_nc_";     // + sourceId → {day, count}
         var LS_FLAGGED = "ankitrain_v1_fl_";     // + sourceId → {cardId: questionPlainText}
+        var LS_STYLES = "ankitrain_v1_css_";    // + sourceId → [css shared by cards, see card.style]
         var LS_THEME = "ankitrain_v1_theme";    // "light" | "dark" | absent (follow system)
         var NEW_LIMIT = 20;
 
@@ -1038,6 +1074,8 @@
         // Cards flagged "à corriger" during study, so they can be fixed
         // directly in real Anki afterward (search "cid:<id>" in its Browse
         // screen to jump straight to one).
+        function loadStyles(sid) { try { return JSON.parse(localStorage.getItem(LS_STYLES + sid) || "[]"); } catch (e) { return []; } }
+        function cardStyle(sid, card) { return card.style != null ? (loadStyles(sid)[card.style] || "") : ""; }
         function loadFlagged(sid) {
             try { return JSON.parse(localStorage.getItem(LS_FLAGGED + sid) || "{}"); } catch (e) { return {}; }
         }
@@ -1678,6 +1716,7 @@
             try { localStorage.removeItem(LS_SRS + id); } catch (e2) { }
             try { localStorage.removeItem(LS_NEWCOUNT + id); } catch (e2) { }
             try { localStorage.removeItem(LS_FLAGGED + id); } catch (e2) { }
+            try { localStorage.removeItem(LS_STYLES + id); } catch (e2) { }
             if (fbUser) deleteSourceFromFirestore(id);
             renderHome();
         }
@@ -1735,10 +1774,37 @@
         }
 
         function goHome() {
+            pendingNext = null;
             saveSRS(sess.sourceId, sess.srs);
             document.getElementById("study").style.display = "none";
             document.getElementById("home").style.display = "block";
             renderHome();
+        }
+
+        // ═══════════════════════════════════════════════
+        // CARD HTML — rendered in a Shadow DOM so a note type's own CSS
+        // (e.g. Refold Mandarin's global div{} / hr{} rules, its Kai font)
+        // applies like in Anki without leaking into the app. Our rules come
+        // after the card's <style> so they win: colors/background follow
+        // the app theme, base font/size stay the app's, per-class styles
+        // (.hanzi, .pinyin…) are kept.
+        // ═══════════════════════════════════════════════
+        var CARD_SHADOW_CSS = ".card{background:transparent!important;color:inherit!important;font-family:inherit;font-size:inherit;text-align:center;padding:0}"
+            + "img{max-width:100%;max-height:50vh;border-radius:8px;margin:8px 0}"
+            + "[lang|=zh]{font-family:Kai,'Kaiti SC',STKaiti,'PingFang SC','Noto Serif SC',serif}";
+        function mountCardHtml(el, html, css) {
+            if (!el) return;
+            var root = el.shadowRoot || el.attachShadow({ mode: "open" });
+            root.innerHTML = (css || "") + '<div class="card">' + html + '</div><style>' + CARD_SHADOW_CSS + '</style>';
+        }
+
+        // True when the back holds more than the typed words (an image, a
+        // meaning, an example sentence…) — worth showing before moving on.
+        function hasRichAnswer(card) {
+            if (!card.answer) return false;
+            if (/<img/i.test(card.answer)) return true;
+            var squash = function (t) { return noAcc(String(t).toLowerCase()).replace(/[\s.,;:!?¡¿'"()\-]+/g, ""); };
+            return squash(plainText(card.answer)) !== squash((card.words || []).join(""));
         }
 
         // ═══════════════════════════════════════════════
@@ -1751,6 +1817,7 @@
         function openBrowse(si, deckName) {
             var src = loadSources()[si];
             var cardsByDeck = loadCards(src.id);
+            browse.sid = src.id;
             var all = [];
             childDeckIds(src.decks, deckName).forEach(function (did) {
                 (cardsByDeck[did] || []).forEach(function (c) { all.push(c); });
@@ -1796,9 +1863,9 @@
             var hasAudio = (c.audioQuestion && c.audioQuestion.length) || (c.audioAnswer && c.audioAnswer.length);
             el.innerHTML =
                 '<div class="s-question b-card" onclick="flipBrowse()">'
-                + '<div class="b-front">' + c.question + '</div>'
+                + '<div class="b-front"></div>'
                 + '<div class="b-sep">verso</div>'
-                + '<div class="b-back' + (browse.flipped ? '' : ' hidden') + '">' + b.back + '</div>'
+                + '<div class="b-back' + (browse.flipped ? '' : ' hidden') + '"></div>'
                 + '</div>'
                 + '<div class="b-nav">'
                 + '<button onclick="stepBrowse(-1)"' + (browse.idx === 0 ? ' disabled' : '') + '>‹ Préc.</button>'
@@ -1806,6 +1873,9 @@
                 + (hasAudio ? '<button onclick="playBrowseAudio()" title="Écouter">🔊</button>' : '')
                 + '<button onclick="stepBrowse(1)"' + (browse.idx === n - 1 ? ' disabled' : '') + '>Suiv. ›</button>'
                 + '</div>';
+            var css = cardStyle(browse.sid, c);
+            mountCardHtml(el.querySelector(".b-front"), c.question, css);
+            mountCardHtml(el.querySelector(".b-back"), b.back, css);
         }
 
         function flipBrowse() {
@@ -1851,7 +1921,7 @@
         // CARD DISPLAY
         // ═══════════════════════════════════════════════
         function showCard() {
-            advancing = false; cardErrors = 0; wordRows = []; revealed = false;
+            advancing = false; cardErrors = 0; wordRows = []; revealed = false; pendingNext = null;
             var card = sess.queue[sess.qIdx];
             if (!card) { showDone(); return; }
             updateProgress();
@@ -1862,7 +1932,7 @@
             var hasAudio = (card.audioQuestion && card.audioQuestion.length) || card.lang;
             var previews = previewIntervals(sess.srs[card.id]);
             document.getElementById("s-content").innerHTML =
-                '<div class="s-question">' + card.question
+                '<div class="s-question"><div class="s-card-body"></div>'
                 + (hasAudio ? '<button class="s-audio-btn" onclick="playCardAudio(\'q\')">🔊 Écouter</button>' : '')
                 + '</div>'
                 + '<div class="t-words" id="t-words"></div>'
@@ -1870,7 +1940,9 @@
                 + '<span class="t-show-ans" onclick="revealCurrent()">💡 Voir la réponse <span class="t-key">F1</span></span>'
                 + '<span class="t-flag" id="s-flag-btn" onclick="toggleFlagCurrent()" title="Marquer à corriger dans Anki">🚩 <span class="t-key">F6</span></span>'
                 + '</div>'
+                + '<div class="s-answer" id="s-answer"></div>'
                 + ratingButtonsHtml(previews);
+            mountCardHtml(document.querySelector("#s-content .s-card-body"), card.question, cardStyle(sess.sourceId, card));
 
             buildRows(card.words);
             updateFlagIndicator();
@@ -2138,7 +2210,29 @@
             advancing = true;
             var q = revealed ? 1 : 3;
             flashForPendingRating(q);
-            playCardAudio("a", function () { flash(function () { advanceCard(q); }); });
+            var card = sess.queue[sess.qIdx];
+            if (!hasRichAnswer(card)) {
+                playCardAudio("a", function () { flash(function () { advanceCard(q); }); });
+                return;
+            }
+            // Rich back (meaning, example sentence, image…): show it and wait
+            // for Entrée / « Suivant → » instead of flashing past it.
+            var box = document.getElementById("s-answer");
+            box.innerHTML = '<div class="s-answer-body"></div>'
+                + '<button class="s-next-btn" onclick="continueAfterAnswer()">Suivant → <span class="t-key">Entrée</span></button>';
+            mountCardHtml(box.querySelector(".s-answer-body"), card.answer, cardStyle(sess.sourceId, card));
+            box.classList.add("on");
+            if (document.activeElement) document.activeElement.blur();
+            pendingNext = function () { flash(function () { advanceCard(q); }); };
+            playCardAudio("a");
+        }
+
+        var pendingNext = null;
+        function continueAfterAnswer() {
+            if (!pendingNext) return;
+            var go = pendingNext; pendingNext = null;
+            document.getElementById("audio-player").pause();
+            go();
         }
 
         function tryComplete() {
@@ -2158,7 +2252,10 @@
         var FKEY_RATING = { F2: 1, F3: 3, F4: 2, F7: 4 };
         document.addEventListener("keydown", function (e) {
             if (document.getElementById("study").style.display !== "flex") return;
-            if (e.key === "F1") {
+            if (pendingNext && e.key === "Enter") {
+                e.preventDefault();
+                continueAfterAnswer();
+            } else if (e.key === "F1") {
                 e.preventDefault();
                 revealCurrent();
             } else if (e.key === "F6") {
