@@ -1229,6 +1229,34 @@
                 .catch(function () { return false; });
         }
 
+        // Other bundled decks (generated with extract.py, images as web
+        // links so nothing is hosted here). Each one is loaded once per
+        // browser — even if default.json is already there — and not again
+        // after being deleted, until "Effacer les données" resets it all.
+        var EXTRA_BUNDLED = [{ url: "arbres.json", id: "arbres" }];
+        var LS_BUNDLED_SEEN = "ankitrain_v1_bundled_seen";
+        function loadExtraBundledDecks() {
+            var seen;
+            try { seen = JSON.parse(localStorage.getItem(LS_BUNDLED_SEEN) || "[]"); } catch (e) { seen = []; }
+            var have = loadSources().map(function (s) { return String(s.id); });
+            var todo = EXTRA_BUNDLED.filter(function (b) { return seen.indexOf(b.id) === -1; });
+            return Promise.all(todo.map(function (b) {
+                if (have.indexOf(b.id) !== -1) return b.id;
+                return fetch(b.url)
+                    .then(function (r) { return r.ok ? r.json() : null; })
+                    .then(function (data) {
+                        if (!data) return null;
+                        var total = importDeckData(data, b.id, b.id, false);
+                        if (total != null) toast("✓ " + (data.source || b.id) + " chargé (" + total + " cartes)");
+                        return total != null ? b.id : null;
+                    })
+                    .catch(function () { return null; });
+            })).then(function (ids) {
+                ids.forEach(function (id) { if (id && seen.indexOf(id) === -1) seen.push(id); });
+                try { localStorage.setItem(LS_BUNDLED_SEEN, JSON.stringify(seen)); } catch (e) { }
+            });
+        }
+
         // Wipes every localStorage key this app owns (sources, cards, SRS,
         // daily new-card counters) — the actual fix for "a source imported
         // before some bug was fixed still shows the bug": there's no other
@@ -1243,7 +1271,7 @@
             toRemove.forEach(function (k) { localStorage.removeItem(k); });
             toast("Données effacées (" + toRemove.length + " entrée(s))");
             if (fbUser) wipeFirestoreForUser();
-            loadDefaultDeckIfEmpty().then(renderHome);
+            loadDefaultDeckIfEmpty().then(loadExtraBundledDecks).then(renderHome);
         }
 
         // ═══════════════════════════════════════════════
@@ -2216,7 +2244,7 @@
 
         // ── INIT ──
         updateThemeToggleIcon();
-        loadDefaultDeckIfEmpty().then(renderHome);
+        loadDefaultDeckIfEmpty().then(loadExtraBundledDecks).then(renderHome);
     </script>
 </body>
 
