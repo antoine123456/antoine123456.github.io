@@ -31,9 +31,19 @@ python3 extract.py "My Deck.apkg" --out my_deck.json
 
 `extract.py` imports the `.apkg` into a throwaway collection and lets Anki's own code render every card, so it handles anything Anki itself handles: sub-decks (`Parent::Child`, shown as a collapsible tree in the app), Basic/Cloze/custom note types, HTML templates, sound/image references, and both the older plain-SQLite `.apkg` format and the newer zstd-compressed one (Anki ≥ 2.1.50).
 
+**Or skip the export** and read your local Anki collection directly (needs `pip install anki`; quit Anki first, it locks the collection):
+
+```bash
+python3 extract.py --collection --deck Arbres --out arbres_extrait.json
+```
+
+`--collection` auto-detects your profile (`--profile` if you have several, or `--collection path/to/collection.anki2`). `--deck` keeps only that deck and its sub-decks; repeat it for several decks. It also works with a `.apkg`.
+
+Images whose `src` is a web link (`<img src="https://…">`) are left as-is, not copied: handy to avoid storing pictures in Anki at all (the Arbres deck uses Wikimedia Commons links), but they won't show offline, in Anki or here.
+
 `pip install anki` is recommended but not required — without it, the script falls back to a stdlib-only reader (`zipfile`/`sqlite3`/`json`) that only understands the **older** `.apkg` format; it will tell you to install `anki` if it hits a newer, incompatible one.
 
-For each card it renders the answer side, strips HTML/sound/image tags, and splits what's left into the list of words you'll type — the question side is kept as-is (with its HTML) and shown above the blanks.
+For each card it renders the answer side, strips HTML/sound/image tags, and splits what's left into the list of words you'll type — the question side is kept as-is (with its HTML) and shown above the blanks. The answer side's own HTML (what follows `<hr id=answer>`, images included) is kept too, as `answer`, for the card browser.
 
 ## Step 3 — Import into the app
 
@@ -77,6 +87,7 @@ ankisync() {
 - The question is shown as a card; type each word of the answer into its blank.
 - Accents are optional — `ame` is accepted for `âme`.
 - After 3 wrong attempts on a word, a hint appears; **💡 Voir les réponses** reveals everything, **Passer →** skips.
+- **🔍** on any deck row opens a read-only card browser: one card at a time, front first; **Space** (or a tap) flips to the back, **← / →** move, the search box filters on both sides (accents ignored), **Esc** goes back. Nothing you do there touches scheduling. JSON made before `answer` existed shows the typed words as the back.
 - Once every blank on a card is correct, the app rates it automatically from how many mistakes you made (0 → Parfait, 1 → Correct, 2 → Difficile, 3+ → À revoir) and schedules its next review with a lightweight SM-2 algorithm. New cards are capped at 20 per session; cards marked "À revoir" come back later in the same session.
 
 ---
@@ -161,6 +172,7 @@ either side of the pair) are silently skipped instead of duplicated.
 - **Bottom-bar study controls, closer to real Anki.** Right now the rating buttons sit wherever they sit; in real Anki they live in a fixed bottom bar, showing a single control (with the new/due counts) that transitions into the 4 rating buttons once the answer is revealed. Worth doing if the current layout ever actually feels uncomfortable in practice, not just because it's different.
 - **Lighter reveal for typed-correct words.** When a card is completed by typing alone (no reveal used), consider only highlighting the rectangle around each solved word instead of the current display — mirrors how little real Anki shows you when you already knew the answer.
 - **Connect directly to Anki via its API?** AnkiConnect (a well-known Anki add-on) exposes a local HTTP API for reading/writing a real, running Anki collection — worth a look as an alternative to the `extract.py`/`.apkg` round-trip for some workflows.
+- **Other languages (Chinese) — parked on the `chinois` branch.** The Refold Mandarin deck needs more than this app does today: its note type's CSS leaks into the page and its fonts get overridden (fix: render cards in a Shadow DOM), and the generic "type the whole back" rule would ask for hanzi + pinyin + meaning + sentence (fix: a per-note-type field to type, the pinyin here). The branch holds an untested first pass; not merged since bundling that deck's media isn't wanted until decks can be uploaded to a server.
 - **Image-occlusion diagram quizzes — in progress on the `image-occlusion-quiz` branch.** The idea: a labeled diagram (e.g. a car) where you type each part's name instead of flipping a card, built on Anki's native **Image Occlusion** note type so the same cards work unmodified in real Anki. One note per diagram, one masked region (cloze) per part — confirmed round-tripping correctly through Anki's own import/export with real coordinates (`left`/`top`/`width`/`height` as 0–1 fractions of the image, e.g. `{{c1::image-occlusion:rect:left=.051:top=.415:width=.114:height=.065:oi=1}}`, shapes joined by `<br>` in the note's `Occlusion` field). `car_diagram.svg`/`.png` on that branch is a hand-built reference diagram (10 labeled parts: parabrisas, espejo, volante, asientos, maletero, intermitente, motor, rueda, puerta, carretera) with an example `.apkg` masking each one. Still to do: `extract.py` support for reading this note type back into JSON, and a web-app study mode that prompts one part at a time, keeps correct labels visible, requeues wrong/revealed ones, and gives the whole diagram one overall SRS rating once every part's been typed correctly.
 
 ## Known bugs
@@ -179,7 +191,7 @@ either side of the pair) are silently skipped instead of duplicated.
       "id": "1234567890",
       "name": "Parent::Child",
       "cards": [
-        { "id": "111", "question": "<b>question HTML</b>", "words": ["word1", "word2"], "tags": ["tag1"] }
+        { "id": "111", "question": "<b>question HTML</b>", "answer": "answer HTML", "words": ["word1", "word2"], "tags": ["tag1"] }
       ]
     }
   ]

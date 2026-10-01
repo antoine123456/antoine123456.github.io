@@ -469,6 +469,7 @@
 
         .s-question img {
             max-width: 100%;
+            max-height: 50vh;
             border-radius: 8px;
             margin: 8px 0;
         }
@@ -746,6 +747,104 @@
             opacity: .6;
         }
 
+        /* ── BROWSE (recto → verso, lecture seule) ── */
+        #browse {
+            min-height: 100vh;
+            display: none;
+            flex-direction: column;
+        }
+
+        .b-count {
+            flex: 1;
+            font-size: 11px;
+            color: var(--text-3);
+            text-align: right;
+        }
+
+        .b-search {
+            width: 100%;
+            max-width: 720px;
+            margin-bottom: 20px;
+            padding: 9px 14px;
+            border: 1.5px solid var(--border-2);
+            border-radius: 12px;
+            background: var(--surface);
+            color: var(--text);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .b-search:focus {
+            border-color: #93aed6;
+        }
+
+        #b-content {
+            width: 100%;
+            max-width: 720px;
+        }
+
+        .b-card {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .b-sep {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 18px 0 12px;
+            font-size: 11px;
+            color: var(--text-3);
+            letter-spacing: .3px;
+        }
+
+        .b-sep::before,
+        .b-sep::after {
+            content: "";
+            flex: 1;
+            border-top: 1px solid var(--border-2);
+        }
+
+        .b-back.hidden {
+            visibility: hidden;
+        }
+
+        .b-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            font-size: 13px;
+            color: var(--text-2);
+        }
+
+        .b-nav button {
+            background: none;
+            border: 1.5px solid var(--border-2);
+            border-radius: 10px;
+            padding: 7px 16px;
+            color: var(--text-2);
+            font-size: 13px;
+            cursor: pointer;
+            transition: border-color .15s, color .15s;
+        }
+
+        .b-nav button:hover:not(:disabled) {
+            border-color: var(--navy);
+            color: var(--navy);
+        }
+
+        .b-nav button:disabled {
+            opacity: .35;
+            cursor: default;
+        }
+
+        @media (max-width: 520px) {
+            .b-nav .b-hint {
+                display: none;
+            }
+        }
+
         /* Toast */
         #toast {
             position: fixed;
@@ -809,6 +908,19 @@
 
     <div id="flash"></div>
     <div id="toast"></div>
+    <!-- ── BROWSE ── -->
+    <div id="browse">
+        <div class="s-topbar">
+            <button class="s-back" onclick="closeBrowse()">← Retour</button>
+            <div class="b-count" id="b-count">0 / 0</div>
+        </div>
+        <div class="s-main">
+            <div class="s-deck-name" id="b-deck-name"></div>
+            <input class="b-search" id="b-search" type="search" placeholder="🔎 Rechercher…" oninput="filterBrowse(this.value)">
+            <div id="b-content"></div>
+        </div>
+    </div>
+
     <audio id="audio-player" preload="none"></audio>
 
     <script>
@@ -1447,6 +1559,7 @@
                     + (stats.trueNew > stats.new
                         ? '<button class="h-custom-btn" title="Étudier 20 cartes de plus que la limite du jour" onclick="event.stopPropagation(); startStudy(' + si + ',\'' + esc(node.fullName) + '\',' + customLimit + ')">+20</button>'
                         : '')
+                    + '<button class="h-custom-btn" title="Parcourir les cartes (recto → verso)" onclick="event.stopPropagation(); openBrowse(' + si + ',\'' + esc(node.fullName) + '\')">🔍</button>'
                     + '</div>';
                 if (node.children.length) html += renderDeckRows(node.children, si, decksMeta, cardsByDeck, srs, newLimit);
                 return html;
@@ -1595,6 +1708,112 @@
             document.getElementById("home").style.display = "block";
             renderHome();
         }
+
+        // ═══════════════════════════════════════════════
+        // BROWSE — fiche par fiche, recto → verso, lecture seule (aucun
+        // effet sur le SRS). Verso = card.answer (extract.py récent), sinon
+        // les mots à taper pour les JSON plus anciens.
+        // ═══════════════════════════════════════════════
+        var browse = { all: [], list: [], idx: 0, flipped: false };
+
+        function openBrowse(si, deckName) {
+            var src = loadSources()[si];
+            var cardsByDeck = loadCards(src.id);
+            var all = [];
+            childDeckIds(src.decks, deckName).forEach(function (did) {
+                (cardsByDeck[did] || []).forEach(function (c) { all.push(c); });
+            });
+            if (!all.length) { toast("Aucune carte dans ce deck"); return; }
+            browse.all = all.map(function (c) {
+                var back = c.answer != null ? c.answer : esc((c.words || []).join(" "));
+                return { card: c, back: back, text: (plainText(c.question) + " " + plainText(back) + " " + (c.words || []).join(" ")).toLowerCase() };
+            });
+            browse.list = browse.all;
+            browse.idx = 0;
+            browse.flipped = false;
+            document.getElementById("b-search").value = "";
+            document.getElementById("b-deck-name").textContent = deckName.split("::").join(" › ");
+            document.getElementById("home").style.display = "none";
+            document.getElementById("browse").style.display = "flex";
+            renderBrowse();
+        }
+
+        function closeBrowse() {
+            document.getElementById("audio-player").pause();
+            document.getElementById("browse").style.display = "none";
+            document.getElementById("home").style.display = "block";
+        }
+
+        function filterBrowse(q) {
+            var terms = noAcc(q.toLowerCase()).split(/\s+/).filter(Boolean);
+            browse.list = browse.all.filter(function (b) {
+                var t = noAcc(b.text);
+                return terms.every(function (term) { return t.indexOf(term) !== -1; });
+            });
+            browse.idx = 0;
+            browse.flipped = false;
+            renderBrowse();
+        }
+
+        function renderBrowse() {
+            var n = browse.list.length;
+            document.getElementById("b-count").textContent = (n ? browse.idx + 1 : 0) + " / " + n;
+            var el = document.getElementById("b-content");
+            if (!n) { el.innerHTML = '<div class="h-empty">Aucune carte ne correspond.</div>'; return; }
+            var b = browse.list[browse.idx], c = b.card;
+            var hasAudio = (c.audioQuestion && c.audioQuestion.length) || (c.audioAnswer && c.audioAnswer.length);
+            el.innerHTML =
+                '<div class="s-question b-card" onclick="flipBrowse()">'
+                + '<div class="b-front">' + c.question + '</div>'
+                + '<div class="b-sep">verso</div>'
+                + '<div class="b-back' + (browse.flipped ? '' : ' hidden') + '">' + b.back + '</div>'
+                + '</div>'
+                + '<div class="b-nav">'
+                + '<button onclick="stepBrowse(-1)"' + (browse.idx === 0 ? ' disabled' : '') + '>‹ Préc.</button>'
+                + '<span class="b-hint">Espace : retourner</span>'
+                + (hasAudio ? '<button onclick="playBrowseAudio()" title="Écouter">🔊</button>' : '')
+                + '<button onclick="stepBrowse(1)"' + (browse.idx === n - 1 ? ' disabled' : '') + '>Suiv. ›</button>'
+                + '</div>';
+        }
+
+        function flipBrowse() {
+            browse.flipped = !browse.flipped;
+            renderBrowse();
+        }
+
+        function stepBrowse(d) {
+            var i = browse.idx + d;
+            if (i < 0 || i >= browse.list.length) return;
+            document.getElementById("audio-player").pause();
+            browse.idx = i;
+            browse.flipped = false;
+            renderBrowse();
+        }
+
+        function playBrowseAudio() {
+            var c = browse.list[browse.idx].card;
+            playAudioList(browse.flipped ? (c.audioAnswer || []) : (c.audioQuestion || []));
+        }
+
+        document.addEventListener("keydown", function (e) {
+            if (document.getElementById("browse").style.display !== "flex") return;
+            var inSearch = e.target && e.target.id === "b-search";
+            if (e.key === "Escape") {
+                e.preventDefault();
+                if (inSearch) e.target.blur(); else closeBrowse();
+            } else if (inSearch) {
+                if (e.key === "Enter") { e.preventDefault(); e.target.blur(); }
+            } else if (e.key === " " || e.key === "Enter") {
+                e.preventDefault();
+                flipBrowse();
+            } else if (e.key === "ArrowLeft") {
+                e.preventDefault();
+                stepBrowse(-1);
+            } else if (e.key === "ArrowRight") {
+                e.preventDefault();
+                stepBrowse(1);
+            }
+        });
 
         // ═══════════════════════════════════════════════
         // CARD DISPLAY

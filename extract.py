@@ -14,6 +14,8 @@ Deux modes d'extraction :
 
 Usage :
     python extract_apkg.py mon_deck.apkg --out mon_deck.json
+    python extract.py --collection --deck Arbres --out arbres_extrait.json
+        (lit directement la collection Anki locale, sans export ; Anki fermé)
 
 Gère :
   - sous-decks (noms avec "::")
@@ -86,12 +88,21 @@ def clean_for_words(html_text: str) -> str:
     return strip_html(t)
 
 
+ANSWER_MARKER = '<hr id=answer>'
+
+
+def answer_part(answer_html: str) -> str:
+    """Partie propre au verso : ce qui suit <hr id=answer> (le recto répété
+    par {{FrontSide}} est retiré), ou tout le verso s'il n'y a pas de marqueur."""
+    idx = answer_html.lower().find(ANSWER_MARKER)
+    return answer_html[idx + len(ANSWER_MARKER):] if idx != -1 else answer_html
+
+
 def card_words_and_question(question_html: str, answer_html: str):
     """À partir du HTML rendu (question() / answer()), isole le texte de la
     réponse (sans répéter la question) et le découpe en mots."""
-    marker = '<hr id=answer>'
-    idx = answer_html.lower().find(marker)
-    answer_new_html = answer_html[idx + len(marker):] if idx != -1 else answer_html
+    idx = answer_html.lower().find(ANSWER_MARKER)
+    answer_new_html = answer_part(answer_html)
 
     q_text = clean_for_words(question_html)
     a_text = clean_for_words(answer_new_html)
@@ -113,6 +124,7 @@ def strip_punct_edges(w: str) -> str:
 # ── Médias (audio/images) ───────────────────────────────────────────────────────
 
 IMG_SRC_RE = re.compile(r'(<img[^>]*\bsrc=["\'])([^"\']+)(["\'])', re.IGNORECASE)
+REMOTE_SRC_RE = re.compile(r'^(https?:|data:|//)', re.IGNORECASE)
 SOUND_TAG_RE = re.compile(r'\[sound:([^\]]+)\]')
 
 
@@ -169,6 +181,8 @@ def rewrite_img_srcs(html_text: str, collector: MediaCollector, resolve) -> str:
     """resolve(filename) -> kwargs dict for collector.add() (media_dir=... or data=...)."""
     def _sub(m):
         filename = m.group(2)
+        if REMOTE_SRC_RE.match(filename):  # image en ligne : rien à copier
+            return m.group(0)
         rel = collector.add(filename, **resolve(filename))
         return m.group(1) + (rel or filename) + m.group(3)
     return IMG_SRC_RE.sub(_sub, html_text)
@@ -217,74 +231,101 @@ def extract_srs(card, today: int) -> dict | None:
     }
 
 
-def process_apkg_via_anki(apkg_path: str, media: MediaCollector) -> list[dict]:
-    from anki.collection import Collection
-    from anki import import_export_pb2 as pb
+def deck_selected(name: str, deck_filter: list | None) -> bool:
+    """True si `name` est l'un des decks demandés ou l'un de leurs sous-decks."""
+    if not deck_filter:
+        return True
+    return any(name == d or name.startswith(d + '::') for d in deck_filter)
 
-    with tempfile.TemporaryDirectory() as tmp:
-        col_path = os.path.join(tmp, 'collection.anki2')
-        col = Collection(col_path)
-        skipped = 0
-        try:
-            req = pb.ImportAnkiPackageRequest(
-                package_path=os.path.abspath(apkg_path),
-                options=pb.ImportAnkiPackageOptions(with_scheduling=True),
-            )
-            col.import_anki_package(req)
-            media_dir = col.media.dir()
-            today = col.sched.today
 
-            deck_map: dict = {}
-            for d in col.decks.all_names_and_ids():
-                name = d.name.strip()
-                if not name or name == 'Default':
-                    continue
-                deck_map[d.id] = {'id': str(d.id), 'name': name, 'cards': []}
+def process_collection(col, media: MediaCollector, deck_filter: list | None = None) -> list[dict]:
+    """Rend chaque carte d'une collection Anki ouverte (éphémère ou réelle)."""
+    media_dir = col.media.dir()
+    today = col.sched.today
+    skipped = 0
 
-            for cid in col.find_cards(''):
-                card = col.get_card(cid)
-                if card.did not in deck_map:
-                    skipped += 1
-                    continue
-                q_html = card.question()
-                a_html = card.answer()
-                words = card_words_and_question(q_html, a_html)
-                if not words:
-                    skipped += 1
-                    continue
+    deck_map: dict = {}
+    for d in col.decks.all_names_and_ids():
+        name = d.name.strip()
+        if not name or name == 'Default' or not deck_selected(name, deck_filter):
+            continue
+        deck_map[d.id] = {'id': str(d.id), 'name': name, 'cards': []}
 
-                audio_q = [rel for tag in card.question_av_tags()
-                           if (fn := getattr(tag, 'filename', None))
-                           and (rel := media.add(fn, media_dir=media_dir))]
-                audio_a = [rel for tag in card.answer_av_tags()
-                           if (fn := getattr(tag, 'filename', None))
-                           and (rel := media.add(fn, media_dir=media_dir))]
-                q_html = rewrite_img_srcs(q_html, media, lambda fn: {'media_dir': media_dir})
-                q_html = strip_sound_tags(q_html)
+    resolve = lambda fn: {'media_dir': media_dir}  # noqa: E731
+    for cid in col.find_cards(''):
+        card = col.get_card(cid)
+        if card.did not in deck_map:
+            if not deck_filter:
+                skipped += 1
+            continue
+        q_html = card.question()
+        a_html = card.answer()
+        words = card_words_and_question(q_html, a_html)
+        if not words:
+            skipped += 1
+            continue
 
-                note = card.note()
-                card_obj = {
-                    'id': str(cid),
-                    'question': q_html,
-                    'words': words,
-                    'tags': list(note.tags),
-                }
-                if audio_q:
-                    card_obj['audioQuestion'] = audio_q
-                if audio_a:
-                    card_obj['audioAnswer'] = audio_a
-                srs = extract_srs(card, today)
-                if srs:
-                    card_obj['srs'] = srs
-                deck_map[card.did]['cards'].append(card_obj)
-        finally:
-            col.close()
+        audio_q = [rel for tag in card.question_av_tags()
+                   if (fn := getattr(tag, 'filename', None))
+                   and (rel := media.add(fn, media_dir=media_dir))]
+        audio_a = [rel for tag in card.answer_av_tags()
+                   if (fn := getattr(tag, 'filename', None))
+                   and (rel := media.add(fn, media_dir=media_dir))]
+        q_html = strip_sound_tags(rewrite_img_srcs(q_html, media, resolve))
+        ans_html = strip_sound_tags(rewrite_img_srcs(answer_part(a_html), media, resolve)).strip()
+
+        note = card.note()
+        card_obj = {
+            'id': str(cid),
+            'question': q_html,
+            'answer': ans_html,
+            'words': words,
+            'tags': list(note.tags),
+        }
+        if audio_q:
+            card_obj['audioQuestion'] = audio_q
+        if audio_a:
+            card_obj['audioAnswer'] = audio_a
+        srs = extract_srs(card, today)
+        if srs:
+            card_obj['srs'] = srs
+        deck_map[card.did]['cards'].append(card_obj)
 
     if skipped:
         print(f"  ⚠  {skipped} carte(s) ignorée(s) (deck exclu ou réponse non parseable)",
               file=sys.stderr)
 
     return sorted([d for d in deck_map.values() if d['cards']], key=lambda d: d['name'])
+
+
+def process_apkg_via_anki(apkg_path: str, media: MediaCollector,
+                          deck_filter: list | None = None) -> list[dict]:
+    from anki.collection import Collection
+    from anki import import_export_pb2 as pb
+
+    with tempfile.TemporaryDirectory() as tmp:
+        col = Collection(os.path.join(tmp, 'collection.anki2'))
+        try:
+            req = pb.ImportAnkiPackageRequest(
+                package_path=os.path.abspath(apkg_path),
+                options=pb.ImportAnkiPackageOptions(with_scheduling=True),
+            )
+            col.import_anki_package(req)
+            return process_collection(col, media, deck_filter)
+        finally:
+            col.close()
+
+
+def process_local_collection(col_path: str, media: MediaCollector,
+                             deck_filter: list | None = None) -> list[dict]:
+    """Lit directement la collection Anki locale (lecture seule de fait :
+    rien n'est modifié). Anki doit être fermé, sinon elle est verrouillée."""
+    from anki.collection import Collection
+    col = Collection(col_path)
+    try:
+        return process_collection(col, media, deck_filter)
+    finally:
+        col.close()
 
 
 # ── Mode 2 : repli stdlib-only (legacy uniquement) ─────────────────────────────
@@ -421,12 +462,14 @@ def process_db_legacy(db_path: str, media: MediaCollector, media_bytes_fn) -> li
                    if (rel := media.add(fn, data=media_bytes_fn(fn)))]
         audio_a = [rel for fn in SOUND_TAG_RE.findall(a_html)
                    if (rel := media.add(fn, data=media_bytes_fn(fn)))]
+        ans_html = strip_sound_tags(rewrite_img_srcs(answer_part(a_html), media, resolve)).strip()
         q_html = rewrite_img_srcs(q_html, media, resolve)
         q_html = strip_sound_tags(q_html)
 
         card_obj = {
             'id': str(c['id']),
             'question': q_html,
+            'answer': ans_html,
             'words': words,
             'tags': note['tags'],
         }
@@ -508,28 +551,50 @@ def main():
     ap = argparse.ArgumentParser(
         description="Convertit un .apkg Anki en JSON pour Anki Trainer"
     )
-    ap.add_argument("apkg", help="Fichier .apkg ou .colpkg")
+    ap.add_argument("apkg", nargs="?", help="Fichier .apkg ou .colpkg (ou --collection)")
     ap.add_argument("--out", required=True, help="Fichier .json de sortie")
+    ap.add_argument("--collection", nargs="?", const="", metavar="CHEMIN",
+                    help="Lire la collection Anki locale au lieu d'un .apkg "
+                         "(chemin d'un collection.anki2, auto-détecté si omis ; Anki fermé)")
+    ap.add_argument("--profile", help="Profil Anki (avec --collection, si plusieurs)")
+    ap.add_argument("--deck", action="append", metavar="NOM",
+                    help="N'extraire que ce deck et ses sous-decks (répétable)")
     args = ap.parse_args()
 
-    if not os.path.exists(args.apkg):
+    if args.collection is None and not args.apkg:
+        ap.error("donnez un .apkg ou --collection")
+    if args.apkg and not os.path.exists(args.apkg):
         sys.exit(f"Fichier introuvable : {args.apkg}")
 
     out_dir = os.path.dirname(os.path.abspath(args.out)) or '.'
     out_stem = os.path.splitext(os.path.basename(args.out))[0]
     media = MediaCollector(out_dir, out_stem + '_media')
 
-    print(f"Ouverture de {os.path.basename(args.apkg)}…")
-    try:
-        import anki  # noqa: F401
-        print("Extraction des cartes (via le paquet 'anki')…")
-        decks = process_apkg_via_anki(args.apkg, media)
-    except ImportError:
-        print("  ℹ paquet 'anki' non installé — repli sur le lecteur stdlib "
-              "(fonctionne uniquement avec les exports Anki plus anciens ; "
-              "pip install anki pour un support complet)", file=sys.stderr)
-        print("Extraction des cartes…")
-        decks = process_apkg_legacy(args.apkg, media)
+    if args.collection is not None:
+        try:
+            import anki  # noqa: F401
+        except ImportError:
+            sys.exit("--collection nécessite le paquet 'anki' : pip install anki")
+        from sync_to_anki import anki_is_running, find_collection
+        col_path = os.path.abspath(args.collection) if args.collection else find_collection(args.profile)
+        if not args.collection and anki_is_running():
+            sys.exit("Anki est ouvert : ferme-le d'abord (sinon la collection est verrouillée).")
+        source_name = args.deck[0] if args.deck and len(args.deck) == 1 else "Anki"
+        print(f"Collection : {col_path}")
+        decks = process_local_collection(col_path, media, args.deck)
+    else:
+        source_name = os.path.basename(args.apkg)
+        print(f"Ouverture de {source_name}…")
+        try:
+            import anki  # noqa: F401
+            print("Extraction des cartes (via le paquet 'anki')…")
+            decks = process_apkg_via_anki(args.apkg, media, args.deck)
+        except ImportError:
+            print("  ℹ paquet 'anki' non installé — repli sur le lecteur stdlib "
+                  "(fonctionne uniquement avec les exports Anki plus anciens ; "
+                  "pip install anki pour un support complet)", file=sys.stderr)
+            print("Extraction des cartes…")
+            decks = process_apkg_legacy(args.apkg, media)
 
     total = sum(len(d['cards']) for d in decks)
     print(f"\n✓ {total} cartes dans {len(decks)} deck(s) :")
@@ -550,7 +615,7 @@ def main():
 
     output = {
         'version': 1,
-        'source': os.path.basename(args.apkg),
+        'source': source_name,
         'decks': decks,
     }
     with open(args.out, 'w', encoding='utf-8') as f:
