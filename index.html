@@ -750,12 +750,56 @@
         /* Verso shown after a card whose back holds more than the typed words */
         /* Verso, shown inside the question card under a separator line
            once the card is done (same look as the card browser) */
-        .s-verso {
-            display: none;
+        /* Inside the card, under the "verso" line: the blanks (type-in
+           mode) or the back once flipped (normal mode). */
+        .s-question .t-words {
+            max-width: none;
+            margin: 6px 0 4px;
         }
 
-        .s-verso.on {
-            display: block;
+        .s-verso-extra:not(:empty) {
+            margin-top: 18px;
+        }
+
+        .s-flip-btn {
+            margin: 4px auto 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: 1.5px solid var(--border-2);
+            border-radius: 12px;
+            padding: 9px 20px;
+            color: var(--text-2);
+            font-size: 14px;
+            cursor: pointer;
+            transition: border-color .15s, color .15s;
+        }
+
+        .s-flip-btn:hover {
+            border-color: var(--navy);
+            color: var(--navy);
+        }
+
+        .t-ratings.waiting {
+            visibility: hidden;
+        }
+
+        .s-mode-toggle {
+            background: none;
+            border: 1.5px solid var(--border-2);
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 12px;
+            color: var(--text-2);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color .15s, color .15s;
+        }
+
+        .s-mode-toggle:hover {
+            border-color: var(--navy);
+            color: var(--navy);
         }
 
         .s-next-btn {
@@ -996,6 +1040,7 @@
     <div id="study">
         <div class="s-topbar">
             <button class="s-back" onclick="goHome()">← Quitter</button>
+            <button class="s-mode-toggle" id="s-mode-toggle" onclick="toggleStudyMode()" title="Basculer saisie / mode normal (Anki)"></button>
             <div class="s-prog">
                 <div class="s-prog-label" id="prog-label">0 / 0</div>
                 <div class="s-prog-track">
@@ -1082,6 +1127,7 @@
         var LS_NEWCOUNT = "ankitrain_v1_nc_";     // + sourceId → {day, count}
         var LS_FLAGGED = "ankitrain_v1_fl_";     // + sourceId → {cardId: questionPlainText}
         var LS_STYLES = "ankitrain_v1_css_";    // + sourceId → [css shared by cards, see card.style]
+        var LS_MODE = "ankitrain_v1_mode";     // "type" (type the answer, default) | "flip" (Anki-style: show answer, rate)
         var LS_THEME = "ankitrain_v1_theme";    // "light" | "dark" | absent (follow system)
         var NEW_LIMIT = 20;
 
@@ -2081,24 +2127,33 @@
             updateProgress();
             updateCounts();
 
-            if (!card.words || !card.words.length) { sess.qIdx++; showCard(); return; }
+            var flip = studyMode() === "flip";
+            flipShown = false;
+            updateModeToggle();
+            if (!flip && (!card.words || !card.words.length)) { sess.qIdx++; showCard(); return; }
 
             var hasAudio = (card.audioQuestion && card.audioQuestion.length) || card.lang;
             var previews = previewIntervals(sess.srs[card.id]);
+            // One card: recto, a "verso" line, then the blanks to type
+            // (type-in mode) or the hidden back + "show" button (normal mode).
             document.getElementById("s-content").innerHTML =
                 '<div class="s-question"><div class="s-card-body"></div>'
                 + (hasAudio ? '<button class="s-audio-btn" onclick="playCardAudio(\'q\')">🔊 Écouter</button>' : '')
-                + '<div class="s-verso" id="s-verso"><div class="b-sep">verso</div><div class="s-verso-body"></div><div class="s-verso-next"></div></div>'
+                + '<div class="b-sep">verso</div>'
+                + (flip
+                    ? '<div class="s-verso-body" id="s-verso-body"></div>'
+                    + '<button class="s-flip-btn" id="s-flip-btn" onclick="flipCard()">Afficher la réponse <span class="t-key">Espace</span></button>'
+                    : '<div class="t-words" id="t-words"></div><div class="s-verso-extra" id="s-verso-extra"></div>')
                 + '</div>'
-                + '<div class="t-words" id="t-words"></div>'
                 + '<div class="t-actions">'
-                + '<span class="t-show-ans" onclick="revealCurrent()">💡 Voir la réponse <span class="t-key">F1</span></span>'
+                + (flip ? '' : '<span class="t-show-ans" onclick="revealCurrent()">💡 Voir la réponse <span class="t-key">F1</span></span>')
                 + '<span class="t-flag" id="s-flag-btn" onclick="toggleFlagCurrent()" title="Marquer à corriger dans Anki">🚩 <span class="t-key">F6</span></span>'
                 + '</div>'
                 + ratingButtonsHtml(previews);
             mountCardHtml(document.querySelector("#s-content .s-card-body"), card.question, cardStyle(sess.sourceId, card));
 
-            buildRows(card.words);
+            if (flip) document.querySelector("#s-content .t-ratings").classList.add("waiting");
+            else buildRows(card.words);
             updateFlagIndicator();
             if (hasAudio) playCardAudio("q");
         }
@@ -2133,6 +2188,14 @@
 
         function rate(q) {
             if (advancing) return;
+            if (studyMode() === "flip") {
+                if (!flipShown) return;
+                advancing = true;
+                flashForPendingRating(q);
+                document.getElementById("audio-player").pause();
+                setTimeout(function () { advanceCard(q); }, 150);
+                return;
+            }
             advancing = true;
             flashForPendingRating(q);
             playCardAudio("both", function () { advanceCard(q); });
@@ -2365,27 +2428,47 @@
             var q = revealed ? 1 : 3;
             flashForPendingRating(q);
             var card = sess.queue[sess.qIdx];
-            showVerso(card);
             if (!hasRichAnswer(card)) {
                 playCardAudio("a", function () { flash(function () { advanceCard(q); }); });
                 return;
             }
-            // Rich back (meaning, example sentence, image…): leave it on
-            // screen and wait for Entrée / « Suivant → ».
-            document.querySelector("#s-verso .s-verso-next").innerHTML =
-                '<button class="s-next-btn" onclick="continueAfterAnswer()">Suivant → <span class="t-key">Entrée</span></button>';
+            // Rich back (meaning, example sentence, image…): show it under
+            // the blanks, in the card, and wait for Entrée / « Suivant → ».
+            var extra = document.getElementById("s-verso-extra");
+            extra.innerHTML = '<div class="s-verso-body"></div>'
+                + '<button class="s-next-btn" onclick="continueAfterAnswer()">Suivant → <span class="t-key">Entrée</span></button>';
+            mountCardHtml(extra.querySelector(".s-verso-body"), card.answer, cardStyle(sess.sourceId, card));
             if (document.activeElement) document.activeElement.blur();
             pendingNext = function () { flash(function () { advanceCard(q); }); };
             playCardAudio("a");
         }
 
-        // Back of the card, under the separator line inside the question card.
-        function showVerso(card) {
-            var box = document.getElementById("s-verso");
-            if (!box) return;
+        // ── Normal (Anki-style) mode: show the back, then rate it ──
+        var flipShown = false;
+        function studyMode() {
+            try { return localStorage.getItem(LS_MODE) === "flip" ? "flip" : "type"; } catch (e) { return "type"; }
+        }
+        function updateModeToggle() {
+            var b = document.getElementById("s-mode-toggle");
+            if (b) b.textContent = studyMode() === "flip" ? "🃏 Mode normal" : "⌨️ Saisie";
+        }
+        function toggleStudyMode() {
+            try { localStorage.setItem(LS_MODE, studyMode() === "flip" ? "type" : "flip"); } catch (e) { }
+            if (document.activeElement) document.activeElement.blur(); // so Space doesn't re-press the toggle
+            document.getElementById("audio-player").pause();
+            if (sess.queue[sess.qIdx] && !advancing) showCard(); else updateModeToggle();
+        }
+        function flipCard() {
+            if (flipShown || advancing) return;
+            var card = sess.queue[sess.qIdx];
+            if (!card) return;
+            flipShown = true;
             var back = card.answer != null ? card.answer : esc((card.words || []).join(" "));
-            mountCardHtml(box.querySelector(".s-verso-body"), back, cardStyle(sess.sourceId, card));
-            box.classList.add("on");
+            mountCardHtml(document.getElementById("s-verso-body"), back, cardStyle(sess.sourceId, card));
+            var btn = document.getElementById("s-flip-btn");
+            if (btn) btn.remove();
+            document.querySelector("#s-content .t-ratings").classList.remove("waiting");
+            playCardAudio("a");
         }
 
         var pendingNext = null;
@@ -2416,6 +2499,13 @@
             if (pendingNext && e.key === "Enter") {
                 e.preventDefault();
                 continueAfterAnswer();
+            } else if (studyMode() === "flip" && !e.metaKey && !e.ctrlKey && (e.key === " " || e.key === "Enter" || e.key === "F1")) {
+                // Like Anki: Space/Entrée shows the answer, then counts as "Correct".
+                e.preventDefault();
+                if (!flipShown) flipCard(); else rate(3);
+            } else if (studyMode() === "flip" && "1234".indexOf(e.key) !== -1 && e.key.length === 1 && !e.metaKey && !e.ctrlKey) {
+                e.preventDefault();
+                rate({ "1": 1, "2": 2, "3": 3, "4": 4 }[e.key]);
             } else if (e.key === "F1") {
                 e.preventDefault();
                 revealCurrent();

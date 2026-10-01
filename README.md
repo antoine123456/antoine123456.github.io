@@ -84,7 +84,8 @@ ankisync() {
 ## How studying works
 
 - Pick a deck (or a parent deck, which studies all its sub-decks together) from the home screen; badges show how many cards are **new**, **due**, and already **learned**.
-- The question is shown as a card; type each word of the answer into its blank.
+- The question is shown as a card; type each word of the answer into its blank, inside the card under its "verso" line.
+- The **⌨️ Saisie / 🃏 Mode normal** toggle at the top of the study screen (remembered per browser) switches to plain Anki-style review: **Space** shows the back in the card, then rate with the buttons, **1–4** or **F2/F3/F4/F7** (**Space** again = Correct).
 - Accents are optional — `ame` is accepted for `âme`.
 - After 3 wrong attempts on a word, a hint appears; **💡 Voir les réponses** reveals everything, **Passer →** skips.
 - **🔍** on any deck row opens a read-only card browser: decks with pictures get a carousel (front and back together; swipe, mouse wheel, **← / →** or ‹ › to move), word/sentence decks a dense `front | back` list; the search box filters on both sides (accents ignored), **Esc** goes back. Nothing you do there touches scheduling. JSON made before `answer` existed shows the typed words as the back.
@@ -179,7 +180,7 @@ either side of the pair) are silently skipped instead of duplicated.
 
 - Saw a case with 3 wrong marks (❌) already under a word where pressing F1 (reveal) then graded the card as Correct instead of À revoir.
 - Typing fast enough doesn't always advance to the next blank in time.
-
+- there a bug with mouse scroll on the caroussel, it get stuck when scolling fast (maybe just a bug of the mouse)
 ## JSON format reference
 
 ```json
