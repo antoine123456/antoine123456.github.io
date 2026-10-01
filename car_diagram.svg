@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1000" font-family="Arial, Helvetica, sans-serif">
+  <rect width="1400" height="1000" fill="#ffffff"/>
+  <line x1="60" y1="700" x2="1340" y2="700" stroke="#222" stroke-width="3"/>
+
+  <!-- body: reversed from v2, front (headlight) now on the LEFT -->
+  <path d="M 1170,560
+           C 1170,515 1130,495 1080,495
+           L 980,495
+           C 960,410 900,330 775,320
+           L 590,320
+           C 495,325 445,355 415,415
+           C 400,450 385,470 325,495
+           L 250,495
+           C 218,495 198,520 198,560
+           L 198,615
+           C 198,648 220,662 252,662
+           L 1118,662
+           C 1150,662 1170,648 1170,615
+           Z"
+        fill="#e8582c" stroke="#1a1a1a" stroke-width="6" stroke-linejoin="round"/>
+
+  <!-- window -->
+  <path d="M 950,470
+           C 932,415 885,355 775,345
+           L 610,345
+           C 535,349 495,370 472,410
+           L 472,470
+           Z"
+        fill="#bfe4f0" stroke="#1a1a1a" stroke-width="5" stroke-linejoin="round"/>
+  <line x1="710" y1="350" x2="710" y2="470" stroke="#1a1a1a" stroke-width="5"/>
+
+  <!-- steering wheel, visible through the front side of the window -->
+  <circle cx="560" cy="445" r="26" fill="none" stroke="#1a1a1a" stroke-width="5"/>
+  <line x1="560" y1="419" x2="560" y2="471" stroke="#1a1a1a" stroke-width="4"/>
+  <line x1="536" y1="458" x2="584" y2="432" stroke="#1a1a1a" stroke-width="4"/>
+  <line x1="536" y1="432" x2="584" y2="458" stroke="#1a1a1a" stroke-width="4"/>
+
+  <!-- door line + handle -->
+  <line x1="710" y1="495" x2="710" y2="662" stroke="#1a1a1a" stroke-width="4"/>
+  <circle cx="740" cy="580" r="6" fill="#1a1a1a"/>
+
+  <!-- side mirror (front, left) -->
+  <path d="M 435,405 C 410,398 392,405 390,420 C 388,434 404,442 425,436 Z"
+        fill="#e8582c" stroke="#1a1a1a" stroke-width="5" stroke-linejoin="round"/>
+
+  <!-- headlight (front, left) / taillight (rear, right) -->
+  <ellipse cx="228" cy="540" rx="24" ry="34" fill="#fde98a" stroke="#1a1a1a" stroke-width="4"/>
+  <ellipse cx="1152" cy="545" rx="16" ry="30" fill="#f2a7a7" stroke="#1a1a1a" stroke-width="4"/>
+
+  <!-- bumper strip -->
+  <rect x="200" y="615" width="965" height="18" rx="6" fill="#1a1a1a"/>
+
+  <!-- wheels: front (left) now at cx=390, rear (right) at cx=980 -->
+  <circle cx="390" cy="662" r="95" fill="#2b2b2b" stroke="#1a1a1a" stroke-width="6"/>
+  <circle cx="390" cy="662" r="46" fill="#cfcfcf" stroke="#1a1a1a" stroke-width="4"/>
+  <circle cx="390" cy="662" r="14" fill="#1a1a1a"/>
+
+  <circle cx="980" cy="662" r="95" fill="#2b2b2b" stroke="#1a1a1a" stroke-width="6"/>
+  <circle cx="980" cy="662" r="46" fill="#cfcfcf" stroke="#1a1a1a" stroke-width="4"/>
+  <circle cx="980" cy="662" r="14" fill="#1a1a1a"/>
+
+  <!-- trunk lid line (rear, right) -->
+  <line x1="980" y1="495" x2="1080" y2="495" stroke="#1a1a1a" stroke-width="4"/>
+
+  <!-- ===================== labels ===================== -->
+  <g stroke="#1a1a1a" stroke-width="3" fill="none">
+    <!-- maletero -> trunk box (rear) -->
+    <line x1="1180" y1="145" x2="1095" y2="500"/>
+    <polygon points="1095,500 1098,480 1113,490" fill="#1a1a1a"/>
+
+    <!-- parabrisas -> front window/hood transition -->
+    <line x1="500" y1="255" x2="528" y2="378"/>
+    <polygon points="528,378 514,363 532,358" fill="#1a1a1a"/>
+
+    <!-- espejo -> side mirror -->
+    <line x1="260" y1="255" x2="404" y2="402"/>
+    <polygon points="404,402 383,396 390,381" fill="#1a1a1a"/>
+
+    <!-- asientos -> cabin interior -->
+    <line x1="780" y1="145" x2="752" y2="390"/>
+    <polygon points="752,390 745,373 763,376" fill="#1a1a1a"/>
+
+    <!-- volante -> steering wheel -->
+    <line x1="560" y1="145" x2="560" y2="415"/>
+    <polygon points="560,415 551,399 569,399" fill="#1a1a1a"/>
+
+    <!-- intermitente -> headlight -->
+    <line x1="140" y1="430" x2="206" y2="513"/>
+    <polygon points="206,513 184,508 192,493" fill="#1a1a1a"/>
+
+    <!-- motor -> under the hood -->
+    <line x1="130" y1="585" x2="290" y2="540"/>
+    <polygon points="290,540 271,536 276,553" fill="#1a1a1a"/>
+
+    <!-- rueda -> front wheel -->
+    <line x1="390" y1="845" x2="390" y2="762"/>
+    <polygon points="390,762 380,778 400,778" fill="#1a1a1a"/>
+
+    <!-- puerta -> door line -->
+    <line x1="780" y1="845" x2="715" y2="668"/>
+    <polygon points="715,668 722,686 705,681" fill="#1a1a1a"/>
+
+    <!-- carretera -> ground line -->
+    <line x1="1060" y1="845" x2="930" y2="705"/>
+    <polygon points="930,705 949,703 944,719" fill="#1a1a1a"/>
+  </g>
+
+  <g font-size="38" fill="#111">
+    <text x="1180" y="120" text-anchor="middle">maletero</text>
+    <text x="500" y="230" text-anchor="middle">parabrisas</text>
+    <text x="260" y="230" text-anchor="middle">espejo</text>
+    <text x="780" y="120" text-anchor="middle">asientos</text>
+    <text x="560" y="120" text-anchor="middle">volante</text>
+    <text x="140" y="410" text-anchor="middle">intermitente</text>
+    <text x="130" y="560" text-anchor="middle">motor</text>
+    <text x="390" y="885" text-anchor="middle">rueda</text>
+    <text x="780" y="885" text-anchor="middle">puerta</text>
+    <text x="1060" y="885" text-anchor="middle">carretera</text>
+  </g>
+</svg>
