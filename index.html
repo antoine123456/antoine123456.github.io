@@ -748,21 +748,13 @@
         }
 
         /* Verso shown after a card whose back holds more than the typed words */
-        .s-answer {
+        /* Verso, shown inside the question card under a separator line
+           once the card is done (same look as the card browser) */
+        .s-verso {
             display: none;
-            width: 100%;
-            max-width: 720px;
-            border: 1.5px solid var(--border-tint-green);
-            border-radius: 18px;
-            padding: 20px 28px;
-            margin: 8px 0 24px;
-            font-size: clamp(16px, 2.4vw, 20px);
-            line-height: 1.6;
-            color: var(--text);
-            text-align: center;
         }
 
-        .s-answer.on {
+        .s-verso.on {
             display: block;
         }
 
@@ -871,6 +863,58 @@
             content: "";
             flex: 1;
             border-top: 1px solid var(--border-2);
+        }
+
+        /* Dense list for text decks: front | back, one row per card */
+        .b-list {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .b-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 14px;
+            align-items: baseline;
+            padding: 7px 14px;
+            font-size: 14px;
+            line-height: 1.4;
+            border-top: 1px solid var(--border);
+        }
+
+        .b-row:first-child {
+            border-top: none;
+        }
+
+        .b-row:nth-child(even) {
+            background: var(--surface-hover);
+        }
+
+        .b-row-front {
+            color: var(--text);
+        }
+
+        .b-row-back {
+            color: var(--text-2);
+            border-left: 1px solid var(--border-2);
+            padding-left: 14px;
+        }
+
+        .b-row-audio {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 0;
+            opacity: .6;
+        }
+
+        .b-row-audio:hover {
+            opacity: 1;
         }
 
         .b-nav {
@@ -1282,7 +1326,12 @@
         // songs.json. Silently does nothing if that file isn't there.
         var DEFAULT_DECK_URL = "default.json";
         function loadDefaultDeckIfEmpty() {
-            if (loadSources().length) return Promise.resolve(false);
+            // default.json used to say "source": "out" (extract.py's --out
+            // name); fix the label already stored on existing devices.
+            var srcs = loadSources();
+            var def = srcs.find(function (s) { return s.id === "default" && s.name === "out"; });
+            if (def) { def.name = "Espagnol"; saveSources(srcs); }
+            if (srcs.length) return Promise.resolve(false);
             return fetch(DEFAULT_DECK_URL)
                 .then(function (r) { return r.ok ? r.json() : null; })
                 .then(function (data) {
@@ -1857,6 +1906,9 @@
                 return { card: c, back: back, text: (plainText(c.question) + " " + plainText(back) + " " + (c.words || []).join(" ")).toLowerCase() };
             });
             browse.list = browse.all;
+            // Pictures need room → carousel; words/sentences read better as
+            // a dense two-column list.
+            browse.carousel = browse.all.some(function (b) { return /<img/i.test(b.card.question + b.back); });
             document.getElementById("b-search").value = "";
             document.getElementById("b-deck-name").textContent = deckName.split("::").join(" › ");
             document.getElementById("home").style.display = "none";
@@ -1894,6 +1946,7 @@
                 updateBrowseCount();
                 return;
             }
+            if (!browse.carousel) { renderBrowseList(el); return; }
             var slides = browse.list.map(function (b, i) {
                 return '<div class="s-question b-slide' + (i === 0 ? ' active' : '') + '" data-i="' + i + '"></div>';
             }).join("");
@@ -1911,7 +1964,42 @@
             }, { root: track, rootMargin: "0px 150%" });
             track.querySelectorAll(".b-slide").forEach(function (sl) { browse.observer.observe(sl); });
             track.addEventListener("scroll", onBrowseScroll, { passive: true });
+            track.addEventListener("wheel", onBrowseWheel, { passive: false });
             updateBrowseCount();
+        }
+
+        // Mouse wheel (vertical) → one slide per notch; horizontal trackpad
+        // swipes keep the native scroll.
+        var wheelLock = 0;
+        function onBrowseWheel(e) {
+            if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+            e.preventDefault();
+            var now = Date.now();
+            if (now < wheelLock) return;
+            wheelLock = now + 250;
+            stepBrowse(e.deltaY > 0 ? 1 : -1);
+        }
+
+        // Text of a card side, entities decoded, <style>/media dropped
+        // (inert <template>: nothing gets loaded).
+        function htmlToText(html) {
+            var t = document.createElement("template");
+            t.innerHTML = String(html || "");
+            t.content.querySelectorAll("style,script").forEach(function (n) { n.remove(); });
+            return t.content.textContent.replace(/\s+/g, " ").trim();
+        }
+
+        function renderBrowseList(el) {
+            el.innerHTML = '<div class="b-list">' + browse.list.map(function (b, i) {
+                var c = b.card;
+                var hasAudio = (c.audioQuestion && c.audioQuestion.length) || (c.audioAnswer && c.audioAnswer.length);
+                return '<div class="b-row">'
+                    + '<div class="b-row-front">' + esc(htmlToText(c.question)) + '</div>'
+                    + '<div class="b-row-back">' + esc(htmlToText(b.back)) + '</div>'
+                    + (hasAudio ? '<button class="b-row-audio" onclick="playBrowseAudio(' + i + ')" title="Écouter">🔊</button>' : '<span></span>')
+                    + '</div>';
+            }).join("") + '</div>';
+            document.getElementById("b-count").textContent = browse.list.length + " cartes";
         }
 
         function fillSlide(sl) {
@@ -1968,6 +2056,7 @@
         document.addEventListener("keydown", function (e) {
             if (document.getElementById("browse").style.display !== "flex") return;
             var inSearch = e.target && e.target.id === "b-search";
+            if (!browse.carousel && !inSearch && e.key !== "Escape") return;
             if (e.key === "Escape") {
                 e.preventDefault();
                 if (inSearch) e.target.blur(); else closeBrowse();
@@ -1999,13 +2088,13 @@
             document.getElementById("s-content").innerHTML =
                 '<div class="s-question"><div class="s-card-body"></div>'
                 + (hasAudio ? '<button class="s-audio-btn" onclick="playCardAudio(\'q\')">🔊 Écouter</button>' : '')
+                + '<div class="s-verso" id="s-verso"><div class="b-sep">verso</div><div class="s-verso-body"></div><div class="s-verso-next"></div></div>'
                 + '</div>'
                 + '<div class="t-words" id="t-words"></div>'
                 + '<div class="t-actions">'
                 + '<span class="t-show-ans" onclick="revealCurrent()">💡 Voir la réponse <span class="t-key">F1</span></span>'
                 + '<span class="t-flag" id="s-flag-btn" onclick="toggleFlagCurrent()" title="Marquer à corriger dans Anki">🚩 <span class="t-key">F6</span></span>'
                 + '</div>'
-                + '<div class="s-answer" id="s-answer"></div>'
                 + ratingButtonsHtml(previews);
             mountCardHtml(document.querySelector("#s-content .s-card-body"), card.question, cardStyle(sess.sourceId, card));
 
@@ -2276,20 +2365,27 @@
             var q = revealed ? 1 : 3;
             flashForPendingRating(q);
             var card = sess.queue[sess.qIdx];
+            showVerso(card);
             if (!hasRichAnswer(card)) {
                 playCardAudio("a", function () { flash(function () { advanceCard(q); }); });
                 return;
             }
-            // Rich back (meaning, example sentence, image…): show it and wait
-            // for Entrée / « Suivant → » instead of flashing past it.
-            var box = document.getElementById("s-answer");
-            box.innerHTML = '<div class="s-answer-body"></div>'
-                + '<button class="s-next-btn" onclick="continueAfterAnswer()">Suivant → <span class="t-key">Entrée</span></button>';
-            mountCardHtml(box.querySelector(".s-answer-body"), card.answer, cardStyle(sess.sourceId, card));
-            box.classList.add("on");
+            // Rich back (meaning, example sentence, image…): leave it on
+            // screen and wait for Entrée / « Suivant → ».
+            document.querySelector("#s-verso .s-verso-next").innerHTML =
+                '<button class="s-next-btn" onclick="continueAfterAnswer()">Suivant → <span class="t-key">Entrée</span></button>';
             if (document.activeElement) document.activeElement.blur();
             pendingNext = function () { flash(function () { advanceCard(q); }); };
             playCardAudio("a");
+        }
+
+        // Back of the card, under the separator line inside the question card.
+        function showVerso(card) {
+            var box = document.getElementById("s-verso");
+            if (!box) return;
+            var back = card.answer != null ? card.answer : esc((card.words || []).join(" "));
+            mountCardHtml(box.querySelector(".s-verso-body"), back, cardStyle(sess.sourceId, card));
+            box.classList.add("on");
         }
 
         var pendingNext = null;
