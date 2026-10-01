@@ -618,32 +618,6 @@
             min-height: 14px;
         }
 
-        .t-actions {
-            margin-top: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 28px;
-            width: 100%;
-        }
-
-        .t-flag {
-            font-size: 11px;
-            color: var(--text-3);
-            cursor: pointer;
-            letter-spacing: .3px;
-            transition: color .15s;
-        }
-
-        .t-flag:hover {
-            color: var(--orange);
-        }
-
-        .t-flag.flagged {
-            color: var(--orange);
-            font-weight: 600;
-        }
-
         .t-key {
             display: inline-block;
             font-size: 9px;
@@ -697,6 +671,82 @@
             .t-rate { flex-direction: column; gap: 1px; padding: 6px 4px; border-radius: 18px; }
             .t-rate .t-key { display: none; }
             .s-pill { font-size: 13px; padding: 10px 8px; }
+        }
+
+        /* ── Phones: a fixed-size card that fits the space left by the
+           keyboard. The study screen is pinned to the *visual* viewport
+           (--vvh / --vvtop, set from JS), the card splits it into a
+           scrollable recto half, the fixed "verso" line, and a scrollable
+           type-in / verso half; the bottom bar (pills + counters) only
+           shows while the keyboard is down. ── */
+        @media (max-width: 600px) {
+            #study {
+                position: fixed;
+                left: 0;
+                right: 0;
+                top: var(--vvtop, 0px);
+                height: var(--vvh, 100vh);
+                min-height: 0;
+                overflow: hidden;
+            }
+
+            #study .s-topbar { padding: 8px 14px 0; }
+            #study .s-deck-name { display: none; }
+
+            #study .s-main {
+                flex: 1;
+                min-height: 0;
+                padding: 8px 12px 10px;
+            }
+
+            #s-content {
+                flex: 1;
+                min-height: 0;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+            }
+
+            #s-content .s-question {
+                flex: 1;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
+                margin: 0;
+                padding: 0 16px;
+            }
+
+            .s-zone {
+                flex: 1 1 0;
+                min-height: 0;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .s-zone-in {
+                margin: auto 0; /* centered when it fits, scrolls when not */
+                padding: 10px 0;
+            }
+
+            #s-content .s-question > .b-sep {
+                flex: none;
+                margin: 0;
+            }
+
+            #study .s-bottom {
+                position: static;
+                flex: none;
+            }
+
+            body.kb-open #study .s-bottom {
+                display: none;
+            }
+
+            .s-pill .t-key {
+                display: none;
+            }
         }
 
         /* Card highlighted in the rating's color (automatic or keyboard
@@ -1923,6 +1973,8 @@
         // ═══════════════════════════════════════════════
         var CARD_SHADOW_CSS = ".card{background:transparent!important;color:inherit!important;font-family:inherit;font-size:inherit;text-align:center;padding:0}"
             + "img{max-width:100%;max-height:50vh;border-radius:8px;margin:8px 0}"
+            // Phones: a picture fits its half of the card (see the phone layout CSS)
+            + "@media (max-width:600px){img{max-height:calc(var(--zoneh,50vh) - 24px);margin:2px 0}}"
             + "[lang|=zh]{font-family:Kai,'Kaiti SC',STKaiti,'PingFang SC','Noto Serif SC',serif}";
         function mountCardHtml(el, html, css) {
             if (!el) return;
@@ -2145,19 +2197,21 @@
             // (type-in mode) or the hidden back (normal mode). The actions
             // (hint / answer, then ratings) live in the bottom bar.
             document.getElementById("s-content").innerHTML =
-                '<div class="s-question"><div class="s-card-body"></div>'
+                '<div class="s-question">'
+                + '<div class="s-zone s-zone-recto"><div class="s-zone-in"><div class="s-card-body"></div>'
                 + (hasAudio ? '<button class="s-audio-btn" onclick="playCardAudio(\'q\')">🔊 Écouter</button>' : '')
+                + '</div></div>'
                 + '<div class="b-sep">verso</div>'
+                + '<div class="s-zone s-zone-verso"><div class="s-zone-in">'
                 + (flip
                     ? '<div class="s-verso-body" id="s-verso-body"></div>'
                     : '<div class="t-words" id="t-words"></div><div class="s-verso-extra" id="s-verso-extra"></div>')
-                + '</div>'
-                + '<div class="t-actions">'
-                + '<span class="t-flag" id="s-flag-btn" onclick="toggleFlagCurrent()" title="Marquer à corriger dans Anki">🚩 <span class="t-key">F6</span></span>'
+                + '</div></div>'
                 + '</div>';
             mountCardHtml(document.querySelector("#s-content .s-card-body"), card.question, cardStyle(sess.sourceId, card));
 
             setBarState("question");
+            updateZoneHeight();
             if (!flip) buildRows(card.words);
             updateFlagIndicator();
             if (hasAudio) playCardAudio("q");
@@ -2443,13 +2497,15 @@
         }
         // "💡 Indice": reveals only the word at the cursor (or the first
         // not-yet-shown one if nothing has focus). Once every missing word
-        // is shown, the bottom bar switches to the rating pills and the
-        // rating is yours to pick (no more automatic rating).
+        // is shown, the bottom bar switches to the rating pills; typing the
+        // words or pressing F1 once more still rates (À revoir) and moves on.
         function revealCurrent() {
-            if (advancing || barState === "rating") return;
+            if (advancing) return;
             var entry = wordRows.find(function (e) { return e.inp === document.activeElement && !e.solved && !e.revealed; })
                 || wordRows.find(function (e) { return !e.solved && !e.revealed; });
-            if (!entry) { setBarState("rating"); return; }
+            // Nothing left to reveal: one more F1 = rate (À revoir, since
+            // hints were used) and move on.
+            if (!entry) { completeCard(); return; }
             revealed = true;
             showHintFor(entry);
             // Every missing word now shown → time to rate it yourself.
@@ -2543,6 +2599,29 @@
             go();
         }
 
+        // Phone layout: keep the study screen sized to what the keyboard
+        // leaves visible, and hide the bottom bar while the keyboard is up.
+        function updateVisualViewport() {
+            var vv = window.visualViewport;
+            var h = vv ? vv.height : window.innerHeight;
+            var root = document.documentElement.style;
+            root.setProperty("--vvh", h + "px");
+            root.setProperty("--vvtop", (vv ? vv.offsetTop : 0) + "px");
+            document.body.classList.toggle("kb-open", !!vv && vv.height < window.innerHeight * 0.75);
+            updateZoneHeight();
+        }
+        // Height of the recto half of the phone card, for card images.
+        function updateZoneHeight() {
+            var z = document.querySelector("#s-content .s-zone-recto");
+            if (z && z.clientHeight) document.documentElement.style.setProperty("--zoneh", z.clientHeight + "px");
+        }
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener("resize", updateVisualViewport);
+            window.visualViewport.addEventListener("scroll", updateVisualViewport);
+        }
+        window.addEventListener("resize", updateVisualViewport);
+        updateVisualViewport();
+
         // Phones (iOS especially) only open the keyboard when focus happens
         // during a tap, and the next card's blanks appear later (after the
         // rating pause). So, in type-in mode, focus moves to an invisible
@@ -2555,7 +2634,7 @@
         }
 
         function tryComplete() {
-            if (advancing || barState === "rating") return;
+            if (advancing) return;
             if (wordRows.every(function (e) { return e.solved; })) completeCard();
         }
 
