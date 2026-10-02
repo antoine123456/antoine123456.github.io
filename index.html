@@ -565,13 +565,6 @@
             gap: 10px;
         }
 
-        .wc-lbl {
-            font-family: Georgia, serif;
-            font-size: clamp(16px, 2.4vw, 24px);
-            min-height: 32px;
-            color: var(--text-3);
-        }
-
         .wc-inp {
             border: none;
             border-bottom: 2.5px solid var(--input-line);
@@ -604,11 +597,47 @@
             color: var(--text-3);
         }
 
-        .wc-hint {
+        /* Hint: the word shown greyed out inside the blank, left-aligned
+           with the input's own text so you can type right over it. */
+        .wc-box {
+            position: relative;
+            display: inline-block;
+        }
+
+        .wc-box .wc-inp {
+            position: relative;
+            z-index: 1;
+            display: block; /* no line-box gap: ghost and text share the same top */
+        }
+
+        .wc-ghost {
             display: none;
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            padding: 2px 4px 7px;
             font-family: Georgia, serif;
-            font-size: 13px;
-            color: var(--gold);
+            font-size: 17px;
+            line-height: normal;
+            text-align: left;
+            color: var(--text-3);
+            opacity: .6;
+            white-space: pre;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .wc-box.hinted .wc-ghost {
+            display: block;
+        }
+
+        .wc-box.hinted .wc-inp {
+            text-align: left;
+        }
+
+        .wc-box.solved .wc-ghost {
+            display: none;
         }
 
         .wc-attempts {
@@ -2434,17 +2463,18 @@
 
             words.forEach(function (word, i) {
                 var col = document.createElement("div"); col.className = "word-col";
-                var lbl = document.createElement("div"); lbl.className = "wc-lbl";
+                var box = document.createElement("div"); box.className = "wc-box";
                 var inp = document.createElement("input"); inp.className = "wc-inp";
                 inp.type = "text"; inp.placeholder = "···";
                 inp.autocomplete = "off"; inp.autocorrect = "off"; inp.spellcheck = false;
                 inp.style.width = Math.max(word.length * 14, 48) + "px";
-                var hint = document.createElement("div"); hint.className = "wc-hint";
+                var ghost = document.createElement("span"); ghost.className = "wc-ghost";
+                box.append(inp, ghost);
                 var attempts = document.createElement("div"); attempts.className = "wc-attempts";
-                col.append(lbl, inp, hint, attempts);
+                col.append(box, attempts);
                 section.appendChild(col);
 
-                var entry = { word: word, expected: [word], inp: inp, lbl: lbl, hint: hint, attempts: attempts, solved: false, revealed: false, errors: 0, _errTimer: null };
+                var entry = { word: word, expected: [word], inp: inp, box: box, ghost: ghost, attempts: attempts, solved: false, revealed: false, errors: 0, _errTimer: null };
                 wordRows.push(entry);
                 inp.addEventListener("input", makeCheck(entry, i));
                 inp.addEventListener("keydown", makeKey(i));
@@ -2472,23 +2502,37 @@
         }
 
         function liveCheck(entry, i) {
+            if (/^\s/.test(entry.inp.value)) entry.inp.value = entry.inp.value.replace(/^\s+/, ""); // space typed between words
+            // Typed past the word (fast typing: "estoy cansado" in one go):
+            // keep the word here and carry the rest into the next blank.
+            var m = entry.inp.value.match(/^\s*(\S+)\s+(\S.*)$/);
+            if (m && entry.expected.some(function (t) { return isMatch(m[1], t); })) {
+                entry.inp.value = m[1];
+                var next = wordRows.find(function (e, j) { return j > i && !e.solved; });
+                if (next) {
+                    next.inp.value = m[2] + next.inp.value;
+                    markSolved(entry);
+                    next.inp.focus();
+                    liveCheck(next, wordRows.indexOf(next));
+                    return;
+                }
+            }
             var r = check(entry);
             if (r === null) {
                 clearTimeout(entry._errTimer);
                 entry.inp.className = "wc-inp";
-                if (!entry.inp.value.trim()) entry.solved = false;
+                if (!entry.inp.value.trim()) { entry.solved = false; entry.box.classList.remove("solved"); }
                 return;
             }
             if (r) {
-                clearTimeout(entry._errTimer);
-                entry.inp.className = "wc-inp ok";
-                entry.solved = true;
-                entry.lbl.textContent = entry.word;
-                entry.lbl.style.color = "#16a34a";
-                setTimeout(function () { if (!entry.inp.isConnected) return; focusNext(i); }, 220);
+                markSolved(entry);
+                // Move on right away (was 220 ms: fast typing then spilled
+                // into this blank and turned it wrong — issue #3).
+                focusNext(i);
             } else {
                 entry.inp.className = "wc-inp err";
                 entry.solved = false;
+                entry.box.classList.remove("solved");
                 clearTimeout(entry._errTimer);
                 entry._errTimer = setTimeout(function () {
                     if (!entry.inp.isConnected || entry.solved) return;
@@ -2500,6 +2544,13 @@
             }
         }
 
+        function markSolved(entry) {
+            clearTimeout(entry._errTimer);
+            entry.inp.className = "wc-inp ok";
+            entry.box.classList.add("solved");
+            entry.solved = true;
+        }
+
         function focusNext(i) {
             for (var j = i + 1; j < wordRows.length; j++) { if (!wordRows[j].solved) { wordRows[j].inp.focus(); return; } }
             for (var j = 0; j < i && j < wordRows.length; j++) { if (!wordRows[j].solved) { wordRows[j].inp.focus(); return; } }
@@ -2507,8 +2558,9 @@
         }
 
         function revealHint(entry) {
-            entry.hint.textContent = entry.expected[0];
-            entry.hint.style.display = "block";
+            entry.ghost.textContent = entry.expected[0];
+            entry.box.classList.add("hinted");
+            entry.inp.placeholder = "";
             entry.revealed = true;
         }
         // "💡 Indice": reveals only the word at the cursor (or the first
@@ -2540,8 +2592,6 @@
         }
         function showHintFor(entry) {
             revealHint(entry);
-            entry.lbl.textContent = entry.word;
-            entry.lbl.style.color = "#c9922a";
         }
 
         // "Voir la réponse": the whole answer at once, then rating pills.
