@@ -673,84 +673,86 @@
             .s-pill { font-size: 13px; padding: 10px 8px; }
         }
 
-        /* ── Phones: a fixed-size card that fits the space left by the
-           keyboard. The study screen is pinned to the *visual* viewport
-           (--vvh / --vvtop, set from JS), the card splits it into a
-           scrollable recto half, the fixed "verso" line, and a scrollable
-           type-in / verso half; the bottom bar (pills + counters) only
-           shows while the keyboard is down. ── */
+        /* ── Compact study layout: phones (≤ 600px wide) and any window
+           where the card wouldn't fit above the bottom bar (body.compact,
+           set by updateCompact()). The study screen is pinned to the
+           *visual* viewport (--vvh / --vvtop, set from JS), the card splits
+           it into a scrollable recto half, the fixed "verso" line, and a
+           scrollable type-in / verso half; with the phone keyboard up the
+           bottom bar keeps only the hint / answer pills. ── */
+        body.compact #study {
+            position: fixed;
+            left: 0;
+            right: 0;
+            top: var(--vvtop, 0px);
+            height: var(--vvh, 100vh);
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        body.compact #study .s-topbar { padding: 8px 14px 0; }
+        body.compact #study .s-deck-name { display: none; }
+
+        body.compact #study .s-main {
+            flex: 1;
+            min-height: 0;
+            padding: 8px 12px 10px;
+        }
+
+        body.compact #s-content {
+            flex: 1;
+            min-height: 0;
+            width: 100%;
+            max-width: 720px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.compact #s-content .s-question {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            padding: 0 16px;
+        }
+
+        body.compact .s-zone {
+            flex: 1 1 0;
+            min-height: 0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        body.compact .s-zone-in {
+            margin: auto 0; /* centered when it fits, scrolls when not */
+            padding: 10px 0;
+        }
+
+        body.compact #s-content .s-question > .b-sep {
+            flex: none;
+            margin: 0;
+        }
+
+        body.compact #study .s-bottom {
+            position: static;
+            flex: none;
+        }
+
+        /* Keyboard up: only the hint / answer pills stay (no counters,
+           no rating pills — those show once the keyboard is down). */
+        body.compact.kb-open #study .s-bottom:not([data-state="question"]),
+        body.compact.kb-open #study .s-counts {
+            display: none;
+        }
+
+        body.compact.kb-open #study .s-actions {
+            margin-bottom: 0;
+        }
+
         @media (max-width: 600px) {
-            #study {
-                position: fixed;
-                left: 0;
-                right: 0;
-                top: var(--vvtop, 0px);
-                height: var(--vvh, 100vh);
-                min-height: 0;
-                overflow: hidden;
-            }
-
-            #study .s-topbar { padding: 8px 14px 0; }
-            #study .s-deck-name { display: none; }
-
-            #study .s-main {
-                flex: 1;
-                min-height: 0;
-                padding: 8px 12px 10px;
-            }
-
-            #s-content {
-                flex: 1;
-                min-height: 0;
-                width: 100%;
-                display: flex;
-                flex-direction: column;
-            }
-
-            #s-content .s-question {
-                flex: 1;
-                min-height: 0;
-                display: flex;
-                flex-direction: column;
-                margin: 0;
-                padding: 0 16px;
-            }
-
-            .s-zone {
-                flex: 1 1 0;
-                min-height: 0;
-                overflow-y: auto;
-                display: flex;
-                flex-direction: column;
-                -webkit-overflow-scrolling: touch;
-            }
-
-            .s-zone-in {
-                margin: auto 0; /* centered when it fits, scrolls when not */
-                padding: 10px 0;
-            }
-
-            #s-content .s-question > .b-sep {
-                flex: none;
-                margin: 0;
-            }
-
-            #study .s-bottom {
-                position: static;
-                flex: none;
-            }
-
-            /* Keyboard up: only the hint / answer pills stay (no counters,
-               no rating pills — those show once the keyboard is down). */
-            body.kb-open #study .s-bottom:not([data-state="question"]),
-            body.kb-open #study .s-counts {
-                display: none;
-            }
-
-            body.kb-open #study .s-actions {
-                margin-bottom: 0;
-            }
-
             .s-pill .t-key {
                 display: none;
             }
@@ -1964,6 +1966,7 @@
         function goHome() {
             pendingNext = null;
             setBarState("");
+            document.body.classList.remove("compact");
             saveSRS(sess.sourceId, sess.srs);
             document.getElementById("study").style.display = "none";
             document.getElementById("home").style.display = "block";
@@ -1980,13 +1983,16 @@
         // ═══════════════════════════════════════════════
         var CARD_SHADOW_CSS = ".card{background:transparent!important;color:inherit!important;font-family:inherit;font-size:inherit;text-align:center;padding:0}"
             + "img{max-width:100%;max-height:50vh;border-radius:8px;margin:8px 0}"
-            // Phones: a picture fits its half of the card (see the phone layout CSS)
-            + "@media (max-width:600px){img{max-height:calc(var(--zoneh,50vh) - 24px);margin:2px 0}}"
+            // Compact layout: a picture fits its half of the card (--card-img-max, see updateZoneHeight)
+            + "img{max-height:var(--card-img-max,50vh)}"
             + "[lang|=zh]{font-family:Kai,'Kaiti SC',STKaiti,'PingFang SC','Noto Serif SC',serif}";
         function mountCardHtml(el, html, css) {
             if (!el) return;
             var root = el.shadowRoot || el.attachShadow({ mode: "open" });
             root.innerHTML = (css || "") + '<div class="card">' + html + '</div><style>' + CARD_SHADOW_CSS + '</style>';
+            root.querySelectorAll("img").forEach(function (img) {
+                if (!img.complete) img.addEventListener("load", scheduleCompactCheck, { once: true });
+            });
         }
 
         // True when the back holds more than the typed words (an image, a
@@ -2218,8 +2224,8 @@
             mountCardHtml(document.querySelector("#s-content .s-card-body"), card.question, cardStyle(sess.sourceId, card));
 
             setBarState("question");
-            updateZoneHeight();
             if (!flip) buildRows(card.words);
+            updateCompact();
             updateFlagIndicator();
             if (hasAudio) playCardAudio("q");
         }
@@ -2267,6 +2273,7 @@
                 html = '<button class="s-pill" onclick="continueAfterAnswer()">Suivant → <span class="t-key">Entrée</span></button>';
             }
             el.innerHTML = html;
+            scheduleCompactCheck();
         }
 
         // Card border + tint in the rating's color.
@@ -2625,12 +2632,38 @@
             root.setProperty("--vvh", h + "px");
             root.setProperty("--vvtop", (vv ? vv.offsetTop : 0) + "px");
             document.body.classList.toggle("kb-open", !!vv && vv.height < window.innerHeight * 0.75);
+            updateCompact();
+        }
+        // Compact layout when the screen is narrow, or when the card (as laid
+        // out normally) would run under the bottom bar. Measured with the
+        // class off, then decided — same task, so nothing flickers.
+        function updateCompact() {
+            var body = document.body;
+            if (document.getElementById("study").style.display !== "flex") { body.classList.remove("compact"); return; }
+            var compact = window.innerWidth <= 600;
+            if (!compact) {
+                body.classList.remove("compact");
+                document.documentElement.style.removeProperty("--card-img-max");
+                var q = document.querySelector("#s-content .s-question");
+                var bar = document.querySelector("#study .s-bottom");
+                if (q && bar) compact = q.getBoundingClientRect().bottom > bar.getBoundingClientRect().top - 8;
+            }
+            body.classList.toggle("compact", compact);
             updateZoneHeight();
         }
-        // Height of the recto half of the phone card, for card images.
+        var compactCheckPending = false;
+        function scheduleCompactCheck() {
+            if (compactCheckPending) return;
+            compactCheckPending = true;
+            requestAnimationFrame(function () { compactCheckPending = false; updateCompact(); });
+        }
+        // Height of the recto half of the compact card → max size of card images.
         function updateZoneHeight() {
+            var root = document.documentElement.style;
             var z = document.querySelector("#s-content .s-zone-recto");
-            if (z && z.clientHeight) document.documentElement.style.setProperty("--zoneh", z.clientHeight + "px");
+            if (document.body.classList.contains("compact") && z && z.clientHeight)
+                root.setProperty("--card-img-max", Math.max(60, z.clientHeight - 24) + "px");
+            else root.removeProperty("--card-img-max");
         }
         if (window.visualViewport) {
             window.visualViewport.addEventListener("resize", updateVisualViewport);
