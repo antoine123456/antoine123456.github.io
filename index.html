@@ -588,6 +588,14 @@
             color: var(--green);
         }
 
+        /* Found only with help (after a hint) or filled in after 3 misses:
+           red, not green. */
+        .wc-inp.ok.helped,
+        .wc-inp.given {
+            border-bottom-color: var(--red);
+            color: var(--red);
+        }
+
         .wc-inp.err {
             border-bottom-color: var(--red);
             color: var(--red);
@@ -620,7 +628,7 @@
             font-family: Georgia, serif;
             font-size: 17px;
             line-height: normal;
-            text-align: left;
+            text-align: center;
             color: var(--text-3);
             opacity: .6;
             white-space: pre;
@@ -630,10 +638,6 @@
 
         .wc-box.hinted .wc-ghost {
             display: block;
-        }
-
-        .wc-box.hinted .wc-inp {
-            text-align: left;
         }
 
         .wc-box.solved .wc-ghost {
@@ -2508,7 +2512,7 @@
             var m = entry.inp.value.match(/^\s*(\S+)\s+(\S.*)$/);
             if (m && entry.expected.some(function (t) { return isMatch(m[1], t); })) {
                 entry.inp.value = m[1];
-                var next = wordRows.find(function (e, j) { return j > i && !e.solved; });
+                var next = wordRows.find(function (e, j) { return j > i && !e.solved && !e.given; });
                 if (next) {
                     next.inp.value = m[2] + next.inp.value;
                     markSolved(entry);
@@ -2517,13 +2521,22 @@
                     return;
                 }
             }
+            if (entry.given) return;
             var r = check(entry);
             if (r === null) {
                 clearTimeout(entry._errTimer);
                 entry.inp.className = "wc-inp";
-                if (!entry.inp.value.trim()) { entry.solved = false; entry.box.classList.remove("solved"); }
+                if (!entry.inp.value.trim()) {
+                    entry.solved = false;
+                    entry.box.classList.remove("solved");
+                    // Wiped a typed attempt to start over: that's a miss too
+                    // (unless its ✗ was already counted) — #20.
+                    if (entry._typed && !entry._counted) addError(entry, i);
+                    entry._typed = entry._counted = false;
+                }
                 return;
             }
+            entry._typed = true;
             if (r) {
                 markSolved(entry);
                 // Move on right away (was 220 ms: fast typing then spilled
@@ -2535,25 +2548,49 @@
                 entry.box.classList.remove("solved");
                 clearTimeout(entry._errTimer);
                 entry._errTimer = setTimeout(function () {
-                    if (!entry.inp.isConnected || entry.solved) return;
-                    entry.errors++;
-                    cardErrors = Math.max(cardErrors, entry.errors);
-                    entry.attempts.textContent = "✗".repeat(Math.min(entry.errors, 5));
-                    if (entry.errors >= 3) revealHint(entry);
+                    if (!entry.inp.isConnected || entry.solved || entry.given) return;
+                    entry._counted = true;
+                    addError(entry, i);
                 }, 1500);
             }
         }
 
         function markSolved(entry) {
             clearTimeout(entry._errTimer);
-            entry.inp.className = "wc-inp ok";
+            // Red instead of green when the word had been hinted (#23).
+            entry.inp.className = "wc-inp ok" + (entry.revealed ? " helped" : "");
             entry.box.classList.add("solved");
             entry.solved = true;
         }
 
+        function addError(entry, i) {
+            entry.errors++;
+            cardErrors = Math.max(cardErrors, entry.errors);
+            entry.attempts.textContent = "✗".repeat(Math.min(entry.errors, 5));
+            if (entry.errors >= 3) giveAnswer(entry, i);
+        }
+
+        // 3 misses: the right word replaces what was typed (in red), the
+        // card will be rated À revoir, and F1 moves on — #21 (and #2: the
+        // auto-hint used to not count as help, so the card got Correct).
+        function giveAnswer(entry, i) {
+            clearTimeout(entry._errTimer);
+            entry.inp.value = entry.word;
+            entry.inp.readOnly = true;
+            entry.inp.className = "wc-inp given";
+            entry.box.classList.add("solved");
+            entry.given = entry.revealed = true;
+            revealed = true;
+            var next = wordRows.find(function (e, j) { return j > i && !e.solved && !e.given; })
+                || wordRows.find(function (e) { return !e.solved && !e.given; });
+            if (next) next.inp.focus();
+            if (!wordRows.some(function (e) { return !e.solved && !e.revealed; })) setBarState("rating");
+        }
+
         function focusNext(i) {
-            for (var j = i + 1; j < wordRows.length; j++) { if (!wordRows[j].solved) { wordRows[j].inp.focus(); return; } }
-            for (var j = 0; j < i && j < wordRows.length; j++) { if (!wordRows[j].solved) { wordRows[j].inp.focus(); return; } }
+            var open = function (e) { return !e.solved && !e.given; };
+            for (var j = i + 1; j < wordRows.length; j++) { if (open(wordRows[j])) { wordRows[j].inp.focus(); return; } }
+            for (var j = 0; j < i && j < wordRows.length; j++) { if (open(wordRows[j])) { wordRows[j].inp.focus(); return; } }
             tryComplete();
         }
 
@@ -2735,7 +2772,7 @@
 
         function tryComplete() {
             if (advancing) return;
-            if (wordRows.every(function (e) { return e.solved; })) completeCard();
+            if (wordRows.every(function (e) { return e.solved || e.given; })) completeCard();
         }
 
         // ═══════════════════════════════════════════════

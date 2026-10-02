@@ -180,6 +180,9 @@ either side of the pair) are silently skipped instead of duplicated.
 - **Image-occlusion diagram quizzes — in progress on the `image-occlusion-quiz` branch.** The idea: a labeled diagram (e.g. a car) where you type each part's name instead of flipping a card, built on Anki's native **Image Occlusion** note type so the same cards work unmodified in real Anki. One note per diagram, one masked region (cloze) per part — confirmed round-tripping correctly through Anki's own import/export with real coordinates (`left`/`top`/`width`/`height` as 0–1 fractions of the image, e.g. `{{c1::image-occlusion:rect:left=.051:top=.415:width=.114:height=.065:oi=1}}`, shapes joined by `<br>` in the note's `Occlusion` field). `car_diagram.svg`/`.png` on that branch is a hand-built reference diagram (10 labeled parts: parabrisas, espejo, volante, asientos, maletero, intermitente, motor, rueda, puerta, carretera) with an example `.apkg` masking each one. Still to do: `extract.py` support for reading this note type back into JSON, and a web-app study mode that prompts one part at a time, keeps correct labels visible, requeues wrong/revealed ones, and gives the whole diagram one overall SRS rating once every part's been typed correctly.
 - browser can show already learnt, due card - either way with color or filter
 - chose keybinding
+- instead of automatically switch to the newt blank, wait for "space"
+- keep this "future work" in track with the github project
+- temps de transition apres correct parfois long ? simplement temps de l'audio 
 
 ### Learning
 - add per tree sub collection having some info about it or tag (recognize tree - info - etc) then also add possibility to filter tag
@@ -189,12 +192,10 @@ either side of the pair) are silently skipped instead of duplicated.
 - un raccourci pour ajouter des mots à apprendre
 
 ## Known bugs
-> Can you add this to github "issues"
 
-- Saw a case with 3 wrong marks (❌) already under a word where pressing F1 (reveal) then graded the card as Correct instead of À revoir.
-- Typing fast enough doesn't always advance to the next blank in time.
-- there a bug with mouse scroll on the caroussel, it get stuck when scolling fast (maybe just a bug of the mouse)
+Tracked as `bug` issues on the [project board](https://github.com/users/antoine123456/projects/1).
 
+- Mouse-wheel scrolling on the carousel sometimes gets stuck when scrolling fast (maybe just the mouse) — #4.
 
 ## JSON format reference
 
