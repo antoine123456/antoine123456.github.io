@@ -75438,6 +75438,160 @@
             "cuatroloop"
           ],
           "lang": "fr"
+        },
+        {
+          "id": "1790927844148",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>confiance",
+          "words": [
+            "confianza"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
+        },
+        {
+          "id": "1790927844149",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>confianza",
+          "words": [
+            "confiance"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1790930923217",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>choisir",
+          "words": [
+            "elegir"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
+        },
+        {
+          "id": "1790930923218",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>elegir",
+          "words": [
+            "choisir"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1790931266122",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>nafta",
+          "words": [
+            "l'ALENA"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1790931266123",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>l'ALENA",
+          "words": [
+            "nafta"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
+        },
+        {
+          "id": "1790931272026",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>gasoil",
+          "words": [
+            "gasoil"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1790931272027",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>gasoil",
+          "words": [
+            "gasoil"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
+        },
+        {
+          "id": "1790931275151",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>suba",
+          "words": [
+            "ci-dessous"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1790931275152",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>ci-dessous",
+          "words": [
+            "suba"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
+        },
+        {
+          "id": "1790931280808",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>surtidor",
+          "words": [
+            "pompe"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1790931280809",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>pompe",
+          "words": [
+            "surtidor"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
+        },
+        {
+          "id": "1790931287560",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>amortiguar",
+          "words": [
+            "coussin"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1790931287561",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>coussin",
+          "words": [
+            "amortiguar"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
         }
       ]
     }
