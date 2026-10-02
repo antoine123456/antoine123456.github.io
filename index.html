@@ -2595,6 +2595,15 @@
         }
 
         function revealHint(entry) {
+            // Keep what's typed if it's a right start of the word (accents and
+            // case ignored), else clear it so the hint shows — #24.
+            var typed = entry.inp.value.trim();
+            var ok = !typed || entry.expected.some(function (t) {
+                return noAcc(t.toLowerCase()).indexOf(noAcc(typed.toLowerCase())) === 0;
+            });
+            if (!ok) entry.inp.value = "";
+            clearTimeout(entry._errTimer);
+            entry.inp.className = "wc-inp";
             entry.ghost.textContent = entry.expected[0];
             entry.box.classList.add("hinted");
             entry.inp.placeholder = "";
