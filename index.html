@@ -588,9 +588,13 @@
             color: var(--green);
         }
 
-        /* Found only with help (after a hint) or filled in after 3 misses:
-           red, not green. */
-        .wc-inp.ok.helped,
+        /* Typed right over its hint: orange (#33). Filled in after 3
+           misses: red. */
+        .wc-inp.ok.helped {
+            border-bottom-color: var(--orange);
+            color: var(--orange);
+        }
+
         .wc-inp.given {
             border-bottom-color: var(--red);
             color: var(--red);
@@ -628,7 +632,7 @@
             font-family: Georgia, serif;
             font-size: 17px;
             line-height: normal;
-            text-align: center;
+            text-align: left;
             color: var(--text-3);
             opacity: .6;
             white-space: pre;
@@ -638,6 +642,12 @@
 
         .wc-box.hinted .wc-ghost {
             display: block;
+        }
+
+        /* With a hint, typing starts at the far left of the blank, right
+           on top of the grey word (#33). */
+        .wc-box.hinted .wc-inp {
+            text-align: left;
         }
 
         .wc-box.solved .wc-ghost {
@@ -2471,6 +2481,7 @@
                 var inp = document.createElement("input"); inp.className = "wc-inp";
                 inp.type = "text"; inp.placeholder = "···";
                 inp.autocomplete = "off"; inp.autocorrect = "off"; inp.spellcheck = false;
+                inp.setAttribute("autocapitalize", "off"); // phones: no capital at the start of a word (#26)
                 inp.style.width = Math.max(word.length * 14, 48) + "px";
                 var ghost = document.createElement("span"); ghost.className = "wc-ghost";
                 box.append(inp, ghost);
