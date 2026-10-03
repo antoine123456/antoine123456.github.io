@@ -2326,11 +2326,10 @@
         // Clicked/tapped → only that button lights up; automatic or
         // keyboard rating → the card itself takes the rating's color.
         function flashForPendingRating(q, viaButton) {
-            var card = sess.queue[sess.qIdx];
-            if (!card) return;
-            var previewSrs = applyRating(sess.srs[card.id] || defaultSRS(), q, { requeueIn: null });
-            var shown = shownRating(q, previewSrs);
-            if (viaButton) flashRateButton(shown); else highlightCard(shown);
+            if (!sess.queue[sess.qIdx]) return;
+            // Always the rating actually chosen (Facile used to be shown as
+            // Correct for a card's first easy answers — #28).
+            if (viaButton) flashRateButton(q); else highlightCard(q);
         }
 
         // What each rating would do to THIS card right now — shown above the
@@ -2819,15 +2818,6 @@
         // Short pause so the rating color is seen before the card changes.
         function flash(cb) {
             setTimeout(cb, 400);
-        }
-
-        // The rating itself (and scheduling) is unaffected — this only
-        // softens the *feedback*: showing "Facile" is held back until a
-        // card has actually been aced on the first try a few times,
-        // "Correct" is shown instead for the first three.
-        function shownRating(q, srs) {
-            var showAsGood = q === 4 && srs && (srs.easyCount || 0) <= 3;
-            return showAsGood ? 3 : q;
         }
 
         function showDone() {
