@@ -588,9 +588,7 @@
             color: var(--green);
         }
 
-        /* Found only with help (after a hint) or filled in after 3 misses:
-           red, not green. */
-        .wc-inp.ok.helped,
+        /* Filled in after 3 misses: red, not green. */
         .wc-inp.given {
             border-bottom-color: var(--red);
             color: var(--red);
@@ -605,43 +603,22 @@
             color: var(--text-3);
         }
 
-        /* Hint: the word shown greyed out inside the blank, left-aligned
-           with the input's own text so you can type right over it. */
         .wc-box {
             position: relative;
             display: inline-block;
         }
 
         .wc-box .wc-inp {
-            position: relative;
-            z-index: 1;
-            display: block; /* no line-box gap: ghost and text share the same top */
-        }
-
-        .wc-ghost {
-            display: none;
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            padding: 2px 4px 7px;
-            font-family: Georgia, serif;
-            font-size: 17px;
-            line-height: normal;
-            text-align: center;
-            color: var(--text-3);
-            opacity: .6;
-            white-space: pre;
-            overflow: hidden;
-            pointer-events: none;
-        }
-
-        .wc-box.hinted .wc-ghost {
             display: block;
         }
 
-        .wc-box.solved .wc-ghost {
+        /* Hint: the word in small orange under the blank. (A greyed-out
+           version inside the blank was tried — git tag indice-fantome.) */
+        .wc-hint {
             display: none;
+            font-family: Georgia, serif;
+            font-size: 13px;
+            color: var(--orange);
         }
 
         .wc-attempts {
@@ -2472,13 +2449,13 @@
                 inp.type = "text"; inp.placeholder = "···";
                 inp.autocomplete = "off"; inp.autocorrect = "off"; inp.spellcheck = false;
                 inp.style.width = Math.max(word.length * 14, 48) + "px";
-                var ghost = document.createElement("span"); ghost.className = "wc-ghost";
-                box.append(inp, ghost);
+                box.append(inp);
+                var hint = document.createElement("div"); hint.className = "wc-hint";
                 var attempts = document.createElement("div"); attempts.className = "wc-attempts";
-                col.append(box, attempts);
+                col.append(box, hint, attempts);
                 section.appendChild(col);
 
-                var entry = { word: word, expected: [word], inp: inp, box: box, ghost: ghost, attempts: attempts, solved: false, revealed: false, errors: 0, _errTimer: null };
+                var entry = { word: word, expected: [word], inp: inp, box: box, hint: hint, attempts: attempts, solved: false, revealed: false, errors: 0, _errTimer: null };
                 wordRows.push(entry);
                 inp.addEventListener("input", makeCheck(entry, i));
                 inp.addEventListener("keydown", makeKey(i));
@@ -2557,8 +2534,7 @@
 
         function markSolved(entry) {
             clearTimeout(entry._errTimer);
-            // Red instead of green when the word had been hinted (#23).
-            entry.inp.className = "wc-inp ok" + (entry.revealed ? " helped" : "");
+            entry.inp.className = "wc-inp ok";
             entry.box.classList.add("solved");
             entry.solved = true;
         }
@@ -2595,18 +2571,8 @@
         }
 
         function revealHint(entry) {
-            // Keep what's typed if it's a right start of the word (accents and
-            // case ignored), else clear it so the hint shows — #24.
-            var typed = entry.inp.value.trim();
-            var ok = !typed || entry.expected.some(function (t) {
-                return noAcc(t.toLowerCase()).indexOf(noAcc(typed.toLowerCase())) === 0;
-            });
-            if (!ok) entry.inp.value = "";
-            clearTimeout(entry._errTimer);
-            entry.inp.className = "wc-inp";
-            entry.ghost.textContent = entry.expected[0];
-            entry.box.classList.add("hinted");
-            entry.inp.placeholder = "";
+            entry.hint.textContent = entry.expected[0];
+            entry.hint.style.display = "block";
             entry.revealed = true;
         }
         // "💡 Indice": reveals only the word at the cursor (or the first
