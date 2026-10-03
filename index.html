@@ -701,7 +701,6 @@
         }
 
         body.compact #study .s-topbar { padding: 8px 14px 0; }
-        body.compact #study .s-deck-name { display: none; }
 
         body.compact #study .s-main {
             flex: 1;
@@ -749,6 +748,19 @@
         body.compact #study .s-bottom {
             position: static;
             flex: none;
+        }
+
+        /* Same bar height whether it shows the hint/answer pills or the
+           rating pills, so the card doesn't resize when the back shows (#32). */
+        #study .s-actions {
+            height: 46px;
+        }
+
+        #study .s-actions .s-pill,
+        #study .t-ratings,
+        #study .t-rate {
+            height: 100%;
+            box-sizing: border-box;
         }
 
         /* Keyboard up: only the hint / answer pills stay (no counters,
@@ -1117,7 +1129,6 @@
             </div>
         </div>
         <div class="s-main">
-            <div class="s-deck-name" id="s-deck-name"></div>
             <div id="s-content"></div>
         </div>
         <div class="s-bottom">
@@ -1968,7 +1979,6 @@
 
             document.getElementById("home").style.display = "none";
             document.getElementById("study").style.display = "flex";
-            document.getElementById("s-deck-name").textContent = sess.deckLabel;
             keepKeyboard();
             showCard();
         }
@@ -2005,6 +2015,14 @@
             });
         }
 
+        // Spanish cards start with a translation-direction header
+        // ("🇫🇷 ➡️ 🇪🇸" + blank lines) — not shown (#30). Done at display
+        // time so decks already stored in a browser get it too.
+        var DIRECTION_HEADER_RE = /(^|<\/style>)\s*(?:🇫🇷|🇪🇸)\s*➡️\s*(?:🇫🇷|🇪🇸)\s*(?:<br\s*\/?>\s*)*/u;
+        function displayQuestion(html) {
+            return String(html || "").replace(DIRECTION_HEADER_RE, "$1");
+        }
+
         // True when the back holds more than the typed words (an image, a
         // meaning, an example sentence…) — worth showing before moving on.
         function hasRichAnswer(card) {
@@ -2032,7 +2050,7 @@
             if (!all.length) { toast("Aucune carte dans ce deck"); return; }
             browse.all = all.map(function (c) {
                 var back = c.answer != null ? c.answer : esc((c.words || []).join(" "));
-                return { card: c, back: back, text: (plainText(c.question) + " " + plainText(back) + " " + (c.words || []).join(" ")).toLowerCase() };
+                return { card: c, back: back, text: (plainText(displayQuestion(c.question)) + " " + plainText(back) + " " + (c.words || []).join(" ")).toLowerCase() };
             });
             browse.list = browse.all;
             // Pictures need room → carousel; words/sentences read better as
@@ -2123,7 +2141,7 @@
                 var c = b.card;
                 var hasAudio = (c.audioQuestion && c.audioQuestion.length) || (c.audioAnswer && c.audioAnswer.length);
                 return '<div class="b-row">'
-                    + '<div class="b-row-front">' + esc(htmlToText(c.question)) + '</div>'
+                    + '<div class="b-row-front">' + esc(htmlToText(displayQuestion(c.question))) + '</div>'
                     + '<div class="b-row-back">' + esc(htmlToText(b.back)) + '</div>'
                     + (hasAudio ? '<button class="b-row-audio" onclick="playBrowseAudio(' + i + ')" title="Écouter">🔊</button>' : '<span></span>')
                     + '</div>';
@@ -2139,7 +2157,7 @@
             sl.innerHTML = '<div class="b-front"></div><div class="b-sep">verso</div><div class="b-back"></div>'
                 + (hasAudio ? '<button class="b-slide-audio" onclick="playBrowseAudio(' + sl.dataset.i + ')" title="Écouter">🔊</button>' : '');
             var css = cardStyle(browse.sid, c);
-            mountCardHtml(sl.querySelector(".b-front"), c.question, css);
+            mountCardHtml(sl.querySelector(".b-front"), displayQuestion(c.question), css);
             mountCardHtml(sl.querySelector(".b-back"), b.back, css);
         }
 
@@ -2231,7 +2249,7 @@
                     : '<div class="t-words" id="t-words"></div><div class="s-verso-extra" id="s-verso-extra"></div>')
                 + '</div></div>'
                 + '</div>';
-            mountCardHtml(document.querySelector("#s-content .s-card-body"), card.question, cardStyle(sess.sourceId, card));
+            mountCardHtml(document.querySelector("#s-content .s-card-body"), displayQuestion(card.question), cardStyle(sess.sourceId, card));
 
             setBarState("question");
             if (!flip) buildRows(card.words);
@@ -2329,7 +2347,9 @@
             if (!sess.queue[sess.qIdx]) return;
             // Always the rating actually chosen (Facile used to be shown as
             // Correct for a card's first easy answers — #28).
-            if (viaButton) flashRateButton(q); else highlightCard(q);
+            // Keyboard (incl. Space = Correct in normal mode): the card and,
+            // if the rating pills are showing, the matching pill (#29).
+            if (viaButton) flashRateButton(q); else { highlightCard(q); flashRateButton(q); }
         }
 
         // What each rating would do to THIS card right now — shown above the
