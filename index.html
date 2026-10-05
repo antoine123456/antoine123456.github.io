@@ -2239,8 +2239,11 @@
         function hasRichAnswer(card) {
             if (!card.answer) return false;
             if (/<img/i.test(card.answer)) return true;
-            var squash = function (t) { return noAcc(String(t).toLowerCase()).replace(/[\s.,;:!?¡¿'"()\-]+/g, ""); };
-            return squash(plainText(card.answer)) !== squash((card.words || []).join(""));
+            // Letters and digits only, entities decoded (an escaped apostrophe
+            // or a « » / … in a song line made the back look "richer" than
+            // the words typed → it waited for Entrée instead of moving on, #36).
+            var squash = function (t) { return noAcc(String(t).toLowerCase()).replace(/[^\p{L}\p{N}]+/gu, ""); };
+            return squash(htmlToText(card.answer)) !== squash((card.words || []).join(""));
         }
 
         // ═══════════════════════════════════════════════
@@ -2747,15 +2750,27 @@
         // there's nothing to play, or if playback is blocked/fails) so
         // callers can wait for it before switching to the next card —
         // otherwise the next card's question audio cuts this one off.
+        // A newer call takes over the player; an older one still calls its
+        // onDone (once) but no longer touches the player — before, the old
+        // call's rejected play() cleared the new call's "ended" handler, so
+        // e.g. finishing a card right after the last hint's audio never
+        // moved on (#36).
+        var audioToken = 0;
         function playAudioList(urls, onDone) {
             var audio = document.getElementById("audio-player");
-            if (!urls || !urls.length) { if (onDone) onDone(); return; }
-            var i = 0;
+            var mine = ++audioToken, i = 0, finished = false;
+            function finish() {
+                if (finished) return;
+                finished = true;
+                if (audioToken === mine) audio.onended = null;
+                if (onDone) onDone();
+            }
+            if (!urls || !urls.length) { finish(); return; }
             function playNext() {
-                if (i >= urls.length) { audio.onended = null; if (onDone) onDone(); return; }
+                if (audioToken !== mine || i >= urls.length) { finish(); return; }
                 audio.src = urls[i++];
                 var p = audio.play();
-                if (p && p.catch) p.catch(playNext);
+                if (p && p.catch) p.catch(function () { if (audioToken === mine) playNext(); else finish(); });
             }
             audio.onended = playNext;
             playNext();
@@ -2943,6 +2958,7 @@
             var next = wordRows.find(function (e, j) { return j > i && !e.solved && !e.given; })
                 || wordRows.find(function (e) { return !e.solved && !e.given; });
             if (next) next.inp.focus();
+            else if (document.activeElement) document.activeElement.blur(); // phone: keyboard down → rating pills show
             if (!wordRows.some(function (e) { return !e.solved && !e.revealed; })) setBarState("rating");
         }
 
