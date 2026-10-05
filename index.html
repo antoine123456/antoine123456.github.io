@@ -131,6 +131,191 @@
             transition: border-color .15s, background .15s;
         }
 
+        .h-info-btn {
+            right: 66px;
+            font-weight: 700;
+            color: var(--navy);
+            font-family: Georgia, serif;
+        }
+
+        /* ── Mini guide (modal over the home screen) ── */
+        .g-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: rgba(10, 12, 16, .45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .g-backdrop[hidden] {
+            display: none;
+        }
+
+        .g-modal {
+            position: relative;
+            width: 100%;
+            max-width: 620px;
+            max-height: 88vh;
+            overflow-y: auto;
+            background: var(--bg);
+            color: var(--text);
+            border: 1.5px solid var(--border-2);
+            border-radius: 20px;
+            padding: 22px 22px 8px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, .25);
+        }
+
+        .g-head {
+            position: sticky;
+            top: -22px;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin: -22px -22px 0;
+            padding: 22px 22px 4px;
+            background: var(--bg);
+        }
+
+        .g-close {
+            flex: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1.5px solid var(--border-2);
+            background: var(--surface);
+            color: var(--text-2);
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .g-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--navy);
+        }
+
+        .g-sub {
+            font-size: 13px;
+            color: var(--text-2);
+            margin-bottom: 18px;
+        }
+
+        .g-step {
+            display: grid;
+            grid-template-columns: 30px 1fr;
+            gap: 4px 12px;
+            padding: 14px 0;
+            border-top: 1px solid var(--border);
+        }
+
+        .g-num {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: var(--navy);
+            color: var(--bg);
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .g-h {
+            font-size: 15px;
+            font-weight: 700;
+            align-self: center;
+        }
+
+        .g-body {
+            grid-column: 2;
+            font-size: 13px;
+            line-height: 1.55;
+            color: var(--text-2);
+        }
+
+        .g-demo {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0 6px;
+            pointer-events: none;
+        }
+
+        .g-demo .s-pill,
+        .g-demo .t-rate {
+            flex: 0 0 auto;
+            height: 38px;
+            box-sizing: border-box;
+        }
+
+        .g-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface);
+            width: 100%;
+        }
+
+        .g-row .h-deckrow-name {
+            flex: 1;
+        }
+
+        .g-card {
+            width: 100%;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            padding: 10px 14px;
+            text-align: center;
+            font-size: 16px;
+            background: var(--bg);
+        }
+
+        .g-card .b-sep {
+            margin: 6px 0;
+        }
+
+        .g-card .wc-inp {
+            width: 90px;
+            pointer-events: none;
+        }
+
+        .g-words {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+        }
+
+        .g-kbd {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            align-items: start;
+            gap: 6px 12px;
+            font-size: 13px;
+            margin-top: 6px;
+        }
+
+        .g-kbd .t-key {
+            margin: 0;
+            justify-self: start;
+            font-size: 11px;
+            padding: 2px 6px;
+        }
+
+        .g-arrow {
+            color: var(--text-3);
+            font-size: 16px;
+        }
+
         .h-theme-toggle:hover {
             border-color: var(--navy);
             background: var(--surface-hover);
@@ -1235,6 +1420,7 @@
     <!-- ── HOME ── -->
     <div id="home">
         <button class="h-theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Basculer clair/sombre">🌙</button>
+        <button class="h-theme-toggle h-info-btn" onclick="openGuide()" title="Mode d'emploi">i</button>
         <div class="h-logo">🃏</div>
         <div class="h-title">Anki Trainer</div>
         <div class="h-sub">Pré-traitez votre .apkg avec <code>extract_apkg.py</code>, puis importez le JSON ici</div>
@@ -1244,6 +1430,118 @@
             <input type="file" accept=".json" style="display:none" onchange="importJSON(this)">
         </label>
         <div class="h-reset" onclick="resetAppData()">🧹 Effacer les données de cet appareil</div>
+    </div>
+
+    <!-- ── MINI GUIDE (modal, opened by the "i" button on the home screen) ── -->
+    <div class="g-backdrop" id="guide" hidden onclick="if (event.target === this) closeGuide()">
+        <div class="g-modal" role="dialog" aria-modal="true" aria-labelledby="g-title">
+            <div class="g-head">
+                <div class="g-title" id="g-title">Mode d'emploi</div>
+                <button class="g-close" onclick="closeGuide()" title="Fermer (Échap)">✕</button>
+            </div>
+            <div class="g-sub">Apprendre en tapant la réponse, avec la répétition espacée d'Anki.</div>
+
+            <div class="g-step">
+                <div class="g-num">1</div><div class="g-h">Choisir un paquet</div>
+                <div class="g-body">
+                    <div class="g-demo"><div class="g-row">
+                        <div class="h-deckrow-name">Espagnol 2</div>
+                        <span class="badge badge-new">20 nvx</span><span class="badge badge-due">5 dus</span><span class="badge badge-done">89 appris</span>
+                        <button class="h-custom-btn">+20</button><button class="h-custom-btn">🔍</button>
+                    </div></div>
+                    Touche la ligne pour réviser. <b>nvx</b> = nouvelles cartes du jour, <b>dus</b> = à revoir aujourd'hui, <b>appris</b> = déjà sues.
+                    <b>+20</b> : 20 nouvelles de plus. <b>🔍</b> : parcourir les cartes (carrousel pour les images, liste pour les mots).
+                </div>
+            </div>
+
+            <div class="g-step">
+                <div class="g-num">2</div><div class="g-h">Taper la réponse</div>
+                <div class="g-body">
+                    <div class="g-demo"><div class="g-card">
+                        le serpent
+                        <div class="b-sep">verso</div>
+                        <div class="g-words">
+                            <div class="word-col"><input class="wc-inp ok" value="la" readonly tabindex="-1"><div class="wc-attempts"></div></div>
+                            <div class="word-col"><input class="wc-inp err" value="serpi" readonly tabindex="-1"><div class="wc-attempts">✗</div></div>
+                        </div>
+                    </div></div>
+                    Un mot par case. <span style="color:var(--green)">Vert</span> = juste, <span style="color:var(--red)">rouge</span> = pas encore ; chaque erreur ajoute une <span style="color:var(--red)">✗</span>.
+                    Les accents sont facultatifs. Dès qu'un mot est juste, on passe à la case suivante.
+                </div>
+            </div>
+
+            <div class="g-step">
+                <div class="g-num">3</div><div class="g-h">Besoin d'aide ?</div>
+                <div class="g-body">
+                    <div class="g-demo">
+                        <span class="s-pill s-pill-hint">💡 Indice <span class="t-key">F1</span></span>
+                        <span class="s-pill">Voir la réponse <span class="t-key">F8</span></span>
+                    </div>
+                    <div class="g-demo"><div class="g-card">
+                        <div class="g-words">
+                            <div class="word-col"><input class="wc-inp" value="" placeholder="···" readonly tabindex="-1"><div class="wc-hint" style="display:block">la</div></div>
+                            <div class="word-col"><input class="wc-inp given" value="serpiente" readonly tabindex="-1"><div class="wc-attempts">✗✗✗</div></div>
+                        </div>
+                    </div></div>
+                    <b>Indice</b> montre le mot <span style="color:var(--orange)">en orange</span> sous la case ; <b>Voir la réponse</b> montre tout.
+                    Après <span style="color:var(--red)">3 ✗</span>, le bon mot s'écrit en rouge. Une carte où on a eu de l'aide est notée « À revoir ».
+                </div>
+            </div>
+
+            <div class="g-step">
+                <div class="g-num">4</div><div class="g-h">Noter la carte</div>
+                <div class="g-body">
+                    <div class="g-demo">
+                        <span class="t-rate t-rate-again"><span class="t-rate-label">À revoir</span><span class="t-rate-time">&lt;1m</span><span class="t-key">F2</span></span>
+                        <span class="t-rate t-rate-hard"><span class="t-rate-label">Difficile</span><span class="t-rate-time">&lt;6m</span><span class="t-key">F4</span></span>
+                        <span class="t-rate t-rate-good"><span class="t-rate-label">Correct</span><span class="t-rate-time">&lt;10m</span><span class="t-key">F3</span></span>
+                        <span class="t-rate t-rate-easy"><span class="t-rate-label">Facile</span><span class="t-rate-time">4j</span><span class="t-key">F7</span></span>
+                    </div>
+                    Tout tapé sans aide → <b>Correct</b> automatiquement. Après un indice ou la réponse, ces boutons apparaissent en bas ; la durée indique quand la carte reviendra.
+                    <div class="g-demo">
+                        <div class="g-card s-question rated-good" style="font-size:14px;padding:6px 10px;margin:0">carte réussie</div>
+                        <div class="g-card s-question rated-again" style="font-size:14px;padding:6px 10px;margin:0">à revoir</div>
+                    </div>
+                    La carte prend la couleur de la note.
+                </div>
+            </div>
+
+            <div class="g-step">
+                <div class="g-num">5</div><div class="g-h">Deux façons de réviser</div>
+                <div class="g-body">
+                    <div class="g-demo">
+                        <span class="s-mode-toggle">⌨️ Saisie</span><span class="g-arrow">⇄</span><span class="s-mode-toggle">🃏 Mode normal</span>
+                    </div>
+                    En haut de l'écran de révision. <b>Saisie</b> : on tape la réponse. <b>Mode normal</b> : comme Anki, <b>Espace</b> retourne la carte, puis on note avec les boutons ou <b>1–4</b> (Espace = Correct).
+                </div>
+            </div>
+
+            <div class="g-step">
+                <div class="g-num">6</div><div class="g-h">Chansons</div>
+                <div class="g-body">
+                    <div class="g-demo"><div class="g-card" style="font-size:14px;text-align:center">
+                        <div>Hoy en mi ventana brilla el sol y el corazón</div>
+                        <div class="ly-hint" style="margin:6px 0 2px">Il devient triste en contemplant la ville…</div>
+                        <div><span class="ly-blank" style="width:2em"></span> <span class="ly-blank" style="width:3em"></span> <span class="ly-blank" style="width:3.5em"></span> <span class="ly-blank" style="width:5em"></span></div>
+                    </div></div>
+                    Chaque ligne est une carte, dans l'ordre de la chanson : les lignes sues s'affichent, les autres sont à compléter. <span class="s-mode-toggle" style="pointer-events:none">⚙</span> pour changer l'indice et le rythme des nouvelles lignes.
+                </div>
+            </div>
+
+            <div class="g-step">
+                <div class="g-num">7</div><div class="g-h">Raccourcis clavier</div>
+                <div class="g-body">
+                    <div class="g-kbd">
+                        <span class="t-key">F1</span><span>indice (encore F1 quand tout est montré = À revoir et suivante)</span>
+                        <span class="t-key">F8</span><span>voir toute la réponse</span>
+                        <span class="t-key">F2 F4 F3 F7</span><span>À revoir · Difficile · Correct · Facile</span>
+                        <span class="t-key">Entrée</span><span>case suivante</span>
+                        <span class="t-key">Espace</span><span>mode normal : retourner, puis Correct</span>
+                        <span class="t-key">← →</span><span>carrousel 🔍 · <b>Échap</b> : retour</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- ── STUDY ── -->
@@ -2430,6 +2728,18 @@
                 e.preventDefault();
                 stepBrowse(1);
             }
+        });
+
+        // ── Mini guide ──
+        function openGuide() {
+            document.getElementById("guide").hidden = false;
+            document.querySelector("#guide .g-modal").scrollTop = 0;
+        }
+        function closeGuide() {
+            document.getElementById("guide").hidden = true;
+        }
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" && !document.getElementById("guide").hidden) { e.preventDefault(); closeGuide(); }
         });
 
         // ═══════════════════════════════════════════════
