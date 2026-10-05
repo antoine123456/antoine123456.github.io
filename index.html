@@ -847,6 +847,15 @@
             transition: border-color .2s, background .2s;
         }
 
+        .ly-active.ly-enter {
+            animation: lyEnter .45s ease;
+        }
+
+        @keyframes lyEnter {
+            from { opacity: .35; transform: translateY(10px) scale(.98); }
+            to { opacity: 1; transform: none; }
+        }
+
         .ly-hint {
             font-size: 13px;
             font-style: italic;
@@ -2497,7 +2506,12 @@
             var content = document.getElementById("s-content");
             var prev = content.querySelector(".ly-view");
             var sameSong = !!prev && prev.dataset.song === songId;
-            var prevTop = prev ? prev.scrollTop : 0;
+            // Where the line just done sits on screen, to keep it there after
+            // the redraw (then slide to the next one).
+            var prevActive = prev && prev.querySelector(".ly-active");
+            var prevPos = prevActive ? prevActive.dataset.pos : null;
+            var prevOffset = prevActive ? prevActive.getBoundingClientRect().top - prev.getBoundingClientRect().top : 0;
+            var pos = 0;
             var pending = {};
             for (var i = sess.qIdx + 1; i < sess.queue.length; i++) pending[sess.queue[i].id] = true;
             var opts = lyricsOpts(), activeShown = false;
@@ -2506,10 +2520,10 @@
             song.strophes.forEach(function (st) {
                 html += '<div class="ly-strophe">' + (st.label ? '<div class="ly-label">' + esc(st.label) + '</div>' : '');
                 st.lines.forEach(function (l) {
-                    var x = sess.srs[l.id];
+                    var x = sess.srs[l.id], p = ' data-pos="' + (pos++) + '"';
                     if (!activeShown && l.id === card.id) {
                         activeShown = true;
-                        html += '<div class="ly-line ly-active">'
+                        html += '<div class="ly-line ly-active"' + p + '>'
                             + (opts.hint === "trad" && card.question ? '<div class="ly-hint">' + card.question + '</div>' : '')
                             + (flip
                                 ? '<div class="s-verso-body ly-flip" id="s-verso-body"></div>'
@@ -2517,10 +2531,10 @@
                             + '</div>';
                     } else if (l.id !== card.id && (sess.lyricsSeen[l.id] || (x && x.state !== "new" && !pending[l.id]))) {
                         // known, or already answered this session (shown until its next turn)
-                        html += '<div class="ly-line ly-known">' + esc(l.text) + '</div>';
+                        html += '<div class="ly-line ly-known"' + p + '>' + esc(l.text) + '</div>';
                     } else {
                         var cls = (pending[l.id] || l.id === card.id) ? "ly-pending" : "ly-locked";
-                        html += '<div class="ly-line ' + cls + '">' + lyricBlanks(l.text) + '</div>';
+                        html += '<div class="ly-line ' + cls + '"' + p + '>' + lyricBlanks(l.text) + '</div>';
                     }
                 });
                 html += '</div>';
@@ -2529,7 +2543,13 @@
             content.innerHTML = html;
 
             var view = content.querySelector(".ly-view");
-            if (sameSong) view.scrollTop = prevTop;
+            var act0 = view.querySelector(".ly-active");
+            var anchor = sameSong && prevPos != null && view.querySelector('[data-pos="' + prevPos + '"]');
+            if (anchor) {
+                // Previous line back where it was: no jump from the redraw.
+                view.scrollTop += (anchor.getBoundingClientRect().top - view.getBoundingClientRect().top) - prevOffset;
+                if (act0) act0.classList.add("ly-enter");
+            }
             setBarState("question");
             if (!flip) {
                 buildRows(card.words);
@@ -2537,7 +2557,28 @@
             }
             updateCompact();
             var act = view.querySelector(".ly-active");
-            if (act) act.scrollIntoView({ behavior: sameSong ? "smooth" : "auto", block: "center" });
+            if (!act) return;
+            var target = view.scrollTop + (act.getBoundingClientRect().top - view.getBoundingClientRect().top)
+                - (view.clientHeight - act.offsetHeight) / 2;
+            if (anchor) slideScroll(view, target, 480); else view.scrollTop = target;
+        }
+
+        // Eased scroll of the lyrics view (a slide, like a lyrics player).
+        function slideScroll(el, target, ms) {
+            var from = el.scrollTop, delta = target - from, t0 = null;
+            target = Math.max(0, Math.min(target, el.scrollHeight - el.clientHeight));
+            delta = target - from;
+            if (Math.abs(delta) < 1) return;
+            var token = el._slide = {};
+            function step(ts) {
+                if (el._slide !== token) return; // a newer slide took over
+                if (t0 === null) t0 = ts;
+                var k = Math.min(1, (ts - t0) / ms);
+                var e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; // easeInOutQuad
+                el.scrollTop = from + delta * e;
+                if (k < 1) requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
         }
 
         // ═══════════════════════════════════════════════
