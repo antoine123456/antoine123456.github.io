@@ -80,7 +80,9 @@
             "pédonculé"
           ],
           "tags": [
-            "commun"
+            "commun",
+            "feuillu",
+            "plaine"
           ],
           "srs": {
             "state": "review",
@@ -91,7 +93,8 @@
             "reps": 2,
             "lapses": 0,
             "easyCount": 0
-          }
+          },
+          "info": "<i>Quercus robur</i> · Fagacées<br>Feuilles lobées au pétiole très court ; glands portés par un long pédoncule.<br>Plaines et collines, sols profonds."
         },
         {
           "id": "1790845645154",
@@ -144,7 +147,9 @@
             "Platane"
           ],
           "tags": [
-            "commun"
+            "commun",
+            "feuillu",
+            "ville"
           ],
           "srs": {
             "state": "review",
@@ -155,7 +160,8 @@
             "reps": 1,
             "lapses": 0,
             "easyCount": 0
-          }
+          },
+          "info": "<i>Platanus × hispanica</i> · Platanacées<br>Écorce qui se détache par plaques (tronc « camouflage ») ; feuilles comme l'érable.<br>Places, routes et canaux du Midi."
         },
         {
           "id": "1790845645157",
@@ -166,7 +172,10 @@
             "d'Inde"
           ],
           "tags": [
-            "commun"
+            "commun",
+            "feuillu",
+            "toxique",
+            "ville"
           ],
           "srs": {
             "state": "review",
@@ -177,7 +186,8 @@
             "reps": 2,
             "lapses": 0,
             "easyCount": 0
-          }
+          },
+          "info": "<i>Aesculus hippocastanum</i> · Sapindacées<br>Feuilles palmées à 5–7 folioles ; grappes de fleurs blanches.<br>⚠️ Marrons non comestibles (toxiques). Parcs et avenues."
         },
         {
           "id": "1790845645158",
@@ -229,7 +239,10 @@
             "Châtaignier"
           ],
           "tags": [
-            "commun"
+            "commun",
+            "feuillu",
+            "comestible",
+            "montagne"
           ],
           "srs": {
             "state": "review",
@@ -240,7 +253,8 @@
             "reps": 2,
             "lapses": 0,
             "easyCount": 0
-          }
+          },
+          "info": "<i>Castanea sativa</i> · Fagacées<br>Longues feuilles bordées de dents pointues ; bogues piquantes.<br>Châtaignes comestibles. Moyenne montagne, sols acides."
         },
         {
           "id": "1790845645161",
@@ -294,7 +308,9 @@
             "sylvestre"
           ],
           "tags": [
-            "commun"
+            "commun",
+            "conifère",
+            "montagne"
           ],
           "srs": {
             "state": "review",
@@ -305,7 +321,8 @@
             "reps": 2,
             "lapses": 0,
             "easyCount": 0
-          }
+          },
+          "info": "<i>Pinus sylvestris</i> · Pinacées<br>Aiguilles groupées par 2, écorce orangée en haut du tronc ; petits cônes.<br>Montagne, jusqu'à environ 2000 m."
         },
         {
           "id": "1790845645164",
@@ -315,7 +332,9 @@
             "If"
           ],
           "tags": [
-            "commun"
+            "commun",
+            "conifère",
+            "toxique"
           ],
           "srs": {
             "state": "review",
@@ -326,7 +345,8 @@
             "reps": 1,
             "lapses": 0,
             "easyCount": 0
-          }
+          },
+          "info": "<i>Taxus baccata</i> · Taxacées<br>Aiguilles plates, vert sombre ; « baies » rouges (arilles).<br>⚠️ Toute la plante est toxique, graine comprise."
         },
         {
           "id": "1790845645165",

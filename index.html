@@ -138,6 +138,69 @@
             font-family: Georgia, serif;
         }
 
+        /* ── Info sheet on the back + tags (#7) ── */
+        .c-info {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border-2);
+            font-size: 14px;
+            line-height: 1.55;
+            color: var(--text-2);
+            text-align: center;
+        }
+
+        .c-info i {
+            color: var(--text);
+        }
+
+        .c-tags {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .c-tag {
+            padding: 2px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--green);
+            background: var(--tint-green);
+        }
+
+        .h-tags {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px 10px;
+            font-size: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .h-tag {
+            padding: 3px 10px;
+            border-radius: 20px;
+            border: 1.5px solid var(--border-2);
+            background: var(--surface);
+            color: var(--text-2);
+            font-size: 12px;
+            cursor: pointer;
+            transition: border-color .15s, color .15s;
+        }
+
+        .h-tag span {
+            color: var(--text-3);
+            font-size: 11px;
+        }
+
+        .h-tag:hover {
+            border-color: var(--green);
+            color: var(--green);
+        }
+
         /* ── Mini guide (modal over the home screen) ── */
         .g-backdrop {
             position: fixed;
@@ -1978,28 +2041,62 @@
         // links so nothing is hosted here). Each one is loaded once per
         // browser — even if default.json is already there — and not again
         // after being deleted, until "Effacer les données" resets it all.
-        var EXTRA_BUNDLED = [{ url: "arbres.json", id: "arbres" }, { url: "songs.json", id: "chansons" }];
-        var LS_BUNDLED_SEEN = "ankitrain_v1_bundled_seen";
+        // Other bundled decks (generated with extract.py, images as web
+        // links so nothing is hosted here). Each one is loaded once per
+        // browser — even if default.json is already there — and not again
+        // after being deleted, until "Effacer les données" resets it all.
+        // Bumping "v" pushes a new version of its cards to browsers that
+        // already have it (progress kept).
+        var EXTRA_BUNDLED = [{ url: "arbres.json", id: "arbres", v: 2 }, { url: "songs.json", id: "chansons", v: 1 }];
+        var LS_BUNDLED_SEEN = "ankitrain_v1_bundled_seen"; // {id: version} (was [id…] = version 1)
         function loadExtraBundledDecks() {
             var seen;
-            try { seen = JSON.parse(localStorage.getItem(LS_BUNDLED_SEEN) || "[]"); } catch (e) { seen = []; }
+            try { seen = JSON.parse(localStorage.getItem(LS_BUNDLED_SEEN) || "{}"); } catch (e) { seen = {}; }
+            if (Array.isArray(seen)) seen = seen.reduce(function (o, id) { o[id] = 1; return o; }, {});
             var have = loadSources().map(function (s) { return String(s.id); });
-            var todo = EXTRA_BUNDLED.filter(function (b) { return seen.indexOf(b.id) === -1; });
+            var todo = EXTRA_BUNDLED.filter(function (b) { return !seen[b.id] || seen[b.id] < b.v; });
             return Promise.all(todo.map(function (b) {
-                if (have.indexOf(b.id) !== -1) return b.id;
+                var deleted = seen[b.id] && have.indexOf(b.id) === -1; // removed by the user: leave it gone
+                if (deleted) return b;
                 return fetch(b.url)
                     .then(function (r) { return r.ok ? r.json() : null; })
                     .then(function (data) {
                         if (!data) return null;
+                        var name = data.source || (isSongsData(data) ? "Chansons" : b.id);
+                        if (have.indexOf(b.id) !== -1) {
+                            if (!refreshDeckData(b.id, data)) return null;
+                            toast("✓ " + name + " mis à jour");
+                            return b;
+                        }
                         var total = importDeckData(data, b.id, b.id, false);
-                        if (total != null) toast("✓ " + (data.source || (isSongsData(data) ? "Chansons" : b.id)) + " chargé (" + total + " cartes)");
-                        return total != null ? b.id : null;
+                        if (total == null) return null;
+                        toast("✓ " + name + " chargé (" + total + " cartes)");
+                        return b;
                     })
                     .catch(function () { return null; });
-            })).then(function (ids) {
-                ids.forEach(function (id) { if (id && seen.indexOf(id) === -1) seen.push(id); });
+            })).then(function (done) {
+                done.forEach(function (b) { if (b) seen[b.id] = b.v; });
                 try { localStorage.setItem(LS_BUNDLED_SEEN, JSON.stringify(seen)); } catch (e) { }
             });
+        }
+
+        // New version of a stored source's cards / decks; progress untouched.
+        function refreshDeckData(sid, data) {
+            if (isSongsData(data)) data = songsToDeckData(data);
+            if (!data || !Array.isArray(data.decks)) return false;
+            var cardsByDeck = {};
+            data.decks.forEach(function (d) { cardsByDeck[d.id] = d.cards || []; });
+            saveCards(sid, cardsByDeck);
+            var sources = loadSources();
+            var src = sources.find(function (x) { return String(x.id) === String(sid); });
+            if (!src) return false;
+            src.decks = data.decks.map(function (d) {
+                var meta = { id: d.id, name: d.name, cardCount: (d.cards || []).length };
+                if (d.lyrics) meta.lyrics = d.lyrics;
+                return meta;
+            });
+            saveSources(sources);
+            return true;
         }
 
         // Wipes every localStorage key this app owns (sources, cards, SRS,
@@ -2390,6 +2487,7 @@
                 var total = src.decks.reduce(function (n, d) { return n + d.cardCount; }, 0);
                 var tree = buildDeckTree(src.decks);
                 var rows = renderDeckRows(tree, si, src.decks, cardsByDeck, srs, remainingNewToday(src.id));
+                rows = tagRowHtml(si, cardsByDeck) + rows;
 
                 return '<div class="h-source">'
                     + '<div class="h-source-header" onclick="toggleSource(this)">'
@@ -2403,6 +2501,26 @@
                     + '<div class="h-decktree open">' + rows + '</div>'
                     + '</div>';
             }).join("");
+        }
+
+        // Tag chips under a source whose cards carry info sheets (#7):
+        // a click studies every card of the source with that tag.
+        function tagRowHtml(si, cardsByDeck) {
+            var counts = {}, hasInfo = false;
+            Object.keys(cardsByDeck).forEach(function (did) {
+                (cardsByDeck[did] || []).forEach(function (c) {
+                    if (c.info) hasInfo = true;
+                    shownTags(c).forEach(function (t) { counts[t] = (counts[t] || 0) + 1; });
+                });
+            });
+            var tags = Object.keys(counts).sort(naturalCompare);
+            if (!hasInfo || !tags.length) return "";
+            return '<div class="h-tags">🏷 ' + tags.map(function (t) {
+                return '<button class="h-tag" onclick="startStudyTag(' + si + ', \'' + encodeURIComponent(t) + '\')">' + esc(t) + ' <span>' + counts[t] + '</span></button>';
+            }).join("") + '</div>';
+        }
+        function startStudyTag(si, encTag) {
+            startStudy(si, null, null, decodeURIComponent(encTag));
         }
 
         function toggleSource(header) {
@@ -2437,24 +2555,27 @@
         var advancing = false;
         var revealed = false;
 
-        function startStudy(si, deckName, customNewLimit) {
+        // deckName null = every deck of the source; tag = only cards with it.
+        function startStudy(si, deckName, customNewLimit, tag) {
             var sources = loadSources();
             var src = sources[si];
             var cardsByDeck = loadCards(src.id);
             var srs = loadSRS(src.id);
 
             // Collect all cards from deckName and its children
-            var childIds = childDeckIds(src.decks, deckName);
+            var childIds = deckName == null ? src.decks.map(function (d) { return d.id; }) : childDeckIds(src.decks, deckName);
             var allCards = [];
             childIds.forEach(function (did) {
-                (cardsByDeck[did] || []).forEach(function (c) { allCards.push(c); });
+                (cardsByDeck[did] || []).forEach(function (c) {
+                    if (!tag || (c.tags || []).indexOf(tag) !== -1) allCards.push(c);
+                });
             });
 
             var newLimit = customNewLimit != null ? customNewLimit : remainingNewToday(src.id);
             var queue, lyricsInfo = null;
             // Songs: the lyrics view, cards in song order (see buildLyricsQueue).
             var studied = src.decks.filter(function (d) { return childIds.indexOf(d.id) !== -1; });
-            if (studied.length && studied.every(function (d) { return d.lyrics; })) {
+            if (!tag && studied.length && studied.every(function (d) { return d.lyrics; })) {
                 var lq = buildLyricsQueue(studied, cardsByDeck, srs, newLimit);
                 queue = lq.queue; lyricsInfo = lq.info;
             } else {
@@ -2471,11 +2592,17 @@
                 queue = dueCards.concat(newCards);
             }
 
+            // A tag with nothing due: free review of all its cards (like
+            // Anki's custom study) rather than an empty session.
+            if (!queue.length && tag && allCards.length) {
+                queue = shuffle(allCards.slice());
+                toast("Révision libre : toutes les cartes « " + tag + " »");
+            }
             if (!queue.length) { toast("Aucune carte à réviser aujourd'hui 🎉"); return; }
 
             sess.sourceIdx = si;
             sess.sourceId = src.id;
-            sess.deckLabel = deckName.split("::").join(" › ");
+            sess.deckLabel = deckName == null ? "🏷 " + tag : deckName.split("::").join(" › ");
             sess.cards = allCards;
             sess.queue = queue;
             sess.qIdx = 0;
@@ -2534,7 +2661,32 @@
 
         // True when the back holds more than the typed words (an image, a
         // meaning, an example sentence…) — worth showing before moving on.
+        // Tags not worth showing (technical ones from the decks' origins).
+        var HIDDEN_TAGS = ["basic", "commun", "chanson", "cuatroloop", "quotidien", "marked", "leech"];
+        function shownTags(card) {
+            return (card.tags || []).filter(function (t) { return HIDDEN_TAGS.indexOf(t.toLowerCase()) === -1; });
+        }
+        // Card info sheet (#7): shown under the answer once the card is done.
+        function infoHtml(card) {
+            var tags = shownTags(card);
+            if (!card.info && !tags.length) return "";
+            return '<div class="c-info">' + (card.info || "")
+                + (tags.length ? '<div class="c-tags">' + tags.map(function (t) { return '<span class="c-tag">' + esc(t) + '</span>'; }).join("") + '</div>' : '')
+                + '</div>';
+        }
+        // The back to show under the blanks: the answer itself when it holds
+        // more than the typed words (image, sentence…), then the info sheet.
+        function showRichBack(container, card) {
+            container.innerHTML = answerHasMore(card) ? '<div class="s-verso-body"></div>' : "";
+            if (answerHasMore(card)) mountCardHtml(container.querySelector(".s-verso-body"), card.answer, cardStyle(sess.sourceId, card));
+            container.insertAdjacentHTML("beforeend", infoHtml(card));
+        }
+
         function hasRichAnswer(card) {
+            return answerHasMore(card) || !!infoHtml(card);
+        }
+
+        function answerHasMore(card) {
             if (!card.answer) return false;
             if (/<img/i.test(card.answer)) return true;
             // Letters and digits only, entities decoded (an escaped apostrophe
@@ -2671,6 +2823,7 @@
             var css = cardStyle(browse.sid, c);
             mountCardHtml(sl.querySelector(".b-front"), displayQuestion(c.question), css);
             mountCardHtml(sl.querySelector(".b-back"), b.back, css);
+            sl.querySelector(".b-back").insertAdjacentHTML("afterend", infoHtml(c));
         }
 
         // Current slide = the one whose centre is closest to the track's.
@@ -3322,11 +3475,7 @@
             var card = sess.queue[sess.qIdx];
             if (!card) return;
             wordRows.forEach(function (e) { if (!e.solved && !e.revealed) { revealed = true; showHintFor(e); } });
-            if (hasRichAnswer(card)) {
-                var extra = document.getElementById("s-verso-extra");
-                extra.innerHTML = '<div class="s-verso-body"></div>';
-                mountCardHtml(extra.querySelector(".s-verso-body"), card.answer, cardStyle(sess.sourceId, card));
-            }
+            if (hasRichAnswer(card)) showRichBack(document.getElementById("s-verso-extra"), card);
             if (document.activeElement) document.activeElement.blur();
             setBarState("rating");
             playCardAudio("a");
@@ -3351,9 +3500,7 @@
             }
             // Rich back (meaning, example sentence, image…): show it under
             // the blanks, in the card, and wait for Entrée / « Suivant → ».
-            var extra = document.getElementById("s-verso-extra");
-            extra.innerHTML = '<div class="s-verso-body"></div>';
-            mountCardHtml(extra.querySelector(".s-verso-body"), card.answer, cardStyle(sess.sourceId, card));
+            showRichBack(document.getElementById("s-verso-extra"), card);
             setBarState("next");
             pendingNext = function () { flash(function () { advanceCard(q); }); };
             playCardAudio("a");
@@ -3380,7 +3527,9 @@
             if (!card) return;
             flipShown = true;
             var back = card.answer != null ? card.answer : esc((card.words || []).join(" "));
-            mountCardHtml(document.getElementById("s-verso-body"), back, cardStyle(sess.sourceId, card));
+            var vb = document.getElementById("s-verso-body");
+            mountCardHtml(vb, back, cardStyle(sess.sourceId, card));
+            vb.insertAdjacentHTML("afterend", infoHtml(card));
             setBarState("rating");
             playCardAudio("a");
         }
