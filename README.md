@@ -97,6 +97,12 @@ ankisync() {
 
 ---
 
+## Songs (lyrics view)
+
+`songs.json` (3 songs, from the old `lyrics-trainer` branch) is bundled as a **Chansons** source — one deck per song, studied like any other deck. Each distinct lyric line is a card (a repeated chorus line is one card): you type the Spanish line, with its French gloss as the hint. The study screen shows the whole song like a lyrics player — lines you know as text, the active line centred with its blanks, the rest as greyed blanks — and keeps the song's order: due lines and new lines go top to bottom, lines to see again come back in a second pass. **⚙** in the top bar holds options to try out: hint (French gloss / context only / first letters) and new lines (one verse at a time / 5 lines / whole song). Songs in the same JSON format (e.g. generated with the AI prompt from the `lyrics-trainer` branch) can be added with **＋ Importer**. Song cards don't exist in Anki, so `ankisync` reports them as missing ids.
+
+---
+
 ## Publish to GitHub Pages
 
 ```bash

@@ -374,6 +374,7 @@
         }
 
         .s-topbar {
+            position: relative;
             padding: 16px 24px 0;
             display: flex;
             align-items: center;
@@ -783,10 +784,130 @@
         /* Card highlighted in the rating's color (automatic or keyboard
            rating; a click/tap only lights up the button pressed). */
         .s-question { transition: border-color .2s, background .2s; }
-        .s-question.rated-again { border-color: var(--red); background: var(--tint-red); }
-        .s-question.rated-hard { border-color: var(--orange); background: var(--tint-orange); }
-        .s-question.rated-good { border-color: var(--green); background: var(--tint-green); }
-        .s-question.rated-easy { border-color: var(--blue); background: var(--tint-blue); }
+        .s-question.rated-again, .ly-active.rated-again { border-color: var(--red); background: var(--tint-red); }
+        .s-question.rated-hard, .ly-active.rated-hard { border-color: var(--orange); background: var(--tint-orange); }
+        .s-question.rated-good, .ly-active.rated-good { border-color: var(--green); background: var(--tint-green); }
+        .s-question.rated-easy, .ly-active.rated-easy { border-color: var(--blue); background: var(--tint-blue); }
+
+        /* ── Songs: lyrics view ── */
+        .ly-view {
+            width: min(720px, 92vw);
+            height: calc(var(--vvh, 100vh) - 230px);
+            overflow-y: auto;
+            box-sizing: border-box;
+            padding: 30vh 8px;
+            text-align: center;
+        }
+
+        .ly-title {
+            font-size: 12px;
+            color: var(--text-3);
+            letter-spacing: .3px;
+            margin-bottom: 20px;
+        }
+
+        .ly-strophe {
+            margin-bottom: 22px;
+        }
+
+        .ly-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-3);
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            margin-bottom: 4px;
+        }
+
+        .ly-line {
+            font-size: 18px;
+            line-height: 1.5;
+            padding: 5px 10px;
+            border-radius: 14px;
+            color: var(--text);
+        }
+
+        .ly-locked {
+            opacity: .4;
+        }
+
+        .ly-blank {
+            display: inline-block;
+            height: 1.05em;
+            margin: 0 3px;
+            vertical-align: bottom;
+            border-bottom: 2px solid var(--border-2);
+        }
+
+        .ly-active {
+            margin: 10px 0;
+            padding: 12px 14px 8px;
+            border: 1.5px solid var(--border-2);
+            background: var(--surface);
+            transition: border-color .2s, background .2s;
+        }
+
+        .ly-hint {
+            font-size: 13px;
+            font-style: italic;
+            color: var(--text-2);
+            margin-bottom: 6px;
+        }
+
+        .ly-active .t-words {
+            max-width: none;
+            gap: 10px 18px;
+        }
+
+        .ly-menu {
+            position: absolute;
+            top: 46px;
+            left: 14px;
+            z-index: 40;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 14px;
+            font-size: 13px;
+            color: var(--text-2);
+            background: var(--surface);
+            border: 1.5px solid var(--border-2);
+            border-radius: 14px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, .12);
+        }
+
+        .ly-menu[hidden] {
+            display: none;
+        }
+
+        .ly-menu label {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .ly-menu select {
+            font-size: 13px;
+            color: var(--text);
+            background: var(--bg);
+            border: 1px solid var(--border-2);
+            border-radius: 8px;
+            padding: 3px 6px;
+        }
+
+        .ly-menu-note {
+            font-size: 11px;
+            color: var(--text-3);
+        }
+
+        body.compact .ly-view {
+            flex: 1;
+            min-height: 0;
+            height: auto;
+            width: 100%;
+            padding: 40% 4px;
+        }
 
         .t-rate-time {
             font-size: 11px;
@@ -1121,6 +1242,24 @@
         <div class="s-topbar">
             <button class="s-back" onclick="goHome()">← Quitter</button>
             <button class="s-mode-toggle" id="s-mode-toggle" onclick="toggleStudyMode()" title="Basculer saisie / mode normal (Anki)"></button>
+            <button class="s-mode-toggle" id="s-lyrics-opts" onclick="toggleLyricsMenu(event)" title="Options des chansons" style="display:none">⚙</button>
+            <div class="ly-menu" id="ly-menu" hidden>
+                <label>Indice
+                    <select name="hint" onchange="onLyricsHintChange(this.value)">
+                        <option value="trad">Traduction FR</option>
+                        <option value="context">Contexte seul</option>
+                        <option value="initials">Premières lettres</option>
+                    </select>
+                </label>
+                <label>Nouvelles lignes
+                    <select name="intro" onchange="setLyricsOpt('intro', this.value)">
+                        <option value="strophe">Strophe par strophe</option>
+                        <option value="lines">5 lignes</option>
+                        <option value="all">Toute la chanson</option>
+                    </select>
+                </label>
+                <div class="ly-menu-note">« Nouvelles lignes » s'applique à la prochaine session.</div>
+            </div>
             <div class="s-prog">
                 <div class="s-prog-label" id="prog-label">0 / 0</div>
                 <div class="s-prog-track">
@@ -1400,6 +1539,7 @@
             reader.onload = function (e) {
                 var data;
                 try { data = JSON.parse(e.target.result); } catch (err) { toast("JSON invalide : " + err.message); return; }
+                if (isSongsData(data)) data = songsToDeckData(data);
                 var total;
                 try { total = importDeckData(data, file.name.replace(/\.json$/, "")); }
                 catch (err) { toast("Import impossible : " + err.message); return; }
@@ -1414,6 +1554,7 @@
         // Returns the number of cards imported, or null if the JSON shape
         // is invalid.
         function importDeckData(data, fallbackName, forcedId, isDefault) {
+            if (isSongsData(data)) data = songsToDeckData(data);
             if (!data || !data.decks || !Array.isArray(data.decks)) return null;
 
             var sid = forcedId || Date.now();
@@ -1423,7 +1564,9 @@
             data.decks.forEach(function (d) { cardsByDeck[d.id] = d.cards || []; });
 
             var decksMeta = data.decks.map(function (d) {
-                return { id: d.id, name: d.name, cardCount: (d.cards || []).length };
+                var meta = { id: d.id, name: d.name, cardCount: (d.cards || []).length };
+                if (d.lyrics) meta.lyrics = d.lyrics; // song layout (lyrics view)
+                return meta;
             });
 
             // Cards first: if they don't fit in localStorage, saveCards
@@ -1450,6 +1593,53 @@
             if (Object.keys(srs).length) saveSRS(sid, srs);
 
             return data.decks.reduce(function (n, d) { return n + (d.cards || []).length; }, 0);
+        }
+
+        // ── Songs (lyrics-trainer format) → one deck per song ──
+        // songs.json: [{title, artist, strophes:[{label, text}], translations:
+        // {line: [{w, t:[fr…]}]}}]. Each distinct line is a card (a repeated
+        // chorus line is one card): question = the French gloss of the line,
+        // words = its Spanish words to type, answer = the Spanish line. The
+        // deck keeps the song's layout (verses → line ids) for the lyrics view.
+        function isSongsData(d) {
+            return Array.isArray(d) && d.length > 0 && d.every(function (x) { return x && Array.isArray(x.strophes); });
+        }
+        function strHash(str) {
+            var h = 5381;
+            for (var i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
+            return (h >>> 0).toString(36);
+        }
+        function lineWords(line) {
+            return line.split(/\s+/).map(function (w) {
+                return w.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+            }).filter(Boolean);
+        }
+        function songsToDeckData(songs) {
+            return {
+                source: "Chansons",
+                decks: songs.map(function (song) {
+                    var tr = song.translations || {};
+                    var cards = [], byLine = {};
+                    var strophes = song.strophes.map(function (st) {
+                        var lines = String(st.text || "").split("\n")
+                            .map(function (l) { return l.trim(); })
+                            .filter(function (l) { return l.length > 1; });
+                        return {
+                            label: st.label || "",
+                            lines: lines.map(function (line) {
+                                if (!byLine[line]) {
+                                    var gloss = (tr[line] || []).map(function (e) { return (e.t && e.t[0]) || ""; }).filter(Boolean).join(" ");
+                                    byLine[line] = { id: "song-" + strHash(song.title + "\n" + line), question: esc(gloss), answer: esc(line), words: lineWords(line), tags: ["chanson"] };
+                                    cards.push(byLine[line]);
+                                }
+                                return { id: byLine[line].id, text: line };
+                            })
+                        };
+                    });
+                    var name = song.title + (song.artist ? " — " + song.artist : "");
+                    return { id: "song-" + strHash(song.title), name: "Chansons::" + name, cards: cards, lyrics: { strophes: strophes } };
+                })
+            };
         }
 
         // If no deck has ever been imported yet, try loading a bundled
@@ -1481,7 +1671,7 @@
         // links so nothing is hosted here). Each one is loaded once per
         // browser — even if default.json is already there — and not again
         // after being deleted, until "Effacer les données" resets it all.
-        var EXTRA_BUNDLED = [{ url: "arbres.json", id: "arbres" }];
+        var EXTRA_BUNDLED = [{ url: "arbres.json", id: "arbres" }, { url: "songs.json", id: "chansons" }];
         var LS_BUNDLED_SEEN = "ankitrain_v1_bundled_seen";
         function loadExtraBundledDecks() {
             var seen;
@@ -1495,7 +1685,7 @@
                     .then(function (data) {
                         if (!data) return null;
                         var total = importDeckData(data, b.id, b.id, false);
-                        if (total != null) toast("✓ " + (data.source || b.id) + " chargé (" + total + " cartes)");
+                        if (total != null) toast("✓ " + (data.source || (isSongsData(data) ? "Chansons" : b.id)) + " chargé (" + total + " cartes)");
                         return total != null ? b.id : null;
                     })
                     .catch(function () { return null; });
@@ -1953,18 +2143,26 @@
                 (cardsByDeck[did] || []).forEach(function (c) { allCards.push(c); });
             });
 
-            // Split new vs due (learning/relearning cards are always "due" —
-            // they're mid-way through short-term steps, not day-scheduled yet)
-            var newCards = [], dueCards = [];
-            allCards.forEach(function (c) {
-                var s = srs[c.id];
-                if (!s || s.state === "new") newCards.push(c);
-                else if (s.state === "learning" || s.state === "relearning" || s.due <= TODAY) dueCards.push(c);
-            });
-            shuffle(newCards); shuffle(dueCards);
             var newLimit = customNewLimit != null ? customNewLimit : remainingNewToday(src.id);
-            newCards = newCards.slice(0, newLimit);
-            var queue = dueCards.concat(newCards);
+            var queue, lyricsInfo = null;
+            // Songs: the lyrics view, cards in song order (see buildLyricsQueue).
+            var studied = src.decks.filter(function (d) { return childIds.indexOf(d.id) !== -1; });
+            if (studied.length && studied.every(function (d) { return d.lyrics; })) {
+                var lq = buildLyricsQueue(studied, cardsByDeck, srs, newLimit);
+                queue = lq.queue; lyricsInfo = lq.info;
+            } else {
+                // Split new vs due (learning/relearning cards are always "due" —
+                // they're mid-way through short-term steps, not day-scheduled yet)
+                var newCards = [], dueCards = [];
+                allCards.forEach(function (c) {
+                    var s = srs[c.id];
+                    if (!s || s.state === "new") newCards.push(c);
+                    else if (s.state === "learning" || s.state === "relearning" || s.due <= TODAY) dueCards.push(c);
+                });
+                shuffle(newCards); shuffle(dueCards);
+                newCards = newCards.slice(0, newLimit);
+                queue = dueCards.concat(newCards);
+            }
 
             if (!queue.length) { toast("Aucune carte à réviser aujourd'hui 🎉"); return; }
 
@@ -1976,6 +2174,10 @@
             sess.qIdx = 0;
             sess.srs = srs;
             sess.done = 0;
+            sess.lyrics = lyricsInfo;
+            sess.lyricsSeen = {};
+            document.getElementById("s-lyrics-opts").style.display = lyricsInfo ? "" : "none";
+            document.getElementById("ly-menu").hidden = true;
 
             document.getElementById("home").style.display = "none";
             document.getElementById("study").style.display = "flex";
@@ -2219,6 +2421,126 @@
         });
 
         // ═══════════════════════════════════════════════
+        // SONGS — lyrics view: the whole song in a vertical column, lines
+        // known shown as text, the active line (hint + blanks) centred,
+        // the others as greyed blanks. Same typing / rating engine.
+        // ═══════════════════════════════════════════════
+        var LS_LYRICS = "ankitrain_v1_lyrics"; // {hint: trad|context|initials, intro: strophe|lines|all}
+        function lyricsOpts() {
+            var o = {};
+            try { o = JSON.parse(localStorage.getItem(LS_LYRICS) || "{}") || {}; } catch (e) { }
+            return { hint: o.hint || "trad", intro: o.intro || "strophe" };
+        }
+        function setLyricsOpt(k, v) {
+            var o = lyricsOpts(); o[k] = v;
+            try { localStorage.setItem(LS_LYRICS, JSON.stringify(o)); } catch (e) { }
+        }
+        function toggleLyricsMenu(e) {
+            if (e) e.stopPropagation();
+            var m = document.getElementById("ly-menu"), o = lyricsOpts();
+            m.querySelector('[name="hint"]').value = o.hint;
+            m.querySelector('[name="intro"]').value = o.intro;
+            m.hidden = !m.hidden;
+        }
+        function onLyricsHintChange(v) {
+            setLyricsOpt("hint", v);
+            if (sess.lyrics && sess.queue[sess.qIdx] && !advancing) showCard();
+        }
+        document.addEventListener("click", function (e) {
+            var m = document.getElementById("ly-menu");
+            if (m && !m.hidden && !m.contains(e.target) && e.target.id !== "s-lyrics-opts") m.hidden = true;
+        });
+
+        // Session queue for songs, in song order: per song, the lines due
+        // and the new lines picked by the "intro" option (one verse / next
+        // 5 lines / all), within the daily new-card limit.
+        function buildLyricsQueue(decks, cardsByDeck, srs, newLimit) {
+            var opts = lyricsOpts(), info = { songs: {}, cardSong: {} }, queue = [];
+            decks.forEach(function (d) {
+                var cards = {};
+                (cardsByDeck[d.id] || []).forEach(function (c) { cards[c.id] = c; });
+                info.songs[d.id] = { name: d.name.split("::").pop(), strophes: d.lyrics.strophes };
+                var order = [], firstStrophe = {};
+                d.lyrics.strophes.forEach(function (st, si) {
+                    st.lines.forEach(function (l) {
+                        if (!(l.id in firstStrophe)) { firstStrophe[l.id] = si; order.push(l.id); }
+                    });
+                });
+                order.forEach(function (id) { info.cardSong[id] = d.id; });
+                var isNew = function (id) { var x = srs[id]; return !x || x.state === "new"; };
+                var isDue = function (id) {
+                    var x = srs[id];
+                    return !!x && x.state !== "new" && (x.state === "learning" || x.state === "relearning" || x.due <= TODAY);
+                };
+                var newIds = order.filter(isNew);
+                if (opts.intro === "strophe" && newIds.length) {
+                    var first = firstStrophe[newIds[0]];
+                    newIds = newIds.filter(function (id) { return firstStrophe[id] === first; });
+                } else if (opts.intro === "lines") newIds = newIds.slice(0, 5);
+                newIds = newIds.slice(0, Math.max(0, newLimit));
+                newLimit -= newIds.length;
+                order.forEach(function (id) {
+                    if (cards[id] && (isDue(id) || newIds.indexOf(id) !== -1)) queue.push(cards[id]);
+                });
+            });
+            return { queue: queue, info: info };
+        }
+
+        function lyricBlanks(text) {
+            return text.split(/\s+/).filter(Boolean).map(function (w) {
+                return '<span class="ly-blank" style="width:' + (Math.max(2, w.length) * 0.55).toFixed(2) + 'em"></span>';
+            }).join(" ");
+        }
+
+        function showLyricLine(card, flip) {
+            var info = sess.lyrics, songId = info.cardSong[card.id], song = info.songs[songId];
+            var content = document.getElementById("s-content");
+            var prev = content.querySelector(".ly-view");
+            var sameSong = !!prev && prev.dataset.song === songId;
+            var prevTop = prev ? prev.scrollTop : 0;
+            var pending = {};
+            for (var i = sess.qIdx + 1; i < sess.queue.length; i++) pending[sess.queue[i].id] = true;
+            var opts = lyricsOpts(), activeShown = false;
+
+            var html = '<div class="ly-view" data-song="' + esc(songId) + '"><div class="ly-title">' + esc(song.name) + '</div>';
+            song.strophes.forEach(function (st) {
+                html += '<div class="ly-strophe">' + (st.label ? '<div class="ly-label">' + esc(st.label) + '</div>' : '');
+                st.lines.forEach(function (l) {
+                    var x = sess.srs[l.id];
+                    if (!activeShown && l.id === card.id) {
+                        activeShown = true;
+                        html += '<div class="ly-line ly-active">'
+                            + (opts.hint === "trad" && card.question ? '<div class="ly-hint">' + card.question + '</div>' : '')
+                            + (flip
+                                ? '<div class="s-verso-body ly-flip" id="s-verso-body"></div>'
+                                : '<div class="t-words ly-words" id="t-words"></div><div class="s-verso-extra" id="s-verso-extra"></div>')
+                            + '</div>';
+                    } else if (l.id !== card.id && (sess.lyricsSeen[l.id] || (x && x.state !== "new" && !pending[l.id]))) {
+                        // known, or already answered this session (shown until its next turn)
+                        html += '<div class="ly-line ly-known">' + esc(l.text) + '</div>';
+                    } else {
+                        var cls = (pending[l.id] || l.id === card.id) ? "ly-pending" : "ly-locked";
+                        html += '<div class="ly-line ' + cls + '">' + lyricBlanks(l.text) + '</div>';
+                    }
+                });
+                html += '</div>';
+            });
+            html += '</div>';
+            content.innerHTML = html;
+
+            var view = content.querySelector(".ly-view");
+            if (sameSong) view.scrollTop = prevTop;
+            setBarState("question");
+            if (!flip) {
+                buildRows(card.words);
+                if (opts.hint === "initials") wordRows.forEach(function (e) { e.inp.placeholder = e.word.charAt(0) + "…"; });
+            }
+            updateCompact();
+            var act = view.querySelector(".ly-active");
+            if (act) act.scrollIntoView({ behavior: sameSong ? "smooth" : "auto", block: "center" });
+        }
+
+        // ═══════════════════════════════════════════════
         // CARD DISPLAY
         // ═══════════════════════════════════════════════
         function showCard() {
@@ -2232,6 +2554,7 @@
             flipShown = false;
             updateModeToggle();
             if (!flip && (!card.words || !card.words.length)) { sess.qIdx++; showCard(); return; }
+            if (sess.lyrics) { showLyricLine(card, flip); return; }
 
             var hasAudio = (card.audioQuestion && card.audioQuestion.length) || card.lang;
             // One card: recto, a "verso" line, then the blanks to type
@@ -2306,7 +2629,7 @@
 
         // Card border + tint in the rating's color.
         function highlightCard(q) {
-            var el = document.querySelector("#s-content .s-question");
+            var el = document.querySelector("#s-content .s-question, #s-content .ly-active");
             if (!el) return;
             el.classList.remove("rated-again", "rated-hard", "rated-good", "rated-easy");
             el.classList.add("rated-" + { 1: "again", 2: "hard", 3: "good", 4: "easy" }[q]);
@@ -2481,8 +2804,8 @@
             });
 
             document.getElementById("kb-keeper").value = "";
-            if (wordRows.length) wordRows[0].inp.focus();
-            setTimeout(function () { if (wordRows.length && document.activeElement !== wordRows[0].inp) wordRows[0].inp.focus(); }, 60);
+            if (wordRows.length) wordRows[0].inp.focus({ preventScroll: true });
+            setTimeout(function () { if (wordRows.length && document.activeElement !== wordRows[0].inp) wordRows[0].inp.focus({ preventScroll: true }); }, 60);
         }
 
         function makeCheck(entry, i) { return function () { liveCheck(entry, i); }; }
@@ -2815,7 +3138,12 @@
             if (wasNew) recordNewIntroduced(sess.sourceId);
             sess.done++;
             sess.qIdx++;
-            if (ctx.requeueIn) {
+            if (sess.lyrics) sess.lyricsSeen[card.id] = true;
+            if (ctx.requeueIn && sess.lyrics) {
+                // Songs: back for another pass, at the end, so the lyrics
+                // keep being gone through top to bottom.
+                sess.queue.push(card);
+            } else if (ctx.requeueIn) {
                 // Not a fixed distance — Anki itself doesn't resurface a
                 // learning-step card at an exact position either, it's
                 // interleaved with whatever else is due around that time.
@@ -2825,6 +3153,9 @@
                 sess.queue.splice(insertAt, 0, card);
             }
             updateCounts();
+            // Songs: only the line changes (no fade), after a short pause so
+            // the rating colour on the line is seen.
+            if (sess.lyrics) { setTimeout(showCard, 350); return; }
             var content = document.getElementById("s-content");
             content.style.cssText = "opacity:0;transform:translateY(-10px);transition:opacity .4s,transform .4s";
             setTimeout(function () {
