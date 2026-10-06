@@ -1271,6 +1271,53 @@
             transition: border-color .15s, color .15s;
         }
 
+        .s-mode-select {
+            appearance: none;
+            -webkit-appearance: none;
+            padding-right: 22px;
+            background-image: linear-gradient(45deg, transparent 50%, var(--text-2) 50%), linear-gradient(135deg, var(--text-2) 50%, transparent 50%);
+            background-position: calc(100% - 12px) 55%, calc(100% - 8px) 55%;
+            background-size: 4px 4px;
+            background-repeat: no-repeat;
+            background-color: var(--surface);
+        }
+
+        /* 🎧 Dictation recto */
+        .d-play {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            margin: 10px 0 6px;
+        }
+
+        .d-btn {
+            width: 74px;
+            height: 74px;
+            border-radius: 50%;
+            border: 1.5px solid var(--border-2);
+            background: var(--surface);
+            font-size: 30px;
+            cursor: pointer;
+            transition: border-color .15s, transform .1s;
+        }
+
+        .d-btn:hover {
+            border-color: var(--navy);
+            transform: translateY(-1px);
+        }
+
+        .d-slow {
+            width: 54px;
+            height: 54px;
+            font-size: 22px;
+            align-self: center;
+        }
+
+        .d-hint {
+            font-size: 13px;
+            color: var(--text-3);
+        }
+
         .s-mode-toggle:hover {
             border-color: var(--navy);
             color: var(--navy);
@@ -1609,12 +1656,12 @@
             </div>
 
             <div class="g-step">
-                <div class="g-num">5</div><div class="g-h">Deux façons de réviser</div>
+                <div class="g-num">5</div><div class="g-h">Trois façons de réviser</div>
                 <div class="g-body">
                     <div class="g-demo">
-                        <span class="s-mode-toggle">⌨️ Saisie</span><span class="g-arrow">⇄</span><span class="s-mode-toggle">🃏 Mode normal</span>
+                        <span class="s-mode-toggle">⌨️ Saisie</span><span class="s-mode-toggle">🃏 Normal</span><span class="s-mode-toggle">🎧 Dictée</span>
                     </div>
-                    En haut de l'écran de révision. <b>Saisie</b> : on tape la réponse. <b>Mode normal</b> : comme Anki, <b>Espace</b> retourne la carte, puis on note avec les boutons ou <b>1–4</b> (Espace = Correct).
+                    Menu en haut de l'écran de révision. <b>Saisie</b> : on tape la réponse. <b>Normal</b> : comme Anki, <b>Espace</b> retourne la carte, puis on note avec les boutons ou <b>1–4</b> (Espace = Correct). <b>Dictée</b> (paquet espagnol) : on écoute et on tape l'espagnol entendu, sur les cartes déjà apprises — progression à part.
                 </div>
             </div>
 
@@ -1650,7 +1697,11 @@
     <div id="study">
         <div class="s-topbar">
             <button class="s-back" onclick="goHome()">← Quitter</button>
-            <button class="s-mode-toggle" id="s-mode-toggle" onclick="toggleStudyMode()" title="Basculer saisie / mode normal (Anki)"></button>
+            <select class="s-mode-toggle s-mode-select" id="s-mode-select" onchange="setStudyMode(this.value)" title="Mode d'étude">
+                <option value="type">⌨️ Saisie</option>
+                <option value="flip">🃏 Normal</option>
+                <option value="dictee">🎧 Dictée</option>
+            </select>
             <button class="s-mode-toggle" id="s-lyrics-opts" onclick="toggleLyricsMenu(event)" title="Options des chansons" style="display:none">⚙</button>
             <div class="ly-menu" id="ly-menu" hidden>
                 <label>Indice
@@ -2600,7 +2651,7 @@
             var sources = loadSources();
             var src = sources[si];
             var cardsByDeck = loadCards(src.id);
-            var srs = loadSRS(src.id);
+            var mainSrs = loadSRS(src.id);
 
             // Collect all cards from deckName and its children
             var childIds = deckName == null ? src.decks.map(function (d) { return d.id; }) : childDeckIds(src.decks, deckName);
@@ -2611,13 +2662,29 @@
                 });
             });
 
-            var newLimit = customNewLimit != null ? customNewLimit : remainingNewToday(src.id);
-            var queue, lyricsInfo = null;
-            // Songs: the lyrics view, cards in song order (see buildLyricsQueue).
+            // Progress "tracks": the main one (type-in and normal mode, the one
+            // sent to Anki), dictation, and one per hint for songs — each with
+            // its own scheduling and daily new-card count (stored under
+            // "<source id>::<track>").
             var studied = src.decks.filter(function (d) { return childIds.indexOf(d.id) !== -1; });
-            if (!tag && studied.length && studied.every(function (d) { return d.lyrics; })) {
+            var isLyrics = !tag && studied.length > 0 && studied.every(function (d) { return d.lyrics; });
+            sess.canDictee = !isLyrics && allCards.some(function (c) {
+                return (c.audioQuestion && c.audioQuestion.length) || (c.audioAnswer && c.audioAnswer.length) || c.lang;
+            });
+            var hint = lyricsOpts().hint;
+            var track = isLyrics ? (hint === "trad" ? "" : "song-" + hint) : (studyMode() === "dictee" ? "dictee" : "");
+            var srsKey = src.id + (track ? "::" + track : "");
+            var srs = track ? loadSRS(srsKey) : mainSrs;
+
+            var newLimit = customNewLimit != null ? customNewLimit : remainingNewToday(srsKey);
+            var queue, lyricsInfo = null;
+            if (isLyrics) {
+                // Songs: the lyrics view, cards in song order (see buildLyricsQueue).
                 var lq = buildLyricsQueue(studied, cardsByDeck, srs, newLimit);
                 queue = lq.queue; lyricsInfo = lq.info;
+            } else if (track === "dictee") {
+                queue = buildDicteeQueue(allCards, mainSrs, srs, newLimit);
+                if (!queue.length) { toast("Rien à dicter : la dictée reprend les cartes déjà passées en révision à l'écrit"); return; }
             } else {
                 // Split new vs due (learning/relearning cards are always "due" —
                 // they're mid-way through short-term steps, not day-scheduled yet)
@@ -2642,6 +2709,10 @@
 
             sess.sourceIdx = si;
             sess.sourceId = src.id;
+            sess.srsKey = srsKey;
+            sess.deckName = deckName;
+            sess.tag = tag;
+            sess.customNewLimit = customNewLimit;
             sess.deckLabel = deckName == null ? "🏷 " + tag : deckName.split("::").join(" › ");
             sess.cards = allCards;
             sess.queue = queue;
@@ -2663,7 +2734,7 @@
             pendingNext = null;
             setBarState("");
             document.body.classList.remove("compact");
-            saveSRS(sess.sourceId, sess.srs);
+            saveSRS(sess.srsKey, sess.srs);
             document.getElementById("study").style.display = "none";
             document.getElementById("home").style.display = "block";
             renderHome();
@@ -2961,6 +3032,62 @@
         });
 
         // ═══════════════════════════════════════════════
+        // DICTATION — 🎧 mode: hear the Spanish, type it. Own progress
+        // ("::dictee"); only cards already in review on the main track.
+        // An ES→FR card and its FR→ES twin share one Spanish text → one item.
+        // ═══════════════════════════════════════════════
+        function dicteeSide(c) {
+            var esFirst = /🇪🇸\s*➡️\s*🇫🇷/u.test(c.question || "") || c.lang === "es";
+            var q = htmlToText(displayQuestion(c.question));
+            var w = (c.words || []).join(" ");
+            return esFirst
+                ? { es: q, fr: w, audio: c.audioQuestion || [] }
+                : { es: w, fr: q, audio: c.audioAnswer || [] };
+        }
+        function buildDicteeQueue(cards, mainSrs, dSrs, newLimit) {
+            var groups = {}, order = [];
+            cards.forEach(function (c) {
+                var side = dicteeSide(c);
+                var key = noAcc(side.es.toLowerCase()).replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+                if (!key) return;
+                if (!groups[key]) { groups[key] = { rep: c, side: side, ok: false }; order.push(key); }
+                var g = groups[key];
+                if (!g.side.audio.length && side.audio.length) g.side.audio = side.audio;
+                var m = mainSrs[c.id];
+                if (m && m.state === "review") g.ok = true; // learnt in writing
+            });
+            var due = [], fresh = [];
+            order.forEach(function (key) {
+                var g = groups[key];
+                if (!g.ok) return;
+                var item = {
+                    id: g.rep.id, dictee: true, lang: "es",
+                    words: lineWords(g.side.es),
+                    question: esc(g.side.es), answer: esc(g.side.es),
+                    info: g.side.fr ? "🇫🇷 " + esc(g.side.fr) : "",
+                    audioQuestion: g.side.audio, audioAnswer: [], tags: []
+                };
+                var x = dSrs[item.id];
+                if (!x || x.state === "new") fresh.push(item);
+                else if (x.state === "learning" || x.state === "relearning" || x.due <= TODAY) due.push(item);
+            });
+            shuffle(due); shuffle(fresh);
+            return due.concat(fresh.slice(0, Math.max(0, newLimit)));
+        }
+        function playDictee(slow) {
+            var card = sess.queue[sess.qIdx];
+            if (!card) return;
+            var audio = document.getElementById("audio-player");
+            audio.defaultPlaybackRate = audio.playbackRate = slow ? 0.75 : 1;
+            if (card.audioQuestion.length) { playAudioList(card.audioQuestion); return; }
+            if (!window.speechSynthesis) return;
+            speechSynthesis.cancel();
+            var u = new SpeechSynthesisUtterance(htmlToText(card.question));
+            u.lang = "es-ES"; u.rate = slow ? 0.7 : 0.95;
+            speechSynthesis.speak(u);
+        }
+
+        // ═══════════════════════════════════════════════
         // SONGS — lyrics view: the whole song in a vertical column, lines
         // known shown as text, the active line (hint + blanks) centred,
         // the others as greyed blanks. Same typing / rating engine.
@@ -2984,7 +3111,7 @@
         }
         function onLyricsHintChange(v) {
             setLyricsOpt("hint", v);
-            if (sess.lyrics && sess.queue[sess.qIdx] && !advancing) showCard();
+            if (sess.lyrics) restartStudy(); // each hint has its own progress
         }
         document.addEventListener("click", function (e) {
             var m = document.getElementById("ly-menu");
@@ -3129,13 +3256,19 @@
             if (sess.lyrics) { showLyricLine(card, flip); return; }
 
             var hasAudio = (card.audioQuestion && card.audioQuestion.length) || card.lang;
+            var dictee = !!card.dictee;
             // One card: recto, a "verso" line, then the blanks to type
             // (type-in mode) or the hidden back (normal mode). The actions
             // (hint / answer, then ratings) live in the bottom bar.
             document.getElementById("s-content").innerHTML =
                 '<div class="s-question">'
-                + '<div class="s-zone s-zone-recto"><div class="s-zone-in"><div class="s-card-body"></div>'
-                + (hasAudio ? '<button class="s-audio-btn" onclick="playCardAudio(\'q\')">🔊 Écouter</button>' : '')
+                + '<div class="s-zone s-zone-recto"><div class="s-zone-in">'
+                + (dictee
+                    ? '<div class="d-play"><button class="d-btn" onclick="playDictee()" title="Réécouter">🔊</button>'
+                    + '<button class="d-btn d-slow" onclick="playDictee(true)" title="Lentement">🐢</button></div>'
+                    + '<div class="d-hint">Écoute et écris ce que tu entends</div>'
+                    : '<div class="s-card-body"></div>'
+                    + (hasAudio ? '<button class="s-audio-btn" onclick="playCardAudio(\'q\')">🔊 Écouter</button>' : ''))
                 + '</div></div>'
                 + '<div class="b-sep">verso</div>'
                 + '<div class="s-zone s-zone-verso"><div class="s-zone-in">'
@@ -3144,7 +3277,8 @@
                     : '<div class="t-words" id="t-words"></div><div class="s-verso-extra" id="s-verso-extra"></div>')
                 + '</div></div>'
                 + '</div>';
-            mountCardHtml(document.querySelector("#s-content .s-card-body"), displayQuestion(card.question), cardStyle(sess.sourceId, card));
+            if (!dictee) mountCardHtml(document.querySelector("#s-content .s-card-body"), displayQuestion(card.question), cardStyle(sess.sourceId, card));
+            else document.getElementById("audio-player").defaultPlaybackRate = 1;
 
             setBarState("question");
             if (!flip) buildRows(card.words);
@@ -3320,6 +3454,13 @@
         function playCardAudio(which, onDone) {
             var card = sess.queue[sess.qIdx];
             if (!card) { if (onDone) onDone(); return; }
+            if (card.dictee) {
+                // The Spanish is the question; nothing more to play after.
+                if (which === "a") { if (onDone) onDone(); return; }
+                if (card.audioQuestion.length) { playAudioList(card.audioQuestion, onDone); return; }
+                speakText(htmlToText(card.question), "es", onDone);
+                return;
+            }
             var urls = which === "both"
                 ? (card.audioQuestion || []).concat(card.audioAnswer || [])
                 : (which === "a" ? card.audioAnswer : card.audioQuestion);
@@ -3573,18 +3714,33 @@
 
         // ── Normal (Anki-style) mode: show the back, then rate it ──
         var flipShown = false;
+        // Stored choice: type | flip | dictee. Dictation only exists for decks
+        // with Spanish audio (not songs, not trees): there it falls back to type.
         function studyMode() {
-            try { return localStorage.getItem(LS_MODE) === "flip" ? "flip" : "type"; } catch (e) { return "type"; }
+            var m = "type";
+            try { m = localStorage.getItem(LS_MODE) || "type"; } catch (e) { }
+            if (m === "dictee" && !sess.canDictee) return "type";
+            return m === "flip" || m === "dictee" ? m : "type";
         }
         function updateModeToggle() {
-            var b = document.getElementById("s-mode-toggle");
-            if (b) b.textContent = studyMode() === "flip" ? "🃏 Mode normal" : "⌨️ Saisie";
+            var sel = document.getElementById("s-mode-select");
+            if (!sel) return;
+            sel.querySelector('option[value="dictee"]').hidden = !sess.canDictee;
+            sel.value = studyMode();
         }
-        function toggleStudyMode() {
-            try { localStorage.setItem(LS_MODE, studyMode() === "flip" ? "type" : "flip"); } catch (e) { }
-            if (document.activeElement) document.activeElement.blur(); // so Space doesn't re-press the toggle
+        function setStudyMode(v) {
+            var before = studyMode();
+            try { localStorage.setItem(LS_MODE, v); } catch (e) { }
+            if (document.activeElement) document.activeElement.blur(); // so Space doesn't reopen the menu
             document.getElementById("audio-player").pause();
+            // Dictation has its own progress → a new session on the same deck.
+            if ((before === "dictee") !== (studyMode() === "dictee")) { restartStudy(); return; }
             if (sess.queue[sess.qIdx] && !advancing) showCard(); else updateModeToggle();
+        }
+        function restartStudy() {
+            saveSRS(sess.srsKey, sess.srs);
+            pendingNext = null;
+            startStudy(sess.sourceIdx, sess.deckName, sess.customNewLimit, sess.tag);
         }
         function flipCard() {
             if (flipShown || advancing) return;
@@ -3716,7 +3872,7 @@
             var ctx = { requeueIn: null };
             sess.srs[card.id] = applyRating(sess.srs[card.id] || defaultSRS(), q, ctx);
             sess.srs[card.id].lastReview = Date.now(); // for cross-device merge on sign-in
-            if (wasNew) recordNewIntroduced(sess.sourceId);
+            if (wasNew) recordNewIntroduced(sess.srsKey);
             sess.done++;
             sess.qIdx++;
             if (sess.lyrics) sess.lyricsSeen[card.id] = true;
@@ -3754,7 +3910,7 @@
 
         function showDone() {
             setBarState("");
-            saveSRS(sess.sourceId, sess.srs);
+            saveSRS(sess.srsKey, sess.srs);
             document.getElementById("s-content").innerHTML =
                 '<div class="s-done">'
                 + '<div class="s-done-icon">🎉</div>'
