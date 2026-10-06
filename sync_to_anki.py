@@ -186,6 +186,48 @@ def count_new_studied_today(col, dry_run):
     return changed
 
 
+def load_flagged(paths):
+    """card id -> texte du recto des cartes marquées 🚩 (F6) dans l'appli,
+    d'après l'export le plus récent de chaque source : une marque retirée
+    dans l'appli disparaît donc au prochain export."""
+    latest = {}
+    for path in paths:
+        with open(path, encoding="utf-8") as f:
+            d = json.load(f)
+        src, at = d.get("source", path), d.get("exportedAt", "")
+        if src not in latest or at >= latest[src][0]:
+            latest[src] = (at, d.get("flagged") or {})
+    out = {}
+    for _, fl in latest.values():
+        out.update(fl)
+    return out
+
+
+def plain(html):
+    return " ".join(re.sub(r"<[^>]+>|\[sound:[^\]]+\]", " ", strip_style(html)).split())
+
+
+def mark_flagged(col, flagged, dry_run):
+    """Cartes marquées : drapeau rouge, tag « a_corriger » et suspendues dans
+    Anki (plus proposées nulle part tant qu'elles ne sont pas corrigées).
+    Renvoie (cid, deck, recto, verso) pour la relecture."""
+    from anki.errors import NotFoundError
+    rows, cids = [], []
+    for cid_str in flagged:
+        try:
+            card = col.get_card(int(cid_str))
+        except (NotFoundError, ValueError):
+            continue  # pas dans Anki (ex. cartes de chansons)
+        fields = card.note().fields
+        rows.append((card.id, col.decks.name(card.did), plain(fields[0]), plain(fields[1]) if len(fields) > 1 else ""))
+        cids.append(card.id)
+    if cids and not dry_run:
+        col.set_user_flag_for_cards(1, cids)
+        col.sched.suspend_cards(cids)
+        col.tags.bulk_add(list({col.get_card(c).nid for c in cids}), "a_corriger")
+    return rows
+
+
 def main():
     ap = argparse.ArgumentParser(
         description="Pousse la progression d'Anki Trainer dans la collection Anki locale"
@@ -206,6 +248,7 @@ def main():
 
     paths = args.stats or sorted(glob.glob(os.path.expanduser("~/Downloads/*_stats*.json")))
     entries = load_latest_entries(paths)
+    flagged = load_flagged(paths)
     print(f"{len(paths)} fichier(s) de stats, {len(entries)} carte(s) étudiée(s) dans Anki Trainer.")
 
     col_path = os.path.abspath(args.collection) if args.collection else find_collection(args.profile)
@@ -272,6 +315,7 @@ def main():
                 rid, cid, -1, interval, last_ivl, card.factor, REVLOG_MANUAL,
             )
         new_today = count_new_studied_today(col, args.dry_run)
+        flagged_rows = mark_flagged(col, flagged, args.dry_run)
     finally:
         col.close()
 
@@ -284,6 +328,11 @@ def main():
         print(f"  ⚠ {missing} id(s) de carte absents de cette collection", file=sys.stderr)
     for name, n in new_today:
         print(f"  ✓ {name} : {n} nouvelle(s) carte(s) comptée(s) comme déjà vue(s) aujourd'hui")
+    if flagged_rows:
+        verb = "seraient marquées" if args.dry_run else "drapeau rouge, tag « a_corriger », suspendue(s)"
+        print(f"\n🚩 {len(flagged_rows)} carte(s) marquée(s) dans l'appli à relire ({verb}) :")
+        for cid, deck, front, back in flagged_rows:
+            print(f"   cid:{cid}  [{deck.split('::')[-1]}]  {front}  →  {back}")
     if updated and not args.dry_run:
         print("\n→ Ouvre Anki et synchronise : la progression part sur AnkiWeb.")
 

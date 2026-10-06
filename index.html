@@ -1890,10 +1890,16 @@
             var card = sess.queue[sess.qIdx];
             if (!card) return;
             var fl = loadFlagged(sess.sourceId);
-            if (fl[card.id]) { delete fl[card.id]; toast("Marque retirée"); }
-            else { fl[card.id] = plainText(card.question).slice(0, 200); toast("🚩 Carte marquée à corriger"); }
+            if (fl[card.id]) { delete fl[card.id]; saveFlagged(sess.sourceId, fl); toast("Marque retirée"); updateFlagIndicator(); return; }
+            fl[card.id] = plainText(displayQuestion(card.question)).slice(0, 200);
             saveFlagged(sess.sourceId, fl);
-            updateFlagIndicator();
+            toast("🚩 Carte marquée : elle ne sera plus proposée");
+            // Out of this session right away (later passes included), not rated (#44).
+            if (advancing) return;
+            for (var i = sess.queue.length - 1; i > sess.qIdx; i--) if (sess.queue[i].id === card.id) sess.queue.splice(i, 1);
+            sess.queue.splice(sess.qIdx, 1);
+            document.getElementById("audio-player").pause();
+            showCard();
         }
         function updateFlagIndicator() {
             var btn = document.getElementById("s-flag-btn");
@@ -2462,8 +2468,10 @@
             var sources = loadSources();
             var src = sources[si];
             var srs = loadSRS(src.id);
-            if (!Object.keys(srs).length) { toast("Aucune progression à exporter pour cette source."); return; }
-            var payload = { version: 1, source: src.name, exportedAt: new Date().toISOString(), cards: srs };
+            var flagged = loadFlagged(src.id);
+            if (!Object.keys(srs).length && !Object.keys(flagged).length) { toast("Aucune progression à exporter pour cette source."); return; }
+            // flagged: cards marked 🚩 (F6) — ankisync flags + suspends them in Anki and lists them for review.
+            var payload = { version: 1, source: src.name, exportedAt: new Date().toISOString(), cards: srs, flagged: flagged };
             var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
             var url = URL.createObjectURL(blob);
             var a = document.createElement("a");
@@ -2509,10 +2517,10 @@
             return roots;
         }
 
-        function renderDeckRows(nodes, si, decksMeta, cardsByDeck, srs, newLimit) {
+        function renderDeckRows(nodes, si, decksMeta, cardsByDeck, srs, newLimit, flagged) {
             return nodes.map(function (node) {
                 var childIds = childDeckIds(decksMeta, node.fullName);
-                var cardIds = allCardIds(cardsByDeck, childIds);
+                var cardIds = allCardIds(cardsByDeck, childIds, flagged);
                 var stats = deckStats(cardIds, srs, newLimit);
                 var customLimit = stats.new + 20;
                 var html = '<div class="h-deckrow" style="padding-left:' + (16 + node.depth * 20) + 'px" onclick="startStudy(' + si + ',\'' + esc(node.fullName) + '\')">'
@@ -2526,7 +2534,7 @@
                         : '')
                     + '<button class="h-custom-btn" title="Parcourir les cartes (recto → verso)" onclick="event.stopPropagation(); openBrowse(' + si + ',\'' + esc(node.fullName) + '\')">🔍</button>'
                     + '</div>';
-                if (node.children.length) html += renderDeckRows(node.children, si, decksMeta, cardsByDeck, srs, newLimit);
+                if (node.children.length) html += renderDeckRows(node.children, si, decksMeta, cardsByDeck, srs, newLimit, flagged);
                 return html;
             }).join("");
         }
@@ -2553,10 +2561,10 @@
         }
 
         // Collect all card ids across a set of deck ids
-        function allCardIds(cardsByDeck, deckIds) {
+        function allCardIds(cardsByDeck, deckIds, flagged) {
             var ids = [];
             deckIds.forEach(function (did) {
-                (cardsByDeck[did] || []).forEach(function (c) { ids.push(c.id); });
+                (cardsByDeck[did] || []).forEach(function (c) { if (!flagged || !flagged[c.id]) ids.push(c.id); });
             });
             return ids;
         }
@@ -2577,7 +2585,7 @@
                 var cardsByDeck = loadCards(src.id);
                 var total = src.decks.reduce(function (n, d) { return n + d.cardCount; }, 0);
                 var tree = buildDeckTree(src.decks);
-                var rows = renderDeckRows(tree, si, src.decks, cardsByDeck, srs, remainingNewToday(src.id));
+                var rows = renderDeckRows(tree, si, src.decks, cardsByDeck, srs, remainingNewToday(src.id), loadFlagged(src.id));
                 rows = tagRowHtml(si, cardsByDeck) + rows;
 
                 return '<div class="h-source">'
@@ -2656,8 +2664,10 @@
             // Collect all cards from deckName and its children
             var childIds = deckName == null ? src.decks.map(function (d) { return d.id; }) : childDeckIds(src.decks, deckName);
             var allCards = [];
+            var flagged = loadFlagged(src.id); // marked 🚩 (F6): never offered again (#44)
             childIds.forEach(function (did) {
                 (cardsByDeck[did] || []).forEach(function (c) {
+                    if (flagged[c.id]) return;
                     if (!tag || (c.tags || []).indexOf(tag) !== -1) allCards.push(c);
                 });
             });
@@ -2680,7 +2690,7 @@
             var queue, lyricsInfo = null;
             if (isLyrics) {
                 // Songs: the lyrics view, cards in song order (see buildLyricsQueue).
-                var lq = buildLyricsQueue(studied, cardsByDeck, srs, newLimit);
+                var lq = buildLyricsQueue(studied, cardsByDeck, srs, newLimit, flagged);
                 queue = lq.queue; lyricsInfo = lq.info;
             } else if (track === "dictee") {
                 queue = buildDicteeQueue(allCards, mainSrs, srs, newLimit);
@@ -3121,7 +3131,8 @@
         // Session queue for songs, in song order: per song, the lines due
         // and the new lines picked by the "intro" option (one verse / next
         // 5 lines / all), within the daily new-card limit.
-        function buildLyricsQueue(decks, cardsByDeck, srs, newLimit) {
+        function buildLyricsQueue(decks, cardsByDeck, srs, newLimit, flagged) {
+            flagged = flagged || {};
             var opts = lyricsOpts(), info = { songs: {}, cardSong: {} }, queue = [];
             decks.forEach(function (d) {
                 var cards = {};
@@ -3139,7 +3150,7 @@
                     var x = srs[id];
                     return !!x && x.state !== "new" && (x.state === "learning" || x.state === "relearning" || x.due <= TODAY);
                 };
-                var newIds = order.filter(isNew);
+                var newIds = order.filter(function (id) { return isNew(id) && !flagged[id]; });
                 if (opts.intro === "strophe" && newIds.length) {
                     var first = firstStrophe[newIds[0]];
                     newIds = newIds.filter(function (id) { return firstStrophe[id] === first; });
@@ -3147,7 +3158,7 @@
                 newIds = newIds.slice(0, Math.max(0, newLimit));
                 newLimit -= newIds.length;
                 order.forEach(function (id) {
-                    if (cards[id] && (isDue(id) || newIds.indexOf(id) !== -1)) queue.push(cards[id]);
+                    if (cards[id] && !flagged[id] && (isDue(id) || newIds.indexOf(id) !== -1)) queue.push(cards[id]);
                 });
             });
             return { queue: queue, info: info };
