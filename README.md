@@ -103,6 +103,21 @@ ankisync() {
 
 ---
 
+## Learning theory (development milestones)
+
+The app's development follows Paul Nation's **four strands**: a balanced language course gives roughly equal time to each. They are the GitHub milestones *Volet 1–4*.
+
+| Strand | What it is | In the app today |
+|---|---|---|
+| 1 — Comprendre (meaning-focused input) | lots of comprehensible reading/listening (~98 % known words) | songs |
+| 2 — Produire (meaning-focused output) | writing/speaking to say something | — (issues #40, #42) |
+| 3 — Langue (language-focused learning) | explicit vocabulary, conjugation, grammar | cards, spaced repetition |
+| 4 — Fluidité (fluency) | doing it fast with what is already known | quick reviews |
+
+Other findings the design leans on: the **testing effect** and **spaced repetition** (recalling beats rereading), the **involvement load hypothesis** (Laufer & Hulstijn — a word sticks when you must search for it, choose it and use it yourself), the **output hypothesis** (Swain — producing reveals what you can't say yet), and **~98 % lexical coverage** for a text to be understood and useful (Nation, Hu).
+
+---
+
 ## Publish to GitHub Pages
 
 ```bash
