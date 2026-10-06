@@ -1388,6 +1388,45 @@
             border-top: 1px solid var(--border);
         }
 
+        .b-list.with-tags .b-row {
+            grid-template-columns: 1fr 1fr minmax(0, 160px) 16px;
+        }
+
+        @media (max-width: 600px) {
+            .b-list.with-tags .b-row {
+                grid-template-columns: 1fr 1fr minmax(0, 80px) 16px;
+            }
+        }
+
+        .b-row-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            justify-content: flex-end;
+        }
+
+        .b-tags {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            max-width: 720px;
+            margin: -8px 0 16px;
+            font-size: 12px;
+        }
+
+        .b-tags:empty {
+            display: none;
+        }
+
+        .h-tag.on {
+            border-color: var(--green);
+            color: var(--green);
+            background: var(--tint-green);
+        }
+
         .b-row:first-child {
             border-top: none;
         }
@@ -1660,6 +1699,7 @@
         <div class="s-main">
             <div class="s-deck-name" id="b-deck-name"></div>
             <input class="b-search" id="b-search" type="search" placeholder="🔎 Rechercher…" oninput="filterBrowse(this.value)">
+            <div class="b-tags" id="b-tags"></div>
             <div id="b-content" style="width:100%"></div>
         </div>
     </div>
@@ -2714,8 +2754,11 @@
             if (!all.length) { toast("Aucune carte dans ce deck"); return; }
             browse.all = all.map(function (c) {
                 var back = c.answer != null ? c.answer : esc((c.words || []).join(" "));
-                return { card: c, back: back, text: (plainText(displayQuestion(c.question)) + " " + plainText(back) + " " + (c.words || []).join(" ")).toLowerCase() };
+                return { card: c, back: back, tags: shownTags(c), text: (plainText(displayQuestion(c.question)) + " " + plainText(back) + " " + (c.words || []).join(" ") + " " + shownTags(c).join(" ")).toLowerCase() };
             });
+            browse.q = "";
+            browse.tag = null;
+            renderBrowseTags();
             browse.list = browse.all;
             // Pictures need room → carousel; words/sentences read better as
             // a dense two-column list.
@@ -2736,12 +2779,33 @@
         }
 
         function filterBrowse(q) {
+            browse.q = q;
             var terms = noAcc(q.toLowerCase()).split(/\s+/).filter(Boolean);
             browse.list = browse.all.filter(function (b) {
+                if (browse.tag && b.tags.indexOf(browse.tag) === -1) return false;
                 var t = noAcc(b.text);
                 return terms.every(function (term) { return t.indexOf(term) !== -1; });
             });
             renderBrowse();
+        }
+
+        // Tag chips above the browser (#41): one tag at a time, combined
+        // with the search box. Hidden when the deck has no useful tags.
+        function renderBrowseTags() {
+            var counts = {};
+            browse.all.forEach(function (b) { b.tags.forEach(function (t) { counts[t] = (counts[t] || 0) + 1; }); });
+            var tags = Object.keys(counts).sort(naturalCompare);
+            browse.hasTags = tags.length > 0;
+            var el = document.getElementById("b-tags");
+            el.innerHTML = !tags.length ? "" : '🏷 <button class="h-tag' + (browse.tag ? '' : ' on') + '" onclick="setBrowseTag(\'\')">toutes</button>'
+                + tags.map(function (t) {
+                    return '<button class="h-tag' + (browse.tag === t ? ' on' : '') + '" onclick="setBrowseTag(\'' + encodeURIComponent(t) + '\')">' + esc(t) + ' <span>' + counts[t] + '</span></button>';
+                }).join("");
+        }
+        function setBrowseTag(enc) {
+            browse.tag = enc ? decodeURIComponent(enc) : null;
+            renderBrowseTags();
+            filterBrowse(browse.q || "");
         }
 
         // Builds empty slide shells for the whole list; each one is filled
@@ -2801,12 +2865,13 @@
         }
 
         function renderBrowseList(el) {
-            el.innerHTML = '<div class="b-list">' + browse.list.map(function (b, i) {
+            el.innerHTML = '<div class="b-list' + (browse.hasTags ? ' with-tags' : '') + '">' + browse.list.map(function (b, i) {
                 var c = b.card;
                 var hasAudio = (c.audioQuestion && c.audioQuestion.length) || (c.audioAnswer && c.audioAnswer.length);
                 return '<div class="b-row">'
                     + '<div class="b-row-front">' + esc(htmlToText(displayQuestion(c.question))) + '</div>'
                     + '<div class="b-row-back">' + esc(htmlToText(b.back)) + '</div>'
+                    + (browse.hasTags ? '<div class="b-row-tags">' + b.tags.map(function (t) { return '<span class="c-tag">' + esc(t) + '</span>'; }).join("") + '</div>' : '')
                     + (hasAudio ? '<button class="b-row-audio" onclick="playBrowseAudio(' + i + ')" title="Écouter">🔊</button>' : '<span></span>')
                     + '</div>';
             }).join("") + '</div>';
