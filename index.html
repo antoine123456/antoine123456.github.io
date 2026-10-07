@@ -3758,12 +3758,18 @@
                 return;
             }
             // Rich back (meaning, example sentence, image…): show it under
-            // the blanks, in the card, and wait for Entrée / « Suivant → ».
+            // the blanks, in the card, then move on by itself once the audio
+            // is over and it has had a moment to be read — no Entrée needed
+            // (Entrée / « Suivant → » still skip the wait).
             showRichBack(document.getElementById("s-verso-extra"), card);
             setBarState("next");
-            pendingNext = function () { flash(function () { advanceCard(q); }); };
-            playCardAudio("a");
+            var go = function () { flash(function () { advanceCard(q); }); };
+            pendingNext = go;
+            playCardAudio("a", function () {
+                setTimeout(function () { if (pendingNext === go) continueAfterAnswer(); }, RICH_BACK_READ_MS);
+            });
         }
+        var RICH_BACK_READ_MS = 2500;
 
         // ── Normal (Anki-style) mode: show the back, then rate it ──
         var flipShown = false;
