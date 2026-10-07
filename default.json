@@ -75592,6 +75592,304 @@
             "cuatroloop"
           ],
           "lang": "fr"
+        },
+        {
+          "id": "1791370273414",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>descuentos",
+          "words": [
+            "réductions"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1791370273415",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>réductions",
+          "words": [
+            "descuentos"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
+        },
+        {
+          "id": "1791370285070",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>promoción",
+          "words": [
+            "promotion"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1791370285071",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>promotion",
+          "words": [
+            "promoción"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
+        },
+        {
+          "id": "1791370298071",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>hábitos",
+          "words": [
+            "habitudes"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1791370298072",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>habitudes",
+          "words": [
+            "hábitos"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
+        },
+        {
+          "id": "1791370315644",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>saludables",
+          "words": [
+            "en",
+            "bonne",
+            "santé"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1791370315645",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>en bonne santé",
+          "words": [
+            "saludables"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
+        },
+        {
+          "id": "1791370327379",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>hábitos saludables",
+          "words": [
+            "habitudes",
+            "saines"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1791370327380",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>habitudes saines",
+          "words": [
+            "hábitos",
+            "saludables"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
+        },
+        {
+          "id": "1791370368474",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>desembarco",
+          "words": [
+            "atterrissage"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1791370368475",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>atterrissage",
+          "words": [
+            "desembarco"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
+        },
+        {
+          "id": "1791370607012",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>pasito",
+          "words": [
+            "petit",
+            "pas"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1791370607013",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>petit pas",
+          "words": [
+            "pasito"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
+        },
+        {
+          "id": "1791370617952",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>despacito",
+          "words": [
+            "lentement"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1791370617953",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>lentement",
+          "words": [
+            "despacito"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
+        },
+        {
+          "id": "1791374528503",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>aseguro",
+          "words": [
+            "j'assure"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1791374528504",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>j'assure",
+          "words": [
+            "aseguro"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
+        },
+        {
+          "id": "1791378431597",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>caminar",
+          "words": [
+            "marcher"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1791378431598",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>marcher",
+          "words": [
+            "caminar"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
+        },
+        {
+          "id": "1791382282731",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>mándala en lugar de",
+          "words": [
+            "envoie-la",
+            "à",
+            "la",
+            "place",
+            "de"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1791382282732",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>envoie-la à la place de",
+          "words": [
+            "mándala",
+            "en",
+            "lugar",
+            "de"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
+        },
+        {
+          "id": "1791382291093",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>mandala",
+          "words": [
+            "mandalas"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1791382291094",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>mandalas",
+          "words": [
+            "mandala"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
+        },
+        {
+          "id": "1791382535945",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>mander",
+          "words": [
+            "mandater"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1791382535946",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>mandater",
+          "words": [
+            "mander"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
         }
       ]
     }

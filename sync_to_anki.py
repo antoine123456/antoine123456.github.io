@@ -28,6 +28,9 @@ Règles :
   d'Anki y sont créés d'abord (une note "Basic (and reversed card)" par
   paire, avec les ids de cartes de l'appli), sauf doublon ou traduction
   identique au mot d'origine.
+- Cartes jalonnées (tag « etapeN ») : l'étape N s'ouvre quand 80 % des
+  cartes de chaque étape précédente sont en révision ; en attendant, ses
+  cartes nouvelles sont suspendues dans Anki (tag « etape_verrou »).
 - Une sauvegarde Anki est créée avant toute écriture (dossier backups/ du
   profil, restaurable via Fichier → Changer de profil → Ouvrir une sauvegarde).
 """
@@ -228,6 +231,60 @@ def mark_flagged(col, flagged, dry_run):
     return rows
 
 
+STAGE_TAG = re.compile(r"^etape(\d+)$", re.I)
+STAGE_LOCK_TAG = "etape_verrou"
+STAGE_UNLOCK_RATIO = 0.8  # même seuil que STAGE_UNLOCK_RATIO dans index.html
+
+
+def apply_stages(col, dry_run):
+    """Cartes jalonnées (tag « etapeN », ex. le paquet Grammaire) : l'étape N
+    n'est ouverte que si, dans chaque étape précédente, au moins 80 % des
+    cartes sont passées en révision. Les cartes nouvelles des étapes encore
+    fermées sont suspendues (tag « etape_verrou ») ; celles des étapes
+    ouvertes sont réactivées — seulement si c'est ce verrou qui les avait
+    suspendues (jamais une carte « a_corriger »).
+    Renvoie (étape ouverte la plus haute, {étape: (révision, total)}, ouvertes, verrouillées)."""
+    stage_of = {}
+    for nid, tags in col.db.all("select id, tags from notes where tags like '%etape%'"):
+        for t in tags.split():
+            m = STAGE_TAG.match(t)
+            if m:
+                stage_of[nid] = int(m.group(1))
+    if not stage_of:
+        return None
+    rows = col.db.all(f"select id, nid, type, queue from cards where nid in ({','.join(map(str, stage_of))})")
+    flagged = set(col.find_notes("tag:a_corriger"))
+    counts = {}
+    for _, nid, ctype, _ in rows:
+        if nid in flagged:
+            continue
+        done, total = counts.get(stage_of[nid], (0, 0))
+        counts[stage_of[nid]] = (done + (ctype == 2), total + 1)
+    open_upto = 1
+    for s in sorted(counts):
+        if s > open_upto:
+            break
+        done, total = counts[s]
+        if s == open_upto and total and done / total >= STAGE_UNLOCK_RATIO:
+            open_upto = s + 1
+    open_upto = min(open_upto, max(counts))
+    locked_nids = {nid for nid, tags in col.db.all(
+        f"select id, tags from notes where id in ({','.join(map(str, stage_of))})")
+        if STAGE_LOCK_TAG in tags.split()}
+    to_lock = [cid for cid, nid, ctype, queue in rows
+               if stage_of[nid] > open_upto and ctype == 0 and queue != -1 and nid not in flagged]
+    to_unlock = [cid for cid, nid, _, queue in rows
+                 if stage_of[nid] <= open_upto and queue == -1 and nid in locked_nids and nid not in flagged]
+    if not dry_run:
+        if to_lock:
+            col.sched.suspend_cards(to_lock)
+            col.tags.bulk_add(list({col.get_card(c).nid for c in to_lock}), STAGE_LOCK_TAG)
+        if to_unlock:
+            col.sched.unsuspend_cards(to_unlock)
+            col.tags.bulk_remove(list({col.get_card(c).nid for c in to_unlock}), STAGE_LOCK_TAG)
+    return open_upto, counts, len(to_unlock), len(to_lock)
+
+
 def main():
     ap = argparse.ArgumentParser(
         description="Pousse la progression d'Anki Trainer dans la collection Anki locale"
@@ -271,7 +328,10 @@ def main():
         updated = newer_in_anki = missing = regraduated = 0
 
         for cid_str, srs in entries.items():
-            cid = int(cid_str)
+            try:
+                cid = int(cid_str)
+            except ValueError:
+                continue  # pas dans Anki (ex. cartes de chansons)
             try:
                 card = col.get_card(cid)
             except NotFoundError:
@@ -316,6 +376,7 @@ def main():
             )
         new_today = count_new_studied_today(col, args.dry_run)
         flagged_rows = mark_flagged(col, flagged, args.dry_run)
+        stages = apply_stages(col, args.dry_run)
     finally:
         col.close()
 
@@ -333,6 +394,14 @@ def main():
         print(f"\n🚩 {len(flagged_rows)} carte(s) marquée(s) dans l'appli à relire ({verb}) :")
         for cid, deck, front, back in flagged_rows:
             print(f"   cid:{cid}  [{deck.split('::')[-1]}]  {front}  →  {back}")
+    if stages:
+        open_upto, counts, unlocked, locked = stages
+        detail = " · ".join(f"{s}: {d}/{t}" for s, (d, t) in sorted(counts.items()))
+        print(f"  🔓 étapes ouvertes : 1 à {open_upto} sur {max(counts)}  (cartes en révision par étape — {detail})")
+        if unlocked:
+            print(f"  ✓ {unlocked} carte(s) {'seraient réactivées' if args.dry_run else 'réactivée(s)'} (étape débloquée)")
+        if locked:
+            print(f"  ✓ {locked} carte(s) {'seraient suspendues' if args.dry_run else 'suspendue(s)'} en attendant leur étape")
     if updated and not args.dry_run:
         print("\n→ Ouvre Anki et synchronise : la progression part sur AnkiWeb.")
 

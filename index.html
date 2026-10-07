@@ -556,6 +556,11 @@
             color: var(--green);
         }
 
+        .badge-locked {
+            background: rgba(128, 128, 128, .12);
+            color: #888;
+        }
+
         .h-custom-btn {
             padding: 2px 9px;
             border-radius: 20px;
@@ -2144,7 +2149,7 @@
         // after being deleted, until "Effacer les données" resets it all.
         // Bumping "v" pushes a new version of its cards to browsers that
         // already have it (progress kept).
-        var EXTRA_BUNDLED = [{ url: "arbres.json", id: "arbres", v: 2 }, { url: "songs.json", id: "chansons", v: 1 }];
+        var EXTRA_BUNDLED = [{ url: "arbres.json", id: "arbres", v: 2 }, { url: "songs.json", id: "chansons", v: 1 }, { url: "grammaire.json", id: "grammaire", v: 1 }];
         var LS_BUNDLED_SEEN = "ankitrain_v1_bundled_seen"; // {id: version} (was [id…] = version 1)
         function loadExtraBundledDecks() {
             var seen;
@@ -2517,10 +2522,12 @@
             return roots;
         }
 
-        function renderDeckRows(nodes, si, decksMeta, cardsByDeck, srs, newLimit, flagged) {
+        function renderDeckRows(nodes, si, decksMeta, cardsByDeck, srs, newLimit, flagged, locked) {
             return nodes.map(function (node) {
                 var childIds = childDeckIds(decksMeta, node.fullName);
                 var cardIds = allCardIds(cardsByDeck, childIds, flagged);
+                var lockedN = cardIds.filter(function (id) { return locked[id]; }).length;
+                cardIds = cardIds.filter(function (id) { return !locked[id]; });
                 var stats = deckStats(cardIds, srs, newLimit);
                 var customLimit = stats.new + 20;
                 var html = '<div class="h-deckrow" style="padding-left:' + (16 + node.depth * 20) + 'px" onclick="startStudy(' + si + ',\'' + esc(node.fullName) + '\')">'
@@ -2529,12 +2536,13 @@
                     + (stats.new ? '<span class="badge badge-new">' + stats.new + ' nvx</span>' : '')
                     + (stats.due ? '<span class="badge badge-due">' + stats.due + ' dus</span>' : '')
                     + (stats.learned ? '<span class="badge badge-done">' + stats.learned + ' appris</span>' : '')
+                    + (lockedN ? '<span class="badge badge-locked" title="Étapes suivantes : s\'ouvrent quand ' + Math.round(STAGE_UNLOCK_RATIO * 100) + ' % des cartes de l\'étape en cours sont apprises">🔒 ' + lockedN + '</span>' : '')
                     + (stats.trueNew > stats.new
                         ? '<button class="h-custom-btn" title="Étudier 20 cartes de plus que la limite du jour" onclick="event.stopPropagation(); startStudy(' + si + ',\'' + esc(node.fullName) + '\',' + customLimit + ')">+20</button>'
                         : '')
                     + '<button class="h-custom-btn" title="Parcourir les cartes (recto → verso)" onclick="event.stopPropagation(); openBrowse(' + si + ',\'' + esc(node.fullName) + '\')">🔍</button>'
                     + '</div>';
-                if (node.children.length) html += renderDeckRows(node.children, si, decksMeta, cardsByDeck, srs, newLimit, flagged);
+                if (node.children.length) html += renderDeckRows(node.children, si, decksMeta, cardsByDeck, srs, newLimit, flagged, locked);
                 return html;
             }).join("");
         }
@@ -2558,6 +2566,38 @@
                 else learned++;
             });
             return { new: Math.min(newC, newLimit == null ? NEW_LIMIT : newLimit), due: due, learned: learned, trueNew: newC };
+        }
+
+        // Staged cards (tag "etapeN", e.g. the Grammaire deck): stage N's new
+        // cards stay locked until, in every earlier stage, at least 80 % of
+        // the cards are in review. Same rule as apply_stages() in
+        // sync_to_anki.py, which suspends the locked ones in Anki.
+        // Returns {card id: stage} for the locked new cards of a source.
+        var STAGE_UNLOCK_RATIO = 0.8;
+        function lockedNewIds(cardsByDeck, srs, flagged) {
+            var stages = {};
+            Object.keys(cardsByDeck).forEach(function (did) {
+                (cardsByDeck[did] || []).forEach(function (c) {
+                    if (flagged && flagged[c.id]) return;
+                    var m = (c.tags || []).join(" ").match(/(?:^| )etape(\d+)(?= |$)/i);
+                    if (!m) return;
+                    var st = stages[m[1]] || (stages[m[1]] = { done: 0, total: 0, fresh: [] });
+                    var s = srs[c.id];
+                    st.total++;
+                    if (s && s.state === "review") st.done++;
+                    if (!s || s.state === "new") st.fresh.push(c.id);
+                });
+            });
+            var nums = Object.keys(stages).map(Number).sort(function (a, b) { return a - b; });
+            var openUpto = 1;
+            for (var i = 0; i < nums.length && nums[i] <= openUpto; i++) {
+                if (nums[i] === openUpto && stages[nums[i]].done >= STAGE_UNLOCK_RATIO * stages[nums[i]].total) openUpto++;
+            }
+            var locked = {};
+            nums.forEach(function (n) {
+                if (n > openUpto) stages[n].fresh.forEach(function (id) { locked[id] = n; });
+            });
+            return locked;
         }
 
         // Collect all card ids across a set of deck ids
@@ -2585,7 +2625,8 @@
                 var cardsByDeck = loadCards(src.id);
                 var total = src.decks.reduce(function (n, d) { return n + d.cardCount; }, 0);
                 var tree = buildDeckTree(src.decks);
-                var rows = renderDeckRows(tree, si, src.decks, cardsByDeck, srs, remainingNewToday(src.id), loadFlagged(src.id));
+                var flagged = loadFlagged(src.id);
+                var rows = renderDeckRows(tree, si, src.decks, cardsByDeck, srs, remainingNewToday(src.id), flagged, lockedNewIds(cardsByDeck, srs, flagged));
                 rows = tagRowHtml(si, cardsByDeck) + rows;
 
                 return '<div class="h-source">'
@@ -2665,9 +2706,10 @@
             var childIds = deckName == null ? src.decks.map(function (d) { return d.id; }) : childDeckIds(src.decks, deckName);
             var allCards = [];
             var flagged = loadFlagged(src.id); // marked 🚩 (F6): never offered again (#44)
+            var locked = lockedNewIds(cardsByDeck, mainSrs, flagged); // later stages, not open yet
             childIds.forEach(function (did) {
                 (cardsByDeck[did] || []).forEach(function (c) {
-                    if (flagged[c.id]) return;
+                    if (flagged[c.id] || locked[c.id]) return;
                     if (!tag || (c.tags || []).indexOf(tag) !== -1) allCards.push(c);
                 });
             });
@@ -2785,7 +2827,7 @@
         // Tags not worth showing (technical ones from the decks' origins).
         var HIDDEN_TAGS = ["basic", "commun", "chanson", "cuatroloop", "quotidien", "marked", "leech"];
         function shownTags(card) {
-            return (card.tags || []).filter(function (t) { return HIDDEN_TAGS.indexOf(t.toLowerCase()) === -1; });
+            return (card.tags || []).filter(function (t) { return HIDDEN_TAGS.indexOf(t.toLowerCase()) === -1 && !/^etape/i.test(t); });
         }
         // Card info sheet (#7): shown under the answer once the card is done.
         function infoHtml(card) {
