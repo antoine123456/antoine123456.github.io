@@ -3596,7 +3596,21 @@
                 .replace(/^[¿¡!.,;:'"«»()\[\]\-–—]+|[¿¡!.,;:'"«»()\[\]\-–—]+$/g, "").trim();
         }
         function noAcc(s) { return s.normalize("NFD").replace(/[̀-ͯ]/g, ""); }
-        function isMatch(input, expected) { var ni = norm(input), ne = norm(expected); return ni === ne || noAcc(ni) === noAcc(ne); }
+        // Letters and digits only: accents, apostrophes (' or the phone's
+        // typographic ’), hyphens… don't count — "olvida’o", "olvidao" and
+        // "olvida'o" all match (#46, song lyrics).
+        function squashWord(x) { return noAcc(norm(x)).replace(/[^\p{L}\p{N}]+/gu, ""); }
+        function isMatch(input, expected) {
+            var ni = norm(input), ne = norm(expected);
+            if (ni === ne || noAcc(ni) === noAcc(ne)) return true;
+            var si = squashWord(input);
+            if (si === "") return false;
+            if (si === squashWord(expected)) return true;
+            // Sung elision of a "d" ("olvida'o" = olvidado, "la'o" = lado):
+            // the full word is accepted too.
+            var full = String(expected).replace(/([aeiouáéíóú])['’]([aoá])/gi, "$1d$2");
+            return full !== expected && si === squashWord(full);
+        }
         function check(entry) {
             if (!entry.inp.value.trim()) return null;
             return entry.expected.some(function (t) { return isMatch(entry.inp.value, t); });
