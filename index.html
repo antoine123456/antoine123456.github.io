@@ -2150,7 +2150,7 @@
         // after being deleted, until "Effacer les données" resets it all.
         // Bumping "v" pushes a new version of its cards to browsers that
         // already have it (progress kept).
-        var EXTRA_BUNDLED = [{ url: "arbres.json", id: "arbres", v: 2 }, { url: "songs.json", id: "chansons", v: 1 }, { url: "grammaire.json", id: "grammaire", v: 1 }];
+        var EXTRA_BUNDLED = [{ url: "arbres.json", id: "arbres", v: 2 }, { url: "songs.json", id: "chansons", v: 1 }, { url: "grammaire.json", id: "grammaire", v: 1 }, { url: "guide.json", id: "guide", v: 1 }];
         var LS_BUNDLED_SEEN = "ankitrain_v1_bundled_seen"; // {id: version} (was [id…] = version 1)
         function loadExtraBundledDecks() {
             var seen;
@@ -2531,7 +2531,7 @@
                 cardIds = cardIds.filter(function (id) { return !locked[id]; });
                 var stats = deckStats(cardIds, srs, newLimit);
                 var customLimit = stats.new + 20;
-                var html = '<div class="h-deckrow" style="padding-left:' + (16 + node.depth * 20) + 'px" onclick="startStudy(' + si + ',\'' + esc(node.fullName) + '\')">'
+                var html = '<div class="h-deckrow" style="padding-left:' + (16 + node.depth * 20) + 'px" onclick="startStudy(' + si + ',' + jsArg(node.fullName) + ')">'
                     + (node.depth > 0 ? '<span style="color:#ddd;margin-right:6px;font-size:11px">└</span>' : '')
                     + '<div class="h-deckrow-name' + (node.depth === 0 ? ' root-deck' : '') + '">' + esc(node.name) + '</div>'
                     + (stats.new ? '<span class="badge badge-new">' + stats.new + ' nvx</span>' : '')
@@ -2539,9 +2539,9 @@
                     + (stats.learned ? '<span class="badge badge-done">' + stats.learned + ' appris</span>' : '')
                     + (lockedN ? '<span class="badge badge-locked" title="Étapes suivantes : s\'ouvrent quand ' + Math.round(STAGE_UNLOCK_RATIO * 100) + ' % des cartes de l\'étape en cours sont apprises">🔒 ' + lockedN + '</span>' : '')
                     + (stats.trueNew > stats.new
-                        ? '<button class="h-custom-btn" title="Étudier 20 cartes de plus que la limite du jour" onclick="event.stopPropagation(); startStudy(' + si + ',\'' + esc(node.fullName) + '\',' + customLimit + ')">+20</button>'
+                        ? '<button class="h-custom-btn" title="Étudier 20 cartes de plus que la limite du jour" onclick="event.stopPropagation(); startStudy(' + si + ',' + jsArg(node.fullName) + ',' + customLimit + ')">+20</button>'
                         : '')
-                    + '<button class="h-custom-btn" title="Parcourir les cartes (recto → verso)" onclick="event.stopPropagation(); openBrowse(' + si + ',\'' + esc(node.fullName) + '\')">🔍</button>'
+                    + '<button class="h-custom-btn" title="Parcourir les cartes (recto → verso)" onclick="event.stopPropagation(); openBrowse(' + si + ',' + jsArg(node.fullName) + ')">🔍</button>'
                     + '</div>';
                 if (node.children.length) html += renderDeckRows(node.children, si, decksMeta, cardsByDeck, srs, newLimit, flagged, locked);
                 return html;
@@ -2826,7 +2826,7 @@
         // True when the back holds more than the typed words (an image, a
         // meaning, an example sentence…) — worth showing before moving on.
         // Tags not worth showing (technical ones from the decks' origins).
-        var HIDDEN_TAGS = ["basic", "commun", "chanson", "cuatroloop", "quotidien", "marked", "leech"];
+        var HIDDEN_TAGS = ["basic", "commun", "chanson", "cuatroloop", "quotidien", "marked", "leech", "guide"];
         function shownTags(card) {
             return (card.tags || []).filter(function (t) { return HIDDEN_TAGS.indexOf(t.toLowerCase()) === -1 && !/^etape/i.test(t); });
         }
@@ -4021,6 +4021,10 @@
         // ═══════════════════════════════════════════════
         // UTILS
         // ═══════════════════════════════════════════════
+        // A string as a JS argument inside an onclick="…" attribute: JSON
+        // quoting, then HTML-escaped (a deck named "Mode d'emploi" used to
+        // break the handler).
+        function jsArg(v) { return esc(JSON.stringify(String(v))).replace(/"/g, "&quot;"); }
         function esc(s) { return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/'/g, "&#39;"); }
         function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
 

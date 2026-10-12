@@ -1,0 +1,228 @@
+{
+ "version": 1,
+ "source": "🎓 Mode d'emploi",
+ "decks": [
+  {
+   "id": "guide",
+   "name": "🎓 Mode d'emploi",
+   "cards": [
+    {
+     "id": "ui-01",
+     "question": "Quelle touche montre le mot à l'endroit du curseur (un indice) ?",
+     "words": [
+      "F1"
+     ],
+     "answer": "F1",
+     "info": "<span class=\"s-pill s-pill-hint\" style=\"display:inline-flex;height:auto;padding:4px 10px\">💡 Indice <span class=\"t-key\">F1</span></span><br>Le mot s'affiche en <span style='color:var(--orange)'>orange</span> sous la case. Encore <span class=\"t-key\">F1</span> quand tout est montré : la carte passe, notée « À revoir ».",
+     "tags": [
+      "guide"
+     ]
+    },
+    {
+     "id": "ui-02",
+     "question": "Quelle touche montre toute la réponse d'un coup ?",
+     "words": [
+      "F8"
+     ],
+     "answer": "F8",
+     "info": "<span class=\"s-pill\" style=\"display:inline-flex;height:auto;padding:4px 10px\">Voir la réponse <span class=\"t-key\">F8</span></span><br>Un appui seul sur <b>Maj droite</b> fait pareil.",
+     "tags": [
+      "guide"
+     ]
+    },
+    {
+     "id": "ui-03",
+     "question": "De quelle couleur s'affiche un mot juste ?",
+     "words": [
+      "vert"
+     ],
+     "answer": "vert",
+     "info": "<span class='wc-inp ok' style='display:inline-block;padding:2px 10px;font-family:Georgia,serif'>bien</span> &nbsp;vert = juste · <span style='color:var(--red)'>rouge</span> = pas encore",
+     "tags": [
+      "guide"
+     ]
+    },
+    {
+     "id": "ui-04",
+     "question": "Les accents sont-ils obligatoires ?",
+     "words": [
+      "non"
+     ],
+     "answer": "non",
+     "info": "<i>ame</i> est accepté pour <i>âme</i>, <i>olvidao</i> pour <i>olvida'o</i>. Majuscules et apostrophes ne comptent pas non plus.",
+     "tags": [
+      "guide"
+     ]
+    },
+    {
+     "id": "ui-05",
+     "question": "Combien de ✗ avant que le bon mot s'écrive à ta place ?",
+     "words": [
+      "trois"
+     ],
+     "answer": "trois",
+     "info": "<span style='color:var(--red)'>✗✗✗</span> → le mot s'écrit en rouge, la carte sera « À revoir ». Effacer un mot pour recommencer compte aussi une ✗.",
+     "tags": [
+      "guide"
+     ]
+    },
+    {
+     "id": "ui-06",
+     "question": "Quelle touche fait passer à la case suivante ?",
+     "words": [
+      "Entrée"
+     ],
+     "answer": "Entrée",
+     "info": "<span class=\"t-key\">Entrée</span> — et dès qu'un mot est juste, le curseur passe tout seul à la case suivante.",
+     "tags": [
+      "guide"
+     ]
+    },
+    {
+     "id": "ui-07",
+     "question": "Quelle note reçoit une carte tapée entièrement sans aide ?",
+     "words": [
+      "Correct"
+     ],
+     "answer": "Correct",
+     "info": "<span class=\"t-rate t-rate-good\" style=\"display:inline-flex;height:auto;padding:4px 10px;max-width:none\"><span class=\"t-rate-label\">Correct</span><span class=\"t-key\">F3</span></span> automatique. Avec un indice ou la réponse : <span class=\"t-rate t-rate-again\" style=\"display:inline-flex;height:auto;padding:4px 10px;max-width:none\"><span class=\"t-rate-label\">À revoir</span><span class=\"t-key\">F2</span></span>.",
+     "tags": [
+      "guide"
+     ]
+    },
+    {
+     "id": "ui-08",
+     "question": "Flèche du haut : quelle note ?",
+     "words": [
+      "Facile"
+     ],
+     "answer": "Facile",
+     "info": "<span class=\"t-rate t-rate-easy\" style=\"display:inline-flex;height:auto;padding:4px 10px;max-width:none\"><span class=\"t-rate-label\">Facile</span><span class=\"t-key\">↑</span></span> <span class=\"t-rate t-rate-hard\" style=\"display:inline-flex;height:auto;padding:4px 10px;max-width:none\"><span class=\"t-rate-label\">Difficile</span><span class=\"t-key\">↓</span></span> <span class=\"t-rate t-rate-again\" style=\"display:inline-flex;height:auto;padding:4px 10px;max-width:none\"><span class=\"t-rate-label\">À revoir</span><span class=\"t-key\">←</span></span> <span class=\"t-rate t-rate-good\" style=\"display:inline-flex;height:auto;padding:4px 10px;max-width:none\"><span class=\"t-rate-label\">Correct</span><span class=\"t-key\">→</span></span><br>(hors des cases : dans une case, les flèches déplacent le curseur)",
+     "tags": [
+      "guide"
+     ]
+    },
+    {
+     "id": "ui-09",
+     "question": "Flèche du bas : quelle note ?",
+     "words": [
+      "Difficile"
+     ],
+     "answer": "Difficile",
+     "info": "<span class=\"t-rate t-rate-hard\" style=\"display:inline-flex;height:auto;padding:4px 10px;max-width:none\"><span class=\"t-rate-label\">Difficile</span><span class=\"t-key\">↓</span></span> — les 4 flèches : ↑ Facile · ↓ Difficile · ← À revoir · → Correct.",
+     "tags": [
+      "guide"
+     ]
+    },
+    {
+     "id": "ui-10",
+     "question": "Quelle touche marque une carte fausse (elle ne revient plus) ?",
+     "words": [
+      "F6"
+     ],
+     "answer": "F6",
+     "info": "<span class=\"t-key\">F6</span> → la carte quitte la séance et n'est plus proposée. À la prochaine synchro, elle est mise de côté dans Anki pour être corrigée.",
+     "tags": [
+      "guide"
+     ]
+    },
+    {
+     "id": "ui-11",
+     "question": "Dans quel mode Espace retourne-t-il la carte, comme dans Anki ?",
+     "words": [
+      "normal"
+     ],
+     "answer": "normal",
+     "info": "Menu en haut : <span class=\"s-mode-toggle\" style=\"display:inline-flex;height:auto;padding:4px 10px\">⌨️ Saisie</span> <span class=\"s-mode-toggle\" style=\"display:inline-flex;height:auto;padding:4px 10px\">🃏 Normal</span> <span class=\"s-mode-toggle\" style=\"display:inline-flex;height:auto;padding:4px 10px\">🎧 Dictée</span><br>En mode normal : <span class=\"t-key\">Espace</span> retourne, puis on note (Espace = Correct).",
+     "tags": [
+      "guide"
+     ]
+    },
+    {
+     "id": "ui-12",
+     "question": "Quel mode fait écouter l'espagnol et écrire ce qu'on entend ?",
+     "words": [
+      "dictée"
+     ],
+     "answer": "dictée",
+     "info": "<span class=\"s-mode-toggle\" style=\"display:inline-flex;height:auto;padding:4px 10px\">🎧 Dictée</span> — seulement les cartes déjà apprises à l'écrit, avec une progression à part. 🐢 = réécouter lentement.",
+     "tags": [
+      "guide"
+     ]
+    },
+    {
+     "id": "ui-13",
+     "question": "Sur l'accueil, quel bouton ajoute 20 nouvelles cartes de plus ?",
+     "words": [
+      "+20"
+     ],
+     "answer": "+20",
+     "info": "<span class=\"h-custom-btn\" style=\"display:inline-flex;height:auto;padding:4px 10px\">+20</span> à côté de chaque paquet, quand la limite du jour est atteinte.",
+     "tags": [
+      "guide"
+     ]
+    },
+    {
+     "id": "ui-14",
+     "question": "Sur l'accueil, la loupe sert à… ?",
+     "words": [
+      "parcourir"
+     ],
+     "answer": "parcourir",
+     "info": "<span class=\"h-custom-btn\" style=\"display:inline-flex;height:auto;padding:4px 10px\">🔍</span> parcourir les cartes d'un paquet : carrousel pour les images, liste pour les mots, filtre par tag.",
+     "tags": [
+      "guide"
+     ]
+    },
+    {
+     "id": "ui-15",
+     "question": "Que télécharge le bouton 📤 d'une source ?",
+     "words": [
+      "stats"
+     ],
+     "answer": "stats",
+     "info": "📤 télécharge ta progression (et les cartes marquées 🚩). Ensuite <code>ankisync</code> l'envoie dans Anki.",
+     "tags": [
+      "guide"
+     ]
+    },
+    {
+     "id": "ui-16",
+     "question": "Quelle commande envoie ta progression dans Anki ?",
+     "words": [
+      "ankisync"
+     ],
+     "answer": "ankisync",
+     "info": "Après 📤 : <code>ankisync</code> ferme Anki, met la collection à jour (sauvegarde avant), puis rouvre Anki qui se synchronise avec AnkiWeb.",
+     "tags": [
+      "guide"
+     ]
+    },
+    {
+     "id": "ui-17",
+     "question": "Dans une chanson, quel bouton change l'indice (traduction, contexte, premières lettres) ?",
+     "words": [
+      "engrenage"
+     ],
+     "answer": "engrenage",
+     "info": "<span class=\"s-mode-toggle\" style=\"display:inline-flex;height:auto;padding:4px 10px\">⚙</span> — chaque indice a sa propre progression, et on choisit aussi le rythme des nouvelles lignes.",
+     "tags": [
+      "guide"
+     ]
+    },
+    {
+     "id": "ui-18",
+     "question": "Quel bouton de l'accueil ouvre le mode d'emploi illustré ?",
+     "words": [
+      "i"
+     ],
+     "answer": "i",
+     "info": "<span style=\"display:inline-flex;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border-2);align-items:center;justify-content:center;font-family:Georgia,serif;font-weight:700;color:var(--navy)\">i</span> en haut à droite de l'accueil, à côté du thème 🌙.",
+     "tags": [
+      "guide"
+     ]
+    }
+   ]
+  }
+ ]
+}
