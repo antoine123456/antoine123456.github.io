@@ -1687,7 +1687,7 @@
                 <div class="g-body">
                     <div class="g-kbd">
                         <span class="t-key">F1</span><span>indice (encore F1 quand tout est montré = À revoir et suivante)</span>
-                        <span class="t-key">F8</span><span>voir toute la réponse</span>
+                        <span class="t-key">F8 · Maj droite</span><span>voir toute la réponse</span>
                         <span class="t-key">F2 F4 F3 F7</span><span>À revoir · Difficile · Correct · Facile</span>
                         <span class="t-key">← ↓ → ↑</span><span>À revoir · Difficile · Correct · Facile (hors des cases)</span>
                         <span class="t-key">Entrée</span><span>case suivante</span>
@@ -3916,6 +3916,19 @@
         // Arrows too (#47): ↑ Facile · ↓ Difficile · ← À revoir · → Correct —
         // except while the cursor is in a blank (arrows then move in the text).
         var ARROW_RATING = { ArrowUp: 4, ArrowDown: 2, ArrowLeft: 1, ArrowRight: 3 };
+
+        // Right Shift tapped on its own = "Voir la réponse" (#48). Only a
+        // tap: if any other key goes down meanwhile (a capital letter), no.
+        var rightShiftTap = false;
+        document.addEventListener("keydown", function (e) {
+            rightShiftTap = e.code === "ShiftRight" && !e.repeat;
+        }, true);
+        document.addEventListener("keyup", function (e) {
+            if (e.code !== "ShiftRight" || !rightShiftTap) return;
+            rightShiftTap = false;
+            if (document.getElementById("study").style.display !== "flex") return;
+            showFullAnswer(); // in normal mode: flips the card
+        });
         document.addEventListener("keydown", function (e) {
             if (document.getElementById("study").style.display !== "flex") return;
             if (pendingNext && e.key === "Enter") {
