@@ -2569,34 +2569,58 @@
             return { new: Math.min(newC, newLimit == null ? NEW_LIMIT : newLimit), due: due, learned: learned, trueNew: newC };
         }
 
-        // Staged cards (tag "etapeN", e.g. the Grammaire deck): stage N's new
-        // cards stay locked until, in every earlier stage, at least 80 % of
-        // the cards are in review. Same rule as apply_stages() in
-        // sync_to_anki.py, which suspends the locked ones in Anki.
+        // Staged cards: stage N's new cards stay locked until, in every
+        // earlier stage, at least 80 % of the cards are in review. Two kinds
+        // of "chains" (same rule as apply_stages() in sync_to_anki.py, which
+        // suspends the locked ones in Anki):
+        // - cards tagged "etapeN" (e.g. the Grammaire deck);
+        // - numbered sibling decks, e.g. "Espagnol 1" … "Espagnol 7": deck N
+        //   is stage N, like Anki's deck order (#50).
         // Returns {card id: stage} for the locked new cards of a source.
         var STAGE_UNLOCK_RATIO = 0.8;
-        function lockedNewIds(cardsByDeck, srs, flagged) {
-            var stages = {};
+        function lockedNewIds(cardsByDeck, srs, flagged, decksMeta) {
+            var chains = {}; // chain name → {stage: {done, total, fresh: []}}
+            function add(chain, n, c) {
+                var stages = chains[chain] || (chains[chain] = {});
+                var st = stages[n] || (stages[n] = { done: 0, total: 0, fresh: [] });
+                var s = srs[c.id];
+                st.total++;
+                if (s && s.state === "review") st.done++;
+                if (!s || s.state === "new") st.fresh.push(c.id);
+            }
+            // numbered sibling decks (at least two in the same parent)
+            var deckStage = {}, groups = {};
+            (decksMeta || []).forEach(function (d) {
+                var k = d.name.lastIndexOf("::");
+                if (k < 0) return;
+                var m = d.name.slice(k + 2).match(/^(.*?)\s*(\d+)$/);
+                if (!m || !m[1]) return;
+                var key = d.name.slice(0, k) + "::" + m[1];
+                (groups[key] = groups[key] || []).push([d.id, +m[2]]);
+            });
+            Object.keys(groups).forEach(function (key) {
+                if (groups[key].length < 2) return;
+                groups[key].forEach(function (x) { deckStage[x[0]] = { chain: key, n: x[1] }; });
+            });
             Object.keys(cardsByDeck).forEach(function (did) {
                 (cardsByDeck[did] || []).forEach(function (c) {
                     if (flagged && flagged[c.id]) return;
                     var m = (c.tags || []).join(" ").match(/(?:^| )etape(\d+)(?= |$)/i);
-                    if (!m) return;
-                    var st = stages[m[1]] || (stages[m[1]] = { done: 0, total: 0, fresh: [] });
-                    var s = srs[c.id];
-                    st.total++;
-                    if (s && s.state === "review") st.done++;
-                    if (!s || s.state === "new") st.fresh.push(c.id);
+                    if (m) add("#etape", +m[1], c);
+                    else if (deckStage[did]) add(deckStage[did].chain, deckStage[did].n, c);
                 });
             });
-            var nums = Object.keys(stages).map(Number).sort(function (a, b) { return a - b; });
-            var openUpto = 1;
-            for (var i = 0; i < nums.length && nums[i] <= openUpto; i++) {
-                if (nums[i] === openUpto && stages[nums[i]].done >= STAGE_UNLOCK_RATIO * stages[nums[i]].total) openUpto++;
-            }
             var locked = {};
-            nums.forEach(function (n) {
-                if (n > openUpto) stages[n].fresh.forEach(function (id) { locked[id] = n; });
+            Object.keys(chains).forEach(function (name) {
+                var stages = chains[name];
+                var nums = Object.keys(stages).map(Number).sort(function (a, b) { return a - b; });
+                var openUpto = nums[0];
+                for (var i = 0; i < nums.length && nums[i] <= openUpto; i++) {
+                    if (nums[i] === openUpto && stages[nums[i]].done >= STAGE_UNLOCK_RATIO * stages[nums[i]].total) openUpto++;
+                }
+                nums.forEach(function (n) {
+                    if (n > openUpto) stages[n].fresh.forEach(function (id) { locked[id] = n; });
+                });
             });
             return locked;
         }
@@ -2627,7 +2651,7 @@
                 var total = src.decks.reduce(function (n, d) { return n + d.cardCount; }, 0);
                 var tree = buildDeckTree(src.decks);
                 var flagged = loadFlagged(src.id);
-                var rows = renderDeckRows(tree, si, src.decks, cardsByDeck, srs, remainingNewToday(src.id), flagged, lockedNewIds(cardsByDeck, srs, flagged));
+                var rows = renderDeckRows(tree, si, src.decks, cardsByDeck, srs, remainingNewToday(src.id), flagged, lockedNewIds(cardsByDeck, srs, flagged, src.decks));
                 rows = tagRowHtml(si, cardsByDeck) + rows;
 
                 return '<div class="h-source">'
@@ -2705,9 +2729,14 @@
 
             // Collect all cards from deckName and its children
             var childIds = deckName == null ? src.decks.map(function (d) { return d.id; }) : childDeckIds(src.decks, deckName);
+            // Deck order (Espagnol 1, 2, … then perso), like Anki's "deck"
+            // gather order: new cards are taken deck after deck (#50).
+            var deckName_ = {};
+            src.decks.forEach(function (d) { deckName_[d.id] = d.name; });
+            childIds = childIds.slice().sort(function (a, b) { return naturalCompare(deckName_[a] || "", deckName_[b] || ""); });
             var allCards = [];
             var flagged = loadFlagged(src.id); // marked 🚩 (F6): never offered again (#44)
-            var locked = lockedNewIds(cardsByDeck, mainSrs, flagged); // later stages, not open yet
+            var locked = lockedNewIds(cardsByDeck, mainSrs, flagged, src.decks); // later stages, not open yet
             childIds.forEach(function (did) {
                 (cardsByDeck[did] || []).forEach(function (c) {
                     if (flagged[c.id] || locked[c.id]) return;
@@ -2747,8 +2776,11 @@
                     if (!s || s.state === "new") newCards.push(c);
                     else if (s.state === "learning" || s.state === "relearning" || s.due <= TODAY) dueCards.push(c);
                 });
-                shuffle(newCards); shuffle(dueCards);
-                newCards = newCards.slice(0, newLimit);
+                // New cards picked in deck / card order (earliest deck first),
+                // then shown in a random order — so an ES→FR card and its
+                // FR→ES twin don't follow each other.
+                shuffle(dueCards);
+                newCards = shuffle(newCards.slice(0, newLimit));
                 queue = dueCards.concat(newCards);
             }
 

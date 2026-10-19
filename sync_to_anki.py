@@ -28,7 +28,8 @@ Règles :
   d'Anki y sont créés d'abord (une note "Basic (and reversed card)" par
   paire, avec les ids de cartes de l'appli), sauf doublon ou traduction
   identique au mot d'origine.
-- Cartes jalonnées (tag « etapeN ») : l'étape N s'ouvre quand 80 % des
+- Cartes jalonnées (tag « etapeN ») et paquets frères numérotés
+  (« Espagnol 1 » … « Espagnol 7 ») : l'étape N s'ouvre quand 80 % des
   cartes de chaque étape précédente sont en révision ; en attendant, ses
   cartes nouvelles sont suspendues dans Anki (tag « etape_verrou »).
 - Une sauvegarde Anki est créée avant toute écriture (dossier backups/ du
@@ -236,45 +237,83 @@ STAGE_LOCK_TAG = "etape_verrou"
 STAGE_UNLOCK_RATIO = 0.8  # même seuil que STAGE_UNLOCK_RATIO dans index.html
 
 
-def apply_stages(col, dry_run):
-    """Cartes jalonnées (tag « etapeN », ex. le paquet Grammaire) : l'étape N
-    n'est ouverte que si, dans chaque étape précédente, au moins 80 % des
-    cartes sont passées en révision. Les cartes nouvelles des étapes encore
-    fermées sont suspendues (tag « etape_verrou ») ; celles des étapes
-    ouvertes sont réactivées — seulement si c'est ce verrou qui les avait
-    suspendues (jamais une carte « a_corriger »).
-    Renvoie (étape ouverte la plus haute, {étape: (révision, total)}, ouvertes, verrouillées)."""
-    stage_of = {}
+DECK_STAGE = re.compile(r"^(.*?)\s*(\d+)$")
+
+
+def stage_chains(col):
+    """Les « chaînes » d'étapes : {nom: {card id: étape}}.
+    - cartes jalonnées par tag « etapeN » (ex. le paquet Grammaire) ;
+    - paquets frères numérotés, ex. « Espagnol 1 » … « Espagnol 7 » sous le
+      même parent : le paquet N est l'étape N (comme l'ordre des paquets
+      dans Anki)."""
+    chains = {}
+    nid_stage = {}
     for nid, tags in col.db.all("select id, tags from notes where tags like '%etape%'"):
         for t in tags.split():
             m = STAGE_TAG.match(t)
             if m:
-                stage_of[nid] = int(m.group(1))
-    if not stage_of:
-        return None
-    rows = col.db.all(f"select id, nid, type, queue from cards where nid in ({','.join(map(str, stage_of))})")
-    flagged = set(col.find_notes("tag:a_corriger"))
-    counts = {}
-    for _, nid, ctype, _ in rows:
-        if nid in flagged:
+                nid_stage[nid] = int(m.group(1))
+    if nid_stage:
+        rows = col.db.all(f"select id, nid from cards where nid in ({','.join(map(str, nid_stage))})")
+        chains["étapes (tag etapeN)"] = {cid: nid_stage[nid] for cid, nid in rows}
+    groups = {}
+    for d in col.decks.all_names_and_ids():
+        parent, _, leaf = d.name.rpartition("::")
+        m = DECK_STAGE.match(leaf)
+        if parent and m and m.group(1):
+            groups.setdefault((parent, m.group(1)), {})[d.id] = int(m.group(2))
+    for (parent, prefix), dids in sorted(groups.items()):
+        if len(dids) < 2:
             continue
-        done, total = counts.get(stage_of[nid], (0, 0))
-        counts[stage_of[nid]] = (done + (ctype == 2), total + 1)
-    open_upto = 1
-    for s in sorted(counts):
-        if s > open_upto:
-            break
-        done, total = counts[s]
-        if s == open_upto and total and done / total >= STAGE_UNLOCK_RATIO:
-            open_upto = s + 1
-    open_upto = min(open_upto, max(counts))
-    locked_nids = {nid for nid, tags in col.db.all(
-        f"select id, tags from notes where id in ({','.join(map(str, stage_of))})")
-        if STAGE_LOCK_TAG in tags.split()}
-    to_lock = [cid for cid, nid, ctype, queue in rows
-               if stage_of[nid] > open_upto and ctype == 0 and queue != -1 and nid not in flagged]
-    to_unlock = [cid for cid, nid, _, queue in rows
-                 if stage_of[nid] <= open_upto and queue == -1 and nid in locked_nids and nid not in flagged]
+        rows = col.db.all(f"select id, did from cards where did in ({','.join(map(str, dids))})")
+        chains[f"{prefix} {min(dids.values())}–{max(dids.values())}"] = {cid: dids[did] for cid, did in rows}
+    return chains
+
+
+def apply_stages(col, dry_run):
+    """Pour chaque chaîne : l'étape N n'est ouverte que si, dans chaque étape
+    précédente, au moins 80 % des cartes sont passées en révision. Les cartes
+    nouvelles des étapes encore fermées sont suspendues (tag
+    « etape_verrou ») ; celles des étapes ouvertes sont réactivées —
+    seulement si c'est ce verrou qui les avait suspendues (jamais une carte
+    « a_corriger »). Les cartes déjà commencées ne sont jamais touchées.
+    Renvoie [(chaîne, étape ouverte la plus haute, {étape: (révision, total)},
+    réactivées, suspendues)]."""
+    chains = stage_chains(col)
+    if not chains:
+        return []
+    flagged = set(col.find_notes("tag:a_corriger"))
+    results, to_lock, to_unlock = [], [], []
+    for name, stage_of in chains.items():
+        rows = col.db.all(f"select id, nid, type, queue from cards where id in ({','.join(map(str, stage_of))})")
+        counts = {}
+        for cid, nid, ctype, _ in rows:
+            if nid in flagged:
+                continue
+            done, total = counts.get(stage_of[cid], (0, 0))
+            counts[stage_of[cid]] = (done + (ctype == 2), total + 1)
+        if not counts:
+            continue
+        first = min(counts)
+        open_upto = first
+        for st in sorted(counts):
+            if st > open_upto:
+                break
+            done, total = counts[st]
+            if st == open_upto and total and done / total >= STAGE_UNLOCK_RATIO:
+                open_upto = st + 1
+        open_upto = min(open_upto, max(counts))
+        nids = {nid for _, nid, _, _ in rows}
+        locked_nids = {nid for nid, tags in col.db.all(
+            f"select id, tags from notes where id in ({','.join(map(str, nids))})")
+            if STAGE_LOCK_TAG in tags.split()}
+        lock = [cid for cid, nid, ctype, queue in rows
+                if stage_of[cid] > open_upto and ctype == 0 and queue != -1 and nid not in flagged]
+        unlock = [cid for cid, nid, _, queue in rows
+                  if stage_of[cid] <= open_upto and queue == -1 and nid in locked_nids and nid not in flagged]
+        to_lock += lock
+        to_unlock += unlock
+        results.append((name, open_upto, counts, len(unlock), len(lock)))
     if not dry_run:
         if to_lock:
             col.sched.suspend_cards(to_lock)
@@ -282,7 +321,7 @@ def apply_stages(col, dry_run):
         if to_unlock:
             col.sched.unsuspend_cards(to_unlock)
             col.tags.bulk_remove(list({col.get_card(c).nid for c in to_unlock}), STAGE_LOCK_TAG)
-    return open_upto, counts, len(to_unlock), len(to_lock)
+    return results
 
 
 def main():
@@ -394,14 +433,13 @@ def main():
         print(f"\n🚩 {len(flagged_rows)} carte(s) marquée(s) dans l'appli à relire ({verb}) :")
         for cid, deck, front, back in flagged_rows:
             print(f"   cid:{cid}  [{deck.split('::')[-1]}]  {front}  →  {back}")
-    if stages:
-        open_upto, counts, unlocked, locked = stages
+    for name, open_upto, counts, unlocked, locked in stages:
         detail = " · ".join(f"{s}: {d}/{t}" for s, (d, t) in sorted(counts.items()))
-        print(f"  🔓 étapes ouvertes : 1 à {open_upto} sur {max(counts)}  (cartes en révision par étape — {detail})")
+        print(f"  🔓 {name} : ouvert jusqu'à {open_upto} sur {max(counts)}  (cartes en révision — {detail})")
         if unlocked:
-            print(f"  ✓ {unlocked} carte(s) {'seraient réactivées' if args.dry_run else 'réactivée(s)'} (étape débloquée)")
+            print(f"     ✓ {unlocked} carte(s) {'seraient réactivées' if args.dry_run else 'réactivée(s)'} (étape débloquée)")
         if locked:
-            print(f"  ✓ {locked} carte(s) {'seraient suspendues' if args.dry_run else 'suspendue(s)'} en attendant leur étape")
+            print(f"     ✓ {locked} carte(s) nouvelle(s) {'seraient suspendues' if args.dry_run else 'suspendue(s)'} en attendant leur étape")
     if updated and not args.dry_run:
         print("\n→ Ouvre Anki et synchronise : la progression part sur AnkiWeb.")
 
