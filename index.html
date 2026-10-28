@@ -138,11 +138,31 @@
             font-family: Georgia, serif;
         }
 
-        /* ── Conjugation table after a miss (#51) ── */
+        /* ── Conjugation table, overlay while F1 is held (#53) ── */
+        .conj-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 150;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(10, 12, 16, .25);
+            pointer-events: none;
+        }
+
+        .conj-overlay[hidden] {
+            display: none;
+        }
+
+        .conj-panel {
+            background: var(--bg);
+            border: 1.5px solid var(--border-2);
+            border-radius: 18px;
+            padding: 16px 22px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, .25);
+        }
+
         .conj {
-            margin-top: 12px;
-            padding-top: 10px;
-            border-top: 1px dashed var(--border-2);
             font-size: 15px;
         }
 
@@ -1823,6 +1843,8 @@
     <input id="kb-keeper" type="text" tabindex="-1" aria-hidden="true" autocomplete="off" autocorrect="off" spellcheck="false"
         style="position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;border:0;padding:0;font-size:16px;pointer-events:none">
 
+    <div class="conj-overlay" id="conj-overlay" hidden></div>
+
     <audio id="audio-player" preload="none"></audio>
 
     <script>
@@ -3493,7 +3515,9 @@
             if (state === "question") {
                 html = studyMode() === "flip"
                     ? '<button class="s-pill" onclick="flipCard()">Afficher la réponse <span class="t-key">Espace</span></button>'
-                    : '<button class="s-pill s-pill-hint" onpointerdown="event.preventDefault()" onmousedown="event.preventDefault()" onclick="hintFromPill()">💡 Indice <span class="t-key">F1</span></button>'
+                    : (isConjCard(card)
+                        ? '<button class="s-pill s-pill-hint" onpointerdown="event.preventDefault(); conjHold(true)" onmousedown="event.preventDefault()" onpointerup="conjHold(false)" onpointerleave="conjHold(false)" onpointercancel="conjHold(false)" title="Maintenir pour voir le tableau">📋 Tableau <span class="t-key">F1</span></button>'
+                        : '<button class="s-pill s-pill-hint" onpointerdown="event.preventDefault()" onmousedown="event.preventDefault()" onclick="hintFromPill()">💡 Indice <span class="t-key">F1</span></button>')
                     + '<button class="s-pill" onclick="showFullAnswer()">Voir la réponse <span class="t-key">F8</span></button>';
             } else if (state === "rating" && card) {
                 html = ratingButtonsHtml(previewIntervals(sess.srs[card.id]));
@@ -3843,7 +3867,6 @@
             showHintFor(entry);
             // Every missing word now shown → time to rate it yourself.
             if (!wordRows.some(function (e) { return !e.solved && !e.revealed; })) {
-                showConjTable(sess.queue[sess.qIdx]);
                 setBarState("rating");
                 playCardAudio("a"); // like Anki: audio plays as soon as the answer appears
             }
@@ -3867,7 +3890,7 @@
             var card = sess.queue[sess.qIdx];
             if (!card) return;
             wordRows.forEach(function (e) { if (!e.solved && !e.revealed) { revealed = true; showHintFor(e); } });
-            if (!showConjTable(card) && hasRichAnswer(card)) showRichBack(document.getElementById("s-verso-extra"), card);
+            if (hasRichAnswer(card)) showRichBack(document.getElementById("s-verso-extra"), card);
             if (document.activeElement) document.activeElement.blur();
             setBarState("rating");
             playCardAudio("a");
@@ -3886,12 +3909,6 @@
             flashForPendingRating(q);
             var card = sess.queue[sess.qIdx];
             keepKeyboard();
-            if ((revealed || cardErrors > 0) && showConjTable(card)) {
-                // Missed conjugation: the table stays until Entrée / « Suivant → ».
-                setBarState("next");
-                pendingNext = function () { flash(function () { advanceCard(q); }); };
-                return;
-            }
             if (!hasRichAnswer(card)) {
                 playCardAudio("a", function () { flash(function () { advanceCard(q); }); });
                 return;
@@ -3958,13 +3975,21 @@
                         + '<td class="conj-f">' + esc(f.slice(0, stem.length)) + '<span class="conj-end">' + esc(f.slice(stem.length)) + '</span></td></tr>';
                 }).join("") + '</table></div>';
         }
-        // Shown under the blanks when the card needed help or had a ✗.
-        function showConjTable(card) {
+        // Shown only as an overlay while F1 (or the 💡 pill) is held, on a
+        // conjugation card in type-in mode; once seen, the card counts as
+        // helped → « À revoir » (#53).
+        function isConjCard(card) {
+            return !!card && studyMode() === "type" && !!conjKey(card);
+        }
+        function conjHold(on) {
+            var ov = document.getElementById("conj-overlay");
+            var card = sess.queue[sess.qIdx];
+            if (!on || advancing || !isConjCard(card)) { ov.hidden = true; return; }
             var html = conjTableHtml(card);
-            if (!html) return false;
-            var extra = document.getElementById("s-verso-extra");
-            if (extra) extra.innerHTML = html;
-            return true;
+            if (!html) return;
+            ov.innerHTML = '<div class="conj-panel">' + html + '</div>';
+            ov.hidden = false;
+            revealed = true;
         }
 
         // ── Normal (Anki-style) mode: show the back, then rate it ──
@@ -4098,6 +4123,9 @@
         // except while the cursor is in a blank (arrows then move in the text).
         var ARROW_RATING = { ArrowUp: 4, ArrowDown: 2, ArrowLeft: 1, ArrowRight: 3 };
 
+        document.addEventListener("keyup", function (e) { if (e.key === "F1") conjHold(false); });
+        window.addEventListener("blur", function () { conjHold(false); });
+
         // Right Shift tapped on its own = "Voir la réponse" (#48). Only a
         // tap: if any other key goes down meanwhile (a capital letter), no.
         var rightShiftTap = false;
@@ -4122,6 +4150,9 @@
             } else if (studyMode() === "flip" && "1234".indexOf(e.key) !== -1 && e.key.length === 1 && !e.metaKey && !e.ctrlKey) {
                 e.preventDefault();
                 rate({ "1": 1, "2": 2, "3": 3, "4": 4 }[e.key]);
+            } else if (e.key === "F1" && isConjCard(sess.queue[sess.qIdx])) {
+                e.preventDefault();
+                if (!e.repeat) conjHold(true); // until F1 is released
             } else if (e.key === "F1") {
                 e.preventDefault();
                 revealCurrent();
