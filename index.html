@@ -138,6 +138,63 @@
             font-family: Georgia, serif;
         }
 
+        /* ── Conjugation table after a miss (#51) ── */
+        .conj {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border-2);
+            font-size: 15px;
+        }
+
+        .conj-title {
+            font-size: 13px;
+            color: var(--text-2);
+            margin-bottom: 6px;
+        }
+
+        .conj-title b {
+            color: var(--text);
+        }
+
+        .conj-table {
+            margin: 0 auto;
+            border-collapse: collapse;
+        }
+
+        .conj-table td {
+            padding: 3px 12px;
+            text-align: left;
+        }
+
+        .conj-p {
+            color: var(--text-3);
+            font-size: 13px;
+        }
+
+        .conj-f {
+            font-family: Georgia, serif;
+            font-size: 17px;
+        }
+
+        .conj-end {
+            color: var(--blue);
+            font-weight: 700;
+        }
+
+        .conj-table tr.missed td {
+            background: var(--tint-red);
+        }
+
+        .conj-table tr.missed td:first-child {
+            border-radius: 8px 0 0 8px;
+            color: var(--red);
+            font-weight: 600;
+        }
+
+        .conj-table tr.missed td:last-child {
+            border-radius: 0 8px 8px 0;
+        }
+
         /* ── Info sheet on the back + tags (#7) ── */
         .c-info {
             margin-top: 12px;
@@ -2183,6 +2240,34 @@
             });
         }
 
+        // Bundled decks already in this browser get their file's latest
+        // content whenever it changes (new perso words from cuatroloop,
+        // fixes…), progress untouched (#52). A deleted one stays deleted.
+        var LS_BUNDLED_SIG = "ankitrain_v1_bundled_sig"; // {id: content signature}
+        function refreshBundledDecks() {
+            var sigs;
+            try { sigs = JSON.parse(localStorage.getItem(LS_BUNDLED_SIG) || "{}") || {}; } catch (e) { sigs = {}; }
+            var have = loadSources().map(function (s) { return String(s.id); });
+            var list = [{ url: DEFAULT_DECK_URL, id: "default" }].concat(EXTRA_BUNDLED)
+                .filter(function (b) { return have.indexOf(b.id) !== -1; });
+            return Promise.all(list.map(function (b) {
+                return fetch(b.url, { cache: "no-cache" })
+                    .then(function (r) { return r.ok ? r.text() : null; })
+                    .then(function (text) {
+                        if (!text) return;
+                        var sig = strHash(text) + ":" + text.length;
+                        if (sigs[b.id] === sig) return;
+                        var data = JSON.parse(text);
+                        if (!refreshDeckData(b.id, data)) return;
+                        if (sigs[b.id]) toast("✓ " + (data.source || (isSongsData(data) ? "Chansons" : b.id)) + " mis à jour");
+                        sigs[b.id] = sig;
+                    })
+                    .catch(function () { });
+            })).then(function () {
+                try { localStorage.setItem(LS_BUNDLED_SIG, JSON.stringify(sigs)); } catch (e) { }
+            });
+        }
+
         // New version of a stored source's cards / decks; progress untouched.
         function refreshDeckData(sid, data) {
             if (isSongsData(data)) data = songsToDeckData(data);
@@ -2216,7 +2301,7 @@
             toRemove.forEach(function (k) { localStorage.removeItem(k); });
             toast("Données effacées (" + toRemove.length + " entrée(s))");
             if (fbUser) wipeFirestoreForUser();
-            loadDefaultDeckIfEmpty().then(loadExtraBundledDecks).then(renderHome);
+            loadDefaultDeckIfEmpty().then(loadExtraBundledDecks).then(refreshBundledDecks).then(renderHome);
         }
 
         // ═══════════════════════════════════════════════
@@ -3758,6 +3843,7 @@
             showHintFor(entry);
             // Every missing word now shown → time to rate it yourself.
             if (!wordRows.some(function (e) { return !e.solved && !e.revealed; })) {
+                showConjTable(sess.queue[sess.qIdx]);
                 setBarState("rating");
                 playCardAudio("a"); // like Anki: audio plays as soon as the answer appears
             }
@@ -3781,7 +3867,7 @@
             var card = sess.queue[sess.qIdx];
             if (!card) return;
             wordRows.forEach(function (e) { if (!e.solved && !e.revealed) { revealed = true; showHintFor(e); } });
-            if (hasRichAnswer(card)) showRichBack(document.getElementById("s-verso-extra"), card);
+            if (!showConjTable(card) && hasRichAnswer(card)) showRichBack(document.getElementById("s-verso-extra"), card);
             if (document.activeElement) document.activeElement.blur();
             setBarState("rating");
             playCardAudio("a");
@@ -3800,6 +3886,12 @@
             flashForPendingRating(q);
             var card = sess.queue[sess.qIdx];
             keepKeyboard();
+            if ((revealed || cardErrors > 0) && showConjTable(card)) {
+                // Missed conjugation: the table stays until Entrée / « Suivant → ».
+                setBarState("next");
+                pendingNext = function () { flash(function () { advanceCard(q); }); };
+                return;
+            }
             if (!hasRichAnswer(card)) {
                 playCardAudio("a", function () { flash(function () { advanceCard(q); }); });
                 return;
@@ -3817,6 +3909,63 @@
             });
         }
         var RICH_BACK_READ_MS = 2500;
+
+        // ── Conjugation table after a miss (#51) ──
+        // Conjugation cards (tag "conjugaison", front "<b>verb</b> … <i>person</i>")
+        // of the same verb and tense make up the table; the stem shared by
+        // the forms is plain, the ending in colour (idee.md: "ser é, ser ás…"),
+        // and the person just missed is highlighted.
+        var CONJ_PERSONS = ["yo", "tú", "él / ella / usted", "nosotros", "vosotros", "ellos / ellas / ustedes"];
+        function conjKey(c) {
+            var tags = c.tags || [];
+            if (tags.indexOf("conjugaison") === -1) return null;
+            var verb = (String(c.question).match(/<b>([^<]+)<\/b>/) || [])[1];
+            var tense = tags.filter(function (t) { return t !== "conjugaison" && t !== verb && !/^etape/i.test(t); })[0];
+            var person = (String(c.question).match(/<i>([^<]+)<\/i>/) || [])[1];
+            return verb && tense && person ? { verb: verb, tense: tense, person: person.trim() } : null;
+        }
+        function conjTableHtml(card) {
+            var k = conjKey(card);
+            if (!k) return "";
+            var forms = {}, tenseLabel = "", meaning = "";
+            var cbd = loadCards(sess.sourceId);
+            Object.keys(cbd).forEach(function (did) {
+                (cbd[did] || []).forEach(function (c) {
+                    var x = conjKey(c);
+                    if (!x || x.verb !== k.verb || x.tense !== k.tense) return;
+                    forms[x.person] = htmlToText(c.answer || (c.words || []).join(" "));
+                    if (!tenseLabel) {
+                        tenseLabel = htmlToText(String(c.question).replace(/^[\s\S]*<br>/, "").replace(/·[\s\S]*$/, ""));
+                        meaning = (String(c.question).match(/\(([^)]+)\)/) || [])[1] || "";
+                    }
+                });
+            });
+            var persons = CONJ_PERSONS.filter(function (p) { return forms[p]; });
+            if (persons.length < 2) return "";
+            // Stem = the start shared by every form (at least 2 letters).
+            var list = persons.map(function (p) { return forms[p]; });
+            var stem = list.reduce(function (a, b) {
+                var i = 0;
+                while (i < a.length && i < b.length && a[i].toLowerCase() === b[i].toLowerCase()) i++;
+                return a.slice(0, i);
+            });
+            if (stem.length < 2) stem = "";
+            return '<div class="conj"><div class="conj-title"><b>' + esc(k.verb) + '</b>'
+                + (meaning ? ' <span>(' + esc(meaning) + ')</span>' : '') + ' · ' + esc(tenseLabel) + '</div>'
+                + '<table class="conj-table">' + persons.map(function (p) {
+                    var f = forms[p];
+                    return '<tr' + (p === k.person ? ' class="missed"' : '') + '><td class="conj-p">' + esc(p) + '</td>'
+                        + '<td class="conj-f">' + esc(f.slice(0, stem.length)) + '<span class="conj-end">' + esc(f.slice(stem.length)) + '</span></td></tr>';
+                }).join("") + '</table></div>';
+        }
+        // Shown under the blanks when the card needed help or had a ✗.
+        function showConjTable(card) {
+            var html = conjTableHtml(card);
+            if (!html) return false;
+            var extra = document.getElementById("s-verso-extra");
+            if (extra) extra.innerHTML = html;
+            return true;
+        }
 
         // ── Normal (Anki-style) mode: show the back, then rate it ──
         var flipShown = false;
@@ -4070,7 +4219,7 @@
 
         // ── INIT ──
         updateThemeToggleIcon();
-        loadDefaultDeckIfEmpty().then(loadExtraBundledDecks).then(renderHome);
+        loadDefaultDeckIfEmpty().then(loadExtraBundledDecks).then(refreshBundledDecks).then(renderHome);
     </script>
 </body>
 
