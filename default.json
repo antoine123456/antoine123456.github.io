@@ -75890,6 +75890,72 @@
             "cuatroloop"
           ],
           "lang": "fr"
+        },
+        {
+          "id": "1791396573613",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>perros",
+          "words": [
+            "chiens"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1791396573614",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>chiens",
+          "words": [
+            "perros"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
+        },
+        {
+          "id": "1791812648085",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>jamais",
+          "words": [
+            "Nunca"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
+        },
+        {
+          "id": "1791812648086",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>Nunca",
+          "words": [
+            "jamais"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1792058287693",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>moi-même",
+          "words": [
+            "moi-même"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "es"
+        },
+        {
+          "id": "1792058287694",
+          "question": "<style>.card {\n    font-family: arial;\n    font-size: 20px;\n    text-align: center;\n    color: black;\n    background-color: white;\n}\n</style>moi-même",
+          "words": [
+            "moi-même"
+          ],
+          "tags": [
+            "cuatroloop"
+          ],
+          "lang": "fr"
         }
       ]
     }
