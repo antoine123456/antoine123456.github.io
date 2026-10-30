@@ -1007,7 +1007,7 @@
             position: absolute;
             left: 0;
             right: 0;
-            top: calc(100% + 1px);
+            top: calc(100% + 5px);
             font-size: 7px;
             line-height: 1;
             letter-spacing: 3px;
@@ -1769,6 +1769,13 @@
             <label class="st-row"><span>Erreurs acceptées avant que le mot soit donné <b id="st-err-v"></b></span>
                 <input type="range" id="st-err" min="1" max="6" step="1" oninput="setSetting('maxErrors', +this.value)"></label>
             <div class="st-note">Nombre d'essais faux sur un même mot avant que l'appli l'écrive pour toi ; la carte est alors notée « À revoir ».</div>
+            <div class="st-row"><span>Vérification des mots</span>
+                <div class="st-switch">
+                    <button id="st-val-live" onclick="setSetting('validate', 'live')">Pendant la frappe</button>
+                    <button id="st-val-enter" onclick="setSetting('validate', 'enter')">Entrée pour valider</button>
+                </div></div>
+            <div class="st-note">Pendant la frappe : le mot se vérifie tout seul, une erreur ajoute un petit point sous le mot.
+                Entrée pour valider : tu tapes le mot puis Entrée ; à chaque erreur, le fond de la case devient plus rouge.</div>
             <div class="st-row"><span>Après le verso complet</span>
                 <div class="st-switch">
                     <button id="st-space-hold" onclick="setSetting('spaceMode', 'hold')">Maintenir Espace</button>
@@ -2057,7 +2064,7 @@
 
         // ⚙ Settings (#56, #57, #92), per user / browser.
         var LS_SETTINGS = "ankitrain_v1_settings";
-        var SETTINGS_DEFAULT = { newPerDay: NEW_LIMIT, reviewsPerDay: 0, minutesPerDay: 0, maxErrors: 3, spaceMode: "hold", debug: false };
+        var SETTINGS_DEFAULT = { newPerDay: NEW_LIMIT, reviewsPerDay: 0, minutesPerDay: 0, maxErrors: 3, spaceMode: "hold", debug: false, validate: "live" };
         function settings() {
             var o = {};
             try { o = JSON.parse(localStorage.getItem(LS_SETTINGS) || "{}") || {}; } catch (e) { }
@@ -2118,6 +2125,8 @@
             document.getElementById("st-profile").textContent = timeModelSummary();
             document.getElementById("st-time-group").hidden = o.measure !== "time";
             set("st-err", o.maxErrors, o.maxErrors);
+            document.getElementById("st-val-live").classList.toggle("on", o.validate !== "enter");
+            document.getElementById("st-val-enter").classList.toggle("on", o.validate === "enter");
             document.getElementById("st-space-hold").classList.toggle("on", o.spaceMode !== "next");
             document.getElementById("st-space-next").classList.toggle("on", o.spaceMode === "next");
             document.getElementById("st-debug-on").classList.toggle("on", !!o.debug);
@@ -3483,15 +3492,18 @@
         }
         // The back to show under the blanks: the answer itself when it holds
         // more than the typed words (image, sentence…), then the info sheet.
+        function renderBack(container, card) {
+            container.innerHTML = answerHasMore(card) ? '<div class="s-verso-body"></div>' : "";
+            if (answerHasMore(card)) mountCardHtml(container.querySelector(".s-verso-body"), backWithoutRepeats(card), cardStyle(sess.sourceId, card));
+            container.insertAdjacentHTML("beforeend", infoHtml(card));
+        }
         function showRichBack(container, card) {
             // The typed words slide to where the full back puts them, and
             // the back fades in (#87) — FLIP: measure, insert, invert, play.
             var words = document.getElementById("t-words");
             var before = words && container.id === "s-verso-extra" && !container.childNodes.length
                 ? words.getBoundingClientRect().top : null;
-            container.innerHTML = answerHasMore(card) ? '<div class="s-verso-body"></div>' : "";
-            if (answerHasMore(card)) mountCardHtml(container.querySelector(".s-verso-body"), backWithoutRepeats(card), cardStyle(sess.sourceId, card));
-            container.insertAdjacentHTML("beforeend", infoHtml(card));
+            renderBack(container, card);
             if (before == null || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
             var dy = before - words.getBoundingClientRect().top;
             container.style.cssText = "opacity:0;transition:none";
@@ -4109,8 +4121,36 @@
             setBarState("question");
             if (!flip) { buildRows(card.words); syncAnswerFont(); }
             updateCompact();
+            fitCardHeight(card, flip);
             updateFlagIndicator();
             if (hasAudio) playCardAudio("q");
+        }
+
+        // Large screens (#99): the card is as tall as its fullest side — the
+        // recto, or the verso once the whole back is out (measured now, out
+        // of sight) — so it never changes size between the two (#80) and
+        // keeps no empty space. Phones keep the whole screen.
+        function fitCardHeight(card, flip) {
+            var c = document.getElementById("s-content");
+            c.style.maxHeight = "";
+            if (!document.body.classList.contains("compact") || window.innerWidth <= 600) return;
+            var rIn = c.querySelector(".s-zone-recto .s-zone-in"), vIn = c.querySelector(".s-zone-verso .s-zone-in");
+            if (!rIn || !vIn) return;
+            var vZone = vIn.parentElement;
+            vZone.style.visibility = "hidden";
+            if (flip) {
+                if (card.rf) showRefoldZones(card, true);
+                else mountCardHtml(document.getElementById("s-verso-body"), card.answer != null ? card.answer : esc((card.words || []).join(" ")), cardStyle(sess.sourceId, card));
+            } else if (hasRichAnswer(card)) renderBack(document.getElementById("s-verso-extra"), card);
+            var half = Math.max(rIn.offsetHeight, vIn.offsetHeight);
+            if (flip) {
+                if (card.rf) showRefoldZones(card, false);
+                else mountCardHtml(document.getElementById("s-verso-body"), "", "");
+            } else document.getElementById("s-verso-extra").innerHTML = "";
+            vZone.style.visibility = "";
+            var q = c.querySelector(".s-question"), sep = c.querySelector(".b-sep");
+            var frame = q.offsetHeight - q.querySelector(".s-zone-recto").offsetHeight - vZone.offsetHeight; // borders, padding, line
+            c.style.maxHeight = Math.max(240, Math.ceil(2 * half + frame + 8)) + "px";
         }
 
         // Anki-style answer buttons (Anki's order), shown as pills in the
@@ -4414,7 +4454,21 @@
 
         function makeCheck(entry, i) { return function () { liveCheck(entry, i); }; }
         function makeKey(i) {
-            return function (e) { if (e.key === "Enter") { e.preventDefault(); focusNext(i); } };
+            return function (e) {
+                if (e.key !== "Enter") return;
+                e.preventDefault();
+                var entry = wordRows[i];
+                // « Entrée pour valider » (#100): Entrée checks the word.
+                if (settings().validate === "enter" && entry && !entry.solved && !entry.given && entry.inp.value.trim()) {
+                    validateEntry(entry, i);
+                    return;
+                }
+                focusNext(i);
+            };
+        }
+        function validateEntry(entry, i) {
+            if (check(entry)) { markSolved(entry); focusNext(i); }
+            else { addError(entry, i); if (!entry.given) entry.inp.select(); }
         }
 
         function norm(s) {
@@ -4444,6 +4498,11 @@
 
         function liveCheck(entry, i) {
             if (/^\s/.test(entry.inp.value)) entry.inp.value = entry.inp.value.replace(/^\s+/, ""); // space typed between words
+            if (settings().validate === "enter") {
+                // checked on Entrée (#100); a space after the word = Entrée too
+                if (/^\S+\s+$/.test(entry.inp.value)) { entry.inp.value = entry.inp.value.trim(); validateEntry(entry, i); }
+                return;
+            }
             // Typed past the word (fast typing: "estoy cansado" in one go):
             // keep the word here and carry the rest into the next blank.
             var m = entry.inp.value.match(/^\s*(\S+)\s+(\S.*)$/);
@@ -4502,7 +4561,13 @@
         function addError(entry, i) {
             entry.errors++;
             cardErrors = Math.max(cardErrors, entry.errors);
-            entry.attempts.textContent = "●".repeat(Math.min(entry.errors, 5));
+            if (settings().validate === "enter") {
+                // the box gets redder with each miss (#100)
+                entry.box.style.background = "rgba(220, 38, 38, " + Math.min(0.6, 0.15 * entry.errors) + ")";
+                entry.box.style.borderRadius = "6px";
+                entry.box.style.padding = "0 6px";
+                entry.inp.className = "wc-inp"; // text stays readable on the red
+            } else entry.attempts.textContent = "●".repeat(Math.min(entry.errors, 5));
             if (entry.errors >= settings().maxErrors) giveAnswer(entry, i);
         }
 
