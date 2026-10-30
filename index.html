@@ -3067,9 +3067,21 @@
         // The back to show under the blanks: the answer itself when it holds
         // more than the typed words (image, sentence…), then the info sheet.
         function showRichBack(container, card) {
+            // The typed words slide to where the full back puts them, and
+            // the back fades in (#87) — FLIP: measure, insert, invert, play.
+            var words = document.getElementById("t-words");
+            var before = words && container.id === "s-verso-extra" && !container.childNodes.length
+                ? words.getBoundingClientRect().top : null;
             container.innerHTML = answerHasMore(card) ? '<div class="s-verso-body"></div>' : "";
             if (answerHasMore(card)) mountCardHtml(container.querySelector(".s-verso-body"), backWithoutRepeats(card), cardStyle(sess.sourceId, card));
             container.insertAdjacentHTML("beforeend", infoHtml(card));
+            if (before == null || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+            var dy = before - words.getBoundingClientRect().top;
+            container.style.cssText = "opacity:0;transition:none";
+            if (Math.abs(dy) > 1) words.style.cssText = "transform:translateY(" + dy + "px);transition:none";
+            words.offsetHeight; // commit the start state
+            words.style.cssText = "transform:none;transition:transform .35s cubic-bezier(.2,.7,.3,1)";
+            container.style.cssText = "opacity:1;transition:opacity .4s ease .2s";
         }
 
         // Rich back under the card (#81): nothing already on screen twice —
@@ -3367,7 +3379,8 @@
             + ".rf-mean{font-size:24px;font-weight:600;margin:2px 0}"
             + ".rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}"
             + ".rf-tr{font-size:15px;opacity:.7;font-style:italic;margin-top:2px}"
-            + ".rf-img img{max-height:200px;border-radius:10px;margin-top:6px}"
+            // Fixed height: the space is there before the picture loads, so the back doesn't jump (#87).
+            + ".rf-img img{height:200px;max-width:100%;object-fit:cover;border-radius:10px;margin-top:6px}"
             + ".rf-play{margin-top:4px;border:1.5px solid rgba(128,128,128,.35);background:none;color:inherit;border-radius:999px;padding:3px 12px;font-size:13px;cursor:pointer}"
             + "</style>";
         // A display copy of the card (same id, words, audio): new front and back.
