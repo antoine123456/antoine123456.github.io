@@ -172,16 +172,17 @@ def main():
         sentence = re.sub(r"<[^>]+>", "", w["e"].get("s", ""))
         for t in toks(sentence):
             if t not in core and imgs.get(t):
-                return imgs[t]
-        return None
+                return imgs[t], t
+        return None, None
 
-    cards = []
+    cards, review = [], []  # review : (carte, nom de la phrase qui fournit l'image ou None)
     for i, w in enumerate(items, 1):
         e = w["e"]
         core = toks(ARTICLE.sub("", w["es"]))
         img = imgs.get(core[0]) if e.get("pos", "").startswith("nom") and len(core) == 1 else None
+        via = None
         if not img:
-            img = context_image(w, core)
+            img, via = context_image(w, core)
         card = {"id": str(ID_BASE + i * 10 + 1), "key": i, "es": w["es"], "fr": w["fr"],
                 "question": html.escape(w["es"]), "answer": html.escape(w["fr"]),
                 "words": w["fr"].split(), "tags": ["vocabulaire"]}
@@ -191,24 +192,114 @@ def main():
         if e.get("sa"): card["sa"] = e["sa"]
         if img: card["img"] = img["url"]
         cards.append(card)
+        if img: review.append((card, via))
 
     out = {"version": 1, "source": "Vocabulaire espagnol",
            "decks": [{"id": "vocab-es", "name": DECK_NAME, "cards": cards}]}
     with open(os.path.join(HERE, "vocabulaire.json"), "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
 
-    review = "".join(f'<figure><img src="{c["img"]}" loading="lazy"><figcaption>#{c["key"]} {html.escape(c["es"])}'
-                     f' — {html.escape(c["fr"])}</figcaption></figure>' for c in cards if c.get("img"))
-    with open(os.path.join(CACHE, "images_review.html"), "w", encoding="utf-8") as f:
-        f.write("<meta charset=utf-8><style>body{font:12px sans-serif;display:flex;flex-wrap:wrap;gap:8px}"
-                "figure{margin:0;width:170px}img{width:170px;height:120px;object-fit:cover;border-radius:6px}"
-                "</style>" + review)
+    write_review(review)
 
     n_s = sum(1 for c in cards if c.get("s"))
     n_i = sum(1 for c in cards if c.get("img"))
     n_a = sum(1 for c in cards if c.get("audioQuestion"))
     print(f"{len(cards)} mots · {n_a} avec audio · {n_s} avec phrase · {n_i} avec image → vocabulaire.json")
     build_apkg(cards)
+
+
+# ── Planche de relecture des images ─────────────────────────────────────────
+REVIEW_HEAD = """<!doctype html><meta charset=utf-8><title>Relecture des images</title>
+<style>
+body{font:13px -apple-system,sans-serif;margin:0;background:#f6f6f4;color:#222}
+header{position:sticky;top:0;z-index:2;background:#fff;border-bottom:1px solid #ddd;padding:10px 16px;
+  display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+header b{font-size:15px}#count{opacity:.7}#status{font-size:12px;color:#16a34a}
+button,label.btn{font:inherit;border:1px solid #ccc;background:#fff;border-radius:16px;padding:5px 12px;cursor:pointer}
+button.main{background:#2563eb;color:#fff;border-color:#2563eb}
+main{display:flex;flex-wrap:wrap;gap:12px;padding:16px}
+figure{margin:0;width:220px;background:#fff;border:1px solid #e3e3e3;border-radius:10px;padding:8px}
+figure.done{border-color:#16a34a;background:#f3fbf5}
+img{width:220px;height:150px;object-fit:cover;border-radius:6px;display:block}
+.w{font-weight:600;margin-top:6px}.via{font-size:11px;color:#b45309}.s{font-size:11px;opacity:.7;margin:2px 0}
+textarea{width:100%;box-sizing:border-box;margin-top:6px;font:12px sans-serif;min-height:38px;resize:vertical;
+  border:1px solid #ddd;border-radius:6px;padding:4px}
+body.hide-done figure.done{display:none}
+</style>
+<header><b>Relecture des images</b><span id=count></span>
+<button class=main onclick="saveFile()">💾 Enregistrer</button>
+<label class=btn>📂 Reprendre un fichier<input type=file accept=.json hidden onchange="loadFile(this.files[0])"></label>
+<label><input type=checkbox onchange="document.body.classList.toggle('hide-done',this.checked)"> masquer les commentées</label>
+<span id=status></span></header>
+<main>"""
+REVIEW_TAIL = """</main>
+<script>
+// Chaque commentaire est gardé dans le navigateur dès la frappe ; « Enregistrer »
+// (ou ⌘S / Ctrl+S) télécharge images_review_comments.json pour Claude.
+const KEY = "vocab_images_review_v1";
+let notes = {};
+try { notes = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
+const figs = [...document.querySelectorAll("figure")];
+function persist() {
+  try { localStorage.setItem(KEY, JSON.stringify(notes)); } catch (e) {}
+  const n = figs.filter(f => notes[f.dataset.key]).length;
+  document.getElementById("count").textContent = n + " / " + figs.length + " commentées";
+}
+function show(f) {
+  const t = f.querySelector("textarea");
+  t.value = notes[f.dataset.key] || "";
+  f.classList.toggle("done", !!t.value.trim());
+}
+figs.forEach(f => {
+  show(f);
+  f.querySelector("textarea").addEventListener("input", e => {
+    const v = e.target.value;
+    if (v.trim()) notes[f.dataset.key] = v; else delete notes[f.dataset.key];
+    f.classList.toggle("done", !!v.trim()); persist();
+    document.getElementById("status").textContent = "gardé dans le navigateur";
+  });
+});
+persist();
+function saveFile() {
+  const out = {};
+  figs.forEach(f => { if (notes[f.dataset.key]) out[f.dataset.key] = {
+    es: f.dataset.es, fr: f.dataset.fr, via: f.dataset.via || null,
+    img: f.querySelector("img").src, comment: notes[f.dataset.key] }; });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify({ saved: new Date().toISOString(), comments: out }, null, 1)],
+    { type: "application/json" }));
+  a.download = "images_review_comments.json"; a.click();
+  document.getElementById("status").textContent = "enregistré à " + new Date().toLocaleTimeString().slice(0, 5)
+    + " (Téléchargements)";
+}
+function loadFile(file) {
+  if (!file) return;
+  file.text().then(t => {
+    const c = JSON.parse(t).comments || {};
+    for (const k in c) notes[k] = c[k].comment;
+    figs.forEach(show); persist();
+    document.getElementById("status").textContent = Object.keys(c).length + " commentaire(s) repris";
+  });
+}
+addEventListener("keydown", e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === "s") { e.preventDefault(); saveFile(); }
+});
+</script>"""
+
+
+def write_review(review):
+    figs = []
+    for c, via in review:
+        a = lambda v: html.escape(v, quote=True)
+        sent = re.sub(r"<[^>]+>", "", c.get("s", ""))
+        figs.append(
+            f'<figure data-key="{c["key"]}" data-es="{a(c["es"])}" data-fr="{a(c["fr"])}" data-via="{a(via or "")}">'
+            f'<img src="{a(c["img"])}" loading="lazy">'
+            f'<div class="w">#{c["key"]} {a(c["es"])} — {a(c["fr"])}</div>'
+            + (f'<div class="via">image de la phrase : {a(via)}</div><div class="s">{a(sent)}</div>' if via else "")
+            + '<textarea placeholder="ton avis…"></textarea></figure>')
+    with open(os.path.join(CACHE, "images_review.html"), "w", encoding="utf-8") as f:
+        f.write(REVIEW_HEAD + "".join(figs) + REVIEW_TAIL)
 
 
 # ── .apkg (Anki) ────────────────────────────────────────────────────────────
