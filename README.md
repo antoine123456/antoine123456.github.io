@@ -13,6 +13,7 @@ espanol-trainer/
 ├── default.json       ← bundled deck auto-loaded on first run if no source has been imported yet
 ├── default_media/     ← its audio/image files
 ├── add_card.py        ← console tool: adds one word pair to the shared "perso" deck (see below)
+├── enrich_es.py       ← builds enrich_es.json: example sentence (from the deck's own sentence cards) + word class for the Spanish cards' « rendu complet » — re-run when default.json changes
 └── README.md
 ```
 
