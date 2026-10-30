@@ -3929,10 +3929,20 @@
         // ═══════════════════════════════════════════════
         // WORD ROWS
         // ═══════════════════════════════════════════════
+        // Words to type without punctuation (#90): "¿Por", "(permanent)",
+        // "va," lose their signs; "?", "...", "!" alone aren't blanks at all.
+        // Inner apostrophes / hyphens stay (c'est, qu'est-ce).
+        function typeableWords(words) {
+            return (words || []).map(function (w) {
+                return String(w).replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+            }).filter(Boolean);
+        }
+
         function buildRows(words) {
             advancing = false;
             var section = document.getElementById("t-words"); if (!section) return;
             section.innerHTML = ""; wordRows = [];
+            words = typeableWords(words);
 
             words.forEach(function (word, i) {
                 var col = document.createElement("div"); col.className = "word-col";
