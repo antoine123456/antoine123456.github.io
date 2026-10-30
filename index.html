@@ -482,14 +482,21 @@
         .sync-status.sync-hidden { display: none; }
 
         #home { padding-top: calc(16px + env(safe-area-inset-top, 0px)); }
-        .h-header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 20px; }
+        .h-header { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
         .h-header .h-theme-toggle { position: static; margin: 0; flex: none; }
         .h-brand { display: flex; align-items: center; gap: 6px; margin-right: auto; }
         .h-brand .h-logo { font-size: 22px; margin: 0; }
         .h-brand .h-title { font-size: 18px; margin: 0; }
         .h-user { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--text-2); }
-        .h-header .h-theme-toggle { order: 2; }
-        @media (max-width: 600px) { .h-user { order: 3; flex-basis: 100%; } }
+        .h-user select { max-width: 150px; }
+        .h-brand .h-title { white-space: nowrap; }
+        /* Phones: still one line (#86) — the sync state shrinks to its icon. */
+        @media (max-width: 600px) {
+            .h-header { gap: 6px; }
+            .h-brand .h-title { font-size: 16px; }
+            .h-user > .h-user-icon, .sync-status .ss-txt { display: none; }
+            .h-user select { max-width: 120px; }
+        }
         .h-user select { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 3px 8px; }
 
         .h-logo {
@@ -1700,8 +1707,8 @@
         <!-- One header line (#84): logo + name, user, guide, theme. No
              help text, import or reset on this branch. -->
         <div class="h-header">
-            <div class="h-brand"><span class="h-logo">🃏</span><span class="h-title">Anki Trainer</span></div>
-            <div class="h-user">👤 <select id="h-user-select" onchange="chooseUser(this.value)"></select>
+            <div class="h-brand"><span class="h-title">Anki Trainer</span></div>
+            <div class="h-user"><span class="h-user-icon">👤</span> <select id="h-user-select" onchange="chooseUser(this.value)"></select>
                 <span id="sync-status" class="sync-status sync-hidden"></span></div>
             <button class="h-theme-toggle h-info-btn" onclick="openGuide()" title="Mode d'emploi">i</button>
             <button class="h-theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Basculer clair/sombre">🌙</button>
@@ -2518,7 +2525,10 @@
             var el = document.getElementById("sync-status");
             if (!el) return;
             var labels = { synced: "✓ Synchronisé", syncing: "↻ Synchronisation…", offline: "⚠ Hors ligne", error: "⚠ Erreur de sync" };
-            el.textContent = labels[state] || "";
+            var l = labels[state] || "";
+            // Icon + text; on phones only the icon shows (#86), the text stays in the tooltip.
+            el.innerHTML = l ? esc(l.slice(0, 1)) + '<span class="ss-txt">' + esc(l.slice(1)) + "</span>" : "";
+            el.title = l;
             el.className = "sync-status sync-" + (state || "hidden");
         }
 
