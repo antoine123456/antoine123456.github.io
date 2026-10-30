@@ -191,7 +191,8 @@ def count_new_studied_today(col, dry_run):
 
 
 def load_flagged(paths):
-    """card id -> texte du recto des cartes marquées 🚩 (F6) dans l'appli,
+    """card id -> texte du recto des cartes marquées 🚩 (F6) dans l'appli
+    (ou {"q": recto, "c": commentaire} si un commentaire a été écrit),
     d'après l'export le plus récent de chaque source : une marque retirée
     dans l'appli disparaît donc au prochain export."""
     latest = {}
@@ -433,6 +434,9 @@ def main():
         print(f"\n🚩 {len(flagged_rows)} carte(s) marquée(s) dans l'appli à relire ({verb}) :")
         for cid, deck, front, back in flagged_rows:
             print(f"   cid:{cid}  [{deck.split('::')[-1]}]  {front}  →  {back}")
+            v = flagged.get(str(cid))
+            if isinstance(v, dict) and v.get("c"):
+                print(f"      💬 {v['c']}")
     for name, open_upto, counts, unlocked, locked in stages:
         detail = " · ".join(f"{s}: {d}/{t}" for s, (d, t) in sorted(counts.items()))
         print(f"  🔓 {name} : ouvert jusqu'à {open_upto} sur {max(counts)}  (cartes en révision — {detail})")
