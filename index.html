@@ -970,11 +970,15 @@
         /* Hint: the word in small orange under the blank. (A greyed-out
            version inside the blank was tried — git tag indice-fantome.) */
         .wc-hint {
-            display: none;
+            /* Its line is always there, so showing a hint moves nothing (#88). */
+            visibility: hidden;
+            min-height: 1.6em;
             font-family: Georgia, serif;
             font-size: 13px;
             color: var(--orange);
         }
+
+        .wc-hint.on { visibility: visible; }
 
         .wc-attempts {
             font-size: 11px;
@@ -1374,6 +1378,9 @@
         .t-words:has(+ .s-verso-extra:not(:empty)) .wc-attempts:empty {
             min-height: 0;
         }
+        .t-words:has(+ .s-verso-extra:not(:empty)) .wc-hint:not(.on) {
+            display: none;
+        }
 
         .s-mode-toggle {
             background: none;
@@ -1760,7 +1767,7 @@
                     </div>
                     <div class="g-demo"><div class="g-card">
                         <div class="g-words">
-                            <div class="word-col"><input class="wc-inp" value="" placeholder="···" readonly tabindex="-1"><div class="wc-hint" style="display:block">la</div></div>
+                            <div class="word-col"><input class="wc-inp" value="" placeholder="···" readonly tabindex="-1"><div class="wc-hint on">la</div></div>
                             <div class="word-col"><input class="wc-inp given" value="serpiente" readonly tabindex="-1"><div class="wc-attempts">✗✗✗</div></div>
                         </div>
                     </div></div>
@@ -3046,7 +3053,14 @@
         // time so decks already stored in a browser get it too.
         var DIRECTION_HEADER_RE = /(^|<\/style>)\s*(?:🇫🇷|🇪🇸)\s*➡️\s*(?:🇫🇷|🇪🇸)\s*(?:<br\s*\/?>\s*)*/u;
         function displayQuestion(html) {
-            return String(html || "").replace(DIRECTION_HEADER_RE, "$1");
+            return noSemicolons(String(html || "").replace(DIRECTION_HEADER_RE, "$1"));
+        }
+        // "il est; elle est" → "il est, elle est" in the text only — not in
+        // tags, <style> or entities like &amp; (#88).
+        function noSemicolons(html) {
+            return html.split(/(<style[\s\S]*?<\/style>|<[^>]*>|&#?\w+;)/i).map(function (part, i) {
+                return i % 2 ? part : part.replace(/\s*;\s*/g, ", ");
+            }).join("");
         }
 
         // True when the back holds more than the typed words (an image, a
@@ -3096,7 +3110,10 @@
             var seen = {};
             front.content.querySelectorAll("div").forEach(function (d) { seen[norm(d.textContent)] = true; });
             back.content.querySelectorAll("div[class^='rf-']").forEach(function (d) {
-                if (seen[norm(d.textContent)] || (d.className === "rf-mean" && studyMode() !== "flip")) d.remove();
+                // The meaning goes only if it is exactly what was typed (other meanings stay, #88).
+                var typed = norm((card.words || []).join(" ")).replace(/[^\p{L}\p{N} ]/gu, "");
+                if (seen[norm(d.textContent)] || (d.className === "rf-mean" && studyMode() !== "flip"
+                    && norm(d.textContent).replace(/[^\p{L}\p{N} ]/gu, "") === typed)) d.remove();
             });
             return back.innerHTML;
         }
@@ -4056,7 +4073,7 @@
 
         function revealHint(entry) {
             entry.hint.textContent = entry.expected[0];
-            entry.hint.style.display = "block";
+            entry.hint.classList.add("on");
             entry.revealed = true;
         }
         // "💡 Indice": reveals only the word at the cursor (or the first
