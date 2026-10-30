@@ -2257,7 +2257,7 @@
         // on log(time) learns this person's coefficients; with few points it
         // stays near the plain average. A new card also costs its expected
         // repeats in the session, a known card its chance of being forgotten.
-        var LS_TIME_OBS = "ankitrain_v1_time_obs", OBS_MAX = 1500;
+        var LS_TIME_OBS = NS + "time_obs", OBS_MAX = 1500;
         var MODEL_PRIOR_MS = { new: 12000, step: 6000, review: 6000 };
         var timeModelCache = null;
         function timeObs() { try { return JSON.parse(localStorage.getItem(LS_TIME_OBS) || "[]"); } catch (e) { return []; } }
