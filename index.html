@@ -984,7 +984,13 @@
             font-size: 11px;
             color: var(--red);
             letter-spacing: 1px;
-            min-height: 14px;
+            /* Fixed box: the ✗ marks never move the words (#88). */
+            height: 14px;
+            line-height: 14px;
+            align-self: stretch;
+            text-align: center;
+            white-space: nowrap;
+            contain: inline-size;
         }
 
         .t-key {
@@ -1376,7 +1382,7 @@
 
         /* Back shown: no empty error line under the words (#81). */
         .t-words:has(+ .s-verso-extra:not(:empty)) .wc-attempts:empty {
-            min-height: 0;
+            height: 0;
         }
         .t-words:has(+ .s-verso-extra:not(:empty)) .wc-hint:not(.on) {
             display: none;
