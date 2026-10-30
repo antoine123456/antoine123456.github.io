@@ -297,6 +297,9 @@
         .fm-modal { max-width: 480px; padding-bottom: 18px; }
         .h-settings-btn { right: 108px; }
         .st-modal { max-width: 460px; padding-bottom: 18px; }
+        .h-range { font-size: 11px; font-weight: 400; color: var(--text-3); margin-left: 4px; }
+        .st-debug { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+        .st-debug button.st-act { font: inherit; font-size: 12.5px; border: 1.5px solid var(--border-2); background: var(--surface); color: var(--text); border-radius: 16px; padding: 5px 12px; cursor: pointer; }
         .st-today { font-size: 12px; color: var(--text-2); margin: 4px 0 14px; }
         .st-row { display: flex; flex-direction: column; gap: 6px; margin: 14px 0 0; font-size: 14px; }
         .st-row b { color: var(--navy); margin-left: 4px; }
@@ -1779,6 +1782,17 @@
                 </div></div>
             <div class="st-note">Maintenir Espace : la carte suivante vient seule après quelques secondes, Espace tenu la garde affichée.
                 Espace pour suivant : le verso reste jusqu'à ce que tu appuies sur Espace.</div>
+            <div class="st-row"><span>Mode debug</span>
+                <div class="st-switch">
+                    <button id="st-debug-off" onclick="setSetting('debug', false)">Arrêté</button>
+                    <button id="st-debug-on" onclick="setSetting('debug', true)">Journal actif</button>
+                </div></div>
+            <div class="st-debug">
+                <button class="st-act" onclick="downloadDebugLog()">⬇ Télécharger le journal (<span id="st-debug-n">0</span>)</button>
+                <button class="st-act" onclick="clearDebugLog()">Vider</button>
+            </div>
+            <div class="st-note">Le journal note les séances, chaque carte (temps mesuré, estimation), la synchro et les erreurs.
+                Télécharge-le et donne-le à Claude pour un retour précis.</div>
         </div>
     </div>
 
@@ -2107,7 +2121,7 @@
 
         // ⚙ Settings (#56, #57, #92), per user / browser.
         var LS_SETTINGS = NS + "settings";
-        var SETTINGS_DEFAULT = { newPerDay: NEW_LIMIT, reviewsPerDay: 0, minutesPerDay: 0, maxErrors: 3, spaceMode: "hold" };
+        var SETTINGS_DEFAULT = { newPerDay: NEW_LIMIT, reviewsPerDay: 0, minutesPerDay: 0, maxErrors: 3, spaceMode: "hold", debug: false };
         function settings() {
             var o = {};
             try { o = JSON.parse(localStorage.getItem(LS_SETTINGS) || "{}") || {}; } catch (e) { }
@@ -2116,8 +2130,33 @@
         function setSetting(k, v) {
             var o = settings(); o[k] = v;
             try { localStorage.setItem(LS_SETTINGS, JSON.stringify(o)); } catch (e) { }
+            dlog("réglage", { cle: k, valeur: v });
             renderSettings();
         }
+
+        // Debug mode (#94): a log of what happens (sessions, cards, times,
+        // estimates, sync, errors), kept in this browser, downloadable from ⚙.
+        var LS_DEBUG_LOG = NS + "debug_log", DEBUG_MAX = 3000;
+        function debugLog() { try { return JSON.parse(localStorage.getItem(LS_DEBUG_LOG) || "[]"); } catch (e) { return []; } }
+        function dlog(ev, data) {
+            if (!settings().debug) return;
+            var log = debugLog();
+            log.push(Object.assign({ t: new Date().toISOString(), ev: ev }, data || {}));
+            if (log.length > DEBUG_MAX) log = log.slice(-DEBUG_MAX);
+            try { localStorage.setItem(LS_DEBUG_LOG, JSON.stringify(log)); } catch (e) { }
+        }
+        function downloadDebugLog() {
+            var dump = {
+                exporte: new Date().toISOString(), page: location.href, navigateur: navigator.userAgent,
+                reglages: settings(), temps_moyens: timing(), aujourdhui: dayStats(), entrees: debugLog()
+            };
+            var a = document.createElement("a");
+            a.href = URL.createObjectURL(new Blob([JSON.stringify(dump, null, 1)], { type: "application/json" }));
+            a.download = "anki-trainer-debug-" + new Date().toISOString().slice(0, 16).replace(/[-:T]/g, "") + ".json";
+            a.click();
+        }
+        function clearDebugLog() { try { localStorage.removeItem(LS_DEBUG_LOG); } catch (e) { } renderSettings(); }
+        window.addEventListener("error", function (e) { dlog("erreur", { message: e.message, ou: (e.filename || "").split("/").pop() + ":" + e.lineno }); });
         function newLimitPerDay() { return settings().newPerDay; }
         function openSettings() { renderSettings(); document.getElementById("settings").hidden = false; }
         function closeSettings() { document.getElementById("settings").hidden = true; if (document.getElementById("home").style.display !== "none") renderHome(); }
@@ -2130,6 +2169,9 @@
             set("st-err", o.maxErrors, o.maxErrors);
             document.getElementById("st-space-hold").classList.toggle("on", o.spaceMode !== "next");
             document.getElementById("st-space-next").classList.toggle("on", o.spaceMode === "next");
+            document.getElementById("st-debug-on").classList.toggle("on", !!o.debug);
+            document.getElementById("st-debug-off").classList.toggle("on", !o.debug);
+            document.getElementById("st-debug-n").textContent = debugLog().length;
             document.getElementById("st-today").textContent = "Aujourd'hui : " + d.reviews + " révision(s), "
                 + d.news + " nouvelle(s), " + Math.round(d.ms / 60000) + " min de révision";
         }
@@ -2436,6 +2478,8 @@
 
             var decksMeta = data.decks.map(function (d) {
                 var meta = { id: d.id, name: d.name, cardCount: (d.cards || []).length };
+                if (d.skippable) meta.skippable = true; // « Je connais » button (#93)
+                if (d.range) meta.range = d.range;      // frequency ranks of a vocabulary level
                 if (d.lyrics) meta.lyrics = d.lyrics; // song layout (lyrics view)
                 return meta;
             });
@@ -2639,6 +2683,8 @@
             if (!src) return false;
             src.decks = data.decks.map(function (d) {
                 var meta = { id: d.id, name: d.name, cardCount: (d.cards || []).length };
+                if (d.skippable) meta.skippable = true; // « Je connais » button (#93)
+                if (d.range) meta.range = d.range;      // frequency ranks of a vocabulary level
                 if (d.lyrics) meta.lyrics = d.lyrics;
                 return meta;
             });
@@ -2703,8 +2749,8 @@
             if (syncInProgress) { syncPending = true; return; }
             syncInProgress = true;
             pushAllToFirestore()
-                .then(function () { setSyncStatus("synced"); })
-                .catch(function (err) { console.error("sync push failed:", err); setSyncStatus("error"); })
+                .then(function () { setSyncStatus("synced"); dlog("synchro envoi", { ok: true }); })
+                .catch(function (err) { console.error("sync push failed:", err); setSyncStatus("error"); dlog("synchro envoi", { ok: false, erreur: String(err) }); })
                 .then(function () {
                     syncInProgress = false;
                     if (syncPending) { syncPending = false; flushSync(); }
@@ -2980,6 +3026,7 @@
 
         function renderDeckRows(nodes, si, decksMeta, cardsByDeck, srs, newLimit, flagged, locked) {
             return nodes.map(function (node) {
+                var meta = decksMeta.find(function (d) { return d.name === node.fullName; });
                 var childIds = childDeckIds(decksMeta, node.fullName);
                 var cardIds = allCardIds(cardsByDeck, childIds, flagged);
                 var lockedN = cardIds.filter(function (id) { return locked[id]; }).length;
@@ -2988,7 +3035,8 @@
                 var customLimit = stats.new + 20;
                 var html = '<div class="h-deckrow" style="padding-left:' + (16 + node.depth * 20) + 'px" onclick="startStudy(' + si + ',' + jsArg(node.fullName) + ')">'
                     + (node.depth > 0 ? '<span style="color:#ddd;margin-right:6px;font-size:11px">└</span>' : '')
-                    + '<div class="h-deckrow-name' + (node.depth === 0 ? ' root-deck' : '') + '">' + esc(node.name) + '</div>'
+                    + '<div class="h-deckrow-name' + (node.depth === 0 ? ' root-deck' : '') + '">' + esc(node.name)
+                    + (meta && meta.range ? ' <span class="h-range">mots ' + meta.range[0] + '–' + meta.range[1] + '</span>' : '') + '</div>'
                     + (stats.new ? '<span class="badge badge-new">' + stats.new + ' nvx</span>' : '')
                     + (stats.due ? '<span class="badge badge-due">' + stats.due + ' dus</span>' : '')
                     + (stats.learned ? '<span class="badge badge-done">' + stats.learned + ' appris</span>' : '')
@@ -2996,11 +3044,37 @@
                     + (stats.trueNew > stats.new
                         ? '<button class="h-custom-btn" title="Étudier 20 cartes de plus que la limite du jour" onclick="event.stopPropagation(); startStudy(' + si + ',' + jsArg(node.fullName) + ',' + customLimit + ')">+20</button>'
                         : '')
+                    + (meta && meta.skippable && stats.trueNew + lockedN > 0
+                        ? '<button class="h-custom-btn" title="Je connais déjà ce niveau : ses cartes jamais vues passent en apprises" onclick="event.stopPropagation(); knowDeck(' + si + ',' + jsArg(node.fullName) + ')">✓ connu</button>'
+                        : '')
                     + '<button class="h-custom-btn" title="Parcourir les cartes (recto → verso)" onclick="event.stopPropagation(); openBrowse(' + si + ',' + jsArg(node.fullName) + ')">🔍</button>'
                     + '</div>';
                 if (node.children.length) html += renderDeckRows(node.children, si, decksMeta, cardsByDeck, srs, newLimit, flagged, locked);
                 return html;
             }).join("");
+        }
+
+        // « Je connais déjà ce niveau » (#93): its never-seen cards become
+        // learnt reviews, due in 20–60 days (spread out) to check them now
+        // and then. Counts as learnt for the next level's lock; ankisync
+        // sends it to Anki like any other progress.
+        function knowDeck(si, deckName) {
+            var src = loadSources()[si];
+            var srs = loadSRS(src.id), flagged = loadFlagged(src.id), cardsByDeck = loadCards(src.id);
+            var ids = allCardIds(cardsByDeck, childDeckIds(src.decks, deckName), flagged)
+                .filter(function (id) { var s = srs[id]; return !s || s.state === "new"; });
+            if (!ids.length) return;
+            if (!confirm("Marquer les " + ids.length + " cartes jamais vues de « " + deckName.split("::").pop()
+                + " » comme déjà connues ?\nElles reviendront dans 20 à 60 jours pour vérifier.")) return;
+            var now = Date.now();
+            ids.forEach(function (id) {
+                var iv = 20 + Math.floor(Math.random() * 41);
+                srs[id] = { state: "review", step: 0, interval: iv, ease: 2.5, due: TODAY + iv, reps: 1, lapses: 0, easyCount: 0, lastReview: now, known: true };
+            });
+            saveSRS(src.id, srs);
+            dlog("niveau connu", { source: src.id, paquet: deckName, cartes: ids.length });
+            toast("✓ " + ids.length + " cartes marquées connues");
+            renderHome();
         }
 
         function isChildOf(child, parent) {
@@ -3287,6 +3361,13 @@
             if (sess.canEnrich && fullRender()) queue = queue.map(enrichedCard);
             sess.queue = queue;
             sess.qIdx = 0;
+            dlog("séance", {
+                source: src.id, paquet: deckName, tag: tag || null, piste: track || "principale",
+                cartes: queue.length, nouvelles: queue.filter(function (c) { var s = srs[c.id]; return !s || s.state === "new"; }).length,
+                estimation_ms: Math.round(queue.reduce(function (n, c) { return n + estimateMs(c, srs, gapFactor()); }, 0)),
+                temps_restant_ms: timeLeftMs() === Infinity ? null : timeLeftMs(), facteur_pause: gapFactor(),
+                limite_nouvelles: newLimit, plus20: customNewLimit != null
+            });
             sess.srs = srs;
             sess.done = 0;
             sess.lyrics = lyricsInfo;
@@ -3945,6 +4026,10 @@
         function showCard() {
             advancing = false; cardErrors = 0; wordRows = []; revealed = false; pendingNext = null;
             sess.cardShownAt = Date.now();
+            if (sess.queue[sess.qIdx]) {
+                var dc = sess.queue[sess.qIdx], ds = sess.srs[dc.id];
+                dlog("carte", { id: dc.id, etat: ds ? ds.state : "new", estimation_ms: Math.round(estimateMs(dc, sess.srs, gapFactor())), mode: studyMode() });
+            }
             var card = sess.queue[sess.qIdx];
             if (!card) { showDone(); return; }
             updateProgress();
@@ -4201,7 +4286,7 @@
             fill.style.width = Math.min(100, r * 100) + "%";
             fill.classList.toggle("full", r >= 1);
             bar.title = "Temps de révision du jour : " + Math.floor(ms / 60000) + " / " + m + " min";
-            if (r >= 1 && !timeToastDone) { timeToastDone = true; toast("⏱ " + m + " min atteintes — tu peux t'arrêter après cette carte"); }
+            if (r >= 1 && !timeToastDone) { timeToastDone = true; dlog("temps atteint", { jour_ms: ms, objectif_min: m }); toast("⏱ " + m + " min atteintes — tu peux t'arrêter après cette carte"); }
         }
 
         function updateProgress() {
@@ -4823,7 +4908,11 @@
             var ctx = { requeueIn: null };
             sess.srs[card.id] = applyRating(sess.srs[card.id] || defaultSRS(), q, ctx);
             sess.srs[card.id].lastReview = Date.now(); // for cross-device merge on sign-in
-            recordCardTime(sess.srs[card.id], wasNew, Math.min(CARD_MS_CAP, Date.now() - (sess.cardShownAt || Date.now())));
+            var spentMs = Date.now() - (sess.cardShownAt || Date.now());
+            recordCardTime(sess.srs[card.id], wasNew, Math.min(CARD_MS_CAP, spentMs));
+            dlog("note", { id: card.id, note: q, temps_ms: spentMs, compte_ms: Math.min(CARD_MS_CAP, spentMs), nouvelle: wasNew,
+                moyenne_carte_ms: sess.srs[card.id].ms, etat: sess.srs[card.id].state, intervalle: sess.srs[card.id].interval,
+                jour_ms: dayStats().ms });
             saveSRS(sess.srsKey, sess.srs); // after every card, not only on leaving the session (#78)
             if (wasNew) recordNewIntroduced(sess.srsKey);
             sess.done++;
