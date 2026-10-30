@@ -2243,7 +2243,7 @@
         // after being deleted, until "Effacer les données" resets it all.
         // Bumping "v" pushes a new version of its cards to browsers that
         // already have it (progress kept).
-        var EXTRA_BUNDLED = [{ url: "arbres.json", id: "arbres", v: 2 }, { url: "songs.json", id: "chansons", v: 1 }, { url: "grammaire.json", id: "grammaire", v: 1 }, { url: "guide.json", id: "guide", v: 1 }, { url: "demo_riche.json", id: "demo-riche", v: 1 }];
+        var EXTRA_BUNDLED = [{ url: "arbres.json", id: "arbres", v: 2 }, { url: "songs.json", id: "chansons", v: 1 }, { url: "grammaire.json", id: "grammaire", v: 1 }, { url: "guide.json", id: "guide", v: 1 }, { url: "demo_riche.json", id: "demo-riche", v: 1 }, { url: "vocabulaire.json", id: "vocabulaire", v: 1 }];
         var LS_BUNDLED_SEEN = "ankitrain_v1_bundled_seen"; // {id: version} (was [id…] = version 1)
         function loadExtraBundledDecks() {
             var seen;
@@ -2922,7 +2922,8 @@
             sess.deckLabel = deckName == null ? "🏷 " + tag : deckName.split("::").join(" › ");
             sess.cards = allCards;
             // Full rendering: Spanish deck, type-in / normal mode, if on.
-            sess.canEnrich = src.id === "default" && !!ENRICH && track !== "dictee";
+            sess.canEnrich = track !== "dictee" && ((src.id === "default" && !!ENRICH)
+                || allCards.some(function (c) { return c.es != null; }));
             if (sess.canEnrich && fullRender()) queue = queue.map(enrichedCard);
             sess.queue = queue;
             sess.qIdx = 0;
@@ -2982,7 +2983,7 @@
         // True when the back holds more than the typed words (an image, a
         // meaning, an example sentence…) — worth showing before moving on.
         // Tags not worth showing (technical ones from the decks' origins).
-        var HIDDEN_TAGS = ["basic", "commun", "chanson", "cuatroloop", "quotidien", "marked", "leech", "guide", "demo"];
+        var HIDDEN_TAGS = ["basic", "commun", "chanson", "cuatroloop", "quotidien", "marked", "leech", "guide", "demo", "vocabulaire"];
         function shownTags(card) {
             return (card.tags || []).filter(function (t) { return HIDDEN_TAGS.indexOf(t.toLowerCase()) === -1 && !/^etape/i.test(t); });
         }
@@ -3270,10 +3271,12 @@
             + ".rf-mean{font-size:24px;font-weight:600;margin:2px 0}"
             + ".rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}"
             + ".rf-tr{font-size:15px;opacity:.7;font-style:italic;margin-top:2px}"
+            + ".rf-img img{max-height:200px;border-radius:10px;margin-top:10px}"
             + ".rf-play{margin-top:8px;border:1.5px solid rgba(128,128,128,.35);background:none;color:inherit;border-radius:999px;padding:3px 12px;font-size:13px;cursor:pointer}"
             + "</style>";
         // A display copy of the card (same id, words, audio): new front and back.
         function enrichedCard(c) {
+            if (c.es != null) return vocabCard(c);
             var e = ENRICH && ENRICH[c.id];
             if (!e) return c;
             var esFirst = /🇪🇸\s*➡️\s*🇫🇷/u.test(c.question || "") || c.lang === "es";
@@ -3289,6 +3292,23 @@
                 + (esFirst ? sentEs : (e.sf ? '<div class="rf-sent">' + esc(e.sf) + '</div>' : ""));
             var back = RF_CSS + '<div class="rf-mean">' + esc(answer) + '</div>' + pos + sentEs + sentFr + play;
             return Object.assign({}, c, { question: front, answer: back, enriched: true });
+        }
+
+        // "Vocabulaire espagnol" deck (vocabulaire.json, built by
+        // build_vocab.py, #71): compact cards (es, fr, pos, s, sf, sa, img)
+        // laid out here, Refold-style — word + example sentence on the front,
+        // meaning, word class, sentence + translation, 🔊 and image on the back.
+        function vocabCard(c) {
+            var pos = c.pos ? '<div class="rf-pos">' + esc(c.pos) + '</div>' : "";
+            var sent = c.s ? '<div class="rf-sent">' + c.s + '</div>' : "";
+            var tr = c.sf ? '<div class="rf-tr">' + esc(c.sf) + '</div>' : "";
+            var play = c.sa ? '<button class="rf-play" onclick="playAudioList([\'' + c.sa + '\'])">🔊 la phrase</button>' : "";
+            var img = c.img ? '<div class="rf-img"><img src="' + esc(c.img) + '" alt=""></div>' : "";
+            return Object.assign({}, c, {
+                question: RF_CSS + '<div class="rf-word">' + esc(c.es) + '</div>' + sent,
+                answer: RF_CSS + '<div class="rf-mean">' + esc(c.fr) + '</div>' + pos + sent + tr + play + img,
+                enriched: true
+            });
         }
 
         // ═══════════════════════════════════════════════
