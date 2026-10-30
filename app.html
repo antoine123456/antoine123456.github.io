@@ -1371,7 +1371,12 @@
         }
 
         .s-verso-extra:not(:empty) {
-            margin-top: 18px;
+            margin-top: 6px;
+        }
+
+        /* Back shown: no empty error line under the words (#81). */
+        .t-words:has(+ .s-verso-extra:not(:empty)) .wc-attempts:empty {
+            min-height: 0;
         }
 
         .s-mode-toggle {
@@ -1919,16 +1924,14 @@
         function deckAllowed(id) { return USER !== GHOST || GHOST_DECKS.indexOf(String(id)) !== -1; }
         document.documentElement.classList.toggle("bare-user", !FULL_DECKS);
 
+        // The list = antoine + the names in Firestore (+ the current one),
+        // nothing remembered locally: a name deleted from Firestore is gone
+        // from the list too (#83).
+        try { localStorage.removeItem(LS_NAMES); } catch (e) { }
         function knownNames() {
-            var names = [];
-            try { names = JSON.parse(localStorage.getItem(LS_NAMES) || "[]"); } catch (e) { }
-            if (names.indexOf(OWNER) === -1) names.unshift(OWNER);
-            return names.filter(function (n) { return n !== GHOST; });
-        }
-        function rememberName(n) {
-            var names = knownNames();
-            if (names.indexOf(n) === -1) names.push(n);
-            try { localStorage.setItem(LS_NAMES, JSON.stringify(names)); } catch (e) { }
+            var names = [OWNER];
+            if (USER && USER !== GHOST && names.indexOf(USER) === -1) names.push(USER);
+            return names;
         }
         function renderUserPicker(extra) {
             var el = document.getElementById("h-user-select");
@@ -1949,7 +1952,6 @@
                 if (!v || /[\/]/.test(v) || v === GHOST || v.indexOf("__") === 0) { renderUserPicker(); return; }
             }
             if (!v || v === USER) return;
-            rememberName(v);
             try { localStorage.setItem(LS_USER, v); } catch (e) { }
             // Push this user's last changes before leaving their namespace.
             clearTimeout(syncTimer);
@@ -2476,7 +2478,7 @@
         // before some bug was fixed still shows the bug": there's no other
         // way to clear that from inside the browser without dev tools.
         function resetAppData() {
-            if (!confirm("Effacer toutes les sources importées, la progression et les compteurs quotidiens de cet appareil ? Irréversible.")) return;
+            if (!confirm("Effacer toutes les sources importées, la progression et les compteurs quotidiens de cet appareil ? (La copie en ligne, s'il y en a une, est gardée et revient au rechargement.)")) return;
             var toRemove = [];
             for (var i = 0; i < localStorage.length; i++) {
                 var k = localStorage.key(i);
@@ -2484,8 +2486,12 @@
             }
             toRemove.forEach(function (k) { localStorage.removeItem(k); });
             toast("Données effacées (" + toRemove.length + " entrée(s))");
-            if (fbUser) wipeFirestoreForUser();
-            (FULL_DECKS ? loadDefaultDeckIfEmpty().then(loadExtraBundledDecks).then(refreshBundledDecks) : Promise.resolve()).then(renderHome);
+            // This device only: the cloud copy stays (it used to be wiped
+            // too, which lost progress that existed nowhere else — #82) and
+            // comes straight back.
+            (fbUser ? fetchAndMergeFromFirestore().catch(function () { }) : Promise.resolve())
+                .then(function () { if (FULL_DECKS) return loadDefaultDeckIfEmpty().then(loadExtraBundledDecks).then(refreshBundledDecks); })
+                .then(renderHome);
         }
 
         // ═══════════════════════════════════════════════
@@ -3153,8 +3159,25 @@
         // more than the typed words (image, sentence…), then the info sheet.
         function showRichBack(container, card) {
             container.innerHTML = answerHasMore(card) ? '<div class="s-verso-body"></div>' : "";
-            if (answerHasMore(card)) mountCardHtml(container.querySelector(".s-verso-body"), card.answer, cardStyle(sess.sourceId, card));
+            if (answerHasMore(card)) mountCardHtml(container.querySelector(".s-verso-body"), backWithoutRepeats(card), cardStyle(sess.sourceId, card));
             container.insertAdjacentHTML("beforeend", infoHtml(card));
+        }
+
+        // Rich back under the card (#81): nothing already on screen twice —
+        // a block whose text is on the recto (the example sentence) goes,
+        // and so does the meaning once it has been typed.
+        function backWithoutRepeats(card) {
+            if (!card.enriched) return card.answer;
+            var norm = function (t) { return String(t || "").replace(/\s+/g, " ").trim().toLowerCase(); };
+            var front = document.createElement("template"), back = document.createElement("template");
+            front.innerHTML = card.question || "";
+            back.innerHTML = card.answer;
+            var seen = {};
+            front.content.querySelectorAll("div").forEach(function (d) { seen[norm(d.textContent)] = true; });
+            back.content.querySelectorAll("div[class^='rf-']").forEach(function (d) {
+                if (seen[norm(d.textContent)] || (d.className === "rf-mean" && studyMode() !== "flip")) d.remove();
+            });
+            return back.innerHTML;
         }
 
         function hasRichAnswer(card) {
@@ -3433,10 +3456,10 @@
             + ".rf-word{font-size:40px;font-weight:600;letter-spacing:.5px;margin:2px 0 8px}"
             + ".rf-sent{font-size:18px;line-height:1.5;opacity:.9}.rf-sent b{color:var(--blue,#2563eb)}"
             + ".rf-mean{font-size:24px;font-weight:600;margin:2px 0}"
-            + ".rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}"
+            + ".rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}"
             + ".rf-tr{font-size:15px;opacity:.7;font-style:italic;margin-top:2px}"
-            + ".rf-img img{max-height:200px;border-radius:10px;margin-top:10px}"
-            + ".rf-play{margin-top:8px;border:1.5px solid rgba(128,128,128,.35);background:none;color:inherit;border-radius:999px;padding:3px 12px;font-size:13px;cursor:pointer}"
+            + ".rf-img img{max-height:200px;border-radius:10px;margin-top:6px}"
+            + ".rf-play{margin-top:4px;border:1.5px solid rgba(128,128,128,.35);background:none;color:inherit;border-radius:999px;padding:3px 12px;font-size:13px;cursor:pointer}"
             + "</style>";
         // A display copy of the card (same id, words, audio): new front and back.
         function enrichedCard(c) {
