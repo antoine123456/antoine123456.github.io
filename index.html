@@ -3907,7 +3907,7 @@
                 || wordRows.find(function (e) { return !e.solved && !e.given; });
             if (next) next.inp.focus();
             else if (document.activeElement) document.activeElement.blur(); // phone: keyboard down → rating pills show
-            if (!wordRows.some(function (e) { return !e.solved && !e.revealed; })) setBarState("rating");
+            if (!wordRows.some(function (e) { return !e.solved && !e.revealed; })) showBackForRating();
         }
 
         function focusNext(i) {
@@ -3937,7 +3937,7 @@
             showHintFor(entry);
             // Every missing word now shown → time to rate it yourself.
             if (!wordRows.some(function (e) { return !e.solved && !e.revealed; })) {
-                setBarState("rating");
+                showBackForRating();
                 playCardAudio("a"); // like Anki: audio plays as soon as the answer appears
             }
             return entry;
@@ -3951,6 +3951,15 @@
         }
         function showHintFor(entry) {
             revealHint(entry);
+        }
+
+        // Whole answer now on screen (word given after 3 ✗, last hint): show
+        // the full back like "Voir la réponse" does, then the rating pills (#70).
+        function showBackForRating() {
+            var card = sess.queue[sess.qIdx];
+            var extra = document.getElementById("s-verso-extra");
+            if (card && extra && hasRichAnswer(card)) showRichBack(extra, card);
+            setBarState("rating");
         }
 
         // "Voir la réponse": the whole answer at once, then rating pills.
