@@ -482,14 +482,21 @@
         .sync-status.sync-hidden { display: none; }
 
         #home { padding-top: calc(16px + env(safe-area-inset-top, 0px)); }
-        .h-header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 20px; }
+        .h-header { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
         .h-header .h-theme-toggle { position: static; margin: 0; flex: none; }
         .h-brand { display: flex; align-items: center; gap: 6px; margin-right: auto; }
         .h-brand .h-logo { font-size: 22px; margin: 0; }
         .h-brand .h-title { font-size: 18px; margin: 0; }
         .h-user { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--text-2); }
-        .h-header .h-theme-toggle { order: 2; }
-        @media (max-width: 600px) { .h-user { order: 3; flex-basis: 100%; } }
+        .h-user select { max-width: 150px; }
+        .h-brand .h-title { white-space: nowrap; }
+        /* Phones: still one line (#86) — the sync state shrinks to its icon. */
+        @media (max-width: 600px) {
+            .h-header { gap: 6px; }
+            .h-brand .h-title { font-size: 16px; }
+            .h-user > .h-user-icon, .sync-status .ss-txt { display: none; }
+            .h-user select { max-width: 120px; }
+        }
         .h-user select { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 3px 8px; }
 
         .h-logo {
@@ -1541,6 +1548,8 @@
             border-top: 1px solid var(--border-2);
         }
 
+        .b-sep:empty { gap: 0; } /* Refold zones (#85): one plain line */
+
         /* Dense list for text decks: front | back, one row per card */
         .b-list {
             width: 100%;
@@ -1698,8 +1707,8 @@
         <!-- One header line (#84): logo + name, user, guide, theme. No
              help text, import or reset on this branch. -->
         <div class="h-header">
-            <div class="h-brand"><span class="h-logo">🃏</span><span class="h-title">Anki Trainer</span></div>
-            <div class="h-user">👤 <select id="h-user-select" onchange="chooseUser(this.value)"></select>
+            <div class="h-brand"><span class="h-title">Anki Trainer</span></div>
+            <div class="h-user"><span class="h-user-icon">👤</span> <select id="h-user-select" onchange="chooseUser(this.value)"></select>
                 <span id="sync-status" class="sync-status sync-hidden"></span></div>
             <button class="h-theme-toggle h-info-btn" onclick="openGuide()" title="Mode d'emploi">i</button>
             <button class="h-theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Basculer clair/sombre">🌙</button>
@@ -2516,7 +2525,10 @@
             var el = document.getElementById("sync-status");
             if (!el) return;
             var labels = { synced: "✓ Synchronisé", syncing: "↻ Synchronisation…", offline: "⚠ Hors ligne", error: "⚠ Erreur de sync" };
-            el.textContent = labels[state] || "";
+            var l = labels[state] || "";
+            // Icon + text; on phones only the icon shows (#86), the text stays in the tooltip.
+            el.innerHTML = l ? esc(l.slice(0, 1)) + '<span class="ss-txt">' + esc(l.slice(1)) + "</span>" : "";
+            el.title = l;
             el.className = "sync-status sync-" + (state || "hidden");
         }
 
@@ -3482,7 +3494,12 @@
             var front = RF_CSS + '<div class="rf-word">' + esc(shown) + '</div>'
                 + (esFirst ? sentEs : (e.sf ? '<div class="rf-sent">' + esc(e.sf) + '</div>' : ""));
             var back = RF_CSS + '<div class="rf-mean">' + esc(answer) + '</div>' + pos + sentEs + sentFr + play;
-            return Object.assign({}, c, { question: front, answer: back, enriched: true });
+            var rf = esFirst
+                ? { top: '<div class="rf-word">' + esc(shown) + '</div>', topBack: '<div class="rf-mean">' + esc(answer) + '</div>' + pos,
+                    bottom: sentEs, bottomBack: sentFr + play }
+                : { top: '<div class="rf-word">' + esc(shown) + '</div>', topBack: '<div class="rf-mean">' + esc(answer) + '</div>' + pos,
+                    bottom: e.sf ? '<div class="rf-sent">' + esc(e.sf) + '</div>' : "", bottomBack: sentEs + play };
+            return Object.assign({}, c, { question: front, answer: back, enriched: true, rf: rf });
         }
 
         // "Vocabulaire espagnol" deck (vocabulaire.json, built by
@@ -3498,7 +3515,9 @@
             return Object.assign({}, c, {
                 question: RF_CSS + '<div class="rf-word">' + esc(c.es) + '</div>' + sent,
                 answer: RF_CSS + '<div class="rf-mean">' + esc(c.fr) + '</div>' + pos + sent + tr + play + img,
-                enriched: true
+                enriched: true,
+                rf: { top: '<div class="rf-word">' + esc(c.es) + '</div>', topBack: '<div class="rf-mean">' + esc(c.fr) + '</div>' + pos,
+                      bottom: sent, bottomBack: tr + play + img }
             });
         }
 
@@ -3752,6 +3771,7 @@
                 + '</div>';
             if (!dictee) mountCardHtml(document.querySelector("#s-content .s-card-body"), displayQuestion(card.question), cardStyle(sess.sourceId, card));
             else document.getElementById("audio-player").defaultPlaybackRate = 1;
+            if (flip && card.rf) showRefoldZones(card, false);
 
             setBarState("question");
             if (!flip) buildRows(card.words);
@@ -4347,11 +4367,30 @@
             pendingNext = null;
             startStudy(sess.sourceIdx, sess.deckName, sess.customNewLimit, sess.tag);
         }
+        // Normal mode on a rich card, like Refold (#85): the word zone above
+        // the line, the sentence zone below; turning the card adds the
+        // meaning under the word and the translation / 🔊 / image under the
+        // sentence — nothing shown twice.
+        function showRefoldZones(card, back) {
+            var css = cardStyle(sess.sourceId, card);
+            mountCardHtml(document.querySelector("#s-content .s-card-body"), RF_CSS + card.rf.top + (back ? card.rf.topBack : ""), css);
+            mountCardHtml(document.getElementById("s-verso-body"), RF_CSS + card.rf.bottom + (back ? card.rf.bottomBack : ""), css);
+            var sep = document.querySelector("#s-content .b-sep");
+            if (sep) sep.textContent = "";
+        }
+
         function flipCard() {
             if (flipShown || advancing) return;
             var card = sess.queue[sess.qIdx];
             if (!card) return;
             flipShown = true;
+            if (card.rf) {
+                showRefoldZones(card, true);
+                document.getElementById("s-verso-body").insertAdjacentHTML("afterend", infoHtml(card));
+                setBarState("rating");
+                playCardAudio("a");
+                return;
+            }
             var back = card.answer != null ? card.answer : esc((card.words || []).join(" "));
             var vb = document.getElementById("s-verso-body");
             mountCardHtml(vb, back, cardStyle(sess.sourceId, card));
