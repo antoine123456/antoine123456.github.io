@@ -4237,6 +4237,13 @@
         // Arrows too (#47): ↑ Facile · ↓ Difficile · ← À revoir · → Correct —
         // except while the cursor is in a blank (arrows then move in the text).
         var ARROW_RATING = { ArrowUp: 4, ArrowDown: 2, ArrowLeft: 1, ArrowRight: 3 };
+        var heldRating = 0; // F2 / F4 held (#72)
+        document.addEventListener("keyup", function (e) {
+            if ((e.key !== "F2" && e.key !== "F4") || !heldRating) return;
+            var q = heldRating;
+            heldRating = 0;
+            if (document.getElementById("study").style.display === "flex") rate(q);
+        });
 
         document.addEventListener("keyup", function (e) { if (e.key === "F1") conjHold(false); });
         window.addEventListener("blur", function () { conjHold(false); });
@@ -4277,6 +4284,14 @@
             } else if (e.key === "F6") {
                 e.preventDefault();
                 toggleFlagCurrent();
+            } else if (e.key === "F2" || e.key === "F4") {
+                // Held: the full card shows (answer + back); released: rated
+                // and on to the next card (#72).
+                e.preventDefault();
+                if (e.repeat || advancing || heldRating) return;
+                heldRating = FKEY_RATING[e.key];
+                if (studyMode() === "flip") { if (!flipShown) flipCard(); }
+                else showFullAnswer();
             } else if (FKEY_RATING.hasOwnProperty(e.key)) {
                 e.preventDefault();
                 rate(FKEY_RATING[e.key]);
