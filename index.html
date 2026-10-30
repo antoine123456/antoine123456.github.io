@@ -2103,6 +2103,16 @@
             a.download = "anki-trainer-debug-" + new Date().toISOString().slice(0, 16).replace(/[-:T]/g, "") + ".json";
             a.click();
         }
+        // What this browser holds after loading (#104): each source and its cards.
+        function logStartup() {
+            dlog("démarrage", {
+                page: location.pathname + location.search,
+                sources: loadSources().map(function (src) {
+                    var cards = loadCards(src.id);
+                    return src.id + " : " + Object.keys(cards).reduce(function (n, d) { return n + (cards[d] || []).length; }, 0) + " cartes, " + src.decks.length + " paquet(s)";
+                })
+            });
+        }
         function clearDebugLog() { try { localStorage.removeItem(LS_DEBUG_LOG); } catch (e) { } renderSettings(); }
         window.addEventListener("error", function (e) { dlog("erreur", { message: e.message, ou: (e.filename || "").split("/").pop() + ":" + e.lineno }); });
         // Time mode: as many new cards as the time left allows (the badges
@@ -2677,9 +2687,10 @@
             if (Array.isArray(seen)) seen = seen.reduce(function (o, id) { o[id] = 1; return o; }, {});
             var have = loadSources().map(function (s) { return String(s.id); });
             var todo = EXTRA_BUNDLED.filter(function (b) { return !seen[b.id] || seen[b.id] < b.v; });
+            dlog("paquets intégrés", { prevus: EXTRA_BUNDLED.map(function (b) { return b.id; }), presents: have, deja_vus: seen, a_charger: todo.map(function (b) { return b.id; }) });
             return Promise.all(todo.map(function (b) {
                 var deleted = seen[b.id] && have.indexOf(b.id) === -1; // removed by the user: leave it gone
-                if (deleted) return b;
+                if (deleted) { dlog("paquet intégré", { id: b.id, action: "ignoré (supprimé par l'utilisateur)" }); return b; }
                 return fetch(b.url)
                     .then(function (r) { return r.ok ? r.json() : null; })
                     .then(function (data) {
@@ -2718,7 +2729,11 @@
                     .then(function (text) {
                         if (!text) return;
                         var sig = strHash(text) + ":" + text.length;
-                        if (sigs[b.id] === sig) return;
+                        // same file, but its cards may be missing here (a source
+                        // that came back from the cloud without them) — #104
+                        var empty = !Object.keys(loadCards(b.id)).some(function (d) { return (loadCards(b.id)[d] || []).length; });
+                        if (sigs[b.id] === sig && !empty) return;
+                        dlog("paquet intégré", { id: b.id, action: empty ? "cartes absentes : rechargé" : "nouvelle version" });
                         var data = JSON.parse(text);
                         if (!refreshDeckData(b.id, data)) return;
                         if (sigs[b.id]) toast("✓ " + (data.source || (isSongsData(data) ? "Chansons" : b.id)) + " mis à jour");
@@ -5043,11 +5058,13 @@
             // the rating colour on the line is seen.
             if (sess.lyrics) { setTimeout(showCard, 350); return; }
             var content = document.getElementById("s-content");
-            content.style.cssText = "opacity:0;transform:translateY(-10px);transition:opacity .4s,transform .4s";
+            // Only these three: max-height (#99, the card's fitted size) lives in this style too (#103).
+            var fade = function (o, y, tr) { content.style.opacity = o; content.style.transform = "translateY(" + y + "px)"; content.style.transition = tr; };
+            fade(0, -10, "opacity .4s, transform .4s");
             setTimeout(function () {
-                content.style.cssText = "opacity:0;transform:translateY(10px);transition:none";
+                fade(0, 10, "none");
                 content.offsetHeight;
-                content.style.cssText = "opacity:1;transform:translateY(0);transition:opacity .4s,transform .4s";
+                fade(1, 0, "opacity .4s, transform .4s");
                 showCard();
             }, 400);
         }
@@ -5091,7 +5108,7 @@
 
         // ── INIT ──
         updateThemeToggleIcon();
-        loadDefaultDeckIfEmpty().then(loadExtraBundledDecks).then(refreshBundledDecks).then(renderHome);
+        loadDefaultDeckIfEmpty().then(loadExtraBundledDecks).then(refreshBundledDecks).then(renderHome).then(logStartup);
     </script>
 </body>
 
