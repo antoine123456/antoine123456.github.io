@@ -295,6 +295,20 @@
         }
 
         .fm-modal { max-width: 480px; padding-bottom: 18px; }
+        .h-settings-btn { right: 108px; }
+        .st-modal { max-width: 460px; padding-bottom: 18px; }
+        .st-today { font-size: 12px; color: var(--text-2); margin: 4px 0 14px; }
+        .st-row { display: flex; flex-direction: column; gap: 6px; margin: 14px 0 0; font-size: 14px; }
+        .st-row b { color: var(--navy); margin-left: 4px; }
+        .st-row input[type=range] { width: 100%; accent-color: var(--navy); }
+        .st-note { font-size: 11.5px; color: var(--text-3); line-height: 1.45; margin-top: 6px; }
+        .st-switch { display: flex; border: 1.5px solid var(--border-2); border-radius: 18px; overflow: hidden; width: fit-content; }
+        .st-switch button { font: inherit; font-size: 13px; border: none; background: none; color: var(--text-2); padding: 6px 14px; cursor: pointer; }
+        .st-switch button.on { background: var(--navy); color: var(--bg); }
+        .s-time { height: 2px; margin-top: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+        .s-time[hidden] { display: none; }
+        .s-time-fill { height: 100%; width: 0; background: var(--blue); transition: width 1s linear; }
+        .s-time-fill.full { background: var(--green); }
         .fm-card { margin: 10px 0 12px; font-size: 14px; color: var(--text-2); }
         #fm-text { width: 100%; box-sizing: border-box; font: inherit; font-size: 15px; color: var(--text); background: var(--surface);
             border: 1.5px solid var(--border-2); border-radius: 12px; padding: 10px 12px; resize: vertical; }
@@ -496,6 +510,12 @@
             .h-brand .h-title { font-size: 16px; }
             .h-user > .h-user-icon, .sync-status .ss-txt { display: none; }
             .h-user select { max-width: 120px; }
+        }
+        @media (max-width: 380px) {
+            .h-header { gap: 4px; }
+            .h-brand .h-title { font-size: 15px; }
+            .h-header .h-theme-toggle { width: 30px; height: 30px; font-size: 13px; }
+            .h-user select { max-width: 96px; }
         }
         .h-user select { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 3px 8px; }
 
@@ -943,8 +963,10 @@
             border-bottom: 2.5px solid var(--input-line);
             background: transparent;
             color: var(--text);
-            font-family: Georgia, serif;
-            font-size: 17px;
+            /* Same font / size / weight as the recto (set per card, #91). */
+            font-family: var(--ans-font, Georgia, serif);
+            font-size: var(--ans-size, 17px);
+            font-weight: var(--ans-weight, 400);
             text-align: center;
             outline: none;
             padding: 2px 4px 7px;
@@ -991,7 +1013,7 @@
             /* Its line is always there, so showing a hint moves nothing (#88). */
             visibility: hidden;
             min-height: 1.6em;
-            font-family: Georgia, serif;
+            font-family: var(--ans-font, Georgia, serif);
             font-size: 13px;
             color: var(--orange);
         }
@@ -1723,6 +1745,7 @@
             <div class="h-brand"><span class="h-title">Anki Trainer</span></div>
             <div class="h-user"><span class="h-user-icon">👤</span> <select id="h-user-select" onchange="chooseUser(this.value)"></select>
                 <span id="sync-status" class="sync-status sync-hidden"></span></div>
+            <button class="h-theme-toggle h-settings-btn" onclick="openSettings()" title="Réglages">⚙</button>
             <button class="h-theme-toggle h-info-btn" onclick="openGuide()" title="Mode d'emploi">i</button>
             <button class="h-theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Basculer clair/sombre">🌙</button>
         </div>
@@ -1730,6 +1753,35 @@
     </div>
 
     <!-- ── MINI GUIDE (modal, opened by the "i" button on the home screen) ── -->
+    <!-- ── ⚙ Settings (#56, #57, #92) ── -->
+    <div class="g-backdrop" id="settings" hidden onclick="if (event.target === this) closeSettings()">
+        <div class="g-modal st-modal" role="dialog" aria-modal="true" aria-labelledby="st-title">
+            <div class="g-head">
+                <div class="g-title" id="st-title">Réglages</div>
+                <button class="g-close" onclick="closeSettings()" title="Fermer (Échap)">✕</button>
+            </div>
+            <div class="st-today" id="st-today"></div>
+            <label class="st-row"><span>Nouvelles cartes par jour <b id="st-new-v"></b></span>
+                <input type="range" id="st-new" min="0" max="100" step="5" oninput="setSetting('newPerDay', +this.value)"></label>
+            <label class="st-row"><span>Révisions par jour <b id="st-rev-v"></b></span>
+                <input type="range" id="st-rev" min="0" max="500" step="10" oninput="setSetting('reviewsPerDay', +this.value)"></label>
+            <label class="st-row"><span>Temps de révision par jour <b id="st-min-v"></b></span>
+                <input type="range" id="st-min" min="0" max="60" step="5" oninput="setSetting('minutesPerDay', +this.value)"></label>
+            <div class="st-note">Avec un temps choisi, l'appli prépare juste assez de cartes : environ 40 s pour une nouvelle,
+                ton temps habituel pour les autres (mesuré à chaque carte), un peu plus pour une carte souvent oubliée, et un peu plus
+                pour toutes après plusieurs jours sans réviser (souvenirs moins frais). Une barre de temps défile pendant la séance.</div>
+            <label class="st-row"><span>Erreurs acceptées avant que le mot soit donné <b id="st-err-v"></b></span>
+                <input type="range" id="st-err" min="1" max="6" step="1" oninput="setSetting('maxErrors', +this.value)"></label>
+            <div class="st-row"><span>Après le verso complet</span>
+                <div class="st-switch">
+                    <button id="st-space-hold" onclick="setSetting('spaceMode', 'hold')">Maintenir Espace</button>
+                    <button id="st-space-next" onclick="setSetting('spaceMode', 'next')">Espace pour suivant</button>
+                </div></div>
+            <div class="st-note">Maintenir Espace : la carte suivante vient seule après quelques secondes, Espace tenu la garde affichée.
+                Espace pour suivant : le verso reste jusqu'à ce que tu appuies sur Espace.</div>
+        </div>
+    </div>
+
     <!-- ── F6: mark a card, with a comment (#77) ── -->
     <div class="g-backdrop" id="flag-modal" hidden onclick="if (event.target === this) closeFlagModal()">
         <div class="g-modal fm-modal" role="dialog" aria-modal="true" aria-labelledby="fm-title">
@@ -1840,7 +1892,16 @@
             </div>
 
             <div class="g-step">
-                <div class="g-num">7</div><div class="g-h">Raccourcis clavier</div>
+                <div class="g-num">7</div><div class="g-h">Réglages ⚙</div>
+                <div class="g-body">
+                    Nouvelles cartes et révisions par jour, erreurs acceptées avant que le mot soit donné, et ce que fait <b>Espace</b> après le verso.
+                    <b>Temps par jour</b> : l'appli mesure ton temps sur chaque carte et prépare juste assez de cartes pour ce temps
+                    (≈ 40 s une nouvelle, plus pour une carte souvent oubliée, un peu plus après quelques jours sans réviser). Une fine barre bleue sous la progression montre le temps écoulé.
+                </div>
+            </div>
+
+            <div class="g-step">
+                <div class="g-num">8</div><div class="g-h">Raccourcis clavier</div>
                 <div class="g-body">
                     <div class="g-kbd">
                         <span class="t-key">F1</span><span>indice (encore F1 quand tout est montré = À revoir et suivante)</span>
@@ -1889,6 +1950,7 @@
                 <div class="s-prog-track">
                     <div class="s-prog-fill" id="prog-fill" style="width:0%"></div>
                 </div>
+                <div class="s-time" id="s-time" hidden title="Temps de révision du jour"><div class="s-time-fill" id="time-fill"></div></div>
             </div>
         </div>
         <div class="s-main">
@@ -2041,7 +2103,92 @@
         var LS_STYLES = NS + "css_";    // + sourceId → [css shared by cards, see card.style]
         var LS_MODE = NS + "mode";     // "type" (type the answer, default) | "flip" (Anki-style: show answer, rate)
         var LS_THEME = NS + "theme";    // "light" | "dark" | absent (follow system)
-        var NEW_LIMIT = 20;
+        var NEW_LIMIT = 20; // default; the ⚙ setting wins (newLimitPerDay)
+
+        // ⚙ Settings (#56, #57, #92), per user / browser.
+        var LS_SETTINGS = NS + "settings";
+        var SETTINGS_DEFAULT = { newPerDay: NEW_LIMIT, reviewsPerDay: 0, minutesPerDay: 0, maxErrors: 3, spaceMode: "hold" };
+        function settings() {
+            var o = {};
+            try { o = JSON.parse(localStorage.getItem(LS_SETTINGS) || "{}") || {}; } catch (e) { }
+            return Object.assign({}, SETTINGS_DEFAULT, o);
+        }
+        function setSetting(k, v) {
+            var o = settings(); o[k] = v;
+            try { localStorage.setItem(LS_SETTINGS, JSON.stringify(o)); } catch (e) { }
+            renderSettings();
+        }
+        function newLimitPerDay() { return settings().newPerDay; }
+        function openSettings() { renderSettings(); document.getElementById("settings").hidden = false; }
+        function closeSettings() { document.getElementById("settings").hidden = true; if (document.getElementById("home").style.display !== "none") renderHome(); }
+        function renderSettings() {
+            var o = settings(), d = dayStats();
+            var set = function (id, v, label) { document.getElementById(id).value = v; document.getElementById(id + "-v").textContent = label; };
+            set("st-new", o.newPerDay, o.newPerDay);
+            set("st-rev", o.reviewsPerDay, o.reviewsPerDay ? o.reviewsPerDay : "sans limite");
+            set("st-min", o.minutesPerDay, o.minutesPerDay ? o.minutesPerDay + " min" : "sans limite");
+            set("st-err", o.maxErrors, o.maxErrors);
+            document.getElementById("st-space-hold").classList.toggle("on", o.spaceMode !== "next");
+            document.getElementById("st-space-next").classList.toggle("on", o.spaceMode === "next");
+            document.getElementById("st-today").textContent = "Aujourd'hui : " + d.reviews + " révision(s), "
+                + d.news + " nouvelle(s), " + Math.round(d.ms / 60000) + " min de révision";
+        }
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" && !document.getElementById("settings").hidden) { e.preventDefault(); closeSettings(); }
+        });
+
+        // Today's totals (all decks): cards rated, time spent (#57, #58).
+        // lastDay = the last day something was studied before today.
+        var LS_DAY = NS + "day";
+        function dayStats() {
+            var d = null;
+            try { d = JSON.parse(localStorage.getItem(LS_DAY) || "null"); } catch (e) { }
+            if (!d) return { day: TODAY, reviews: 0, news: 0, ms: 0, lastDay: null };
+            if (d.day !== TODAY) return { day: TODAY, reviews: 0, news: 0, ms: 0, lastDay: d.day };
+            return d;
+        }
+        function saveDayStats(d) { try { localStorage.setItem(LS_DAY, JSON.stringify(d)); } catch (e) { } }
+
+        // Time per card: measured from the card showing to its rating,
+        // capped (a break isn't study time). Averages kept for new cards and
+        // for the others; each card also keeps its own (srs.ms).
+        var CARD_MS_CAP = 60000;
+        var LS_TIMING = NS + "timing";
+        function timing() {
+            var t = {};
+            try { t = JSON.parse(localStorage.getItem(LS_TIMING) || "{}") || {}; } catch (e) { }
+            return { newMs: t.newMs || 40000, reviewMs: t.reviewMs || 15000 };
+        }
+        function recordCardTime(s, wasNew, ms) {
+            var ema = function (old, v) { return old ? Math.round(old * 0.7 + v * 0.3) : v; };
+            s.ms = ema(s.ms, ms);
+            var t = timing();
+            if (wasNew) t.newMs = ema(t.newMs, ms); else t.reviewMs = ema(t.reviewMs, ms);
+            try { localStorage.setItem(LS_TIMING, JSON.stringify(t)); } catch (e) { }
+            var d = dayStats();
+            d.ms += ms;
+            if (wasNew) d.news++; else d.reviews++;
+            saveDayStats(d);
+        }
+        // Expected time for a card (#57): its own time if known, else the
+        // average; +10 s weighted by how often it was forgotten; everything a
+        // bit longer after days without studying.
+        function estimateMs(card, srs, gapFactor) {
+            var s = srs[card.id], t = timing();
+            var isNew = !s || s.state === "new";
+            var ms = s && s.ms ? s.ms : (isNew ? t.newMs : t.reviewMs);
+            if (s && s.lapses) ms += 10000 * Math.min(1, s.lapses / Math.max(1, s.reps || 1));
+            return ms * gapFactor;
+        }
+        function gapFactor() {
+            var d = dayStats();
+            var gap = d.lastDay == null ? 1 : TODAY - d.lastDay;
+            return 1 + 0.08 * Math.max(0, Math.min(7, gap - 1));
+        }
+        function timeLeftMs() {
+            var m = settings().minutesPerDay;
+            return m ? m * 60000 - dayStats().ms : Infinity;
+        }
 
         // Manual override on top of the CSS @media(prefers-color-scheme)
         // default. Absent = follow the system/browser setting.
@@ -2093,7 +2240,7 @@
         function remainingNewToday(sid) {
             var nc = loadNewCount(sid);
             var introducedToday = nc.day === TODAY ? nc.count : 0;
-            return Math.max(0, NEW_LIMIT - introducedToday);
+            return Math.max(0, newLimitPerDay() - introducedToday);
         }
         function recordNewIntroduced(sid) {
             var nc = loadNewCount(sid);
@@ -2874,7 +3021,7 @@
                 else if (s.state === "learning" || s.state === "relearning" || s.due <= TODAY) due++;
                 else learned++;
             });
-            return { new: Math.min(newC, newLimit == null ? NEW_LIMIT : newLimit), due: due, learned: learned, trueNew: newC };
+            return { new: Math.min(newC, newLimit == null ? newLimitPerDay() : newLimit), due: due, learned: learned, trueNew: newC };
         }
 
         // Staged cards: stage N's new cards stay locked until, in every
@@ -3091,7 +3238,31 @@
                 // FR→ES twin don't follow each other.
                 shuffle(dueCards);
                 newCards = shuffle(newCards.slice(0, newLimit));
+                // ⚙ Reviews per day (#56): learning steps always come back,
+                // day-scheduled reviews stop at the limit.
+                var st = settings();
+                if (st.reviewsPerDay && customNewLimit == null) {
+                    var left = Math.max(0, st.reviewsPerDay - dayStats().reviews);
+                    dueCards = dueCards.filter(function (c) {
+                        var s = srs[c.id];
+                        if (s.state === "learning" || s.state === "relearning") return true;
+                        return left-- > 0;
+                    });
+                }
                 queue = dueCards.concat(newCards);
+                // ⚙ Time per day (#57): just enough cards for the time left
+                // (due ones first). « +20 » ignores it.
+                var budget = timeLeftMs();
+                if (budget !== Infinity && customNewLimit == null) {
+                    if (budget <= 0) { toast("⏱ Temps de révision du jour atteint (" + st.minutesPerDay + " min) — ⚙ pour le changer, ou +20"); return; }
+                    var f = gapFactor(), sum = 0, kept = [];
+                    for (var qi = 0; qi < queue.length; qi++) {
+                        var est = estimateMs(queue[qi], srs, f);
+                        if (kept.length && sum + est > budget) break;
+                        kept.push(queue[qi]); sum += est;
+                    }
+                    queue = kept;
+                }
             }
 
             // A tag with nothing due: free review of all its cards (like
@@ -3205,9 +3376,11 @@
             if (before == null || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
             var dy = before - words.getBoundingClientRect().top;
             container.style.cssText = "opacity:0;transition:none";
-            if (Math.abs(dy) > 1) words.style.cssText = "transform:translateY(" + dy + "px);transition:none";
+            // Only transform / transition: the answer font (#91) lives in this element's inline style too.
+            if (Math.abs(dy) > 1) { words.style.transition = "none"; words.style.transform = "translateY(" + dy + "px)"; }
             words.offsetHeight; // commit the start state
-            words.style.cssText = "transform:none;transition:transform .35s cubic-bezier(.2,.7,.3,1)";
+            words.style.transition = "transform .35s cubic-bezier(.2,.7,.3,1)";
+            words.style.transform = "none";
             container.style.cssText = "opacity:1;transition:opacity .4s ease .2s";
         }
 
@@ -3771,6 +3944,7 @@
         // ═══════════════════════════════════════════════
         function showCard() {
             advancing = false; cardErrors = 0; wordRows = []; revealed = false; pendingNext = null;
+            sess.cardShownAt = Date.now();
             var card = sess.queue[sess.qIdx];
             if (!card) { showDone(); return; }
             updateProgress();
@@ -3810,7 +3984,7 @@
             if (flip && card.rf) showRefoldZones(card, false);
 
             setBarState("question");
-            if (!flip) buildRows(card.words);
+            if (!flip) { buildRows(card.words); syncAnswerFont(); }
             updateCompact();
             updateFlagIndicator();
             if (hasAudio) playCardAudio("q");
@@ -3857,6 +4031,8 @@
                     + '<button class="s-pill" onclick="showFullAnswer()">Voir la réponse <span class="t-key">F8</span></button>';
             } else if (state === "rating" && card) {
                 html = ratingButtonsHtml(previewIntervals(sess.srs[card.id]));
+            } else if (state === "next" && settings().spaceMode === "next") {
+                html = '<button class="s-pill" onclick="continueAfterAnswer()">Suivant <span class="t-key">Espace</span></button>';
             } else if (state === "next") {
                 html = '<button class="s-pill s-hold' + (holdBack ? ' on' : '') + '" onpointerdown="event.preventDefault(); setHold(true)" onpointerup="setHold(false)" onpointerleave="setHold(false)" onpointercancel="setHold(false)">'
                     + '⏸ <span class="s-hold-kb">Maintenir Espace</span><span class="s-hold-touch">Maintenir appuyé</span></button>';
@@ -4010,7 +4186,26 @@
             }
         }
 
+        // Time bar (#58): today's study time against the ⚙ time per day.
+        var timeTimer = null, timeToastDone = false;
+        function updateTimeBar() {
+            var bar = document.getElementById("s-time");
+            var m = settings().minutesPerDay;
+            var on = !!m && document.getElementById("study").style.display === "flex";
+            bar.hidden = !on;
+            if (!on) { clearInterval(timeTimer); timeTimer = null; return; }
+            if (!timeTimer) timeTimer = setInterval(updateTimeBar, 1000);
+            var ms = dayStats().ms + Math.min(CARD_MS_CAP, Date.now() - (sess.cardShownAt || Date.now()));
+            var r = ms / (m * 60000);
+            var fill = document.getElementById("time-fill");
+            fill.style.width = Math.min(100, r * 100) + "%";
+            fill.classList.toggle("full", r >= 1);
+            bar.title = "Temps de révision du jour : " + Math.floor(ms / 60000) + " / " + m + " min";
+            if (r >= 1 && !timeToastDone) { timeToastDone = true; toast("⏱ " + m + " min atteintes — tu peux t'arrêter après cette carte"); }
+        }
+
         function updateProgress() {
+            updateTimeBar();
             var total = sess.queue.length;
             var done = Math.min(sess.qIdx, total);
             document.getElementById("prog-label").textContent = done + " / " + total;
@@ -4036,10 +4231,38 @@
         // ═══════════════════════════════════════════════
         // WORD ROWS
         // ═══════════════════════════════════════════════
+        // The blanks take the recto's main text style (#91): the big word of
+        // a rich card, else the first text of the card (its own CSS included).
+        function syncAnswerFont() {
+            var words = document.getElementById("t-words");
+            var host = document.querySelector("#s-content .s-card-body");
+            if (!words || !host || !host.shadowRoot) return;
+            var root = host.shadowRoot, el = root.querySelector(".rf-word");
+            if (!el) {
+                var w = document.createTreeWalker(root.querySelector(".card") || root, NodeFilter.SHOW_TEXT);
+                while (w.nextNode()) { if (w.currentNode.textContent.trim()) { el = w.currentNode.parentElement; break; } }
+            }
+            if (!el) return;
+            var cs = getComputedStyle(el);
+            words.style.setProperty("--ans-font", cs.fontFamily);
+            words.style.setProperty("--ans-size", cs.fontSize);
+            words.style.setProperty("--ans-weight", cs.fontWeight);
+        }
+
+        // Words to type without punctuation (#90): "¿Por", "(permanent)",
+        // "va," lose their signs; "?", "...", "!" alone aren't blanks at all.
+        // Inner apostrophes / hyphens stay (c'est, qu'est-ce).
+        function typeableWords(words) {
+            return (words || []).map(function (w) {
+                return String(w).replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+            }).filter(Boolean);
+        }
+
         function buildRows(words) {
             advancing = false;
             var section = document.getElementById("t-words"); if (!section) return;
             section.innerHTML = ""; wordRows = [];
+            words = typeableWords(words);
 
             words.forEach(function (word, i) {
                 var col = document.createElement("div"); col.className = "word-col";
@@ -4047,7 +4270,7 @@
                 var inp = document.createElement("input"); inp.className = "wc-inp";
                 inp.type = "text"; inp.placeholder = "···";
                 inp.autocomplete = "off"; inp.autocorrect = "off"; inp.spellcheck = false;
-                inp.style.width = Math.max(word.length * 14, 48) + "px";
+                inp.style.width = "max(48px, " + (word.length + 1) + "ch)"; // ch of the answer font (#91)
                 box.append(inp);
                 var hint = document.createElement("div"); hint.className = "wc-hint";
                 var attempts = document.createElement("div"); attempts.className = "wc-attempts";
@@ -4156,7 +4379,7 @@
             entry.errors++;
             cardErrors = Math.max(cardErrors, entry.errors);
             entry.attempts.textContent = "✗".repeat(Math.min(entry.errors, 5));
-            if (entry.errors >= 3) giveAnswer(entry, i);
+            if (entry.errors >= settings().maxErrors) giveAnswer(entry, i);
         }
 
         // 3 misses: the right word replaces what was typed (in red), the
@@ -4267,6 +4490,7 @@
             setBarState("next");
             var go = function () { flash(function () { advanceCard(q); }); };
             pendingNext = go;
+            if (settings().spaceMode === "next") return; // waits for Espace / the pill (#92)
             playCardAudio("a", function () {
                 setTimeout(function () {
                     if (pendingNext !== go) return;
@@ -4294,6 +4518,7 @@
         document.addEventListener("keydown", function (e) {
             if (e.key !== " " || !pendingNext || document.getElementById("study").style.display !== "flex") return;
             e.preventDefault();
+            if (settings().spaceMode === "next") { if (!e.repeat) continueAfterAnswer(); return; }
             if (!e.repeat) setHold(true);
         }, true);
         document.addEventListener("keyup", function (e) { if (e.key === " ") setHold(false); });
@@ -4598,6 +4823,7 @@
             var ctx = { requeueIn: null };
             sess.srs[card.id] = applyRating(sess.srs[card.id] || defaultSRS(), q, ctx);
             sess.srs[card.id].lastReview = Date.now(); // for cross-device merge on sign-in
+            recordCardTime(sess.srs[card.id], wasNew, Math.min(CARD_MS_CAP, Date.now() - (sess.cardShownAt || Date.now())));
             saveSRS(sess.srsKey, sess.srs); // after every card, not only on leaving the session (#78)
             if (wasNew) recordNewIntroduced(sess.srsKey);
             sess.done++;

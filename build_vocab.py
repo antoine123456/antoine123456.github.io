@@ -192,7 +192,9 @@ def main():
             first += " " + note.group(0).strip()
         card = {"id": str(ID_BASE + i * 10 + 1), "key": i, "es": w["es"], "fr": fr,
                 "question": html.escape(w["es"]), "answer": html.escape(fr),
-                "words": first.split(), "tags": ["vocabulaire"]}
+                # No punctuation to type (#90): « ? », « ... » alone are dropped, « (permanent) » → permanent.
+                "words": [t for t in (re.sub(r"^[^\w]+|[^\w]+$", "", x) for x in first.split()) if t],
+                "tags": ["vocabulaire"]}
         if e.get("pos"): card["pos"] = e["pos"]
         if e.get("s"): card["s"], card["sf"] = e["s"], e.get("sf", "")
         if w["audio"]: card["audioQuestion"] = [w["audio"]]
