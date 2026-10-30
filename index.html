@@ -1072,6 +1072,11 @@
             flex-direction: column;
         }
 
+        /* Large screens: a fixed-size card, not the whole height (#80). */
+        @media (min-width: 601px) {
+            body.compact #s-content { max-height: 640px; margin: auto 0; }
+        }
+
         body.compact #s-content .s-question {
             flex: 1;
             min-height: 0;
@@ -4262,7 +4267,9 @@
         function updateCompact() {
             var body = document.body;
             if (document.getElementById("study").style.display !== "flex") { body.classList.remove("compact"); return; }
-            var compact = window.innerWidth <= 600;
+            // Cards always use the fixed layout, so the card keeps the same
+            // size from recto to verso (#80); songs keep the old check.
+            var compact = window.innerWidth <= 600 || !sess.lyrics;
             if (!compact) {
                 body.classList.remove("compact");
                 document.documentElement.style.removeProperty("--card-img-max");
