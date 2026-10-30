@@ -41,6 +41,21 @@ FREQ_URL = "https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/c
 # Wikimedia demande un User-Agent qui permet de contacter l'auteur.
 UA = {"User-Agent": "anki-trainer-vocab/1.0 (https://github.com/antoine123456/antoine123456.github.io)"}
 DECK_NAME = "🇪🇸 Vocabulaire espagnol"
+# Frequency levels (#93): sub-decks « Niveau N », chained like Espagnol 1…7
+# (a level opens when 80 % of the previous one is learnt; « Je connais déjà
+# ce niveau » in the app marks it learnt). Upper bound of each level's rank.
+LEVELS = [100, 250, 500, 1000, None]
+
+
+def level_of(rank):
+    for n, top in enumerate(LEVELS, 1):
+        if top is None or rank <= top:
+            return n
+
+
+def level_deck(n):
+    lo = 1 if n == 1 else LEVELS[n - 2] + 1
+    return f"{DECK_NAME}::Niveau {n}", lo, LEVELS[n - 1]
 ID_BASE = 1_100_000_000_000  # ids déterministes, dans le passé (2004, avant Anki : ni futur refusé, ni collision)
 
 sys.path.insert(0, HERE)
@@ -204,7 +219,10 @@ def main():
         if img: review.append((card, via))
 
     out = {"version": 1, "source": "Vocabulaire espagnol",
-           "decks": [{"id": "vocab-es", "name": DECK_NAME, "cards": cards}]}
+           "decks": [{"id": f"vocab-es-{n}", "name": level_deck(n)[0], "skippable": True,
+                      "range": [level_deck(n)[1], min(level_deck(n)[2] or len(cards), len(cards))],
+                      "cards": [c for c in cards if level_of(c["key"]) == n]}
+                     for n in range(1, len(LEVELS) + 1)]}
     with open(os.path.join(HERE, "vocabulaire.json"), "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
 
@@ -358,6 +376,7 @@ def build_apkg(cards):
             mm.add(m)
             m = mm.by_name("Vocabulaire espagnol (Refold)")
             did = col.decks.id(DECK_NAME)
+            level_dids = {n: col.decks.id(level_deck(n)[0]) for n in range(1, len(LEVELS) + 1)}
             media = col.media.dir()
             for c in cards:
                 n = col.new_note(m)
@@ -375,7 +394,7 @@ def build_apkg(cards):
                 if c.get("img"):
                     n["Image"] = f'<img src="{c["img"]}">'
                 n.tags = ["vocabulaire"] + ([c["pos"].split()[0]] if c.get("pos") else [])
-                col.add_note(n, did)
+                col.add_note(n, level_dids[level_of(c["key"])])
                 # Mêmes ids que dans l'appli (ankisync fait le lien après import).
                 cid = col.db.scalar("select id from cards where nid = ?", n.id)
                 col.db.execute("update cards set id = ? where id = ?", int(c["id"]), cid)
