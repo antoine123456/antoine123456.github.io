@@ -298,6 +298,7 @@
         .h-settings-btn { right: 108px; }
         .st-modal { max-width: 460px; padding-bottom: 18px; }
         .h-range { font-size: 11px; font-weight: 400; color: var(--text-3); margin-left: 4px; }
+        #st-cards-group[hidden], #st-time-group[hidden] { display: none; }
         .st-debug { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
         .st-debug button.st-act { font: inherit; font-size: 12.5px; border: 1.5px solid var(--border-2); background: var(--surface); color: var(--text); border-radius: 16px; padding: 5px 12px; cursor: pointer; }
         .st-today { font-size: 12px; color: var(--text-2); margin: 4px 0 14px; }
@@ -1764,17 +1765,31 @@
                 <button class="g-close" onclick="closeSettings()" title="Fermer (Échap)">✕</button>
             </div>
             <div class="st-today" id="st-today"></div>
-            <label class="st-row"><span>Nouvelles cartes par jour <b id="st-new-v"></b></span>
-                <input type="range" id="st-new" min="0" max="100" step="5" oninput="setSetting('newPerDay', +this.value)"></label>
-            <label class="st-row"><span>Révisions par jour <b id="st-rev-v"></b></span>
-                <input type="range" id="st-rev" min="0" max="500" step="10" oninput="setSetting('reviewsPerDay', +this.value)"></label>
-            <label class="st-row"><span>Temps de révision par jour <b id="st-min-v"></b></span>
-                <input type="range" id="st-min" min="0" max="60" step="5" oninput="setSetting('minutesPerDay', +this.value)"></label>
-            <div class="st-note">Avec un temps choisi, l'appli prépare juste assez de cartes : environ 40 s pour une nouvelle,
-                ton temps habituel pour les autres (mesuré à chaque carte), un peu plus pour une carte souvent oubliée, et un peu plus
-                pour toutes après plusieurs jours sans réviser (souvenirs moins frais). Une barre de temps défile pendant la séance.</div>
+            <div class="st-row"><span>Quantité de révision par jour</span>
+                <div class="st-switch">
+                    <button id="st-measure-cards" onclick="setSetting('measure', 'cards')">Nombre de cartes</button>
+                    <button id="st-measure-time" onclick="setSetting('measure', 'time')">Temps</button>
+                </div></div>
+            <div id="st-cards-group">
+                <label class="st-row"><span>Nouvelles cartes par jour <b id="st-new-v"></b></span>
+                    <input type="range" id="st-new" min="0" max="100" step="5" oninput="setSetting('newPerDay', +this.value)"></label>
+                <div class="st-note">Cartes jamais vues ajoutées chaque jour, pour chaque source (Espagnol, Vocabulaire…), en plus des cartes à revoir.</div>
+                <label class="st-row"><span>Révisions par jour <b id="st-rev-v"></b></span>
+                    <input type="range" id="st-rev" min="0" max="500" step="10" oninput="setSetting('reviewsPerDay', +this.value)"></label>
+                <div class="st-note">Maximum de cartes déjà apprises à revoir par jour, tous paquets confondus ; au-delà, elles attendent le lendemain
+                    (comme « Révisions max./jour » dans Anki). Les cartes en cours d'apprentissage passent toujours. Tout à gauche : sans limite.</div>
+            </div>
+            <div id="st-time-group">
+                <label class="st-row"><span>Temps de révision par jour <b id="st-min-v"></b></span>
+                    <input type="range" id="st-min" min="5" max="60" step="5" oninput="setSetting('minutesPerDay', +this.value)"></label>
+                <div class="st-note">Durée visée par jour, tous paquets confondus. L'appli prend d'abord les cartes à revoir, puis autant de nouvelles
+                    que le temps restant le permet. Elle estime chaque carte : environ 40 s pour une nouvelle, ton temps habituel pour les autres
+                    (mesuré à chaque carte), un peu plus pour une carte souvent oubliée, et un peu plus pour toutes après plusieurs jours sans réviser.
+                    Une barre de temps défile pendant la séance ; « +20 » permet de continuer au-delà.</div>
+            </div>
             <label class="st-row"><span>Erreurs acceptées avant que le mot soit donné <b id="st-err-v"></b></span>
                 <input type="range" id="st-err" min="1" max="6" step="1" oninput="setSetting('maxErrors', +this.value)"></label>
+            <div class="st-note">Nombre d'essais faux sur un même mot avant que l'appli l'écrive pour toi ; la carte est alors notée « À revoir ».</div>
             <div class="st-row"><span>Après le verso complet</span>
                 <div class="st-switch">
                     <button id="st-space-hold" onclick="setSetting('spaceMode', 'hold')">Maintenir Espace</button>
@@ -1908,9 +1923,11 @@
             <div class="g-step">
                 <div class="g-num">7</div><div class="g-h">Réglages ⚙</div>
                 <div class="g-body">
-                    Nouvelles cartes et révisions par jour, erreurs acceptées avant que le mot soit donné, et ce que fait <b>Espace</b> après le verso.
-                    <b>Temps par jour</b> : l'appli mesure ton temps sur chaque carte et prépare juste assez de cartes pour ce temps
-                    (≈ 40 s une nouvelle, plus pour une carte souvent oubliée, un peu plus après quelques jours sans réviser). Une fine barre bleue sous la progression montre le temps écoulé.
+                    Choisis comment mesurer ta journée : en <b>nombre de cartes</b> (nouvelles et révisions par jour, comme Anki)
+                    ou en <b>temps</b> (ex. 15 min) : l'appli mesure ton temps sur chaque carte et prépare d'abord les cartes à revoir, puis
+                    autant de nouvelles que le temps le permet (≈ 40 s une nouvelle, plus pour une carte souvent oubliée, un peu plus après
+                    quelques jours sans réviser). Une fine barre bleue sous la progression montre le temps écoulé.
+                    Aussi : erreurs acceptées avant que le mot soit donné, ce que fait <b>Espace</b> après le verso, et le mode debug.
                 </div>
             </div>
 
@@ -2125,8 +2142,13 @@
         function settings() {
             var o = {};
             try { o = JSON.parse(localStorage.getItem(LS_SETTINGS) || "{}") || {}; } catch (e) { }
-            return Object.assign({}, SETTINGS_DEFAULT, o);
+            o = Object.assign({}, SETTINGS_DEFAULT, o);
+            // Two ways to size a day (#96): by card counts, or by time.
+            if (!o.measure) o.measure = o.minutesPerDay ? "time" : "cards";
+            if (o.measure === "time" && !o.minutesPerDay) o.minutesPerDay = 15;
+            return o;
         }
+        function byTime() { return settings().measure === "time"; }
         function setSetting(k, v) {
             var o = settings(); o[k] = v;
             try { localStorage.setItem(LS_SETTINGS, JSON.stringify(o)); } catch (e) { }
@@ -2157,7 +2179,12 @@
         }
         function clearDebugLog() { try { localStorage.removeItem(LS_DEBUG_LOG); } catch (e) { } renderSettings(); }
         window.addEventListener("error", function (e) { dlog("erreur", { message: e.message, ou: (e.filename || "").split("/").pop() + ":" + e.lineno }); });
-        function newLimitPerDay() { return settings().newPerDay; }
+        // Time mode: as many new cards as the time left allows (the badges
+        // show that); card mode: the slider.
+        function newLimitPerDay() {
+            if (!byTime()) return settings().newPerDay;
+            return Math.max(0, Math.floor(timeLeftMs() / (timing().newMs * gapFactor())));
+        }
         function openSettings() { renderSettings(); document.getElementById("settings").hidden = false; }
         function closeSettings() { document.getElementById("settings").hidden = true; if (document.getElementById("home").style.display !== "none") renderHome(); }
         function renderSettings() {
@@ -2165,7 +2192,11 @@
             var set = function (id, v, label) { document.getElementById(id).value = v; document.getElementById(id + "-v").textContent = label; };
             set("st-new", o.newPerDay, o.newPerDay);
             set("st-rev", o.reviewsPerDay, o.reviewsPerDay ? o.reviewsPerDay : "sans limite");
-            set("st-min", o.minutesPerDay, o.minutesPerDay ? o.minutesPerDay + " min" : "sans limite");
+            set("st-min", o.minutesPerDay, o.minutesPerDay + " min");
+            document.getElementById("st-measure-cards").classList.toggle("on", o.measure !== "time");
+            document.getElementById("st-measure-time").classList.toggle("on", o.measure === "time");
+            document.getElementById("st-cards-group").hidden = o.measure === "time";
+            document.getElementById("st-time-group").hidden = o.measure !== "time";
             set("st-err", o.maxErrors, o.maxErrors);
             document.getElementById("st-space-hold").classList.toggle("on", o.spaceMode !== "next");
             document.getElementById("st-space-next").classList.toggle("on", o.spaceMode === "next");
@@ -2228,8 +2259,8 @@
             return 1 + 0.08 * Math.max(0, Math.min(7, gap - 1));
         }
         function timeLeftMs() {
-            var m = settings().minutesPerDay;
-            return m ? m * 60000 - dayStats().ms : Infinity;
+            var o = settings();
+            return o.measure === "time" ? o.minutesPerDay * 60000 - dayStats().ms : Infinity;
         }
 
         // Manual override on top of the CSS @media(prefers-color-scheme)
@@ -2282,6 +2313,7 @@
         function remainingNewToday(sid) {
             var nc = loadNewCount(sid);
             var introducedToday = nc.day === TODAY ? nc.count : 0;
+            if (byTime()) return newLimitPerDay(); // the time spent already counts
             return Math.max(0, newLimitPerDay() - introducedToday);
         }
         function recordNewIntroduced(sid) {
@@ -3315,7 +3347,7 @@
                 // ⚙ Reviews per day (#56): learning steps always come back,
                 // day-scheduled reviews stop at the limit.
                 var st = settings();
-                if (st.reviewsPerDay && customNewLimit == null) {
+                if (st.measure !== "time" && st.reviewsPerDay && customNewLimit == null) {
                     var left = Math.max(0, st.reviewsPerDay - dayStats().reviews);
                     dueCards = dueCards.filter(function (c) {
                         var s = srs[c.id];
@@ -4275,7 +4307,7 @@
         var timeTimer = null, timeToastDone = false;
         function updateTimeBar() {
             var bar = document.getElementById("s-time");
-            var m = settings().minutesPerDay;
+            var m = byTime() ? settings().minutesPerDay : 0;
             var on = !!m && document.getElementById("study").style.display === "flex";
             bar.hidden = !on;
             if (!on) { clearInterval(timeTimer); timeTimer = null; return; }
