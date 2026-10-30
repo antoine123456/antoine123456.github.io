@@ -233,6 +233,30 @@ def mark_flagged(col, flagged, dry_run):
     return rows
 
 
+def place_vocab_levels(col, dry_run):
+    """Le paquet « Vocabulaire espagnol » est en niveaux de fréquence (#93) :
+    chaque carte va dans le sous-paquet de son niveau, d'après
+    vocabulaire.json (les cartes importées avant les niveaux étaient toutes
+    dans le paquet parent). Renvoie le nombre de cartes déplacées."""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "vocabulaire.json")
+    if not os.path.exists(path):
+        return 0
+    with open(path, encoding="utf-8") as f:
+        decks = json.load(f)["decks"]
+    moved = 0
+    for d in decks:
+        cids = [int(c["id"]) for c in d["cards"]]
+        found = col.db.list(f"select id from cards where id in ({','.join(map(str, cids))})") if cids else []
+        if not found:
+            continue
+        did = col.decks.id(d["name"], create=not dry_run) if not dry_run else col.decks.id_for_name(d["name"])
+        todo = [cid for cid in found if col.db.scalar("select did from cards where id = ?", cid) != did]
+        moved += len(todo)
+        if todo and not dry_run:
+            col.set_deck(todo, did)
+    return moved
+
+
 STAGE_TAG = re.compile(r"^etape(\d+)$", re.I)
 STAGE_LOCK_TAG = "etape_verrou"
 STAGE_UNLOCK_RATIO = 0.8  # même seuil que STAGE_UNLOCK_RATIO dans index.html
@@ -416,6 +440,7 @@ def main():
             )
         new_today = count_new_studied_today(col, args.dry_run)
         flagged_rows = mark_flagged(col, flagged, args.dry_run)
+        vocab_moved = place_vocab_levels(col, args.dry_run)
         stages = apply_stages(col, args.dry_run)
     finally:
         col.close()
@@ -427,6 +452,8 @@ def main():
         print(f"  = {newer_in_anki} déjà à jour (révisées plus récemment dans Anki, ou déjà synchronisées)")
     if missing:
         print(f"  ⚠ {missing} id(s) de carte absents de cette collection", file=sys.stderr)
+    if vocab_moved:
+        print(f"  ✓ Vocabulaire : {vocab_moved} carte(s) {'seraient rangées' if args.dry_run else 'rangée(s)'} dans leur niveau")
     for name, n in new_today:
         print(f"  ✓ {name} : {n} nouvelle(s) carte(s) comptée(s) comme déjà vue(s) aujourd'hui")
     if flagged_rows:
