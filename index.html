@@ -470,6 +470,10 @@
         .sync-status.sync-offline { color: var(--orange); }
         .sync-status.sync-hidden { display: none; }
 
+        .h-user { display: flex; gap: 8px; align-items: center; justify-content: center; margin-bottom: 14px; font-size: 13px; color: var(--text-2); }
+        .h-user select { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 3px 8px; }
+        .bare-user .h-sub, .bare-user .h-import-btn, .bare-user .h-reset { display: none; }
+
         .h-logo {
             font-size: 36px;
             margin-bottom: 6px;
@@ -1665,6 +1669,8 @@
     <div id="home">
         <button class="h-theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Basculer clair/sombre">🌙</button>
         <button class="h-theme-toggle h-info-btn" onclick="openGuide()" title="Mode d'emploi">i</button>
+        <div class="h-user">👤 <select id="h-user-select" onchange="chooseUser(this.value)"></select>
+            <span id="sync-status" class="sync-status sync-hidden"></span></div>
         <div class="h-logo">🃏</div>
         <div class="h-title">Anki Trainer</div>
         <div class="h-sub">Pré-traitez votre .apkg avec <code>extract_apkg.py</code>, puis importez le JSON ici</div>
@@ -1863,22 +1869,81 @@
 
     <script>
         // ═══════════════════════════════════════════════
-        // FIREBASE (optional — Google sign-in + cloud sync)
+        // USER (#76) — a name picked from a list, no password, no Google.
+        // ═══════════════════════════════════════════════
+        // The name is the Firestore doc id (users/<name>) and picks this
+        // browser's localStorage namespace: "antoine" keeps the historical
+        // ankitrain_v1_* keys (his progress from main), everyone else gets
+        // ankitrain_u_<name>_*. "antoine" and the hidden "fantome" (only
+        // through ?fantome in the URL, never listed) get every bundled deck;
+        // other names start on a bare page — no decks, no import.
+        var LS_USER = "ankitrain_user", LS_NAMES = "ankitrain_names";
+        var GHOST = "fantome", OWNER = "antoine";
+        var USER = /[?&]fantome\b/.test(location.search) ? GHOST
+            : (function () { try { return localStorage.getItem(LS_USER) || ""; } catch (e) { return ""; } })();
+        var NS = !USER || USER === OWNER ? "ankitrain_v1_" : "ankitrain_u_" + encodeURIComponent(USER) + "_";
+        var FULL_DECKS = USER === OWNER || USER === GHOST;
+        document.documentElement.classList.toggle("bare-user", !FULL_DECKS);
+
+        function knownNames() {
+            var names = [];
+            try { names = JSON.parse(localStorage.getItem(LS_NAMES) || "[]"); } catch (e) { }
+            if (names.indexOf(OWNER) === -1) names.unshift(OWNER);
+            return names.filter(function (n) { return n !== GHOST; });
+        }
+        function rememberName(n) {
+            var names = knownNames();
+            if (names.indexOf(n) === -1) names.push(n);
+            try { localStorage.setItem(LS_NAMES, JSON.stringify(names)); } catch (e) { }
+        }
+        function renderUserPicker(extra) {
+            var el = document.getElementById("h-user-select");
+            if (!el) return;
+            var names = knownNames();
+            (extra || []).forEach(function (n) { if (n !== GHOST && names.indexOf(n) === -1) names.push(n); });
+            if (USER === GHOST) names.push(GHOST);
+            el.innerHTML = (USER ? "" : '<option value="" selected>— choisir —</option>')
+                + names.map(function (n) {
+                    return '<option value="' + esc(n) + '"' + (n === USER ? " selected" : "") + ">"
+                        + (n === GHOST ? "👻 " : "") + esc(n) + "</option>";
+                }).join("")
+                + '<option value="__new">＋ nouveau nom…</option>';
+        }
+        function chooseUser(v) {
+            if (v === "__new") {
+                v = (prompt("Ton nom :") || "").trim();
+                if (!v || /[\/]/.test(v) || v === GHOST || v.indexOf("__") === 0) { renderUserPicker(); return; }
+            }
+            if (!v || v === USER) return;
+            rememberName(v);
+            try { localStorage.setItem(LS_USER, v); } catch (e) { }
+            // Push this user's last changes before leaving their namespace.
+            clearTimeout(syncTimer);
+            var go = function () { location.href = location.pathname; };
+            // Never wait more than 3 s (offline, Firestore down…): the data stays in localStorage anyway.
+            var wait = new Promise(function (r) { setTimeout(r, 3000); });
+            Promise.race([fbUser ? pushAllToFirestore() : Promise.resolve(), wait]).then(go, go);
+        }
+        // Other names already in Firestore join the list (minus the ghost).
+        function listCloudUsers() {
+            if (!fbDb) return;
+            fbDb.collection("users").get().then(function (snap) {
+                renderUserPicker(snap.docs.map(function (d) { return d.id; }));
+            }).catch(function () { });
+        }
+
+        // ═══════════════════════════════════════════════
+        // FIREBASE (optional — cloud sync of the chosen user)
         // ═══════════════════════════════════════════════
         // Paste your own project's values here to enable sync. Not a secret:
         // this is meant to be public in client code.
         //
-        // There is currently no way to actually sign in — a name-picking
-        // dropdown was tried and dropped (no real auth behind it meant every
-        // id needed manual allow-listing in the Firestore rules for each
-        // new person, not worth it), and real Google sign-in is intended
-        // for later (see the `auth` branch, which already has a working
-        // implementation). Everything below stays wired up and dormant in
-        // the meantime: fbUser is never set, so scheduleSync()/flushSync()
-        // (guarded by `if (!fbUser) return`) never fire, and the app is
-        // pure localStorage — but the Firestore database, its users/{uid}
-        // schema, and all the push/merge logic are ready to go the moment
-        // something sets fbUser again.
+        // Signing in is just picking a name (see USER above, #76): it sets
+        // fbUser = {uid: name} at startup, which wakes up the sync below —
+        // pull/merge from users/<name> once, then push on every save. The
+        // Firestore rules must allow users/{userId}/** (test rule: see
+        // FIREBASE.md on the firebase-debug branch). Real Google sign-in
+        // stays on the `auth` branch for later.
         var FIREBASE_CONFIG = {
             apiKey: "AIzaSyDMn9fYdjo3rpo2k1Q89pQ2dsIi12c0kJk",
             authDomain: "type-in-anki.firebaseapp.com",
@@ -1906,14 +1971,14 @@
         // ═══════════════════════════════════════════════
         // STORAGE
         // ═══════════════════════════════════════════════
-        var LS_SOURCES = "ankitrain_v1_sources"; // [{id, name, decks:[{id,name,cardCount}]}]
-        var LS_CARDS = "ankitrain_v1_c_";      // + sourceId → {deckId:[cards]}
-        var LS_SRS = "ankitrain_v1_s_";      // + sourceId → {cardId: srsMeta}
-        var LS_NEWCOUNT = "ankitrain_v1_nc_";     // + sourceId → {day, count}
-        var LS_FLAGGED = "ankitrain_v1_fl_";     // + sourceId → {cardId: questionPlainText}
-        var LS_STYLES = "ankitrain_v1_css_";    // + sourceId → [css shared by cards, see card.style]
-        var LS_MODE = "ankitrain_v1_mode";     // "type" (type the answer, default) | "flip" (Anki-style: show answer, rate)
-        var LS_THEME = "ankitrain_v1_theme";    // "light" | "dark" | absent (follow system)
+        var LS_SOURCES = NS + "sources"; // [{id, name, decks:[{id,name,cardCount}]}]
+        var LS_CARDS = NS + "c_";      // + sourceId → {deckId:[cards]}
+        var LS_SRS = NS + "s_";      // + sourceId → {cardId: srsMeta}
+        var LS_NEWCOUNT = NS + "nc_";     // + sourceId → {day, count}
+        var LS_FLAGGED = NS + "fl_";     // + sourceId → {cardId: questionPlainText}
+        var LS_STYLES = NS + "css_";    // + sourceId → [css shared by cards, see card.style]
+        var LS_MODE = NS + "mode";     // "type" (type the answer, default) | "flip" (Anki-style: show answer, rate)
+        var LS_THEME = NS + "theme";    // "light" | "dark" | absent (follow system)
         var NEW_LIMIT = 20;
 
         // Manual override on top of the CSS @media(prefers-color-scheme)
@@ -2244,7 +2309,7 @@
         // Bumping "v" pushes a new version of its cards to browsers that
         // already have it (progress kept).
         var EXTRA_BUNDLED = [{ url: "arbres.json", id: "arbres", v: 2 }, { url: "songs.json", id: "chansons", v: 1 }, { url: "grammaire.json", id: "grammaire", v: 1 }, { url: "guide.json", id: "guide", v: 1 }, { url: "demo_riche.json", id: "demo-riche", v: 1 }, { url: "vocabulaire.json", id: "vocabulaire", v: 1 }];
-        var LS_BUNDLED_SEEN = "ankitrain_v1_bundled_seen"; // {id: version} (was [id…] = version 1)
+        var LS_BUNDLED_SEEN = NS + "bundled_seen"; // {id: version} (was [id…] = version 1)
         function loadExtraBundledDecks() {
             var seen;
             try { seen = JSON.parse(localStorage.getItem(LS_BUNDLED_SEEN) || "{}"); } catch (e) { seen = {}; }
@@ -2279,7 +2344,7 @@
         // Bundled decks already in this browser get their file's latest
         // content whenever it changes (new perso words from cuatroloop,
         // fixes…), progress untouched (#52). A deleted one stays deleted.
-        var LS_BUNDLED_SIG = "ankitrain_v1_bundled_sig"; // {id: content signature}
+        var LS_BUNDLED_SIG = NS + "bundled_sig"; // {id: content signature}
         function refreshBundledDecks() {
             var sigs;
             try { sigs = JSON.parse(localStorage.getItem(LS_BUNDLED_SIG) || "{}") || {}; } catch (e) { sigs = {}; }
@@ -2332,12 +2397,12 @@
             var toRemove = [];
             for (var i = 0; i < localStorage.length; i++) {
                 var k = localStorage.key(i);
-                if (k && k.indexOf("ankitrain_v1_") === 0) toRemove.push(k);
+                if (k && k.indexOf(NS + "") === 0) toRemove.push(k);
             }
             toRemove.forEach(function (k) { localStorage.removeItem(k); });
             toast("Données effacées (" + toRemove.length + " entrée(s))");
             if (fbUser) wipeFirestoreForUser();
-            loadDefaultDeckIfEmpty().then(loadExtraBundledDecks).then(refreshBundledDecks).then(renderHome);
+            (FULL_DECKS ? loadDefaultDeckIfEmpty().then(loadExtraBundledDecks).then(refreshBundledDecks) : Promise.resolve()).then(renderHome);
         }
 
         // ═══════════════════════════════════════════════
@@ -2396,6 +2461,10 @@
             return out.length ? out : [""];
         }
 
+        function isBundledSource(id) {
+            return id === "default" || EXTRA_BUNDLED.some(function (b) { return b.id === String(id); });
+        }
+
         function pushAllToFirestore() {
             if (!FIREBASE_ENABLED || !fbUser || !fbDb) return Promise.resolve();
             var sources = loadSources();
@@ -2424,7 +2493,7 @@
                 // no need to duplicate its content in Firestore.
                 var cardWrites = [];
                 sources.forEach(function (src) {
-                    if (src.isDefault) return;
+                    if (src.isDefault || isBundledSource(src.id)) return;
                     var json = JSON.stringify(loadCards(src.id));
                     var chunks = chunkString(json, 900000);
                     var chunkCol = userRef.collection("sources").doc(String(src.id)).collection("cardChunks");
@@ -2451,7 +2520,7 @@
             dump.sources.forEach(function (s) {
                 dump.perSource[s.id] = { cards: loadCards(s.id), srs: loadSRS(s.id), newCount: loadNewCount(s.id), flagged: loadFlagged(s.id) };
             });
-            try { localStorage.setItem("ankitrain_v1_backup_" + Date.now(), JSON.stringify(dump)); } catch (e) { }
+            try { localStorage.setItem(NS + "backup_" + Date.now(), JSON.stringify(dump)); } catch (e) { }
         }
 
         // Keeps whichever SRS entry was reviewed more recently. Entries
@@ -2491,8 +2560,8 @@
                         var srcRef = userRef.collection("sources").doc(cs.id);
                         return Promise.all([srcRef.get(), fetchSourceCards(userRef, cs.id)]).then(function (r) {
                             var meta = r[0].exists ? r[0].data() : { srs: {}, newCount: {}, flagged: {} };
-                            var cards = r[1] || (cs.isDefault ? null : {});
                             var sid = cs.isDefault ? "default" : cs.id;
+                            var cards = r[1] || (isBundledSource(sid) ? null : {});
                             localSources.push({ id: sid, name: cs.name, decks: cs.decks, isDefault: !!cs.isDefault });
                             if (cards) saveCardsRaw(sid, cards);
                             saveSRSRaw(sid, meta.srs || {});
@@ -2526,10 +2595,10 @@
                             var merged = (cloudNc.day === TODAY && cloudNc.count > (localNc.day === TODAY ? localNc.count : 0))
                                 ? cloudNc : localNc;
                             saveNewCountRaw(local.id, merged);
-                        } else if (r[1]) {
+                        } else if (r[1] || isBundledSource(cs.isDefault ? "default" : cs.id)) {
                             var sid = cs.isDefault ? "default" : cs.id;
                             localSources.push({ id: sid, name: cs.name, decks: cs.decks, isDefault: !!cs.isDefault });
-                            saveCardsRaw(sid, r[1]);
+                            if (r[1]) saveCardsRaw(sid, r[1]);
                             saveSRSRaw(sid, meta.srs || {});
                             saveNewCountRaw(sid, meta.newCount || { day: TODAY, count: 0 });
                             saveFlaggedRaw(sid, meta.flagged || {});
@@ -2581,7 +2650,7 @@
             var toRemove = [];
             for (var i = 0; i < localStorage.length; i++) {
                 var k = localStorage.key(i);
-                if (k && k.indexOf("ankitrain_v1_") === 0 && k.indexOf("ankitrain_v1_backup_") !== 0) toRemove.push(k);
+                if (k && k.indexOf(NS + "") === 0 && k.indexOf(NS + "backup_") !== 0) toRemove.push(k);
             }
             toRemove.forEach(function (k) { localStorage.removeItem(k); });
         }
@@ -2761,6 +2830,8 @@
         function renderHome() {
             var sources = loadSources();
             var el = document.getElementById("h-sources");
+            if (!USER) { el.innerHTML = '<div class="h-empty">Choisis ton nom ci-dessus.</div>'; return; }
+            if (!sources.length && !FULL_DECKS) { el.innerHTML = '<div class="h-empty">Aucun paquet pour l\'instant.</div>'; return; }
             if (!sources.length) {
                 el.innerHTML = '<div class="h-empty">Aucun deck importé.<br>Pré-traitez votre .apkg avec <code>extract_apkg.py</code> puis importez le JSON.</div>';
                 return;
@@ -3247,7 +3318,7 @@
         // cards (+ its native audio), word class / gender. Data from
         // enrich_es.json (built by enrich_es.py); on/off per device.
         // ═══════════════════════════════════════════════
-        var LS_FULL = "ankitrain_v1_full_render"; // "1" | "0" (default on)
+        var LS_FULL = NS + "full_render"; // "1" | "0" (default on)
         var ENRICH = null;
         fetch("enrich_es.json").then(function (r) { return r.ok ? r.json() : null; })
             .then(function (d) { ENRICH = d; }).catch(function () { });
@@ -3372,7 +3443,7 @@
         // known shown as text, the active line (hint + blanks) centred,
         // the others as greyed blanks. Same typing / rating engine.
         // ═══════════════════════════════════════════════
-        var LS_LYRICS = "ankitrain_v1_lyrics"; // {hint: trad|context|initials, intro: strophe|lines|all}
+        var LS_LYRICS = NS + "lyrics"; // {hint: trad|context|initials, intro: strophe|lines|all}
         function lyricsOpts() {
             var o = {};
             try { o = JSON.parse(localStorage.getItem(LS_LYRICS) || "{}") || {}; } catch (e) { }
@@ -4400,7 +4471,17 @@
 
         // ── INIT ──
         updateThemeToggleIcon();
-        loadDefaultDeckIfEmpty().then(loadExtraBundledDecks).then(refreshBundledDecks).then(renderHome);
+        renderUserPicker();
+        if (USER && FIREBASE_ENABLED) fbUser = { uid: USER };
+        listCloudUsers();
+        renderHome();
+        (fbUser ? fetchAndMergeFromFirestore().then(function () { setSyncStatus("synced"); },
+            function (err) { console.error("sync pull failed:", err); setSyncStatus("error"); }) : Promise.resolve())
+            .then(function () {
+                if (!FULL_DECKS) return;
+                return loadDefaultDeckIfEmpty().then(loadExtraBundledDecks).then(refreshBundledDecks);
+            })
+            .then(renderHome);
     </script>
 </body>
 
