@@ -1,0 +1,131 @@
+{
+ "version": 1,
+ "source": "🧪 Cartes enrichies (démo)",
+ "decks": [
+  {
+   "id": "demo-riche",
+   "name": "🧪 Cartes enrichies (démo)",
+   "cards": [
+    {
+     "id": "rf-01",
+     "question": "<style>\n.rf-word{font-size:44px;font-weight:600;letter-spacing:.5px;margin:4px 0 10px}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-sent b{color:var(--blue,#2563eb)}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}\n.rf-tr{font-size:15px;opacity:.7;font-style:italic;margin-top:2px}\n.rf-note{font-size:13px;opacity:.75;margin-top:10px;padding:6px 10px;border-left:3px solid var(--blue,#2563eb);text-align:left;display:inline-block}\n.rf-img img{max-height:190px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">la manzana</div><div class=\"rf-sent\">Me gusta la <b>manzana</b> roja.</div>",
+     "words": [
+      "la",
+      "pomme"
+     ],
+     "answer": "<style>\n.rf-word{font-size:44px;font-weight:600;letter-spacing:.5px;margin:4px 0 10px}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-sent b{color:var(--blue,#2563eb)}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}\n.rf-tr{font-size:15px;opacity:.7;font-style:italic;margin-top:2px}\n.rf-note{font-size:13px;opacity:.75;margin-top:10px;padding:6px 10px;border-left:3px solid var(--blue,#2563eb);text-align:left;display:inline-block}\n.rf-img img{max-height:190px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">la pomme</div><div class=\"rf-pos\">nom féminin</div><div class=\"rf-sent\">Me gusta la <b>manzana</b> roja.</div><div class=\"rf-tr\">J'aime la pomme rouge.</div><div class=\"rf-note\"><i>la manzana</i> désigne aussi un pâté de maisons.</div><div class=\"rf-img\"><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/1/15/Red_Apple.jpg/960px-Red_Apple.jpg\"></div>",
+     "audioQuestion": [
+      "default_media/spanishdict-0deaea98-f87dc261-a35dec0c-0f5ff637-c4f7f287.mp3"
+     ],
+     "tags": [
+      "demo"
+     ]
+    },
+    {
+     "id": "rf-02",
+     "question": "<style>\n.rf-word{font-size:44px;font-weight:600;letter-spacing:.5px;margin:4px 0 10px}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-sent b{color:var(--blue,#2563eb)}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}\n.rf-tr{font-size:15px;opacity:.7;font-style:italic;margin-top:2px}\n.rf-note{font-size:13px;opacity:.75;margin-top:10px;padding:6px 10px;border-left:3px solid var(--blue,#2563eb);text-align:left;display:inline-block}\n.rf-img img{max-height:190px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">el pan</div><div class=\"rf-sent\">Quiero <b>pan</b> con queso, por favor.</div>",
+     "words": [
+      "le",
+      "pain"
+     ],
+     "answer": "<style>\n.rf-word{font-size:44px;font-weight:600;letter-spacing:.5px;margin:4px 0 10px}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-sent b{color:var(--blue,#2563eb)}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}\n.rf-tr{font-size:15px;opacity:.7;font-style:italic;margin-top:2px}\n.rf-note{font-size:13px;opacity:.75;margin-top:10px;padding:6px 10px;border-left:3px solid var(--blue,#2563eb);text-align:left;display:inline-block}\n.rf-img img{max-height:190px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">le pain</div><div class=\"rf-pos\">nom masculin</div><div class=\"rf-sent\">Quiero <b>pan</b> con queso, por favor.</div><div class=\"rf-tr\">Je veux du pain avec du fromage, s'il te plaît.</div><div class=\"rf-note\">Pas d'article partitif en espagnol : <i>quiero pan</i> = je veux <b>du</b> pain.</div><div class=\"rf-img\"><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/Baguette_de_pain%2C_WikiCheese_Lausanne.jpg/960px-Baguette_de_pain%2C_WikiCheese_Lausanne.jpg\"></div>",
+     "audioQuestion": [
+      "default_media/spanishdict-672e36fd-98e24905-e057bf42-534838ba-446a22b7.mp3"
+     ],
+     "tags": [
+      "demo"
+     ]
+    },
+    {
+     "id": "rf-03",
+     "question": "<style>\n.rf-word{font-size:44px;font-weight:600;letter-spacing:.5px;margin:4px 0 10px}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-sent b{color:var(--blue,#2563eb)}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}\n.rf-tr{font-size:15px;opacity:.7;font-style:italic;margin-top:2px}\n.rf-note{font-size:13px;opacity:.75;margin-top:10px;padding:6px 10px;border-left:3px solid var(--blue,#2563eb);text-align:left;display:inline-block}\n.rf-img img{max-height:190px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">el queso</div><div class=\"rf-sent\">El <b>queso</b> de España es delicioso.</div>",
+     "words": [
+      "le",
+      "fromage"
+     ],
+     "answer": "<style>\n.rf-word{font-size:44px;font-weight:600;letter-spacing:.5px;margin:4px 0 10px}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-sent b{color:var(--blue,#2563eb)}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}\n.rf-tr{font-size:15px;opacity:.7;font-style:italic;margin-top:2px}\n.rf-note{font-size:13px;opacity:.75;margin-top:10px;padding:6px 10px;border-left:3px solid var(--blue,#2563eb);text-align:left;display:inline-block}\n.rf-img img{max-height:190px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">le fromage</div><div class=\"rf-pos\">nom masculin</div><div class=\"rf-sent\">El <b>queso</b> de España es delicioso.</div><div class=\"rf-tr\">Le fromage d'Espagne est délicieux.</div><div class=\"rf-note\">Le plus connu : le <i>queso manchego</i>, de la Mancha.</div><div class=\"rf-img\"><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7d/Wedge_of_Laughing_Cow_spreadable_cheese_Original_Creamy_Swiss_flavor.JPG/960px-Wedge_of_Laughing_Cow_spreadable_cheese_Original_Creamy_Swiss_flavor.JPG\"></div>",
+     "audioQuestion": [
+      "default_media/spanishdict-a3d8e4da-37c8f7fb-1981f9a1-30da9ef9-0b959540.mp3"
+     ],
+     "tags": [
+      "demo"
+     ]
+    },
+    {
+     "id": "rf-04",
+     "question": "<style>\n.rf-word{font-size:44px;font-weight:600;letter-spacing:.5px;margin:4px 0 10px}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-sent b{color:var(--blue,#2563eb)}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}\n.rf-tr{font-size:15px;opacity:.7;font-style:italic;margin-top:2px}\n.rf-note{font-size:13px;opacity:.75;margin-top:10px;padding:6px 10px;border-left:3px solid var(--blue,#2563eb);text-align:left;display:inline-block}\n.rf-img img{max-height:190px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">la naranja</div><div class=\"rf-sent\">¿Tienes una <b>naranja</b>? Tengo sed.</div>",
+     "words": [
+      "l'orange"
+     ],
+     "answer": "<style>\n.rf-word{font-size:44px;font-weight:600;letter-spacing:.5px;margin:4px 0 10px}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-sent b{color:var(--blue,#2563eb)}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}\n.rf-tr{font-size:15px;opacity:.7;font-style:italic;margin-top:2px}\n.rf-note{font-size:13px;opacity:.75;margin-top:10px;padding:6px 10px;border-left:3px solid var(--blue,#2563eb);text-align:left;display:inline-block}\n.rf-img img{max-height:190px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">l'orange</div><div class=\"rf-pos\">nom féminin</div><div class=\"rf-sent\">¿Tienes una <b>naranja</b>? Tengo sed.</div><div class=\"rf-tr\">Tu as une orange ? J'ai soif.</div><div class=\"rf-note\"><i>naranja</i> est aussi la couleur : <i>un vestido naranja</i>.</div><div class=\"rf-img\"><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c4/Orange-Fruit-Pieces.jpg/960px-Orange-Fruit-Pieces.jpg\"></div>",
+     "audioQuestion": [
+      "default_media/spanishdict-19146120-89c4f61e-7a2c3308-e925e332-f590c3d5.mp3"
+     ],
+     "tags": [
+      "demo"
+     ]
+    },
+    {
+     "id": "rf-05",
+     "question": "<style>\n.rf-word{font-size:44px;font-weight:600;letter-spacing:.5px;margin:4px 0 10px}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-sent b{color:var(--blue,#2563eb)}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}\n.rf-tr{font-size:15px;opacity:.7;font-style:italic;margin-top:2px}\n.rf-note{font-size:13px;opacity:.75;margin-top:10px;padding:6px 10px;border-left:3px solid var(--blue,#2563eb);text-align:left;display:inline-block}\n.rf-img img{max-height:190px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">el café</div><div class=\"rf-sent\">Un <b>café</b> con leche, por favor.</div>",
+     "words": [
+      "le",
+      "café"
+     ],
+     "answer": "<style>\n.rf-word{font-size:44px;font-weight:600;letter-spacing:.5px;margin:4px 0 10px}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-sent b{color:var(--blue,#2563eb)}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}\n.rf-tr{font-size:15px;opacity:.7;font-style:italic;margin-top:2px}\n.rf-note{font-size:13px;opacity:.75;margin-top:10px;padding:6px 10px;border-left:3px solid var(--blue,#2563eb);text-align:left;display:inline-block}\n.rf-img img{max-height:190px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">le café</div><div class=\"rf-pos\">nom masculin</div><div class=\"rf-sent\">Un <b>café</b> con leche, por favor.</div><div class=\"rf-tr\">Un café au lait, s'il vous plaît.</div><div class=\"rf-note\">Accent sur le <b>é</b> : <i>ca-FÉ</i>.</div><div class=\"rf-img\"><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/4/45/A_small_cup_of_coffee.JPG/960px-A_small_cup_of_coffee.JPG\"></div>",
+     "audioQuestion": [
+      "default_media/spanishdict-4312d4e3-dfe8b06e-9544b3f2-d7201560-63c255c0.mp3"
+     ],
+     "tags": [
+      "demo"
+     ]
+    },
+    {
+     "id": "rf-06",
+     "question": "<style>\n.rf-word{font-size:44px;font-weight:600;letter-spacing:.5px;margin:4px 0 10px}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-sent b{color:var(--blue,#2563eb)}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}\n.rf-tr{font-size:15px;opacity:.7;font-style:italic;margin-top:2px}\n.rf-note{font-size:13px;opacity:.75;margin-top:10px;padding:6px 10px;border-left:3px solid var(--blue,#2563eb);text-align:left;display:inline-block}\n.rf-img img{max-height:190px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">la vaca</div><div class=\"rf-sent\">La <b>vaca</b> es muy grande.</div>",
+     "words": [
+      "la",
+      "vache"
+     ],
+     "answer": "<style>\n.rf-word{font-size:44px;font-weight:600;letter-spacing:.5px;margin:4px 0 10px}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-sent b{color:var(--blue,#2563eb)}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}\n.rf-tr{font-size:15px;opacity:.7;font-style:italic;margin-top:2px}\n.rf-note{font-size:13px;opacity:.75;margin-top:10px;padding:6px 10px;border-left:3px solid var(--blue,#2563eb);text-align:left;display:inline-block}\n.rf-img img{max-height:190px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">la vache</div><div class=\"rf-pos\">nom féminin</div><div class=\"rf-sent\">La <b>vaca</b> es muy grande.</div><div class=\"rf-tr\">La vache est très grande.</div><div class=\"rf-note\"><i>la carne de vaca</i> = le bœuf (la viande).</div><div class=\"rf-img\"><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8a/Cow_on_pasture%2C_Ehrenbach.jpg/960px-Cow_on_pasture%2C_Ehrenbach.jpg\"></div>",
+     "audioQuestion": [
+      "default_media/spanishdict-1b17e743-f5691fc0-25d86e8c-c8c2038d-c89c6f54.mp3"
+     ],
+     "tags": [
+      "demo"
+     ]
+    },
+    {
+     "id": "rf-07",
+     "question": "<style>\n.rf-word{font-size:44px;font-weight:600;letter-spacing:.5px;margin:4px 0 10px}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-sent b{color:var(--blue,#2563eb)}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}\n.rf-tr{font-size:15px;opacity:.7;font-style:italic;margin-top:2px}\n.rf-note{font-size:13px;opacity:.75;margin-top:10px;padding:6px 10px;border-left:3px solid var(--blue,#2563eb);text-align:left;display:inline-block}\n.rf-img img{max-height:190px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">el paraguas</div><div class=\"rf-sent\">Hay chaparrones: necesito mi <b>paraguas</b>.</div>",
+     "words": [
+      "le",
+      "parapluie"
+     ],
+     "answer": "<style>\n.rf-word{font-size:44px;font-weight:600;letter-spacing:.5px;margin:4px 0 10px}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-sent b{color:var(--blue,#2563eb)}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}\n.rf-tr{font-size:15px;opacity:.7;font-style:italic;margin-top:2px}\n.rf-note{font-size:13px;opacity:.75;margin-top:10px;padding:6px 10px;border-left:3px solid var(--blue,#2563eb);text-align:left;display:inline-block}\n.rf-img img{max-height:190px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">le parapluie</div><div class=\"rf-pos\">nom masculin</div><div class=\"rf-sent\">Hay chaparrones: necesito mi <b>paraguas</b>.</div><div class=\"rf-tr\">Il y a des averses : j'ai besoin de mon parapluie.</div><div class=\"rf-note\">Invariable : <i>el paraguas, los paraguas</i> (para + aguas).</div><div class=\"rf-img\"><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/b/ba/Woman_sitting_under_a_red_umbrella%2C_Alameda_Afonso_Henriques%2C_Lisbon%2C_Portugal_julesvernex2.jpg/960px-Woman_sitting_under_a_red_umbrella%2C_Alameda_Afonso_Henriques%2C_Lisbon%2C_Portugal_julesvernex2.jpg\"></div>",
+     "audioQuestion": [
+      "default_media/spanishdict-60bebb03-cbedbfe4-e76f51d3-46fa0c11-b8b9392e.mp3"
+     ],
+     "tags": [
+      "demo"
+     ]
+    },
+    {
+     "id": "rf-08",
+     "question": "<style>\n.rf-word{font-size:44px;font-weight:600;letter-spacing:.5px;margin:4px 0 10px}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-sent b{color:var(--blue,#2563eb)}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}\n.rf-tr{font-size:15px;opacity:.7;font-style:italic;margin-top:2px}\n.rf-note{font-size:13px;opacity:.75;margin-top:10px;padding:6px 10px;border-left:3px solid var(--blue,#2563eb);text-align:left;display:inline-block}\n.rf-img img{max-height:190px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">la botella</div><div class=\"rf-sent\">¿Quiere una <b>botella</b> o un vaso?</div>",
+     "words": [
+      "la",
+      "bouteille"
+     ],
+     "answer": "<style>\n.rf-word{font-size:44px;font-weight:600;letter-spacing:.5px;margin:4px 0 10px}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-sent b{color:var(--blue,#2563eb)}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}\n.rf-tr{font-size:15px;opacity:.7;font-style:italic;margin-top:2px}\n.rf-note{font-size:13px;opacity:.75;margin-top:10px;padding:6px 10px;border-left:3px solid var(--blue,#2563eb);text-align:left;display:inline-block}\n.rf-img img{max-height:190px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">la bouteille</div><div class=\"rf-pos\">nom féminin</div><div class=\"rf-sent\">¿Quiere una <b>botella</b> o un vaso?</div><div class=\"rf-tr\">Vous voulez une bouteille ou un verre ?</div><div class=\"rf-note\"><i>una botella de agua</i> = une bouteille d'eau.</div><div class=\"rf-img\"><img src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/6/67/Bottle_of_medicinal_water%2C_France%2C_1928_Wellcome_L0057444.jpg/960px-Bottle_of_medicinal_water%2C_France%2C_1928_Wellcome_L0057444.jpg\"></div>",
+     "audioQuestion": [
+      "default_media/spanishdict-214bfdd7-cd1107c0-6d13fc17-75f0acc3-a55882b0.mp3"
+     ],
+     "tags": [
+      "demo"
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -2229,7 +2229,7 @@
         // after being deleted, until "Effacer les données" resets it all.
         // Bumping "v" pushes a new version of its cards to browsers that
         // already have it (progress kept).
-        var EXTRA_BUNDLED = [{ url: "arbres.json", id: "arbres", v: 2 }, { url: "songs.json", id: "chansons", v: 1 }, { url: "grammaire.json", id: "grammaire", v: 1 }, { url: "guide.json", id: "guide", v: 1 }];
+        var EXTRA_BUNDLED = [{ url: "arbres.json", id: "arbres", v: 2 }, { url: "songs.json", id: "chansons", v: 1 }, { url: "grammaire.json", id: "grammaire", v: 1 }, { url: "guide.json", id: "guide", v: 1 }, { url: "demo_riche.json", id: "demo-riche", v: 1 }];
         var LS_BUNDLED_SEEN = "ankitrain_v1_bundled_seen"; // {id: version} (was [id…] = version 1)
         function loadExtraBundledDecks() {
             var seen;
@@ -2965,7 +2965,7 @@
         // True when the back holds more than the typed words (an image, a
         // meaning, an example sentence…) — worth showing before moving on.
         // Tags not worth showing (technical ones from the decks' origins).
-        var HIDDEN_TAGS = ["basic", "commun", "chanson", "cuatroloop", "quotidien", "marked", "leech", "guide"];
+        var HIDDEN_TAGS = ["basic", "commun", "chanson", "cuatroloop", "quotidien", "marked", "leech", "guide", "demo"];
         function shownTags(card) {
             return (card.tags || []).filter(function (t) { return HIDDEN_TAGS.indexOf(t.toLowerCase()) === -1 && !/^etape/i.test(t); });
         }
