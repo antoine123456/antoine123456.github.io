@@ -183,9 +183,16 @@ def main():
         via = None
         if not img:
             img, via = context_image(w, core)
-        card = {"id": str(ID_BASE + i * 10 + 1), "key": i, "es": w["es"], "fr": w["fr"],
-                "question": html.escape(w["es"]), "answer": html.escape(w["fr"]),
-                "words": w["fr"].split(), "tags": ["vocabulaire"]}
+        # « il est; elle est; c'est (permanent) » : shown with commas, and only
+        # the first meaning (+ its note in brackets) is to type (#88).
+        fr = re.sub(r"\s*;\s*", ", ", w["fr"])
+        first = w["fr"].split(";")[0].strip()
+        note = re.search(r"\([^)]*\)\s*$", w["fr"])
+        if note and note.group(0).strip() not in first:
+            first += " " + note.group(0).strip()
+        card = {"id": str(ID_BASE + i * 10 + 1), "key": i, "es": w["es"], "fr": fr,
+                "question": html.escape(w["es"]), "answer": html.escape(fr),
+                "words": first.split(), "tags": ["vocabulaire"]}
         if e.get("pos"): card["pos"] = e["pos"]
         if e.get("s"): card["s"], card["sf"] = e["s"], e.get("sf", "")
         if w["audio"]: card["audioQuestion"] = [w["audio"]]
