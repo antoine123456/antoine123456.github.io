@@ -299,6 +299,7 @@
         .st-modal { max-width: 460px; padding-bottom: 18px; }
         .h-range { font-size: 11px; font-weight: 400; color: var(--text-3); margin-left: 4px; }
         #st-cards-group[hidden], #st-time-group[hidden] { display: none; }
+        .st-profile { font-size: 12px; color: var(--text-2); background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; margin-top: 12px; line-height: 1.45; }
         .st-debug { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
         .st-debug button.st-act { font: inherit; font-size: 12.5px; border: 1.5px solid var(--border-2); background: var(--surface); color: var(--text); border-radius: 16px; padding: 5px 12px; cursor: pointer; }
         .st-today { font-size: 12px; color: var(--text-2); margin: 4px 0 14px; }
@@ -1000,17 +1001,20 @@
 
         .wc-hint.on { visibility: visible; }
 
+        /* Errors (#97): small red dots just under the line, laid over the
+           gap — no line of their own, so nothing moves (#88). */
         .wc-attempts {
-            font-size: 11px;
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: calc(100% + 1px);
+            font-size: 7px;
+            line-height: 1;
+            letter-spacing: 3px;
             color: var(--red);
-            letter-spacing: 1px;
-            /* Fixed box: the ✗ marks never move the words (#88). */
-            height: 14px;
-            line-height: 14px;
-            align-self: stretch;
             text-align: center;
             white-space: nowrap;
-            contain: inline-size;
+            pointer-events: none;
         }
 
         .t-key {
@@ -1401,9 +1405,6 @@
         }
 
         /* Back shown: no empty error line under the words (#81). */
-        .t-words:has(+ .s-verso-extra:not(:empty)) .wc-attempts:empty {
-            height: 0;
-        }
         .t-words:has(+ .s-verso-extra:not(:empty)) .wc-hint:not(.on) {
             display: none;
         }
@@ -1757,11 +1758,12 @@
                     (comme « Révisions max./jour » dans Anki). Les cartes en cours d'apprentissage passent toujours. Tout à gauche : sans limite.</div>
             </div>
             <div id="st-time-group">
+                <div class="st-profile" id="st-profile"></div>
                 <label class="st-row"><span>Temps de révision par jour <b id="st-min-v"></b></span>
                     <input type="range" id="st-min" min="5" max="60" step="5" oninput="setSetting('minutesPerDay', +this.value)"></label>
                 <div class="st-note">Durée visée par jour, tous paquets confondus. L'appli prend d'abord les cartes à revoir, puis autant de nouvelles
-                    que le temps restant le permet. Elle estime chaque carte : environ 40 s pour une nouvelle, ton temps habituel pour les autres
-                    (mesuré à chaque carte), un peu plus pour une carte souvent oubliée, et un peu plus pour toutes après plusieurs jours sans réviser.
+                    que le temps restant le permet. Le temps de chaque carte est appris sur tes propres mesures (ci-dessus) : type de carte, nombre de
+                    lettres et de mots, rareté du mot, oublis, et les reprises d'une nouvelle carte ; un peu plus pour toutes après plusieurs jours sans réviser.
                     Une barre de temps défile pendant la séance ; « +20 » permet de continuer au-delà.</div>
             </div>
             <label class="st-row"><span>Erreurs acceptées avant que le mot soit donné <b id="st-err-v"></b></span>
@@ -1831,10 +1833,10 @@
                         <div class="b-sep">verso</div>
                         <div class="g-words">
                             <div class="word-col"><input class="wc-inp ok" value="la" readonly tabindex="-1"><div class="wc-attempts"></div></div>
-                            <div class="word-col"><input class="wc-inp err" value="serpi" readonly tabindex="-1"><div class="wc-attempts">✗</div></div>
+                            <div class="word-col"><div class="wc-box"><input class="wc-inp err" value="serpi" readonly tabindex="-1"><div class="wc-attempts">●</div></div></div>
                         </div>
                     </div></div>
-                    Un mot par case. <span style="color:var(--green)">Vert</span> = juste, <span style="color:var(--red)">rouge</span> = pas encore ; chaque erreur ajoute une <span style="color:var(--red)">✗</span>.
+                    Un mot par case. <span style="color:var(--green)">Vert</span> = juste, <span style="color:var(--red)">rouge</span> = pas encore ; chaque erreur ajoute un petit point <span style="color:var(--red)">●</span> sous le mot.
                     Les accents sont facultatifs. Dès qu'un mot est juste, on passe à la case suivante.
                 </div>
             </div>
@@ -1849,11 +1851,11 @@
                     <div class="g-demo"><div class="g-card">
                         <div class="g-words">
                             <div class="word-col"><input class="wc-inp" value="" placeholder="···" readonly tabindex="-1"><div class="wc-hint on">la</div></div>
-                            <div class="word-col"><input class="wc-inp given" value="serpiente" readonly tabindex="-1"><div class="wc-attempts">✗✗✗</div></div>
+                            <div class="word-col"><div class="wc-box"><input class="wc-inp given" value="serpiente" readonly tabindex="-1"><div class="wc-attempts">●●●</div></div></div>
                         </div>
                     </div></div>
                     <b>Indice</b> montre le mot <span style="color:var(--orange)">en orange</span> sous la case ; <b>Voir la réponse</b> montre tout.
-                    Après <span style="color:var(--red)">3 ✗</span>, le bon mot s'écrit en rouge. Une carte où on a eu de l'aide est notée « À revoir ».
+                    Après <span style="color:var(--red)">3 erreurs</span> (réglable dans ⚙), le bon mot s'écrit en rouge. Une carte où on a eu de l'aide est notée « À revoir ».
                 </div>
             </div>
 
@@ -2100,7 +2102,7 @@
         // show that); card mode: the slider.
         function newLimitPerDay() {
             if (!byTime()) return settings().newPerDay;
-            return Math.max(0, Math.floor(timeLeftMs() / (timing().newMs * gapFactor())));
+            return Math.max(0, Math.floor(timeLeftMs() / (newCardCostMs() * gapFactor())));
         }
         function openSettings() { renderSettings(); document.getElementById("settings").hidden = false; }
         function closeSettings() { document.getElementById("settings").hidden = true; if (document.getElementById("home").style.display !== "none") renderHome(); }
@@ -2113,6 +2115,7 @@
             document.getElementById("st-measure-cards").classList.toggle("on", o.measure !== "time");
             document.getElementById("st-measure-time").classList.toggle("on", o.measure === "time");
             document.getElementById("st-cards-group").hidden = o.measure === "time";
+            document.getElementById("st-profile").textContent = timeModelSummary();
             document.getElementById("st-time-group").hidden = o.measure !== "time";
             set("st-err", o.maxErrors, o.maxErrors);
             document.getElementById("st-space-hold").classList.toggle("on", o.spaceMode !== "next");
@@ -2163,12 +2166,128 @@
         // Expected time for a card (#57): its own time if known, else the
         // average; +10 s weighted by how often it was forgotten; everything a
         // bit longer after days without studying.
+        // ── Local time model (#98) ──
+        // Every rated card leaves an observation: kind of pass (first sight
+        // of a new card, a learning-step repeat, a known card), letters and
+        // words to type, frequency rank (vocabulary), how often the card was
+        // forgotten, and the time it took. Per kind, a small ridge regression
+        // on log(time) learns this person's coefficients; with few points it
+        // stays near the plain average. A new card also costs its expected
+        // repeats in the session, a known card its chance of being forgotten.
+        var LS_TIME_OBS = "ankitrain_v1_time_obs", OBS_MAX = 1500;
+        var MODEL_PRIOR_MS = { new: 12000, step: 6000, review: 6000 };
+        var timeModelCache = null;
+        function timeObs() { try { return JSON.parse(localStorage.getItem(LS_TIME_OBS) || "[]"); } catch (e) { return []; } }
+        function cardFeatures(card, s) {
+            var w = typeableWords(card.words);
+            return { l: w.join("").length, w: w.length, r: card.key || null, lp: s && s.reps ? (s.lapses || 0) / s.reps : 0 };
+        }
+        function passKind(s) {
+            if (!s || s.state === "new") return "new";
+            return s.state === "review" ? "review" : "step";
+        }
+        function recordObs(kind, card, sBefore, ms, q) {
+            var f = cardFeatures(card, sBefore), obs = timeObs();
+            obs.push({ k: kind, l: f.l, w: f.w, r: f.r, lp: Math.round(f.lp * 100) / 100, ms: ms, q: q, d: TODAY });
+            if (obs.length > OBS_MAX) obs = obs.slice(-OBS_MAX);
+            try { localStorage.setItem(LS_TIME_OBS, JSON.stringify(obs)); } catch (e) { }
+            timeModelCache = null;
+        }
+        var FEATS = [
+            function (f) { return f.l; },                                  // letters to type
+            function (f) { return f.w; },                                  // words
+            function (f) { return f.r == null ? null : Math.log2(1 + f.r); }, // rarer word = higher
+            function (f) { return f.lp; }                                  // forgotten share
+        ];
+        function solve(A, b) { // Gauss–Jordan, small systems
+            var n = b.length;
+            for (var i = 0; i < n; i++) {
+                var p = i;
+                for (var r = i + 1; r < n; r++) if (Math.abs(A[r][i]) > Math.abs(A[p][i])) p = r;
+                var t = A[i]; A[i] = A[p]; A[p] = t; t = b[i]; b[i] = b[p]; b[p] = t;
+                if (Math.abs(A[i][i]) < 1e-9) continue;
+                for (var r2 = 0; r2 < n; r2++) {
+                    if (r2 === i) continue;
+                    var k = A[r2][i] / A[i][i];
+                    for (var c = i; c < n; c++) A[r2][c] -= k * A[i][c];
+                    b[r2] -= k * b[i];
+                }
+            }
+            return b.map(function (v, i) { return Math.abs(A[i][i]) < 1e-9 ? 0 : v / A[i][i]; });
+        }
+        function fitKind(rows, priorMs) {
+            var n = rows.length, LAMBDA = 8;
+            // features standardised; a missing value (no rank) = the mean
+            var stats = FEATS.map(function (fn) {
+                var v = rows.map(function (o) { return fn(o); }).filter(function (x) { return x != null; });
+                var m = v.length ? v.reduce(function (a, x) { return a + x; }, 0) / v.length : 0;
+                var sd = v.length > 1 ? Math.sqrt(v.reduce(function (a, x) { return a + (x - m) * (x - m); }, 0) / v.length) : 0;
+                return { m: m, sd: sd || 1, flat: sd < 1e-6 };
+            });
+            // clamped: no guessing far outside what was measured
+            var z = function (o) { return FEATS.map(function (fn, j) { var x = fn(o); return x == null || stats[j].flat ? 0 : Math.max(-2, Math.min(2, (x - stats[j].m) / stats[j].sd)); }); };
+            var ys = rows.map(function (o) { return Math.log(o.ms); });
+            // intercept pulled towards the prior when there are few points
+            var mean = (ys.reduce(function (a, y) { return a + y; }, 0) + 3 * Math.log(priorMs)) / (n + 3);
+            var k = FEATS.length, A = [], b = [];
+            for (var i = 0; i < k; i++) { A.push(new Array(k).fill(0)); A[i][i] = LAMBDA; b.push(0); }
+            rows.forEach(function (o, idx) {
+                var x = z(o), y = ys[idx] - mean;
+                for (var i = 0; i < k; i++) { b[i] += x[i] * y; for (var j = 0; j < k; j++) A[i][j] += x[i] * x[j]; }
+            });
+            var beta = n >= 6 ? solve(A, b) : new Array(k).fill(0);
+            return { n: n, mean: mean, beta: beta, stats: stats, z: z };
+        }
+        function timeModel() {
+            if (timeModelCache) return timeModelCache;
+            var obs = timeObs().filter(function (o) { return o.ms >= 500; });
+            var by = { new: [], step: [], review: [] };
+            obs.forEach(function (o) { (by[o.k] || by.step).push(o); });
+            var m = {};
+            Object.keys(by).forEach(function (k) { m[k] = fitKind(by[k], MODEL_PRIOR_MS[k]); });
+            // repeats: learning-step passes per new card; forgetting rate of known cards
+            m.repeatsPerNew = by.new.length >= 5 ? Math.min(5, by.step.length / by.new.length) : 2;
+            var lapsed = by.review.filter(function (o) { return o.q === 1; }).length;
+            m.forget = by.review.length >= 5 ? lapsed / by.review.length : 0.15;
+            m.n = obs.length;
+            return (timeModelCache = m);
+        }
+        function predictMs(kind, f) {
+            var md = timeModel()[kind], x = md.z(f);
+            var lg = md.mean + x.reduce(function (a, v, i) { return a + v * md.beta[i]; }, 0);
+            return Math.max(1500, Math.min(CARD_MS_CAP, Math.exp(lg)));
+        }
+        // Expected time for a card in a session (#57, #98).
         function estimateMs(card, srs, gapFactor) {
-            var s = srs[card.id], t = timing();
-            var isNew = !s || s.state === "new";
-            var ms = s && s.ms ? s.ms : (isNew ? t.newMs : t.reviewMs);
-            if (s && s.lapses) ms += 10000 * Math.min(1, s.lapses / Math.max(1, s.reps || 1));
+            var s = srs[card.id], m = timeModel(), f = cardFeatures(card, s), kind = passKind(s), ms;
+            if (kind === "new") ms = predictMs("new", f) + m.repeatsPerNew * predictMs("step", f);
+            else if (kind === "step") ms = predictMs("step", f) * 1.5;
+            else ms = predictMs("review", f) + m.forget * 2 * predictMs("step", f);
+            if (s && s.ms && kind !== "new") ms = (ms + s.ms) / 2; // its own history counts too
             return ms * gapFactor;
+        }
+        // A typical new card with its repeats (for "new cards that fit").
+        function newCardCostMs() {
+            var md = timeModel().new, f = { l: md.stats[0].m || 6, w: md.stats[1].m || 1, r: null, lp: 0 };
+            return predictMs("new", f) + timeModel().repeatsPerNew * predictMs("step", f);
+        }
+        // Readable summary for ⚙.
+        function timeModelSummary() {
+            var m = timeModel(), mid = { l: m.new.stats[0].m || 6, w: m.new.stats[1].m || 1, r: null, lp: 0 };
+            var sec = function (ms) { return (ms / 1000).toFixed(ms < 10000 ? 1 : 0).replace(".", ",") + " s"; };
+            var perLetter = predictMs("review", { l: mid.l + 1, w: mid.w, r: null, lp: 0 }) - predictMs("review", mid);
+            // a word twice as rare (one log2 step), only once ranks measured vary enough
+            var rs = m.new.stats[2], rare = null;
+            if (rs.m && rs.sd >= 0.5) {
+                var rAt = function (lg) { return Math.pow(2, lg) - 1; };
+                rare = predictMs("new", { l: mid.l, w: mid.w, r: rAt(rs.m + 1), lp: 0 }) - predictMs("new", { l: mid.l, w: mid.w, r: rAt(rs.m), lp: 0 });
+            }
+            if (m.n < 10) return "Pas encore assez de mesures (" + m.n + ") : valeurs de départ. Le calcul s'affine à chaque carte.";
+            return "Ton profil (" + m.n + " mesures) : nouvelle carte ≈ " + sec(predictMs("new", mid)) + " + "
+                + m.repeatsPerNew.toFixed(1).replace(".", ",") + " reprise(s) de " + sec(predictMs("step", mid))
+                + " · carte connue ≈ " + sec(predictMs("review", mid)) + " (oubliée " + Math.round(m.forget * 100) + " % des fois)"
+                + " · " + (perLetter >= 0 ? "+" : "") + sec(perLetter) + " par lettre"
+                + (rare != null ? " · mot 2× plus rare " + (rare >= 0 ? "+" : "") + sec(rare) : "") + ".";
         }
         function gapFactor() {
             var d = dayStats();
@@ -3285,7 +3404,7 @@
                 cartes: queue.length, nouvelles: queue.filter(function (c) { var s = srs[c.id]; return !s || s.state === "new"; }).length,
                 estimation_ms: Math.round(queue.reduce(function (n, c) { return n + estimateMs(c, srs, gapFactor()); }, 0)),
                 temps_restant_ms: timeLeftMs() === Infinity ? null : timeLeftMs(), facteur_pause: gapFactor(),
-                limite_nouvelles: newLimit, plus20: customNewLimit != null
+                limite_nouvelles: newLimit, plus20: customNewLimit != null, modele: timeModelSummary()
             });
             sess.srs = srs;
             sess.done = 0;
@@ -4278,7 +4397,8 @@
                 box.append(inp);
                 var hint = document.createElement("div"); hint.className = "wc-hint";
                 var attempts = document.createElement("div"); attempts.className = "wc-attempts";
-                col.append(box, hint, attempts);
+                box.append(attempts); // the dots sit under this word's line (#97)
+                col.append(box, hint);
                 section.appendChild(col);
 
                 var entry = { word: word, expected: [word], inp: inp, box: box, hint: hint, attempts: attempts, solved: false, revealed: false, errors: 0, _errTimer: null };
@@ -4382,7 +4502,7 @@
         function addError(entry, i) {
             entry.errors++;
             cardErrors = Math.max(cardErrors, entry.errors);
-            entry.attempts.textContent = "✗".repeat(Math.min(entry.errors, 5));
+            entry.attempts.textContent = "●".repeat(Math.min(entry.errors, 5));
             if (entry.errors >= settings().maxErrors) giveAnswer(entry, i);
         }
 
@@ -4824,12 +4944,15 @@
         function advanceCard(q) {
             var card = sess.queue[sess.qIdx];
             var wasNew = !sess.srs[card.id] || sess.srs[card.id].state === "new";
+            var sBefore = sess.srs[card.id] ? Object.assign({}, sess.srs[card.id]) : null, kindBefore = passKind(sBefore);
+            var predicted = Math.round(estimateMs(card, sess.srs, 1));
             var ctx = { requeueIn: null };
             sess.srs[card.id] = applyRating(sess.srs[card.id] || defaultSRS(), q, ctx);
             sess.srs[card.id].lastReview = Date.now(); // for cross-device merge on sign-in
             var spentMs = Date.now() - (sess.cardShownAt || Date.now());
             recordCardTime(sess.srs[card.id], wasNew, Math.min(CARD_MS_CAP, spentMs));
-            dlog("note", { id: card.id, note: q, temps_ms: spentMs, compte_ms: Math.min(CARD_MS_CAP, spentMs), nouvelle: wasNew,
+            recordObs(kindBefore, card, sBefore, Math.min(CARD_MS_CAP, spentMs), q);
+            dlog("note", { id: card.id, note: q, passage: kindBefore, prevu_ms: predicted, temps_ms: spentMs, compte_ms: Math.min(CARD_MS_CAP, spentMs), nouvelle: wasNew,
                 moyenne_carte_ms: sess.srs[card.id].ms, etat: sess.srs[card.id].state, intervalle: sess.srs[card.id].interval,
                 jour_ms: dayStats().ms });
             saveSRS(sess.srsKey, sess.srs); // after every card, not only on leaving the session (#78)
