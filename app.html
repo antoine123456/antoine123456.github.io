@@ -2736,6 +2736,12 @@
                 if (fbUser) deleteSourceFromFirestore(s.id);
             });
             saveSources(keep);
+            // forget that pruned bundled decks were "seen", so they come back if allowed later
+            try {
+                var seen = JSON.parse(localStorage.getItem(LS_BUNDLED_SEEN) || "{}");
+                sources.forEach(function (s) { if (!deckAllowed(s.id)) delete seen[s.id]; });
+                localStorage.setItem(LS_BUNDLED_SEEN, JSON.stringify(seen));
+            } catch (e) { }
         }
 
         function loadDefaultDeckIfEmpty() {
@@ -2779,7 +2785,9 @@
             var have = loadSources().map(function (s) { return String(s.id); });
             var todo = EXTRA_BUNDLED.filter(function (b) { return !seen[b.id] || seen[b.id] < b.v; });
             return Promise.all(todo.map(function (b) {
-                var deleted = seen[b.id] && have.indexOf(b.id) === -1; // removed by the user: leave it gone
+                // removed by the user: leave it gone — except the ghost's decks,
+                // which may have been pruned by an older version (#79)
+                var deleted = seen[b.id] && have.indexOf(b.id) === -1 && USER !== GHOST;
                 if (deleted) return b;
                 return fetch(b.url)
                     .then(function (r) { return r.ok ? r.json() : null; })
