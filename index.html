@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Firebase · diagnostic</title>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <style>
         :root {
@@ -128,6 +127,54 @@
             cursor: default;
         }
 
+        h2 {
+            font-size: 15px;
+            margin: 22px 0 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        select {
+            margin-left: 6px;
+            padding: 5px 8px;
+            border-radius: 8px;
+            border: 1.5px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+        }
+
+        .explorer {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 14px;
+        }
+
+        @media (max-width: 600px) {
+            .explorer { grid-template-columns: 1fr; }
+        }
+
+        .explorer ul {
+            list-style: none;
+            margin: 4px 0 12px;
+            padding: 0;
+        }
+
+        .explorer li {
+            padding: 4px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .explorer li:hover, .explorer li.on {
+            background: var(--surface);
+        }
+
+        .explorer li span {
+            color: var(--text-2);
+            font-size: 12px;
+        }
+
         pre {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -144,18 +191,29 @@
 <body>
     <main>
         <h1>Firebase · diagnostic</h1>
-        <div class="sub">Branche <b>firebase-debug</b> — état de la connexion uniquement. L'appli : <a href="app.html">app.html</a></div>
+        <div class="sub">Branche <b>firebase-debug</b> — état de la connexion uniquement, sans authentification (choix d'un nom). L'appli : <a href="app.html">app.html</a></div>
 
         <div class="rows" id="rows"></div>
 
         <div class="actions">
-            <button id="b-signin" onclick="signIn()">Se connecter avec Google</button>
-            <button id="b-signout" onclick="signOut()">Se déconnecter</button>
-            <button id="b-read" onclick="testRead()">Tester la lecture Firestore</button>
-            <button id="b-write" onclick="testWrite()">Tester l'écriture Firestore</button>
+            <label>Utilisateur
+                <select id="user" onchange="chooseUser(this.value)"></select>
+            </label>
+            <button id="b-read" onclick="testRead()">Tester la lecture</button>
+            <button id="b-write" onclick="testWrite()">Tester l'écriture</button>
             <button onclick="copyLog()">Copier le journal</button>
         </div>
 
+        <h2>Explorateur <button onclick="explore()">Rafraîchir</button></h2>
+        <div class="sub">Comme MongoDB Compass, en plus simple — l'explorateur complet est dans la
+            <a href="https://console.firebase.google.com/project/type-in-anki/firestore/data" target="_blank">console Firebase (Firestore → Data)</a>.</div>
+        <div class="explorer">
+            <div><div class="label">users</div><ul id="x-users"></ul></div>
+            <div><div class="label" id="x-doc-title">document</div><pre id="x-doc">—</pre>
+                <div class="label">sous-collection sources</div><ul id="x-sources"></ul><pre id="x-source" hidden></pre></div>
+        </div>
+
+        <h2>Journal</h2>
         <pre id="log"></pre>
     </main>
 
@@ -178,7 +236,7 @@
             "auth/popup-closed-by-user": "Fenêtre de connexion fermée avant la fin.",
             "auth/network-request-failed": "Pas de réseau, ou requête bloquée (bloqueur de pub, pare-feu).",
             "auth/api-key-not-valid.-please-pass-a-valid-api-key.": "Clé API invalide : vérifier apiKey dans la configuration.",
-            "permission-denied": "Refusé par les règles Firestore : vérifier Firestore → Rules (ex. accès à users/{uid} pour l'utilisateur connecté).",
+            "permission-denied": "Refusé par les règles Firestore : sans authentification, il faut autoriser users/{nom} (et sa sous-collection) dans Firestore → Rules — voir la règle de test dans FIREBASE.md.",
             "unavailable": "Firestore injoignable (hors ligne ou base non créée).",
             "failed-precondition": "Base Firestore absente ou pas encore créée pour ce projet.",
             "not-found": "Document absent (normal si rien n'a encore été écrit)."
@@ -195,9 +253,6 @@
                 return '<div class="row"><span class="dot ' + s.status + '"></span><span class="label">' + s.label
                     + '</span><span class="val">' + s.value + (s.hint ? '<div class="hint">' + s.hint + '</div>' : '') + '</span></div>';
             }).join("");
-            var signedIn = state.auth && state.auth.status === "ok";
-            document.getElementById("b-signin").disabled = !window.fbAuth || signedIn;
-            document.getElementById("b-signout").disabled = !signedIn;
             document.getElementById("b-read").disabled = !window.fbDb;
             document.getElementById("b-write").disabled = !window.fbDb;
         }
@@ -229,7 +284,6 @@
             set("config", "Configuration", "ok", "projet « " + FIREBASE_CONFIG.projectId + " » · authDomain " + FIREBASE_CONFIG.authDomain);
             try {
                 firebase.initializeApp(FIREBASE_CONFIG);
-                window.fbAuth = firebase.auth();
                 window.fbDb = firebase.firestore();
                 set("init", "Initialisation", "ok", "firebase.initializeApp OK");
                 log("initialisation OK");
@@ -239,41 +293,42 @@
             }
         }
 
-        // ── Authentification ──
-        if (window.fbAuth) {
-            set("auth", "Authentification", "wait", "en attente de l'état…");
-            fbAuth.onAuthStateChanged(function (u) {
-                if (u) {
-                    set("auth", "Authentification", "ok", "connecté : " + (u.email || "(sans e-mail)") + "<br><span class='label'>uid " + u.uid + " · " + u.providerData.map(function (p) { return p.providerId; }).join(", ") + "</span>");
-                    log("connecté : " + (u.email || u.uid));
-                } else {
-                    set("auth", "Authentification", "ko", "non connecté");
-                    log("non connecté");
-                }
-            }, function (e) {
-                set("auth", "Authentification", "ko", e.message, hintFor(e));
-                log("erreur d'authentification", e);
-            });
-            fbAuth.getRedirectResult().catch(function (e) {
-                set("auth", "Authentification", "ko", e.message, hintFor(e));
-                log("retour de connexion", e);
-            });
+        // ── Utilisateur : un nom choisi dans la liste, sans authentification ──
+        // L'utilisateur « nom » = le document users/<nom> (comme l'ancien
+        // menu déroulant de noms). Aucun mot de passe : à réserver aux tests.
+        var LS_USER = "fbdebug_user", LS_NAMES = "fbdebug_names";
+        function knownNames() {
+            try { return JSON.parse(localStorage.getItem(LS_NAMES) || "[]"); } catch (e) { return []; }
         }
-        function signIn() {
-            log("connexion Google…");
-            fbAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(function (e) {
-                set("auth", "Authentification", "ko", e.message, hintFor(e));
-                log("connexion échouée", e);
-            });
+        function currentUser() { return localStorage.getItem(LS_USER) || ""; }
+        function fillUsers(extra) {
+            var names = knownNames().concat(extra || []);
+            names = names.filter(function (n, i) { return n && names.indexOf(n) === i; }).sort();
+            var cur = currentUser();
+            document.getElementById("user").innerHTML = '<option value="">— choisir —</option>'
+                + names.map(function (n) { return '<option' + (n === cur ? ' selected' : '') + '>' + n.replace(/</g, "&lt;") + '</option>'; }).join("")
+                + '<option value="__new">＋ nouveau nom…</option>';
+            set("auth", "Utilisateur", cur ? "ok" : "ko", cur ? "users/" + cur : "aucun nom choisi");
         }
-        function signOut() {
-            fbAuth.signOut().then(function () { log("déconnecté"); });
+        function chooseUser(v) {
+            if (v === "__new") {
+                v = (prompt("Nom d'utilisateur :") || "").trim();
+                if (!v) { fillUsers(); return; }
+                if (/[\/]/.test(v)) { alert("Pas de « / » dans le nom."); fillUsers(); return; }
+                var names = knownNames(); names.push(v);
+                localStorage.setItem(LS_NAMES, JSON.stringify(names));
+            }
+            localStorage.setItem(LS_USER, v);
+            log("utilisateur : " + (v || "aucun"));
+            fillUsers();
+            explore();
         }
+        fillUsers();
 
         // ── Firestore ──
         function docRef() {
-            var u = fbAuth && fbAuth.currentUser;
-            return u ? fbDb.collection("users").doc(u.uid) : fbDb.collection("debug").doc("ping");
+            var u = currentUser();
+            return u ? fbDb.collection("users").doc(u) : fbDb.collection("debug").doc("ping");
         }
         function testRead() {
             var ref = docRef();
@@ -301,7 +356,60 @@
                 log("écriture échouée", e);
             });
         }
+        // ── Explorateur ──
+        function pretty(o) {
+            return JSON.stringify(o, function (k, v) {
+                if (v && typeof v.toDate === "function") return v.toDate().toISOString();
+                if (typeof v === "string" && v.length > 300) return v.slice(0, 300) + "… (" + v.length + " caractères)";
+                return v;
+            }, 2);
+        }
+        function explore() {
+            if (!window.fbDb) return;
+            var ul = document.getElementById("x-users");
+            ul.innerHTML = "<li>…</li>";
+            fbDb.collection("users").get().then(function (snap) {
+                var ids = [];
+                ul.innerHTML = snap.docs.map(function (d) {
+                    ids.push(d.id);
+                    return '<li class="' + (d.id === currentUser() ? "on" : "") + '" data-id="' + d.id.replace(/"/g, "&quot;") + '">'
+                        + d.id.replace(/</g, "&lt;") + ' <span>' + Object.keys(d.data()).length + ' champ(s)</span></li>';
+                }).join("") || "<li><span>(vide)</span></li>";
+                ul.querySelectorAll("li[data-id]").forEach(function (li) { li.onclick = function () { chooseUser(li.dataset.id); }; });
+                fillUsers(ids);
+                log("explorateur : " + ids.length + " utilisateur(s) dans users");
+            }).catch(function (e) {
+                ul.innerHTML = '<li><span>' + (e.code || "") + '</span></li>';
+                log("liste des utilisateurs refusée", e);
+                set("explore", "Explorateur", "ko", "lecture de la collection users impossible", hintFor(e));
+            });
+            var u = currentUser();
+            document.getElementById("x-doc-title").textContent = u ? "users/" + u : "document";
+            document.getElementById("x-source").hidden = true;
+            if (!u) { document.getElementById("x-doc").textContent = "—"; document.getElementById("x-sources").innerHTML = ""; return; }
+            var ref = fbDb.collection("users").doc(u);
+            ref.get().then(function (snap) {
+                document.getElementById("x-doc").textContent = snap.exists ? pretty(snap.data()) : "(document absent)";
+            }).catch(function (e) { document.getElementById("x-doc").textContent = (e.code || "") + " — " + e.message; });
+            ref.collection("sources").get().then(function (snap) {
+                var sl = document.getElementById("x-sources");
+                sl.innerHTML = snap.docs.map(function (d) {
+                    return '<li data-id="' + d.id.replace(/"/g, "&quot;") + '">' + d.id.replace(/</g, "&lt;") + ' <span>' + Object.keys(d.data()).length + ' champ(s)</span></li>';
+                }).join("") || "<li><span>(aucune)</span></li>";
+                sl.querySelectorAll("li[data-id]").forEach(function (li) {
+                    li.onclick = function () {
+                        ref.collection("sources").doc(li.dataset.id).get().then(function (d) {
+                            var pre = document.getElementById("x-source");
+                            pre.hidden = false;
+                            pre.textContent = "sources/" + li.dataset.id + "\n" + pretty(d.data());
+                        });
+                    };
+                });
+            }).catch(function (e) { document.getElementById("x-sources").innerHTML = '<li><span>' + (e.code || "") + '</span></li>'; });
+        }
+
         render();
+        explore();
     </script>
 </body>
 
