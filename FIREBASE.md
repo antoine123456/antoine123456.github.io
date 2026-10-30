@@ -28,5 +28,5 @@ service cloud.firestore {
 
 - **antoine** : tous les paquets de main, et la progression déjà dans ce navigateur.
 - **nouveau nom** : page nue, sans paquet ni import.
-- **fantome** : absent de la liste, mêmes paquets qu'antoine mais données à part. On y accède avec `app.html?fantome`. Il sert à tester la synchro sur un autre utilisateur.
-- La progression part dans Firestore (`users/<nom>`) en quittant une séance ou à sa fin, et revient sur un autre appareil au chargement.
+- **fantome** : absent de la liste, seulement le paquet « Vocabulaire espagnol », données à part. On y accède avec `app.html?fantome`. Il sert à tester la synchro sur un autre utilisateur.
+- La progression part dans Firestore (`users/<nom>`) après chaque carte, et revient sur un autre appareil au chargement.
