@@ -481,9 +481,16 @@
         .sync-status.sync-offline { color: var(--orange); }
         .sync-status.sync-hidden { display: none; }
 
-        .h-user { display: flex; gap: 8px; align-items: center; justify-content: center; margin-bottom: 14px; font-size: 13px; color: var(--text-2); }
+        #home { padding-top: calc(16px + env(safe-area-inset-top, 0px)); }
+        .h-header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 20px; }
+        .h-header .h-theme-toggle { position: static; margin: 0; flex: none; }
+        .h-brand { display: flex; align-items: center; gap: 6px; margin-right: auto; }
+        .h-brand .h-logo { font-size: 22px; margin: 0; }
+        .h-brand .h-title { font-size: 18px; margin: 0; }
+        .h-user { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--text-2); }
+        .h-header .h-theme-toggle { order: 2; }
+        @media (max-width: 600px) { .h-user { order: 3; flex-basis: 100%; } }
         .h-user select { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 3px 8px; }
-        .bare-user .h-sub, .bare-user .h-import-btn, .bare-user .h-reset { display: none; }
 
         .h-logo {
             font-size: 36px;
@@ -1688,19 +1695,16 @@
 
     <!-- ── HOME ── -->
     <div id="home">
-        <button class="h-theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Basculer clair/sombre">🌙</button>
-        <button class="h-theme-toggle h-info-btn" onclick="openGuide()" title="Mode d'emploi">i</button>
-        <div class="h-user">👤 <select id="h-user-select" onchange="chooseUser(this.value)"></select>
-            <span id="sync-status" class="sync-status sync-hidden"></span></div>
-        <div class="h-logo">🃏</div>
-        <div class="h-title">Anki Trainer</div>
-        <div class="h-sub">Pré-traitez votre .apkg avec <code>extract_apkg.py</code>, puis importez le JSON ici</div>
+        <!-- One header line (#84): logo + name, user, guide, theme. No
+             help text, import or reset on this branch. -->
+        <div class="h-header">
+            <div class="h-brand"><span class="h-logo">🃏</span><span class="h-title">Anki Trainer</span></div>
+            <div class="h-user">👤 <select id="h-user-select" onchange="chooseUser(this.value)"></select>
+                <span id="sync-status" class="sync-status sync-hidden"></span></div>
+            <button class="h-theme-toggle h-info-btn" onclick="openGuide()" title="Mode d'emploi">i</button>
+            <button class="h-theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Basculer clair/sombre">🌙</button>
+        </div>
         <div class="h-sources" id="h-sources"></div>
-        <label class="h-import-btn">
-            ＋ Importer un fichier .json
-            <input type="file" accept=".json" style="display:none" onchange="importJSON(this)">
-        </label>
-        <div class="h-reset" onclick="resetAppData()">🧹 Effacer les données de cet appareil</div>
     </div>
 
     <!-- ── MINI GUIDE (modal, opened by the "i" button on the home screen) ── -->
