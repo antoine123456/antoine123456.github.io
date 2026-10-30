@@ -294,6 +294,17 @@
             display: none;
         }
 
+        .fm-modal { max-width: 480px; padding-bottom: 18px; }
+        .fm-card { margin: 10px 0 12px; font-size: 14px; color: var(--text-2); }
+        #fm-text { width: 100%; box-sizing: border-box; font: inherit; font-size: 15px; color: var(--text); background: var(--surface);
+            border: 1.5px solid var(--border-2); border-radius: 12px; padding: 10px 12px; resize: vertical; }
+        #fm-text:focus { outline: none; border-color: var(--red); }
+        .fm-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; margin-top: 12px; }
+        .fm-keys { flex: 1 1 100%; font-size: 11px; color: var(--text-3); }
+        .fm-btn { font: inherit; font-size: 14px; border: 1.5px solid var(--border-2); background: var(--surface); color: var(--text);
+            border-radius: 18px; padding: 7px 16px; cursor: pointer; }
+        .fm-ok { border-color: var(--red); color: var(--red); font-weight: 600; }
+
         .g-modal {
             position: relative;
             width: 100%;
@@ -1065,6 +1076,11 @@
             flex-direction: column;
         }
 
+        /* Large screens: a fixed-size card, not the whole height (#80). */
+        @media (min-width: 601px) {
+            body.compact #s-content { max-height: 640px; margin: auto 0; }
+        }
+
         body.compact #s-content .s-question {
             flex: 1;
             min-height: 0;
@@ -1683,6 +1699,20 @@
     </div>
 
     <!-- ── MINI GUIDE (modal, opened by the "i" button on the home screen) ── -->
+    <!-- ── F6: mark a card, with a comment (#77) ── -->
+    <div class="g-backdrop" id="flag-modal" hidden onclick="if (event.target === this) closeFlagModal()">
+        <div class="g-modal fm-modal" role="dialog" aria-modal="true" aria-labelledby="fm-title">
+            <div class="g-title" id="fm-title">🚩 Marquer la carte</div>
+            <div class="fm-card" id="fm-card"></div>
+            <textarea id="fm-text" rows="3" placeholder="Ce qui ne va pas, la bonne réponse… (facultatif)"></textarea>
+            <div class="fm-actions">
+                <span class="fm-keys">Entrée : marquer · Maj+Entrée : à la ligne · Échap : annuler</span>
+                <button class="fm-btn" onclick="closeFlagModal()">Annuler</button>
+                <button class="fm-btn fm-ok" onclick="confirmFlag()">🚩 Marquer</button>
+            </div>
+        </div>
+    </div>
+
     <div class="g-backdrop" id="guide" hidden onclick="if (event.target === this) closeGuide()">
         <div class="g-modal" role="dialog" aria-modal="true" aria-labelledby="g-title">
             <div class="g-head">
@@ -2055,7 +2085,35 @@
             if (!card) return;
             var fl = loadFlagged(sess.sourceId);
             if (fl[card.id]) { delete fl[card.id]; saveFlagged(sess.sourceId, fl); toast("Marque retirée"); updateFlagIndicator(); return; }
-            fl[card.id] = plainText(displayQuestion(card.question)).slice(0, 200);
+            openFlagModal(card);
+        }
+        // F6 opens a small window to say what's wrong (#77); the card is
+        // only marked once confirmed. Stored value: the question text, or
+        // {q, c} when there's a comment (ankisync prints it for review).
+        function flagLabel(card) { // blocks (word, sentence…) kept apart by a space
+            return plainText(displayQuestion(card.question).replace(/<\/(div|p|h\d)>|<br\s*\/?>/gi, " $&")).replace(/\s+/g, " ").trim().slice(0, 200);
+        }
+        function flagModalOpen() { return !document.getElementById("flag-modal").hidden; }
+        function openFlagModal(card) {
+            document.getElementById("fm-card").textContent = flagLabel(card);
+            var t = document.getElementById("fm-text");
+            t.value = "";
+            document.getElementById("flag-modal").hidden = false;
+            setTimeout(function () { t.focus(); }, 0);
+        }
+        function closeFlagModal() {
+            document.getElementById("flag-modal").hidden = true;
+            var open = wordRows.find(function (e) { return !e.solved && !e.given; });
+            if (open && studyMode() !== "flip") open.inp.focus();
+        }
+        function confirmFlag() {
+            var card = sess.queue[sess.qIdx];
+            var comment = document.getElementById("fm-text").value.trim();
+            document.getElementById("flag-modal").hidden = true;
+            if (!card || !sess.sourceId) return;
+            var fl = loadFlagged(sess.sourceId);
+            var q = flagLabel(card);
+            fl[card.id] = comment ? { q: q, c: comment } : q;
             saveFlagged(sess.sourceId, fl);
             toast("🚩 Carte marquée : elle ne sera plus proposée");
             // Out of this session right away (later passes included), not rated (#44).
@@ -2079,7 +2137,10 @@
             var fl = loadFlagged(src.id);
             var ids = Object.keys(fl);
             if (!ids.length) { toast("Aucune carte marquée pour cette source."); return; }
-            var lines = ids.map(function (id) { return "cid:" + id + "  —  " + fl[id]; });
+            var lines = ids.map(function (id) {
+                var v = fl[id];
+                return "cid:" + id + "  —  " + (typeof v === "string" ? v : v.q + "  💬 " + v.c);
+            });
             var text = lines.join("\n");
             prompt(ids.length + " carte(s) à corriger dans Anki (Parcourir → coller \"cid:X or cid:Y...\" ou chercher une ligne) :",
                 "cid:" + ids.join(" or cid:") + "\n\n" + text);
@@ -3300,6 +3361,16 @@
             }
         });
 
+        ["keydown", "keyup"].forEach(function (type) {
+            document.addEventListener(type, function (e) {
+                if (!flagModalOpen()) return;
+                e.stopImmediatePropagation();
+                if (type !== "keydown") return;
+                if (e.key === "Escape") { e.preventDefault(); closeFlagModal(); }
+                else if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); confirmFlag(); }
+            }, true);
+        });
+
         // ── Mini guide ──
         function openGuide() {
             document.getElementById("guide").hidden = false;
@@ -4267,7 +4338,9 @@
         function updateCompact() {
             var body = document.body;
             if (document.getElementById("study").style.display !== "flex") { body.classList.remove("compact"); return; }
-            var compact = window.innerWidth <= 600;
+            // Cards always use the fixed layout, so the card keeps the same
+            // size from recto to verso (#80); songs keep the old check.
+            var compact = window.innerWidth <= 600 || !sess.lyrics;
             if (!compact) {
                 body.classList.remove("compact");
                 document.documentElement.style.removeProperty("--card-img-max");
@@ -4401,6 +4474,7 @@
             var ctx = { requeueIn: null };
             sess.srs[card.id] = applyRating(sess.srs[card.id] || defaultSRS(), q, ctx);
             sess.srs[card.id].lastReview = Date.now(); // for cross-device merge on sign-in
+            saveSRS(sess.srsKey, sess.srs); // after every card, not only on leaving the session (#78)
             if (wasNew) recordNewIntroduced(sess.srsKey);
             sess.done++;
             sess.qIdx++;
