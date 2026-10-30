@@ -820,6 +820,19 @@
             margin-left: 2px;
         }
 
+        .s-hold.on {
+            border-color: var(--blue);
+            background: var(--tint-blue);
+            color: var(--blue);
+        }
+
+        .s-hold-touch { display: none; }
+
+        @media (hover: none) {
+            .s-hold-kb { display: none; }
+            .s-hold-touch { display: inline; }
+        }
+
         .s-counts {
             display: flex;
             justify-content: center;
@@ -1786,6 +1799,7 @@
                 <option value="dictee">🎧 Dictée</option>
             </select>
             <button class="s-mode-toggle" id="s-lyrics-opts" onclick="toggleLyricsMenu(event)" title="Options des chansons" style="display:none">⚙</button>
+            <button class="s-mode-toggle" id="s-full-toggle" onclick="toggleFullRender()" title="Rendu complet : phrase d'exemple, nature / genre (réglage de cet appareil)" style="display:none"></button>
             <div class="ly-menu" id="ly-menu" hidden>
                 <label>Indice
                     <select name="hint" onchange="onLyricsHintChange(this.value)">
@@ -2907,6 +2921,9 @@
             sess.customNewLimit = customNewLimit;
             sess.deckLabel = deckName == null ? "🏷 " + tag : deckName.split("::").join(" › ");
             sess.cards = allCards;
+            // Full rendering: Spanish deck, type-in / normal mode, if on.
+            sess.canEnrich = src.id === "default" && !!ENRICH && track !== "dictee";
+            if (sess.canEnrich && fullRender()) queue = queue.map(enrichedCard);
             sess.queue = queue;
             sess.qIdx = 0;
             sess.srs = srs;
@@ -3224,6 +3241,57 @@
         });
 
         // ═══════════════════════════════════════════════
+        // FULL RENDERING (#65, #66) — Spanish cards shown like the demo deck:
+        // the word big, an example sentence from the deck's own sentence
+        // cards (+ its native audio), word class / gender. Data from
+        // enrich_es.json (built by enrich_es.py); on/off per device.
+        // ═══════════════════════════════════════════════
+        var LS_FULL = "ankitrain_v1_full_render"; // "1" | "0" (default on)
+        var ENRICH = null;
+        fetch("enrich_es.json").then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) { ENRICH = d; }).catch(function () { });
+        function fullRender() {
+            try { return localStorage.getItem(LS_FULL) !== "0"; } catch (e) { return true; }
+        }
+        function updateFullToggle() {
+            var b = document.getElementById("s-full-toggle");
+            if (!b) return;
+            b.style.display = sess.canEnrich ? "" : "none";
+            b.textContent = fullRender() ? "✨ Complet" : "▫️ Simple";
+        }
+        function toggleFullRender() {
+            try { localStorage.setItem(LS_FULL, fullRender() ? "0" : "1"); } catch (e) { }
+            if (document.activeElement) document.activeElement.blur();
+            restartStudy();
+        }
+        var RF_CSS = "<style>"
+            + ".rf-word{font-size:40px;font-weight:600;letter-spacing:.5px;margin:2px 0 8px}"
+            + ".rf-sent{font-size:18px;line-height:1.5;opacity:.9}.rf-sent b{color:var(--blue,#2563eb)}"
+            + ".rf-mean{font-size:24px;font-weight:600;margin:2px 0}"
+            + ".rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}"
+            + ".rf-tr{font-size:15px;opacity:.7;font-style:italic;margin-top:2px}"
+            + ".rf-play{margin-top:8px;border:1.5px solid rgba(128,128,128,.35);background:none;color:inherit;border-radius:999px;padding:3px 12px;font-size:13px;cursor:pointer}"
+            + "</style>";
+        // A display copy of the card (same id, words, audio): new front and back.
+        function enrichedCard(c) {
+            var e = ENRICH && ENRICH[c.id];
+            if (!e) return c;
+            var esFirst = /🇪🇸\s*➡️\s*🇫🇷/u.test(c.question || "") || c.lang === "es";
+            var shown = htmlToText(displayQuestion(c.question));
+            var answer = (c.words || []).join(" ");
+            var pos = e.pos ? '<div class="rf-pos">' + esc(e.pos) + '</div>' : "";
+            var play = e.sa ? '<button class="rf-play" onclick="playAudioList([\'' + e.sa + '\'])">🔊 la phrase</button>' : "";
+            var sentEs = e.s ? '<div class="rf-sent">' + e.s + '</div>' : "";
+            var sentFr = e.sf ? '<div class="rf-tr">' + esc(e.sf) + '</div>' : "";
+            // Front: never the answer — ES→FR shows the Spanish sentence,
+            // FR→ES only its French translation.
+            var front = RF_CSS + '<div class="rf-word">' + esc(shown) + '</div>'
+                + (esFirst ? sentEs : (e.sf ? '<div class="rf-sent">' + esc(e.sf) + '</div>' : ""));
+            var back = RF_CSS + '<div class="rf-mean">' + esc(answer) + '</div>' + pos + sentEs + sentFr + play;
+            return Object.assign({}, c, { question: front, answer: back, enriched: true });
+        }
+
+        // ═══════════════════════════════════════════════
         // DICTATION — 🎧 mode: hear the Spanish, type it. Own progress
         // ("::dictee"); only cards already in review on the main track.
         // An ES→FR card and its FR→ES twin share one Spanish text → one item.
@@ -3445,6 +3513,7 @@
             var flip = studyMode() === "flip";
             flipShown = false;
             updateModeToggle();
+            updateFullToggle();
             if (!flip && (!card.words || !card.words.length)) { sess.qIdx++; showCard(); return; }
             if (sess.lyrics) { showLyricLine(card, flip); return; }
 
@@ -3522,7 +3591,8 @@
             } else if (state === "rating" && card) {
                 html = ratingButtonsHtml(previewIntervals(sess.srs[card.id]));
             } else if (state === "next") {
-                html = '<button class="s-pill" onclick="continueAfterAnswer()">Suivant → <span class="t-key">Entrée</span></button>';
+                html = '<button class="s-pill s-hold' + (holdBack ? ' on' : '') + '" onpointerdown="event.preventDefault(); setHold(true)" onpointerup="setHold(false)" onpointerleave="setHold(false)" onpointercancel="setHold(false)">'
+                    + '⏸ <span class="s-hold-kb">Maintenir Espace</span><span class="s-hold-touch">Maintenir appuyé</span></button>';
             }
             el.innerHTML = html;
             scheduleCompactCheck();
@@ -3922,10 +3992,45 @@
             var go = function () { flash(function () { advanceCard(q); }); };
             pendingNext = go;
             playCardAudio("a", function () {
-                setTimeout(function () { if (pendingNext === go) continueAfterAnswer(); }, RICH_BACK_READ_MS);
+                setTimeout(function () {
+                    if (pendingNext !== go) return;
+                    if (holdBack) deferredNext = go; // held: move on once released
+                    else continueAfterAnswer();
+                }, RICH_BACK_READ_MS);
             });
         }
         var RICH_BACK_READ_MS = 2500;
+
+        // Holding Space (or a finger on the screen / the ⏸ pill) keeps the
+        // back on screen; released, the card moves on if its time is up (#67).
+        var holdBack = false, deferredNext = null;
+        function setHold(on) {
+            on = !!on && !!pendingNext;
+            if (on === holdBack) return;
+            holdBack = on;
+            var pill = document.querySelector("#s-actions .s-hold");
+            if (pill) pill.classList.toggle("on", on);
+            if (!on && deferredNext && deferredNext === pendingNext) {
+                deferredNext = null;
+                setTimeout(function () { if (!holdBack && pendingNext) continueAfterAnswer(); }, 120);
+            }
+        }
+        document.addEventListener("keydown", function (e) {
+            if (e.key !== " " || !pendingNext || document.getElementById("study").style.display !== "flex") return;
+            e.preventDefault();
+            if (!e.repeat) setHold(true);
+        }, true);
+        document.addEventListener("keyup", function (e) { if (e.key === " ") setHold(false); });
+        // Phones: a finger kept on the card area does the same.
+        document.addEventListener("pointerdown", function (e) {
+            if (!pendingNext || e.pointerType === "mouse") return;
+            if (e.target.closest("button, input, select, a")) return;
+            if (!e.target.closest("#study")) return;
+            setHold(true);
+        });
+        ["pointerup", "pointercancel"].forEach(function (t) {
+            document.addEventListener(t, function (e) { if (e.pointerType !== "mouse") setHold(false); });
+        });
 
         // ── Conjugation table after a miss (#51) ──
         // Conjugation cards (tag "conjugaison", front "<b>verb</b> … <i>person</i>")
@@ -4039,6 +4144,7 @@
         function continueAfterAnswer() {
             if (!pendingNext) return;
             var go = pendingNext; pendingNext = null;
+            holdBack = false; deferredNext = null;
             keepKeyboard();
             document.getElementById("audio-player").pause();
             go();
