@@ -2146,13 +2146,8 @@
         var NEW_LIMIT = 20; // default; the ⚙ setting wins (newLimitPerDay)
 
         // ⚙ Settings (#56, #57, #92), per user / browser.
-<<<<<<< HEAD
         var LS_SETTINGS = NS + "settings";
-        var SETTINGS_DEFAULT = { newPerDay: NEW_LIMIT, reviewsPerDay: 0, minutesPerDay: 0, maxErrors: 3, spaceMode: "hold", debug: false };
-=======
-        var LS_SETTINGS = "ankitrain_v1_settings";
         var SETTINGS_DEFAULT = { newPerDay: NEW_LIMIT, reviewsPerDay: 0, minutesPerDay: 0, maxErrors: 3, spaceMode: "hold", debug: false, validate: "live" };
->>>>>>> main
         function settings() {
             var o = {};
             try { o = JSON.parse(localStorage.getItem(LS_SETTINGS) || "{}") || {}; } catch (e) { }
