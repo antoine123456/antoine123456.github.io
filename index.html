@@ -3108,8 +3108,8 @@
                     + (stats.trueNew > stats.new
                         ? '<button class="h-custom-btn" title="Étudier 20 cartes de plus que la limite du jour" onclick="event.stopPropagation(); startStudy(' + si + ',' + jsArg(node.fullName) + ',' + customLimit + ')">+20</button>'
                         : '')
-                    + (meta && meta.skippable && stats.trueNew + lockedN > 0
-                        ? '<button class="h-custom-btn" title="Je connais déjà ce niveau : ses cartes jamais vues passent en apprises" onclick="event.stopPropagation(); knowDeck(' + si + ',' + jsArg(node.fullName) + ')">✓ connu</button>'
+                    + (stats.trueNew + lockedN > 0 // every deck (#106), first on the vocabulary levels (#93)
+                        ? '<button class="h-custom-btn" title="Je connais déjà ce paquet : ses cartes jamais vues passent en apprises" onclick="event.stopPropagation(); knowDeck(' + si + ',' + jsArg(node.fullName) + ')">✓ connu</button>'
                         : '')
                     + '<button class="h-custom-btn" title="Parcourir les cartes (recto → verso)" onclick="event.stopPropagation(); openBrowse(' + si + ',' + jsArg(node.fullName) + ')">🔍</button>'
                     + '</div>';
@@ -3118,7 +3118,7 @@
             }).join("");
         }
 
-        // « Je connais déjà ce niveau » (#93): its never-seen cards become
+        // « Je connais déjà ce paquet » (#93, #106): its never-seen cards become
         // learnt reviews, due in 20–60 days (spread out) to check them now
         // and then. Counts as learnt for the next level's lock; ankisync
         // sends it to Anki like any other progress.
@@ -3498,8 +3498,16 @@
             return (card.tags || []).filter(function (t) { return HIDDEN_TAGS.indexOf(t.toLowerCase()) === -1 && !/^etape/i.test(t); });
         }
         // Card info sheet (#7): shown under the answer once the card is done.
+        // Per-source switches (#61). Defaults come from what the cards hold;
+        // this map overrides them — the base of a future « réglages par
+        // paquet ». Grammaire: tags after the answer paused.
+        var SOURCE_FEATURES = { grammaire: { tagsAfterAnswer: false } };
+        function feature(name, sid) {
+            var f = SOURCE_FEATURES[sid == null ? sess.sourceId : sid];
+            return !f || f[name] !== false;
+        }
         function infoHtml(card) {
-            var tags = shownTags(card);
+            var tags = feature("tagsAfterAnswer") ? shownTags(card) : [];
             if (!card.info && !tags.length) return "";
             return '<div class="c-info">' + (card.info || "")
                 + (tags.length ? '<div class="c-tags">' + tags.map(function (t) { return '<span class="c-tag">' + esc(t) + '</span>'; }).join("") + '</div>' : '')
