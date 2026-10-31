@@ -2793,7 +2793,10 @@
             try { seen = JSON.parse(localStorage.getItem(LS_BUNDLED_SEEN) || "{}"); } catch (e) { seen = {}; }
             if (Array.isArray(seen)) seen = seen.reduce(function (o, id) { o[id] = 1; return o; }, {});
             var have = loadSources().map(function (s) { return String(s.id); });
-            var todo = EXTRA_BUNDLED.filter(function (b) { return !seen[b.id] || seen[b.id] < b.v; });
+            // the ghost's decks: loaded whenever missing, whatever « seen » says (#105)
+            var todo = EXTRA_BUNDLED.filter(function (b) {
+                return !seen[b.id] || seen[b.id] < b.v || (USER === GHOST && have.indexOf(b.id) === -1);
+            });
             dlog("paquets intégrés", { prevus: EXTRA_BUNDLED.map(function (b) { return b.id; }), presents: have, deja_vus: seen, a_charger: todo.map(function (b) { return b.id; }) });
             return Promise.all(todo.map(function (b) {
                 // removed by the user: leave it gone — except the ghost's decks,
@@ -5235,9 +5238,18 @@
         renderHome();
         // The cloud pull never holds the decks back more than 5 s (offline,
         // Firestore unreachable…): local data and bundled decks load anyway (#104).
-        var pullTimeout = new Promise(function (_, rej) { setTimeout(function () { rej(new Error("délai dépassé (5 s)")); }, 5000); });
-        (fbUser ? Promise.race([fetchAndMergeFromFirestore(), pullTimeout]).then(function () { setSyncStatus("synced"); dlog("synchro réception", { ok: true }); },
-            function (err) { console.error("sync pull failed:", err); setSyncStatus(navigator.onLine === false ? "offline" : "error"); dlog("synchro réception", { ok: false, erreur: String(err) }); }) : Promise.resolve())
+        // A slow pull isn't an error (#105): the home updates when it lands.
+        var pull = fbUser ? fetchAndMergeFromFirestore() : null, pullStart = Date.now();
+        if (pull) pull.then(function () {
+            setSyncStatus("synced"); dlog("synchro réception", { ok: true, duree_ms: Date.now() - pullStart }); renderHome();
+        }, function (err) {
+            console.error("sync pull failed:", err); setSyncStatus(navigator.onLine === false ? "offline" : "error");
+            dlog("synchro réception", { ok: false, erreur: String(err), duree_ms: Date.now() - pullStart });
+        });
+        var pullWait = new Promise(function (res) { setTimeout(function () { res("lente"); }, 5000); });
+        (pull ? Promise.race([pull.then(function () { return "ok"; }, function () { return "erreur"; }), pullWait]).then(function (r) {
+            if (r === "lente") dlog("synchro réception", { attente: "plus de 5 s, les paquets se chargent sans attendre" });
+        }) : Promise.resolve())
             .then(function () {
                 if (!FULL_DECKS) return;
                 pruneSources();
