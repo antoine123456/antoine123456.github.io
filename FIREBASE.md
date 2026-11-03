@@ -1,6 +1,6 @@
 # Branche firebase-debug
 
-`index.html` est une page de diagnostic : l'état de la connexion à Firestore, un choix de nom d'utilisateur (sans Google, sans mot de passe) et un petit explorateur de la base. L'appli elle-même est dans `app.html`.
+`diagnostic.html` est une page de diagnostic : l'état de la connexion à Firestore, un choix de nom d'utilisateur (sans Google, sans mot de passe) et un petit explorateur de la base. L'appli elle-même est la page d'accueil (`index.html`, copie de la branche firebase-users) ; `app.html` y renvoie pour les anciens liens.
 
 ## Règles Firestore de test
 
@@ -24,9 +24,9 @@ service cloud.firestore {
 - Dans la page : section « Explorateur » (la collection `users`, le document choisi et sa sous-collection `sources`).
 - Explorateur complet, comme MongoDB Compass : https://console.firebase.google.com/project/type-in-anki/firestore/data
 
-## L'appli avec choix du nom (`app.html`, branche firebase-users)
+## L'appli avec choix du nom (`index.html`, branche firebase-users)
 
 - **antoine** : tous les paquets de main, et la progression déjà dans ce navigateur.
 - **nouveau nom** : page nue, sans paquet ni import.
-- **fantome** : absent de la liste, les paquets « Vocabulaire espagnol » et « Grammaire », données à part. On y accède avec `app.html?fantome`. Il sert à tester la synchro sur un autre utilisateur.
+- **fantome** : absent de la liste, les paquets « Vocabulaire espagnol » et « Grammaire », données à part. On y accède avec `?fantome` au bout de l'adresse (https://antoine123456.github.io/?fantome). Il sert à tester la synchro sur un autre utilisateur.
 - La progression part dans Firestore (`users/<nom>`) après chaque carte, et revient sur un autre appareil au chargement.
