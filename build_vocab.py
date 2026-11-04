@@ -53,9 +53,68 @@ def level_of(rank):
             return n
 
 
-def level_deck(n):
+def level_deck(n, lang="fr"):
     lo = 1 if n == 1 else LEVELS[n - 2] + 1
-    return f"{DECK_NAME}::Niveau {n}", lo, LEVELS[n - 1]
+    L = LANGS[lang]
+    return f"{L['deck']}::{L['level']} {n}", lo, LEVELS[n - 1]
+
+
+# Same deck in other languages (#109): the Spanish words, sounds, images and
+# levels stay; meaning, sentence translation and word class come from
+# vocab_<lang>.tsv (key, meaning, sentence translation).
+LANGS = {
+    "fr": {"deck": DECK_NAME, "level": "Niveau", "source": "Vocabulaire espagnol", "json": "vocabulaire.json",
+           "apkg": "Vocabulaire espagnol.apkg", "model": "Vocabulaire espagnol (Refold)", "id_base": 1_100_000_000_000,
+           "deck_id": "vocab-es"},
+    "it": {"deck": "🇪🇸 Vocabolario spagnolo", "level": "Livello", "source": "Vocabolario spagnolo (italiano)",
+           "json": "vocabolario.json", "apkg": "Vocabolario spagnolo.apkg", "model": "Vocabolario spagnolo (Refold)",
+           "id_base": 1_101_000_000_000, "deck_id": "vocab-es-it", "tsv": "vocab_it.tsv",
+           "pos": {"nom masculin": "sostantivo maschile", "nom féminin": "sostantivo femminile",
+                   "nom masculin pluriel": "sostantivo maschile plurale", "nom féminin pluriel": "sostantivo femminile plurale",
+                   "verbe": "verbo"}},
+}
+
+
+def words_to_type(meaning):
+    """First meaning (+ its note in brackets), no punctuation (#88, #90)."""
+    first = re.split(r"\s*[;,]\s*", meaning)[0].strip()
+    note = re.search(r"\([^)]*\)\s*$", meaning)
+    if note and note.group(0).strip() not in first:
+        first += " " + note.group(0).strip()
+    return [t for t in (re.sub(r"^[^\w]+|[^\w]+$", "", x) for x in first.split()) if t]
+
+
+def translated(cards, lang):
+    """A copy of the deck's cards in another language (#109)."""
+    L = LANGS[lang]
+    rows = {}
+    with open(os.path.join(HERE, L["tsv"]), encoding="utf-8") as f:
+        for line in f:
+            if line.startswith("#") or not line.strip():
+                continue
+            p = line.rstrip("\n").split("\t")
+            rows[int(p[0])] = p[1:]
+    out = []
+    for c in cards:
+        r = rows.get(c["key"])
+        if not r:
+            continue
+        t = dict(c, id=str(L["id_base"] + int(c["id"]) - ID_BASE), fr=r[0], answer=html.escape(r[0]), words=words_to_type(r[0]))
+        if c.get("pos"):
+            t["pos"] = L["pos"].get(c["pos"], c["pos"])
+        if c.get("s"):
+            t["sf"] = r[1] if len(r) > 1 else ""
+        out.append(t)
+    return out
+
+
+def deck_json(cards, lang):
+    L = LANGS[lang]
+    return {"version": 1, "source": L["source"],
+            "decks": [{"id": f"{L['deck_id']}-{n}", "name": level_deck(n, lang)[0], "skippable": True,
+                       "range": [level_deck(n)[1], min(level_deck(n)[2] or len(cards), len(cards))],
+                       "cards": [c for c in cards if level_of(c["key"]) == n]}
+                      for n in range(1, len(LEVELS) + 1)]}
 ID_BASE = 1_100_000_000_000  # ids déterministes, dans le passé (2004, avant Anki : ni futur refusé, ni collision)
 
 sys.path.insert(0, HERE)
@@ -218,13 +277,12 @@ def main():
         cards.append(card)
         if img: review.append((card, via))
 
-    out = {"version": 1, "source": "Vocabulaire espagnol",
-           "decks": [{"id": f"vocab-es-{n}", "name": level_deck(n)[0], "skippable": True,
-                      "range": [level_deck(n)[1], min(level_deck(n)[2] or len(cards), len(cards))],
-                      "cards": [c for c in cards if level_of(c["key"]) == n]}
-                     for n in range(1, len(LEVELS) + 1)]}
     with open(os.path.join(HERE, "vocabulaire.json"), "w", encoding="utf-8") as f:
-        json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
+        json.dump(deck_json(cards, "fr"), f, ensure_ascii=False, separators=(",", ":"))
+    cards_it = translated(cards, "it")
+    with open(os.path.join(HERE, LANGS["it"]["json"]), "w", encoding="utf-8") as f:
+        json.dump(deck_json(cards_it, "it"), f, ensure_ascii=False, separators=(",", ":"))
+    print(f"{len(cards_it)} mots en italien → {LANGS['it']['json']}")
 
     write_review(review)
 
@@ -233,6 +291,7 @@ def main():
     n_a = sum(1 for c in cards if c.get("audioQuestion"))
     print(f"{len(cards)} mots · {n_a} avec audio · {n_s} avec phrase · {n_i} avec image → vocabulaire.json")
     build_apkg(cards)
+    build_apkg(cards_it, "it")
 
 
 # ── Planche de relecture des images ─────────────────────────────────────────
@@ -351,7 +410,8 @@ CSS = """.card { font-family: -apple-system, "Segoe UI", sans-serif; text-align:
 FIELDS = ["Clé", "Mot", "Sens", "Nature", "Phrase", "Traduction", "Audio", "AudioPhrase", "Image"]
 
 
-def build_apkg(cards):
+def build_apkg(cards, lang="fr"):
+    L = LANGS[lang]
     try:
         from anki.collection import Collection
         from anki.collection import ExportAnkiPackageOptions
@@ -360,12 +420,12 @@ def build_apkg(cards):
         return
     import shutil
     import tempfile
-    out_path = os.path.join(HERE, "Vocabulaire espagnol.apkg")
+    out_path = os.path.join(HERE, L["apkg"])
     with tempfile.TemporaryDirectory() as tmp:
         col = Collection(os.path.join(tmp, "collection.anki2"))
         try:
             mm = col.models
-            m = mm.new("Vocabulaire espagnol (Refold)")
+            m = mm.new(L["model"])
             for name in FIELDS:
                 mm.add_field(m, mm.new_field(name))
             t = mm.new_template("Mot → sens")
@@ -374,9 +434,9 @@ def build_apkg(cards):
             m["css"] = CSS
             m["sortf"] = 0
             mm.add(m)
-            m = mm.by_name("Vocabulaire espagnol (Refold)")
-            did = col.decks.id(DECK_NAME)
-            level_dids = {n: col.decks.id(level_deck(n)[0]) for n in range(1, len(LEVELS) + 1)}
+            m = mm.by_name(L["model"])
+            did = col.decks.id(L["deck"])
+            level_dids = {n: col.decks.id(level_deck(n, lang)[0]) for n in range(1, len(LEVELS) + 1)}
             media = col.media.dir()
             for c in cards:
                 n = col.new_note(m)
