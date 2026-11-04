@@ -2046,17 +2046,24 @@
         // ankitrain_v1_* keys (his progress from main), everyone else gets
         // ankitrain_u_<name>_*. "antoine" gets every bundled deck, the
         // hidden "fantome" (only through ?fantome in the URL, never listed)
-        // only GHOST_DECKS (Vocabulaire, Grammaire); other names start on a bare page — no decks,
+        // and the names in USER_DECKS (chiara…) only their decks; other names start on a bare page — no decks,
         // no import.
         var LS_USER = "ankitrain_user", LS_NAMES = "ankitrain_names";
         var GHOST = "fantome", OWNER = "antoine";
         var USER = /[?&]fantome\b/.test(location.search) ? GHOST
             : (function () { try { return localStorage.getItem(LS_USER) || ""; } catch (e) { return ""; } })();
         var NS = !USER || USER === OWNER ? "ankitrain_v1_" : "ankitrain_u_" + encodeURIComponent(USER) + "_";
-        var FULL_DECKS = USER === OWNER || USER === GHOST;
+        // Decks per user (#111): a listed user gets only these bundled decks;
+        // antoine gets them all (except the restricted ones); others: none.
+        var USER_DECKS = {
+            fantome: ["vocabulaire", "grammaire", "vocabolario", "grammatica"], // to try new decks (#79, #101, #109, #110)
+            chiara: ["vocabolario", "grammatica"]                              // Italian decks (#111)
+        };
+        var LISTED_USERS = ["chiara"]; // shown in the name list even before their first sync
+        var FULL_DECKS = USER === OWNER || !!USER_DECKS[USER];
         // The ghost only gets these bundled decks (#79); null = all of them.
-        var GHOST_DECKS = ["vocabulaire", "grammaire", "vocabolario"]; // #79, #101, #109
-        function deckAllowed(id) { return USER !== GHOST || GHOST_DECKS.indexOf(String(id)) !== -1; }
+        var GHOST_DECKS = USER_DECKS[GHOST];
+        function deckAllowed(id) { var l = USER_DECKS[USER]; return !l || l.indexOf(String(id)) !== -1; }
         document.documentElement.classList.toggle("bare-user", !FULL_DECKS);
 
         // The list = antoine + the names in Firestore (+ the current one),
@@ -2064,7 +2071,7 @@
         // from the list too (#83).
         try { localStorage.removeItem(LS_NAMES); } catch (e) { }
         function knownNames() {
-            var names = [OWNER];
+            var names = [OWNER].concat(LISTED_USERS);
             if (USER && USER !== GHOST && names.indexOf(USER) === -1) names.push(USER);
             return names;
         }
@@ -2809,8 +2816,9 @@
         // Bumping "v" pushes a new version of its cards to browsers that
         // already have it (progress kept).
         var EXTRA_BUNDLED = [{ url: "arbres.json", id: "arbres", v: 2 }, { url: "songs.json", id: "chansons", v: 1 }, { url: "grammaire.json", id: "grammaire", v: 1 }, { url: "guide.json", id: "guide", v: 1 }, { url: "demo_riche.json", id: "demo-riche", v: 1 }, { url: "vocabulaire.json", id: "vocabulaire", v: 1 },
-            { url: "vocabolario.json", id: "vocabolario", v: 1, ghostOnly: true }] // to review on the ghost (#109)
-            .filter(function (b) { return deckAllowed(b.id) && (!b.ghostOnly || USER === GHOST); });
+            { url: "vocabolario.json", id: "vocabolario", v: 1, restricted: true }, // Italian decks: only for
+            { url: "grammatica.json", id: "grammatica", v: 1, restricted: true }]   // users who list them (#109–#111)
+            .filter(function (b) { return deckAllowed(b.id) && (!b.restricted || !!USER_DECKS[USER]); });
         var LS_BUNDLED_SEEN = NS + "bundled_seen"; // {id: version} (was [id…] = version 1)
         function loadExtraBundledDecks() {
             var seen;
@@ -2819,13 +2827,13 @@
             var have = loadSources().map(function (s) { return String(s.id); });
             // the ghost's decks: loaded whenever missing, whatever « seen » says (#105)
             var todo = EXTRA_BUNDLED.filter(function (b) {
-                return !seen[b.id] || seen[b.id] < b.v || (USER === GHOST && have.indexOf(b.id) === -1);
+                return !seen[b.id] || seen[b.id] < b.v || (!!USER_DECKS[USER] && have.indexOf(b.id) === -1);
             });
             dlog("paquets intégrés", { prevus: EXTRA_BUNDLED.map(function (b) { return b.id; }), presents: have, deja_vus: seen, a_charger: todo.map(function (b) { return b.id; }) });
             return Promise.all(todo.map(function (b) {
                 // removed by the user: leave it gone — except the ghost's decks,
                 // which may have been pruned by an older version (#79)
-                var deleted = seen[b.id] && have.indexOf(b.id) === -1 && USER !== GHOST;
+                var deleted = seen[b.id] && have.indexOf(b.id) === -1 && !USER_DECKS[USER];
                 if (deleted) { dlog("paquet intégré", { id: b.id, action: "ignoré (supprimé par l'utilisateur)" }); return b; }
                 return fetch(b.url)
                     .then(function (r) { return r.ok ? r.json() : null; })
