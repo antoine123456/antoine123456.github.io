@@ -295,6 +295,11 @@
         }
 
         .fm-modal { max-width: 480px; padding-bottom: 18px; }
+        #b-export-btn[hidden] { display: none; }
+        #b-review-btn.on { background: var(--navy); color: var(--bg); border-color: var(--navy); }
+        .b-review-bar { display: flex; gap: 8px; align-items: center; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+        .b-comment { font-size: 13px; color: var(--red); max-width: 90%; text-align: center; }
+        .b-flag { font: inherit; font-size: 13px; border: 1.5px solid var(--border-2); background: var(--surface); color: var(--text); border-radius: 16px; padding: 4px 12px; cursor: pointer; }
         .h-settings-btn { right: 108px; }
         .st-modal { max-width: 460px; padding-bottom: 18px; }
         .h-range { font-size: 11px; font-weight: 400; color: var(--text-3); margin-left: 4px; }
@@ -2011,6 +2016,8 @@
     <div id="browse">
         <div class="s-topbar">
             <button class="s-back" onclick="closeBrowse()">← Retour</button>
+            <button class="s-mode-toggle" id="b-review-btn" onclick="toggleBrowseReview()" title="Relire le paquet carte par carte et commenter (F6)">📝 Relecture</button>
+            <button class="s-mode-toggle" id="b-export-btn" onclick="downloadBrowseComments()" hidden>⬇ Commentaires <span id="b-comment-n"></span></button>
             <div class="b-count" id="b-count">0 / 0</div>
         </div>
         <div class="s-main">
@@ -2485,21 +2492,37 @@
             return plainText(displayQuestion(card.question).replace(/<\/(div|p|h\d)>|<br\s*\/?>/gi, " $&")).replace(/\s+/g, " ").trim().slice(0, 200);
         }
         function flagModalOpen() { return !document.getElementById("flag-modal").hidden; }
-        function openFlagModal(card) {
+        // target: null = the study card (#77); {sid, card, done} = a card
+        // reviewed in 🔍 Parcourir (#108), kept in place, comment editable.
+        var flagTarget = null;
+        function openFlagModal(card, target) {
+            flagTarget = target || null;
             document.getElementById("fm-card").textContent = flagLabel(card);
             var t = document.getElementById("fm-text");
-            t.value = "";
+            var old = target ? loadFlagged(target.sid)[card.id] : null;
+            t.value = old && typeof old === "object" ? old.c : "";
             document.getElementById("flag-modal").hidden = false;
             setTimeout(function () { t.focus(); }, 0);
         }
         function closeFlagModal() {
             document.getElementById("flag-modal").hidden = true;
+            if (flagTarget) { flagTarget = null; return; }
             var open = wordRows.find(function (e) { return !e.solved && !e.given; });
             if (open && studyMode() !== "flip") open.inp.focus();
         }
         function confirmFlag() {
-            var card = sess.queue[sess.qIdx];
             var comment = document.getElementById("fm-text").value.trim();
+            if (flagTarget) {
+                var tg = flagTarget; flagTarget = null;
+                document.getElementById("flag-modal").hidden = true;
+                var tfl = loadFlagged(tg.sid);
+                tfl[tg.card.id] = comment ? { q: flagLabel(tg.card), c: comment } : flagLabel(tg.card);
+                saveFlagged(tg.sid, tfl);
+                dlog("relecture", { source: tg.sid, id: tg.card.id, commentaire: comment });
+                if (tg.done) tg.done();
+                return;
+            }
+            var card = sess.queue[sess.qIdx];
             document.getElementById("flag-modal").hidden = true;
             if (!card || !sess.sourceId) return;
             var fl = loadFlagged(sess.sourceId);
@@ -3724,11 +3747,53 @@
             // a dense two-column list.
             browse.carousel = browse.all.some(function (b) { return /<img/i.test(b.card.question + b.back); });
             document.getElementById("b-search").value = "";
+            document.getElementById("b-review-btn").classList.toggle("on", !!browse.review);
+            document.getElementById("b-export-btn").hidden = !browse.review;
+            if (browse.review) setTimeout(updateBrowseCommentCount, 0);
             document.getElementById("b-deck-name").textContent = deckName.split("::").join(" › ");
             document.getElementById("home").style.display = "none";
             document.getElementById("browse").style.display = "flex";
             renderBrowse();
         }
+
+        // 📝 Relecture (#108): every deck as a carousel, one card at a time,
+        // F6 / the button to comment it (kept with the card, like F6 in study),
+        // « ⬇ Commentaires » to hand them over.
+        function toggleBrowseReview() {
+            browse.review = !browse.review;
+            document.getElementById("b-review-btn").classList.toggle("on", browse.review);
+            document.getElementById("b-export-btn").hidden = !browse.review;
+            updateBrowseCommentCount();
+            renderBrowse();
+        }
+        function browseComments() {
+            var fl = loadFlagged(browse.sid);
+            return browse.all.filter(function (b) { return fl[b.card.id]; }).map(function (b) {
+                var v = fl[b.card.id];
+                return { id: b.card.id, recto: flagLabel(b.card), verso: htmlToText(b.back), commentaire: typeof v === "object" ? v.c : "" };
+            });
+        }
+        function updateBrowseCommentCount() { document.getElementById("b-comment-n").textContent = "(" + browseComments().length + ")"; }
+        function browseFlag(i) {
+            var b = browse.list[i]; if (!b) return;
+            openFlagModal(b.card, { sid: browse.sid, card: b.card, done: function () {
+                var sl = document.querySelector('.b-slide[data-i="' + i + '"]');
+                if (sl) { delete sl.dataset.filled; fillSlide(sl); }
+                updateBrowseCommentCount();
+            } });
+        }
+        function downloadBrowseComments() {
+            var out = { paquet: document.getElementById("b-deck-name").textContent, source: browse.sid, exporte: new Date().toISOString(), commentaires: browseComments() };
+            var a = document.createElement("a");
+            a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 1)], { type: "application/json" }));
+            a.download = "relecture-" + browse.sid + "-" + new Date().toISOString().slice(0, 10) + ".json";
+            a.click();
+        }
+        document.addEventListener("keydown", function (e) {
+            if (e.key !== "F6" || document.getElementById("browse").style.display !== "flex" || !browse.review || flagModalOpen()) return;
+            e.preventDefault();
+            browseFlag(browse.idx);
+        });
 
         function closeBrowse() {
             document.getElementById("audio-player").pause();
@@ -3781,7 +3846,7 @@
                 updateBrowseCount();
                 return;
             }
-            if (!browse.carousel) { renderBrowseList(el); return; }
+            if (!browse.carousel && !browse.review) { renderBrowseList(el); return; }
             var slides = browse.list.map(function (b, i) {
                 return '<div class="s-question b-slide' + (i === 0 ? ' active' : '') + '" data-i="' + i + '"></div>';
             }).join("");
@@ -3843,11 +3908,16 @@
             sl.dataset.filled = "1";
             var b = browse.list[+sl.dataset.i], c = b.card;
             var hasAudio = (c.audioQuestion && c.audioQuestion.length) || (c.audioAnswer && c.audioAnswer.length);
+            // Review mode (#108): the card as studied (full rendering) + its comment.
+            var rc = browse.review && fullRender() ? enrichedCard(c) : c;
+            var fl = browse.review ? loadFlagged(browse.sid)[c.id] : null;
             sl.innerHTML = '<div class="b-front"></div><div class="b-sep">verso</div><div class="b-back"></div>'
-                + (hasAudio ? '<button class="b-slide-audio" onclick="playBrowseAudio(' + sl.dataset.i + ')" title="Écouter">🔊</button>' : '');
+                + (hasAudio ? '<button class="b-slide-audio" onclick="playBrowseAudio(' + sl.dataset.i + ')" title="Écouter">🔊</button>' : '')
+                + (browse.review ? '<div class="b-review-bar"><div class="b-comment">' + (fl ? "🚩 " + esc(typeof fl === "object" ? fl.c : "marquée") : "") + '</div>'
+                    + '<button class="b-flag" onclick="browseFlag(' + sl.dataset.i + ')">🚩 ' + (fl ? "Modifier" : "Commenter") + ' <span class="t-key">F6</span></button></div>' : '');
             var css = cardStyle(browse.sid, c);
-            mountCardHtml(sl.querySelector(".b-front"), displayQuestion(c.question), css);
-            mountCardHtml(sl.querySelector(".b-back"), b.back, css);
+            mountCardHtml(sl.querySelector(".b-front"), displayQuestion(rc.question), css);
+            mountCardHtml(sl.querySelector(".b-back"), rc !== c && rc.answer != null ? rc.answer : b.back, css);
             sl.querySelector(".b-back").insertAdjacentHTML("afterend", infoHtml(c));
         }
 
@@ -3893,7 +3963,7 @@
         document.addEventListener("keydown", function (e) {
             if (document.getElementById("browse").style.display !== "flex") return;
             var inSearch = e.target && e.target.id === "b-search";
-            if (!browse.carousel && !inSearch && e.key !== "Escape") return;
+            if (!browse.carousel && !browse.review && !inSearch && e.key !== "Escape") return;
             if (e.key === "Escape") {
                 e.preventDefault();
                 if (inSearch) e.target.blur(); else closeBrowse();
