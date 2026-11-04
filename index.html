@@ -4052,7 +4052,7 @@
             var shown = htmlToText(displayQuestion(c.question));
             var answer = (c.words || []).join(" ");
             var pos = e.pos ? '<div class="rf-pos">' + esc(e.pos) + '</div>' : "";
-            var play = e.sa ? '<button class="rf-play" onclick="playAudioList([\'' + e.sa + '\'])">🔊 la phrase</button>' : "";
+            var play = e.sa ? '<button class="rf-play" onclick="playAudioList([\'' + e.sa + '\'])">' + tr("🔊 la phrase") + '</button>' : "";
             var sentEs = e.s ? '<div class="rf-sent">' + e.s + '</div>' : "";
             var sentFr = e.sf ? '<div class="rf-tr">' + esc(e.sf) + '</div>' : "";
             // Front: never the answer — ES→FR shows the Spanish sentence,
@@ -4076,7 +4076,7 @@
             var pos = c.pos ? '<div class="rf-pos">' + esc(c.pos) + '</div>' : "";
             var sent = c.s ? '<div class="rf-sent">' + c.s + '</div>' : "";
             var tr = c.sf ? '<div class="rf-tr">' + esc(c.sf) + '</div>' : "";
-            var play = c.sa ? '<button class="rf-play" onclick="playAudioList([\'' + c.sa + '\'])">🔊 la phrase</button>' : "";
+            var play = c.sa ? '<button class="rf-play" onclick="playAudioList([\'' + c.sa + '\'])">' + tr("🔊 la phrase") + '</button>' : "";
             var img = c.img ? '<div class="rf-img"><img src="' + esc(c.img) + '" alt=""></div>' : "";
             return Object.assign({}, c, {
                 question: RF_CSS + '<div class="rf-word">' + esc(c.es) + '</div>' + sent,
@@ -5315,6 +5315,162 @@
             el.textContent = msg; el.classList.add("show");
             clearTimeout(_toastTimer);
             _toastTimer = setTimeout(function () { el.classList.remove("show"); }, 3500);
+        }
+
+        // ═══════════════════════════════════════════════
+        // INTERFACE LANGUAGE (#112) — French by default. Another language
+        // (UI_LANG_USER, set per user on the server branch) translates the
+        // interface as it is shown: text nodes and title / placeholder
+        // attributes, watched with a MutationObserver, plus confirm / prompt.
+        // Cards (shadow DOM) are not touched.
+        // ═══════════════════════════════════════════════
+        var UI_LANG = (typeof UI_LANG_USER !== "undefined" && UI_LANG_USER) || "fr";
+        var I18N = {
+            it: {
+                exact: {
+                    "Anki Trainer": "Anki Trainer", "— choisir —": "— scegli —", "＋ nouveau nom…": "＋ nuovo nome…", "Ton nom :": "Il tuo nome:",
+                    "Synchronisé": "Sincronizzato", "Synchronisation…": "Sincronizzazione…", "Hors ligne": "Offline", "Erreur de sync": "Errore di sincronizzazione",
+                    "✓ Synchronisé": "✓ Sincronizzato", "↻ Synchronisation…": "↻ Sincronizzazione…", "⚠ Hors ligne": "⚠ Offline", "⚠ Erreur de sync": "⚠ Errore di sincronizzazione",
+                    "Basculer clair/sombre": "Tema chiaro/scuro", "Mode d'emploi": "Istruzioni", "Réglages": "Impostazioni",
+                    "Cartes marquées à corriger": "Carte segnalate da correggere", "Exporter les stats": "Esporta le statistiche",
+                    "Je connais déjà ce paquet : ses cartes jamais vues passent en apprises": "Conosco già questo mazzo: le carte mai viste diventano imparate",
+                    "✓ connu": "✓ già noto", "Parcourir les cartes (recto → verso)": "Sfoglia le carte (fronte → retro)",
+                    "Étudier 20 cartes de plus que la limite du jour": "Studia 20 carte in più del limite di oggi",
+                    "Étapes suivantes : s'ouvrent quand 80 % des cartes de l'étape en cours sont apprises": "Tappe successive: si aprono quando l'80 % delle carte della tappa in corso è imparato",
+                    "nvx": "nuove", "dus": "da rivedere", "appris": "imparate",
+                    "← Quitter": "← Esci", "⌨️ Saisie": "⌨️ Scrittura", "🃏 Normal": "🃏 Normale", "🎧 Dictée": "🎧 Dettato",
+                    "Saisie": "Scrittura", "Normal": "Normale", "Dictée": "Dettato", "Mode d'étude": "Modalità di studio",
+                    "Taper la réponse": "Scrivi la risposta", "Noter la carte": "Valuta la carta",
+                    "✨ Complet": "✨ Completo", "Rendu complet : phrase d'exemple, nature / genre (réglage de cet appareil)": "Visualizzazione completa: frase d'esempio, categoria / genere (impostazione di questo dispositivo)",
+                    "verso": "retro", "💡 Indice": "💡 Suggerimento", "Indice": "Suggerimento", "Voir la réponse": "Vedi la risposta",
+                    "Afficher la réponse": "Mostra la risposta", "📋 Tableau": "📋 Tabella", "Maintenir pour voir le tableau": "Tieni premuto per vedere la tabella",
+                    "À revoir": "Da rivedere", "Difficile": "Difficile", "Correct": "Giusto", "Facile": "Facile",
+                    "Maintenir Espace": "Tieni premuto Spazio", "Maintenir appuyé": "Tieni premuto", "Suivant": "Avanti", "Espace": "Spazio", "Entrée": "Invio", "Échap": "Esc",
+                    "🔊 Écouter": "🔊 Ascolta", "Écouter": "Ascolta", "🔊 la phrase": "🔊 la frase", "Réécouter": "Riascolta", "Lentement": "Lentamente",
+                    "Écoute et écris ce que tu entends": "Ascolta e scrivi quello che senti",
+                    "Session terminée !": "Sessione finita!", "← Retour": "← Indietro", "Temps de révision du jour": "Tempo di studio di oggi",
+                    "🚩 Marquer la carte": "🚩 Segnala la carta", "Ce qui ne va pas, la bonne réponse… (facultatif)": "Cosa non va, la risposta giusta… (facoltativo)",
+                    "Entrée : marquer · Maj+Entrée : à la ligne · Échap : annuler": "Invio: segnala · Maiusc+Invio: a capo · Esc: annulla",
+                    "Annuler": "Annulla", "🚩 Marquer": "🚩 Segnala", "🚩 Commenter": "🚩 Commenta", "🚩 Modifier": "🚩 Modifica",
+                    "Fermer (Échap)": "Chiudi (Esc)",
+                    "📝 Relecture": "📝 Revisione", "Relire le paquet carte par carte et commenter (F6)": "Rileggi il mazzo carta per carta e commenta (F6)",
+                    "⬇ Commentaires": "⬇ Commenti", "🔎 Rechercher…": "🔎 Cerca…", "‹ Préc.": "‹ Prec.", "Suiv. ›": "Succ. ›", "← → pour défiler": "← → per scorrere",
+                    "Options des chansons": "Opzioni delle canzoni", "Traduction FR": "Traduzione", "Contexte seul": "Solo contesto", "Premières lettres": "Prime lettere",
+                    "Nouvelles lignes": "Nuove righe", "Strophe par strophe": "Strofa per strofa", "5 lignes": "5 righe", "Toute la chanson": "Tutta la canzone",
+                    "« Nouvelles lignes » s'applique à la prochaine session.": "« Nuove righe » vale dalla prossima sessione.",
+                    // ⚙ settings
+                    "Quantité de révision par jour": "Quantità di studio al giorno", "Nombre de cartes": "Numero di carte", "Temps": "Tempo",
+                    "Nouvelles cartes par jour": "Nuove carte al giorno",
+                    "Cartes jamais vues ajoutées chaque jour, pour chaque source (Espagnol, Vocabulaire…), en plus des cartes à revoir.": "Carte mai viste aggiunte ogni giorno, per ogni fonte (Vocabolario, Grammatica…), oltre alle carte da rivedere.",
+                    "Révisions par jour": "Ripassi al giorno",
+                    "Maximum de cartes déjà apprises à revoir par jour, tous paquets confondus ; au-delà, elles attendent le lendemain (comme « Révisions max./jour » dans Anki). Les cartes en cours d'apprentissage passent toujours. Tout à gauche : sans limite.": "Massimo di carte già imparate da rivedere al giorno, in tutti i mazzi; oltre, aspettano il giorno dopo (come « Ripassi max./giorno » in Anki). Le carte in fase di apprendimento passano sempre. Tutto a sinistra: senza limite.",
+                    "sans limite": "senza limite", "Temps de révision par jour": "Tempo di studio al giorno",
+                    "Durée visée par jour, tous paquets confondus. L'appli prend d'abord les cartes à revoir, puis autant de nouvelles que le temps restant le permet. Le temps de chaque carte est appris sur tes propres mesures (ci-dessus) : type de carte, nombre de lettres et de mots, rareté du mot, oublis, et les reprises d'une nouvelle carte ; un peu plus pour toutes après plusieurs jours sans réviser. Une barre de temps défile pendant la séance ; « +20 » permet de continuer au-delà.": "Durata prevista al giorno, in tutti i mazzi. L'app prende prima le carte da rivedere, poi tante nuove quante ne permette il tempo rimasto. Il tempo di ogni carta è calcolato sulle tue misure (qui sopra): tipo di carta, numero di lettere e di parole, rarità della parola, dimenticanze e ripetizioni di una carta nuova; un po' di più per tutte dopo vari giorni senza studiare. Una barra del tempo scorre durante la sessione; « +20 » permette di andare oltre.",
+                    "Erreurs acceptées avant que le mot soit donné": "Errori ammessi prima che la parola venga data",
+                    "Nombre d'essais faux sur un même mot avant que l'appli l'écrive pour toi ; la carte est alors notée « À revoir ».": "Numero di tentativi sbagliati sulla stessa parola prima che l'app la scriva per te; la carta viene allora valutata « Da rivedere ».",
+                    "Vérification des mots": "Controllo delle parole", "Pendant la frappe": "Durante la scrittura", "Entrée pour valider": "Invio per confermare",
+                    "Pendant la frappe : le mot se vérifie tout seul, une erreur ajoute un petit point sous le mot. Entrée pour valider : tu tapes le mot puis Entrée ; à chaque erreur, le fond de la case devient plus rouge.": "Durante la scrittura: la parola si controlla da sola, un errore aggiunge un puntino sotto la parola. Invio per confermare: scrivi la parola e premi Invio; a ogni errore lo sfondo della casella diventa più rosso.",
+                    "Après le verso complet": "Dopo il retro completo", "Espace pour suivant": "Spazio per andare avanti",
+                    "Maintenir Espace : la carte suivante vient seule après quelques secondes, Espace tenu la garde affichée. Espace pour suivant : le verso reste jusqu'à ce que tu appuies sur Espace.": "Tieni premuto Spazio: la carta successiva arriva da sola dopo qualche secondo, tenendo premuto Spazio resta visibile. Spazio per andare avanti: il retro resta finché non premi Spazio.",
+                    "Mode debug": "Modalità debug", "Arrêté": "Spenta", "Journal actif": "Registro attivo", "Vider": "Svuota",
+                    "Le journal note les séances, chaque carte (temps mesuré, estimation), la synchro et les erreurs. Télécharge-le et donne-le à Claude pour un retour précis.": "Il registro annota le sessioni, ogni carta (tempo misurato, stima), la sincronizzazione e gli errori. Scaricalo e dallo a Claude per un riscontro preciso.",
+                    "⬇ Télécharger le journal (": "⬇ Scarica il registro (",
+                    // guide
+                    "Apprendre en tapant la réponse, avec la répétition espacée d'Anki.": "Imparare scrivendo la risposta, con la ripetizione dilazionata di Anki.",
+                    "Choisir un paquet": "Scegliere un mazzo", "Touche la ligne pour réviser.": "Tocca la riga per studiare.",
+                    "= nouvelles cartes du jour,": "= nuove carte del giorno,", "= à revoir aujourd'hui,": "= da rivedere oggi,", "= déjà sues.": "= già sapute.",
+                    ": 20 nouvelles de plus.": ": 20 nuove in più.", ": parcourir les cartes (carrousel pour les images, liste pour les mots).": ": sfogliare le carte (carosello per le immagini, elenco per le parole).",
+                    "Un mot par case.": "Una parola per casella.", "Vert": "Verde", "= juste,": "= giusto,", "rouge": "rosso",
+                    "= pas encore ; chaque erreur ajoute un petit point": "= non ancora; ogni errore aggiunge un puntino", "sous le mot.": "sotto la parola.",
+                    "sous le mot. Les accents sont facultatifs. Dès qu'un mot est juste, on passe à la case suivante.": "sotto la parola. Gli accenti sono facoltativi. Appena una parola è giusta, si passa alla casella successiva.",
+                    "Besoin d'aide ?": "Serve aiuto?", "montre le mot": "mostra la parola", "en orange": "in arancione", "sous la case ;": "sotto la casella;",
+                    "montre tout. Après": "mostra tutto. Dopo", "3 erreurs": "3 errori",
+                    "(réglable dans ⚙), le bon mot s'écrit en rouge. Une carte où on a eu de l'aide est notée « À revoir ».": "(regolabile in ⚙), la parola giusta si scrive in rosso. Una carta in cui hai avuto aiuto viene valutata « Da rivedere ».",
+                    "La carte prend la couleur de la note.": "La carta prende il colore della valutazione.", "Tout tapé sans aide →": "Tutto scritto senza aiuto →",
+                    "carte réussie": "carta riuscita",
+                    "automatiquement. Après un indice ou la réponse, ces boutons apparaissent en bas ; la durée indique quand la carte reviendra.": "automaticamente. Dopo un suggerimento o la risposta, questi pulsanti compaiono in basso; la durata indica quando la carta tornerà.",
+                    "Trois façons de réviser": "Tre modi di studiare", "Menu en haut de l'écran de révision.": "Menu in alto nella schermata di studio.",
+                    ": on tape la réponse.": ": si scrive la risposta.", ": comme Anki,": ": come Anki,",
+                    "retourne la carte, puis on note avec les boutons ou": "gira la carta, poi si valuta con i pulsanti o", "(Espace = Correct).": "(Spazio = Giusto).",
+                    "(paquet espagnol) : on écoute et on tape l'espagnol entendu, sur les cartes déjà apprises — progression à part.": ": si ascolta e si scrive lo spagnolo sentito, sulle carte già imparate — progressi a parte.",
+                    "Chansons": "Canzoni",
+                    "Chaque ligne est une carte, dans l'ordre de la chanson : les lignes sues s'affichent, les autres sont à compléter.": "Ogni riga è una carta, nell'ordine della canzone: le righe sapute si vedono, le altre sono da completare.",
+                    "pour changer l'indice et le rythme des nouvelles lignes.": "per cambiare il suggerimento e il ritmo delle nuove righe.",
+                    "Réglages ⚙": "Impostazioni ⚙", "Choisis comment mesurer ta journée : en": "Scegli come misurare la tua giornata: in",
+                    "nombre de cartes": "numero di carte", "(nouvelles et révisions par jour, comme Anki) ou en": "(nuove e ripassi al giorno, come Anki) o in", "temps": "tempo",
+                    "(ex. 15 min) : l'appli mesure ton temps sur chaque carte et prépare d'abord les cartes à revoir, puis autant de nouvelles que le temps le permet (≈ 40 s une nouvelle, plus pour une carte souvent oubliée, un peu plus après quelques jours sans réviser). Une fine barre bleue sous la progression montre le temps écoulé. Aussi : erreurs acceptées avant que le mot soit donné, ce que fait": "(es. 15 min): l'app misura il tuo tempo su ogni carta e prepara prima le carte da rivedere, poi tante nuove quante ne permette il tempo (≈ 40 s una nuova, di più per una carta spesso dimenticata, un po' di più dopo qualche giorno senza studiare). Una sottile barra blu sotto l'avanzamento mostra il tempo trascorso. Inoltre: errori ammessi prima che la parola venga data, cosa fa",
+                    "après le verso, et le mode debug.": "dopo il retro, e la modalità debug.",
+                    "Raccourcis clavier": "Scorciatoie da tastiera", "indice (encore F1 quand tout est montré = À revoir et suivante)": "suggerimento (ancora F1 quando tutto è mostrato = Da rivedere e avanti)",
+                    "voir toute la réponse": "vedi tutta la risposta", "F8 · Maj droite": "F8 · Maiusc destro", "À revoir · Difficile · Correct · Facile": "Da rivedere · Difficile · Giusto · Facile",
+                    "À revoir · Difficile · Correct · Facile (hors des cases)": "Da rivedere · Difficile · Giusto · Facile (fuori dalle caselle)", "case suivante": "casella successiva",
+                    "mode normal : retourner, puis Correct": "modalità normale: girare, poi Giusto", "carrousel 🔍 ·": "carosello 🔍 ·", ": retour": ": indietro",
+                    "Il devient triste en contemplant la ville…": "Diventa triste guardando la città…", "le serpent": "il serpente", "à revoir": "da rivedere",
+                    // messages
+                    "Aucune carte à réviser aujourd'hui 🎉": "Nessuna carta da ripassare oggi 🎉", "Aucune carte dans ce deck": "Nessuna carta in questo mazzo",
+                    "🚩 Carte marquée : elle ne sera plus proposée": "🚩 Carta segnalata: non verrà più proposta", "Marque retirée": "Segnalazione rimossa",
+                    "Aucune carte marquée pour cette source.": "Nessuna carta segnalata in questa fonte.", "Aucune progression à exporter pour cette source.": "Nessun progresso da esportare per questa fonte.",
+                    "Rien à dicter : la dictée reprend les cartes déjà passées en révision à l'écrit": "Niente da dettare: il dettato riprende le carte già passate in ripasso per iscritto",
+                    "Supprimer cette source et toute la progression ?": "Eliminare questa fonte e tutti i progressi?",
+                    "Aucune carte ne correspond.": "Nessuna carta corrisponde.", "Aucun paquet pour l'instant.": "Ancora nessun mazzo.", "Choisis ton nom ci-dessus.": "Scegli il tuo nome qui sopra."
+                },
+                re: [
+                    [/^(\d+) nvx$/, "$1 nuove"], [/^(\d+) dus$/, "$1 da rivedere"], [/^(\d+) appris$/, "$1 imparate"],
+                    [/^(\d+) cartes · (\d+) deck\(s\)$/, "$1 carte · $2 mazzi"], [/^(\d+) cartes$/, "$1 carte"], [/^mots (\d+)–(\d+)$/, "parole $1–$2"],
+                    [/^Aujourd'hui : (\d+) révision\(s\), (\d+) nouvelle\(s\), (\d+) min de révision$/, "Oggi: $1 ripassi, $2 nuove, $3 min di studio"],
+                    [/^(\d+) cartes révisées aujourd'hui$/, "$1 carte ripassate oggi"],
+                    [/^✓ (.+) chargé \((\d+) cartes\)$/, "✓ $1 caricato ($2 carte)"], [/^✓ (.+) mis à jour$/, "✓ $1 aggiornato"],
+                    [/^✓ (\d+) cartes marquées connues$/, "✓ $1 carte segnate come note"],
+                    [/^Pas encore assez de mesures \((\d+)\) : valeurs de départ\. Le calcul s'affine à chaque carte\.$/, "Non ci sono ancora abbastanza misure ($1): valori iniziali. Il calcolo migliora a ogni carta."],
+                    [/^⏱ (\d+) min atteintes — tu peux t'arrêter après cette carte$/, "⏱ $1 min raggiunti — puoi fermarti dopo questa carta"],
+                    [/^⏱ Temps de révision du jour atteint \((\d+) min\) — ⚙ pour le changer, ou \+20$/, "⏱ Tempo di studio di oggi raggiunto ($1 min) — ⚙ per cambiarlo, o +20"],
+                    [/^Temps de révision du jour : (\d+) \/ (\d+) min$/, "Tempo di studio di oggi: $1 / $2 min"],
+                    [/^Révision libre : toutes les cartes « (.+) »$/, "Ripasso libero: tutte le carte « $1 »"],
+                    [/^Marquer les (\d+) cartes jamais vues de « (.+) » comme déjà connues \?\nElles reviendront dans 20 à 60 jours pour vérifier\.$/, "Segnare le $1 carte mai viste di « $2 » come già note?\nTorneranno tra 20 e 60 giorni per verifica."],
+                    [/^Ton profil \((\d+) mesures\) : /, "Il tuo profilo ($1 misure): "]
+                ],
+                // pieces of the time profile line (#98)
+                sub: [["nouvelle carte ≈ ", "carta nuova ≈ "], [" reprise(s) de ", " ripetizione/i da "], [" · carte connue ≈ ", " · carta nota ≈ "],
+                      [" (oubliée ", " (dimenticata "], [" % des fois)", " % delle volte)"], [" par lettre", " per lettera"], [" · mot 2× plus rare ", " · parola 2× più rara "]]
+            }
+        };
+        function tr(s) {
+            var L = I18N[UI_LANG];
+            if (!L || s == null) return s;
+            var str = String(s), key = str.replace(/\s+/g, " ").trim();
+            if (!key) return str;
+            var lead = str.match(/^\s*/)[0], trail = str.match(/\s*$/)[0];
+            if (L.exact.hasOwnProperty(key)) return lead + L.exact[key] + trail;
+            var out = key, hit = false;
+            L.re.forEach(function (r) { if (r[0].test(out)) { out = out.replace(r[0], r[1]); hit = true; } });
+            if (/^Il tuo profilo/.test(out)) L.sub.forEach(function (p) { out = out.split(p[0]).join(p[1]); });
+            if (!hit) return str;
+            return lead + out + trail;
+        }
+        function translateTree(root) {
+            if (UI_LANG === "fr" || !root) return;
+            if (root.nodeType === 3) { var t = tr(root.nodeValue); if (t !== root.nodeValue) root.nodeValue = t; return; }
+            if (root.nodeType !== 1 || /^(SCRIPT|STYLE)$/.test(root.tagName)) return;
+            ["title", "placeholder"].forEach(function (a) { if (root.hasAttribute && root.hasAttribute(a)) { var v = root.getAttribute(a), t2 = tr(v); if (t2 !== v) root.setAttribute(a, t2); } });
+            var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+            while (w.nextNode()) {
+                var n = w.currentNode;
+                if (n.nodeType === 3) { if (n.parentElement && /^(SCRIPT|STYLE)$/.test(n.parentElement.tagName)) continue; var t3 = tr(n.nodeValue); if (t3 !== n.nodeValue) n.nodeValue = t3; }
+                else ["title", "placeholder"].forEach(function (a) { if (n.hasAttribute(a)) { var v2 = n.getAttribute(a), t4 = tr(v2); if (t4 !== v2) n.setAttribute(a, t4); } });
+            }
+        }
+        if (UI_LANG !== "fr") {
+            document.documentElement.lang = UI_LANG;
+            translateTree(document.body);
+            new MutationObserver(function (muts) {
+                muts.forEach(function (m) {
+                    if (m.type === "characterData") translateTree(m.target);
+                    else if (m.type === "attributes") translateTree(m.target);
+                    else m.addedNodes.forEach(translateTree);
+                });
+            }).observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["title", "placeholder"] });
+            var nativeConfirm = window.confirm.bind(window), nativePrompt = window.prompt.bind(window);
+            window.confirm = function (m) { return nativeConfirm(tr(m)); };
+            window.prompt = function (m, d) { return nativePrompt(tr(m), d); };
         }
 
         // ── INIT ──
