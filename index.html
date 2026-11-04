@@ -3649,7 +3649,7 @@
         // Per-source switches (#61). Defaults come from what the cards hold;
         // this map overrides them — the base of a future « réglages par
         // paquet ». Grammaire: tags after the answer paused.
-        var SOURCE_FEATURES = { grammaire: { tagsAfterAnswer: false } };
+        var SOURCE_FEATURES = { grammaire: { tagsAfterAnswer: false }, grammatica: { tagsAfterAnswer: false } };
         function feature(name, sid) {
             var f = SOURCE_FEATURES[sid == null ? sess.sourceId : sid];
             return !f || f[name] !== false;
