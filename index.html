@@ -4054,7 +4054,7 @@
             var shown = htmlToText(displayQuestion(c.question));
             var answer = (c.words || []).join(" ");
             var pos = e.pos ? '<div class="rf-pos">' + esc(e.pos) + '</div>' : "";
-            var play = e.sa ? '<button class="rf-play" onclick="playAudioList([\'' + e.sa + '\'])">' + tr("🔊 la phrase") + '</button>' : "";
+            var play = e.sa ? '<button class="rf-play" onclick="playAudioList([\'' + e.sa + '\'])">' + t9n("🔊 la phrase") + '</button>' : "";
             var sentEs = e.s ? '<div class="rf-sent">' + e.s + '</div>' : "";
             var sentFr = e.sf ? '<div class="rf-tr">' + esc(e.sf) + '</div>' : "";
             // Front: never the answer — ES→FR shows the Spanish sentence,
@@ -4078,7 +4078,7 @@
             var pos = c.pos ? '<div class="rf-pos">' + esc(c.pos) + '</div>' : "";
             var sent = c.s ? '<div class="rf-sent">' + c.s + '</div>' : "";
             var tr = c.sf ? '<div class="rf-tr">' + esc(c.sf) + '</div>' : "";
-            var play = c.sa ? '<button class="rf-play" onclick="playAudioList([\'' + c.sa + '\'])">' + tr("🔊 la phrase") + '</button>' : "";
+            var play = c.sa ? '<button class="rf-play" onclick="playAudioList([\'' + c.sa + '\'])">' + t9n("🔊 la phrase") + '</button>' : "";
             var img = c.img ? '<div class="rf-img"><img src="' + esc(c.img) + '" alt=""></div>' : "";
             return Object.assign({}, c, {
                 question: RF_CSS + '<div class="rf-word">' + esc(c.es) + '</div>' + sent,
@@ -5435,7 +5435,7 @@
                       [" (oubliée ", " (dimenticata "], [" % des fois)", " % delle volte)"], [" par lettre", " per lettera"], [" · mot 2× plus rare ", " · parola 2× più rara "]]
             }
         };
-        function tr(s) {
+        function t9n(s) {
             var L = I18N[UI_LANG];
             if (!L || s == null) return s;
             var str = String(s), key = str.replace(/\s+/g, " ").trim();
@@ -5450,14 +5450,14 @@
         }
         function translateTree(root) {
             if (UI_LANG === "fr" || !root) return;
-            if (root.nodeType === 3) { var t = tr(root.nodeValue); if (t !== root.nodeValue) root.nodeValue = t; return; }
+            if (root.nodeType === 3) { var t = t9n(root.nodeValue); if (t !== root.nodeValue) root.nodeValue = t; return; }
             if (root.nodeType !== 1 || /^(SCRIPT|STYLE)$/.test(root.tagName)) return;
-            ["title", "placeholder"].forEach(function (a) { if (root.hasAttribute && root.hasAttribute(a)) { var v = root.getAttribute(a), t2 = tr(v); if (t2 !== v) root.setAttribute(a, t2); } });
+            ["title", "placeholder"].forEach(function (a) { if (root.hasAttribute && root.hasAttribute(a)) { var v = root.getAttribute(a), t2 = t9n(v); if (t2 !== v) root.setAttribute(a, t2); } });
             var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
             while (w.nextNode()) {
                 var n = w.currentNode;
-                if (n.nodeType === 3) { if (n.parentElement && /^(SCRIPT|STYLE)$/.test(n.parentElement.tagName)) continue; var t3 = tr(n.nodeValue); if (t3 !== n.nodeValue) n.nodeValue = t3; }
-                else ["title", "placeholder"].forEach(function (a) { if (n.hasAttribute(a)) { var v2 = n.getAttribute(a), t4 = tr(v2); if (t4 !== v2) n.setAttribute(a, t4); } });
+                if (n.nodeType === 3) { if (n.parentElement && /^(SCRIPT|STYLE)$/.test(n.parentElement.tagName)) continue; var t3 = t9n(n.nodeValue); if (t3 !== n.nodeValue) n.nodeValue = t3; }
+                else ["title", "placeholder"].forEach(function (a) { if (n.hasAttribute(a)) { var v2 = n.getAttribute(a), t4 = t9n(v2); if (t4 !== v2) n.setAttribute(a, t4); } });
             }
         }
         if (UI_LANG !== "fr") {
@@ -5471,8 +5471,8 @@
                 });
             }).observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["title", "placeholder"] });
             var nativeConfirm = window.confirm.bind(window), nativePrompt = window.prompt.bind(window);
-            window.confirm = function (m) { return nativeConfirm(tr(m)); };
-            window.prompt = function (m, d) { return nativePrompt(tr(m), d); };
+            window.confirm = function (m) { return nativeConfirm(t9n(m)); };
+            window.prompt = function (m, d) { return nativePrompt(t9n(m), d); };
         }
 
         // ── INIT ──
