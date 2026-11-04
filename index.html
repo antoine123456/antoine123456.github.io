@@ -2055,7 +2055,7 @@
         var NS = !USER || USER === OWNER ? "ankitrain_v1_" : "ankitrain_u_" + encodeURIComponent(USER) + "_";
         var FULL_DECKS = USER === OWNER || USER === GHOST;
         // The ghost only gets these bundled decks (#79); null = all of them.
-        var GHOST_DECKS = ["vocabulaire", "grammaire"]; // #79, #101
+        var GHOST_DECKS = ["vocabulaire", "grammaire", "vocabolario"]; // #79, #101, #109
         function deckAllowed(id) { return USER !== GHOST || GHOST_DECKS.indexOf(String(id)) !== -1; }
         document.documentElement.classList.toggle("bare-user", !FULL_DECKS);
 
@@ -2808,8 +2808,9 @@
         // after being deleted, until "Effacer les données" resets it all.
         // Bumping "v" pushes a new version of its cards to browsers that
         // already have it (progress kept).
-        var EXTRA_BUNDLED = [{ url: "arbres.json", id: "arbres", v: 2 }, { url: "songs.json", id: "chansons", v: 1 }, { url: "grammaire.json", id: "grammaire", v: 1 }, { url: "guide.json", id: "guide", v: 1 }, { url: "demo_riche.json", id: "demo-riche", v: 1 }, { url: "vocabulaire.json", id: "vocabulaire", v: 1 }]
-            .filter(function (b) { return deckAllowed(b.id); });
+        var EXTRA_BUNDLED = [{ url: "arbres.json", id: "arbres", v: 2 }, { url: "songs.json", id: "chansons", v: 1 }, { url: "grammaire.json", id: "grammaire", v: 1 }, { url: "guide.json", id: "guide", v: 1 }, { url: "demo_riche.json", id: "demo-riche", v: 1 }, { url: "vocabulaire.json", id: "vocabulaire", v: 1 },
+            { url: "vocabolario.json", id: "vocabolario", v: 1, ghostOnly: true }] // to review on the ghost (#109)
+            .filter(function (b) { return deckAllowed(b.id) && (!b.ghostOnly || USER === GHOST); });
         var LS_BUNDLED_SEEN = NS + "bundled_seen"; // {id: version} (was [id…] = version 1)
         function loadExtraBundledDecks() {
             var seen;
