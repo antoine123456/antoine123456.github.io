@@ -5281,6 +5281,7 @@
                     "Aucune carte ne correspond.": "Nessuna carta corrisponde.", "Aucun paquet pour l'instant.": "Ancora nessun mazzo.", "Choisis ton nom ci-dessus.": "Scegli il tuo nome qui sopra."
                 },
                 re: [
+                    [/^(\d+)j$/, "$1g"], [/^(\d+)mo$/, "$1 mesi"], [/^([\d.]+)a$/, "$1 anni"], // next interval on the rating pills
                     [/^(\d+) nvx$/, "$1 nuove"], [/^(\d+) dus$/, "$1 da rivedere"], [/^(\d+) appris$/, "$1 imparate"],
                     [/^(\d+) cartes · (\d+) deck\(s\)$/, "$1 carte · $2 mazzi"], [/^(\d+) cartes$/, "$1 carte"], [/^mots (\d+)–(\d+)$/, "parole $1–$2"],
                     [/^Aujourd'hui : (\d+) révision\(s\), (\d+) nouvelle\(s\), (\d+) min de révision$/, "Oggi: $1 ripassi, $2 nuove, $3 min di studio"],
