@@ -2060,6 +2060,8 @@
             chiara: ["vocabolario", "grammatica"]                              // Italian decks (#111)
         };
         var LISTED_USERS = ["chiara"]; // shown in the name list even before their first sync
+        var USER_LANGS = { chiara: "it" }; // interface language per user (#112), French otherwise
+        var UI_LANG_USER = USER_LANGS[USER] || null;
         var FULL_DECKS = USER === OWNER || !!USER_DECKS[USER];
         // The ghost only gets these bundled decks (#79); null = all of them.
         var GHOST_DECKS = USER_DECKS[GHOST];
