@@ -295,6 +295,11 @@
         }
 
         .fm-modal { max-width: 480px; padding-bottom: 18px; }
+        .ac-row { display: flex; flex-direction: column; gap: 4px; margin-top: 12px; font-size: 13px; color: var(--text-2); }
+        .ac-row input { font: inherit; font-size: 16px; color: var(--text); background: var(--surface); border: 1.5px solid var(--border-2); border-radius: 10px; padding: 8px 10px; }
+        .ac-row input:focus { outline: none; border-color: var(--navy); }
+        .fm-btn.ac-ok { border-color: var(--navy); color: var(--navy); }
+        .h-source-export.h-add-btn { font-size: 18px; font-weight: 700; color: var(--navy); opacity: 1; }
         #b-export-btn[hidden] { display: none; }
         #b-review-btn.on { background: var(--navy); color: var(--bg); border-color: var(--navy); }
         .b-review-bar { display: flex; gap: 8px; align-items: center; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
@@ -1802,6 +1807,20 @@
         </div>
     </div>
 
+    <!-- ── ＋ my own card in « Vocabulaire perso » (#114) ── -->
+    <div class="g-backdrop" id="add-modal" hidden onclick="if (event.target === this) closeAddCard()">
+        <div class="g-modal fm-modal" role="dialog" aria-modal="true" aria-labelledby="ac-title">
+            <div class="g-title" id="ac-title">＋ Ajouter une carte</div>
+            <label class="ac-row"><span>Espagnol</span><input id="ac-es" type="text" autocomplete="off" placeholder="la ventana"></label>
+            <label class="ac-row"><span>Traduction</span><input id="ac-fr" type="text" autocomplete="off" placeholder="la fenêtre"></label>
+            <div class="fm-actions">
+                <span class="fm-keys">Entrée : ajouter et en saisir une autre · Échap : fermer</span>
+                <button class="fm-btn" onclick="closeAddCard()">Fermer</button>
+                <button class="fm-btn fm-ok ac-ok" onclick="confirmAddCard()">＋ Ajouter</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ── F6: mark a card, with a comment (#77) ── -->
     <div class="g-backdrop" id="flag-modal" hidden onclick="if (event.target === this) closeFlagModal()">
         <div class="g-modal fm-modal" role="dialog" aria-modal="true" aria-labelledby="fm-title">
@@ -1830,10 +1849,12 @@
                     <div class="g-demo"><div class="g-row">
                         <div class="h-deckrow-name">Espagnol 2</div>
                         <span class="badge badge-new">20 nvx</span><span class="badge badge-due">5 dus</span><span class="badge badge-done">89 appris</span>
-                        <button class="h-custom-btn">+20</button><button class="h-custom-btn">🔍</button>
+                        <button class="h-custom-btn">+20</button><button class="h-custom-btn">✓</button><button class="h-custom-btn">🔍</button>
                     </div></div>
                     Touche la ligne pour réviser. <b>nvx</b> = nouvelles cartes du jour, <b>dus</b> = à revoir aujourd'hui, <b>appris</b> = déjà sues.
-                    <b>+20</b> : 20 nouvelles de plus. <b>🔍</b> : parcourir les cartes (carrousel pour les images, liste pour les mots).
+                    <b>+20</b> : 20 nouvelles de plus. <b>✓</b> : je connais déjà ce paquet (ses cartes jamais vues passent en apprises, elles reviendront de temps en temps).
+                    <b>🔍</b> : parcourir les cartes (carrousel pour les images, liste pour les mots) ; <b>📝 Relecture</b> les montre une par une, <b>F6</b> pour commenter une carte.
+                    <b>＋</b> (sur « 📝 Vocabulaire perso ») : ajouter tes propres cartes, l'espagnol et sa traduction.
                 </div>
             </div>
 
@@ -1850,6 +1871,7 @@
                     </div></div>
                     Un mot par case. <span style="color:var(--green)">Vert</span> = juste, <span style="color:var(--red)">rouge</span> = pas encore ; chaque erreur ajoute un petit point <span style="color:var(--red)">●</span> sous le mot.
                     Les accents sont facultatifs. Dès qu'un mot est juste, on passe à la case suivante.
+                    Dans ⚙, « Entrée pour valider » : le mot n'est vérifié qu'à Entrée, et la case rougit à chaque erreur.
                 </div>
             </div>
 
@@ -1932,6 +1954,7 @@
                         <span class="t-key">← ↓ → ↑</span><span>À revoir · Difficile · Correct · Facile (hors des cases)</span>
                         <span class="t-key">Entrée</span><span>case suivante</span>
                         <span class="t-key">Espace</span><span>mode normal : retourner, puis Correct</span>
+                        <span class="t-key">F6</span><span>signaler la carte avec un commentaire (aussi dans 📝 Relecture)</span>
                         <span class="t-key">← →</span><span>carrousel 🔍 · <b>Échap</b> : retour</span>
                     </div>
                 </div>
@@ -3132,7 +3155,7 @@
                         ? '<button class="h-custom-btn" title="Étudier 20 cartes de plus que la limite du jour" onclick="event.stopPropagation(); startStudy(' + si + ',' + jsArg(node.fullName) + ',' + customLimit + ')">+20</button>'
                         : '')
                     + (stats.trueNew + lockedN > 0 // every deck (#106), first on the vocabulary levels (#93)
-                        ? '<button class="h-custom-btn" title="Je connais déjà ce paquet : ses cartes jamais vues passent en apprises" onclick="event.stopPropagation(); knowDeck(' + si + ',' + jsArg(node.fullName) + ')">✓ connu</button>'
+                        ? '<button class="h-custom-btn" title="Je connais déjà ce paquet : ses cartes jamais vues passent en apprises" onclick="event.stopPropagation(); knowDeck(' + si + ',' + jsArg(node.fullName) + ')">✓</button>'
                         : '')
                     + '<button class="h-custom-btn" title="Parcourir les cartes (recto → verso)" onclick="event.stopPropagation(); openBrowse(' + si + ',' + jsArg(node.fullName) + ')">🔍</button>'
                     + '</div>';
@@ -3163,6 +3186,50 @@
             toast("✓ " + ids.length + " cartes marquées connues");
             renderHome();
         }
+
+        // « Vocabulaire perso » (#114): a source of one's own cards, always
+        // there (created empty), filled with ＋ — Spanish on the front, the
+        // translation to type, like the vocabulary deck. Synced like any
+        // imported source (its cards go to Firestore).
+        var PERSO_ID = "perso-vocab";
+        function ensurePersoSource() {
+            var sources = loadSources();
+            if (sources.some(function (x) { return x.id === PERSO_ID; })) return;
+            sources.push({ id: PERSO_ID, name: "📝 Vocabulaire perso", decks: [{ id: PERSO_ID + "-1", name: "📝 Vocabulaire perso", cardCount: 0 }] });
+            saveSources(sources);
+            if (!Object.keys(loadCards(PERSO_ID)).length) saveCards(PERSO_ID, {});
+        }
+        function openAddCard(e) {
+            if (e) e.stopPropagation();
+            document.getElementById("ac-es").value = ""; document.getElementById("ac-fr").value = "";
+            document.getElementById("add-modal").hidden = false;
+            setTimeout(function () { document.getElementById("ac-es").focus(); }, 0);
+        }
+        function closeAddCard() { document.getElementById("add-modal").hidden = true; renderHome(); }
+        function confirmAddCard() {
+            var es = document.getElementById("ac-es").value.trim(), fr = document.getElementById("ac-fr").value.trim();
+            if (!es || !fr) { document.getElementById(es ? "ac-fr" : "ac-es").focus(); return; }
+            var cards = loadCards(PERSO_ID), did = PERSO_ID + "-1";
+            var meaning = fr.replace(/\s*;\s*/g, ", ");
+            var words = typeableWords(meaning.split(/\s*,\s*/)[0].split(/\s+/));
+            (cards[did] = cards[did] || []).push({ id: String(Date.now()), es: es, fr: meaning, question: esc(es), answer: esc(meaning), words: words, tags: ["perso"] });
+            saveCards(PERSO_ID, cards);
+            var sources = loadSources(), src = sources.find(function (x) { return x.id === PERSO_ID; });
+            if (src) { src.decks[0].cardCount = cards[did].length; saveSources(sources); }
+            dlog("carte perso", { es: es, traduction: meaning });
+            toast("✓ « " + es + " » ajoutée");
+            document.getElementById("ac-es").value = ""; document.getElementById("ac-fr").value = "";
+            document.getElementById("ac-es").focus();
+        }
+        document.addEventListener("keydown", function (e) {
+            if (document.getElementById("add-modal").hidden) return;
+            if (e.key === "Escape") { e.preventDefault(); closeAddCard(); }
+            else if (e.key === "Enter" && (e.target.id === "ac-es" || e.target.id === "ac-fr")) {
+                e.preventDefault();
+                if (e.target.id === "ac-es" && !document.getElementById("ac-fr").value.trim()) document.getElementById("ac-fr").focus();
+                else confirmAddCard();
+            }
+        });
 
         function isChildOf(child, parent) {
             return child === parent || child.startsWith(parent + "::");
@@ -3276,6 +3343,7 @@
                     + '<div class="h-source-meta">' + total + ' cartes · ' + src.decks.length + ' deck(s)</div>'
                     + '<button class="h-source-export" onclick="showFlaggedList(event,' + si + ')" title="Cartes marquées à corriger">🚩</button>'
                     + '<button class="h-source-export" onclick="exportStats(event,' + si + ')" title="Exporter les stats">📤</button>'
+                    + (src.id === PERSO_ID ? '<button class="h-source-export h-add-btn" onclick="openAddCard(event)" title="Ajouter une carte">＋</button>' : '')
                     + '<button class="h-source-del" onclick="deleteSource(event,' + si + ')">✕</button>'
                     + '<span class="h-source-arrow open">›</span>'
                     + '</div>'
@@ -3516,7 +3584,7 @@
         // True when the back holds more than the typed words (an image, a
         // meaning, an example sentence…) — worth showing before moving on.
         // Tags not worth showing (technical ones from the decks' origins).
-        var HIDDEN_TAGS = ["basic", "commun", "chanson", "cuatroloop", "quotidien", "marked", "leech", "guide", "demo", "vocabulaire"];
+        var HIDDEN_TAGS = ["basic", "commun", "chanson", "cuatroloop", "quotidien", "marked", "leech", "guide", "demo", "vocabulaire", "perso"];
         function shownTags(card) {
             return (card.tags || []).filter(function (t) { return HIDDEN_TAGS.indexOf(t.toLowerCase()) === -1 && !/^etape/i.test(t); });
         }
@@ -5201,7 +5269,12 @@
                     "Basculer clair/sombre": "Tema chiaro/scuro", "Mode d'emploi": "Istruzioni", "Réglages": "Impostazioni",
                     "Cartes marquées à corriger": "Carte segnalate da correggere", "Exporter les stats": "Esporta le statistiche",
                     "Je connais déjà ce paquet : ses cartes jamais vues passent en apprises": "Conosco già questo mazzo: le carte mai viste diventano imparate",
-                    "✓ connu": "✓ già noto", "Parcourir les cartes (recto → verso)": "Sfoglia le carte (fronte → retro)",
+                    "✓ connu": "✓ già noto",
+                    "📝 Vocabulaire perso": "📝 Vocabolario personale", "Ajouter une carte": "Aggiungi una carta", "＋ Ajouter une carte": "＋ Aggiungi una carta",
+                    "Espagnol": "Spagnolo", "Traduction": "Traduzione", "Fermer": "Chiudi", "＋ Ajouter": "＋ Aggiungi", "la fenêtre": "la finestra",
+                    "Entrée : ajouter et en saisir une autre · Échap : fermer": "Invio: aggiungi e scrivine un'altra · Esc: chiudi",
+                    "signaler la carte avec un commentaire (aussi dans 📝 Relecture)": "segnala la carta con un commento (anche in 📝 Revisione)",
+                    ": 20 nouvelles de plus.": ": 20 nuove in più.", "Parcourir les cartes (recto → verso)": "Sfoglia le carte (fronte → retro)",
                     "Étudier 20 cartes de plus que la limite du jour": "Studia 20 carte in più del limite di oggi",
                     "Étapes suivantes : s'ouvrent quand 80 % des cartes de l'étape en cours sont apprises": "Tappe successive: si aprono quando l'80 % delle carte della tappa in corso è imparato",
                     "nvx": "nuove", "dus": "da rivedere", "appris": "imparate",
@@ -5246,7 +5319,7 @@
                     "Apprendre en tapant la réponse, avec la répétition espacée d'Anki.": "Imparare scrivendo la risposta, con la ripetizione dilazionata di Anki.",
                     "Choisir un paquet": "Scegliere un mazzo", "Touche la ligne pour réviser.": "Tocca la riga per studiare.",
                     "= nouvelles cartes du jour,": "= nuove carte del giorno,", "= à revoir aujourd'hui,": "= da rivedere oggi,", "= déjà sues.": "= già sapute.",
-                    ": 20 nouvelles de plus.": ": 20 nuove in più.", ": parcourir les cartes (carrousel pour les images, liste pour les mots).": ": sfogliare le carte (carosello per le immagini, elenco per le parole).",
+                    ": parcourir les cartes (carrousel pour les images, liste pour les mots).": ": sfogliare le carte (carosello per le immagini, elenco per le parole).",
                     "Un mot par case.": "Una parola per casella.", "Vert": "Verde", "= juste,": "= giusto,", "rouge": "rosso",
                     "= pas encore ; chaque erreur ajoute un petit point": "= non ancora; ogni errore aggiunge un puntino", "sous le mot.": "sotto la parola.",
                     "sous le mot. Les accents sont facultatifs. Dès qu'un mot est juste, on passe à la case suivante.": "sotto la parola. Gli accenti sono facoltativi. Appena una parola è giusta, si passa alla casella successiva.",
@@ -5288,6 +5361,7 @@
                     [/^(\d+) cartes révisées aujourd'hui$/, "$1 carte ripassate oggi"],
                     [/^✓ (.+) chargé \((\d+) cartes\)$/, "✓ $1 caricato ($2 carte)"], [/^✓ (.+) mis à jour$/, "✓ $1 aggiornato"],
                     [/^✓ (\d+) cartes marquées connues$/, "✓ $1 carte segnate come note"],
+                    [/^✓ « (.+) » ajoutée$/, "✓ « $1 » aggiunta"],
                     [/^Pas encore assez de mesures \((\d+)\) : valeurs de départ\. Le calcul s'affine à chaque carte\.$/, "Non ci sono ancora abbastanza misure ($1): valori iniziali. Il calcolo migliora a ogni carta."],
                     [/^⏱ (\d+) min atteintes — tu peux t'arrêter après cette carte$/, "⏱ $1 min raggiunti — puoi fermarti dopo questa carta"],
                     [/^⏱ Temps de révision du jour atteint \((\d+) min\) — ⚙ pour le changer, ou \+20$/, "⏱ Tempo di studio di oggi raggiunto ($1 min) — ⚙ per cambiarlo, o +20"],
@@ -5343,7 +5417,7 @@
 
         // ── INIT ──
         updateThemeToggleIcon();
-        loadDefaultDeckIfEmpty().then(loadExtraBundledDecks).then(refreshBundledDecks).then(renderHome).then(logStartup);
+        loadDefaultDeckIfEmpty().then(loadExtraBundledDecks).then(refreshBundledDecks).then(ensurePersoSource).then(renderHome).then(logStartup);
     </script>
 </body>
 
