@@ -3481,7 +3481,8 @@
             var sources = loadSources();
             var el = document.getElementById("h-sources");
             if (!USER) { el.innerHTML = '<div class="h-empty">Choisis ton nom ci-dessus.</div>'; return; }
-            if (!sources.length && FULL_DECKS && !decksReady) { el.innerHTML = '<div class="h-empty">Chargement des paquets…</div>'; return; }
+            // Bundled cards come from their files at start (#116): wait for them.
+            if (FULL_DECKS && !decksReady) { el.innerHTML = '<div class="h-empty">Chargement des paquets…</div>'; return; }
             if (!sources.length && !FULL_DECKS) { el.innerHTML = '<div class="h-empty">Aucun paquet pour l\'instant.</div>'; return; }
             if (!sources.length) {
                 el.innerHTML = '<div class="h-empty">Aucun deck importé.<br>Pré-traitez votre .apkg avec <code>extract_apkg.py</code> puis importez le JSON.</div>';
