@@ -305,6 +305,14 @@
         .combo-err .combo-err-n { background: linear-gradient(180deg, #fca5a5 0%, #dc2626 55%, #7f1d1d 100%); -webkit-background-clip: text; background-clip: text; font-size: 64px; }
         .combo-err.pop .combo-n { animation: comboPop .32s cubic-bezier(.2, 1.6, .4, 1); }
         .s-question.shake { animation: cardShake .38s; }
+        /* Next card (#143): up from the back of the screen, a golden glow like the combos. */
+        #s-content.card-enter { animation: cardEnter .36s cubic-bezier(.2, 1.4, .4, 1); }
+        @keyframes cardEnter {
+            0% { opacity: 0; transform: scale(.55); filter: blur(8px) drop-shadow(0 0 0 rgba(245, 179, 1, 0)); }
+            55% { opacity: 1; transform: scale(1.035); filter: blur(0) drop-shadow(0 0 22px rgba(245, 179, 1, .5)); }
+            100% { opacity: 1; transform: scale(1); filter: none; }
+        }
+        @media (prefers-reduced-motion: reduce) { #s-content.card-enter { animation: none; } }
         @keyframes cardShake { 0%, 100% { translate: 0 0; } 20% { translate: -7px 0; } 40% { translate: 6px 0; } 60% { translate: -4px 0; } 80% { translate: 2px 0; } }
         .key-flash { animation: keyFlash .35s ease-out; }
         @keyframes keyFlash { 0% { transform: scale(1); } 35% { transform: scale(1.06); box-shadow: 0 0 0 4px rgba(245, 179, 1, .35); } 100% { transform: scale(1); } }
@@ -318,6 +326,12 @@
         .combo-hits { font: italic 900 20px/1 "Impact", "Arial Black", system-ui, sans-serif; letter-spacing: 3px; color: var(--combo-c, #f5b301); -webkit-text-stroke: 1px rgba(60, 20, 0, .4); }
         .combo-label { font: italic 800 16px/1.2 system-ui, sans-serif; letter-spacing: 1px; color: #dc2626; min-height: 20px; margin-top: 4px; opacity: 0; }
         .combo-days { font-size: 13px; font-weight: 700; color: var(--text-2); margin-top: 8px; }
+        .h-streak { display: flex; align-items: baseline; gap: 8px; margin: 2px 0 14px; }
+        .h-streak[hidden] { display: none; }
+        .h-streak-n { font: italic 900 44px/1 "Impact", "Arial Black", system-ui, sans-serif; padding: 0 6px 0 2px;
+            background: linear-gradient(180deg, #ffe680 0%, #f5b301 50%, #c2410c 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+            -webkit-text-stroke: 1px rgba(60, 20, 0, .35); animation: comboPop .4s cubic-bezier(.2, 1.6, .4, 1); }
+        .h-streak-l { font: italic 800 15px/1 system-ui, sans-serif; letter-spacing: 1px; color: var(--text-2); }
         .combo.pop .combo-n { animation: comboPop .32s cubic-bezier(.2, 1.6, .4, 1); }
         .combo.milestone .combo-label { animation: comboLabel 1.6s ease-out forwards; }
         .combo.milestone .combo-n { animation: comboPop .32s cubic-bezier(.2, 1.6, .4, 1), comboShake .4s .1s; }
@@ -1787,6 +1801,7 @@
         <div class="h-logo">🃏</div>
         <div class="h-title">Anki Trainer</div>
         <div class="h-sub">Pré-traitez votre .apkg avec <code>extract_apkg.py</code>, puis importez le JSON ici</div>
+        <div class="h-streak" id="h-streak" hidden></div>
         <div class="h-sources" id="h-sources"></div>
         <label class="h-import-btn">
             ＋ Importer un fichier .json
@@ -1872,7 +1887,7 @@
                     <button id="st-combo-on" onclick="setSetting('combo', true)">Affichés</button>
                     <button id="st-combo-off" onclick="setSetting('combo', false)">Cachés</button>
                 </div></div>
-            <div class="st-note">Comme dans un jeu de combat : à droite de la carte les mots justes d'affilée (sans aide) et les jours d'affilée, à gauche les erreurs de la carte et les cartes ratées d'affilée (ordinateur) ; un mot juste rebondit, la carte tremble à une erreur, les boutons du bas s'allument à l'appui de leur touche, et la carte notée part vers un coin (À revoir ↙, Difficile ↖, Correct ↘, Facile ↗).</div>
+            <div class="st-note">Comme dans un jeu de combat : à droite de la carte les mots justes d'affilée (sans aide), à gauche les erreurs de la carte et les cartes ratées d'affilée (ordinateur) ; les jours d'affilée sont sur l'accueil ; un mot juste rebondit, la carte tremble à une erreur, les boutons du bas s'allument à l'appui de leur touche, et la carte notée part vers un coin (À revoir ↙, Difficile ↖, Correct ↘, Facile ↗).</div>
             <div class="st-row"><span>Mode debug</span>
                 <div class="st-switch">
                     <button id="st-debug-off" onclick="setSetting('debug', false)">Arrêté</button>
@@ -1954,7 +1969,7 @@
                     Les accents sont facultatifs. Dès qu'un mot est juste, on passe à la case suivante.
                     Dans ⚙, « Entrée pour valider » : le mot n'est vérifié qu'à Entrée, et toute la carte rougit à chaque erreur (erreurs comptées sur toute la réponse).
                     Une carte juste mais tapée lentement (30 s par défaut, réglable dans ⚙) est notée « Difficile ».
-                    Sur ordinateur, un <b>combo</b> compte à droite de la carte les mots justes d'affilée (sans aide) et les jours d'affilée ; « À revoir » le casse. À gauche, les erreurs de la carte et les cartes ratées d'affilée.
+                    Sur ordinateur, un <b>combo</b> compte à droite de la carte les mots justes d'affilée (sans aide) ; « À revoir » le casse. À gauche, les erreurs de la carte et les cartes ratées d'affilée. Les jours d'affilée s'affichent sur l'accueil.
                     Quand tout est montré après de l'aide, <b>Espace</b> ou <b>Entrée</b> = « À revoir » et carte suivante.
                 </div>
             </div>
@@ -2054,6 +2069,7 @@
                         <li><b>6 nov.</b> combo d'erreurs à droite, carte qui tremble, mots qui rebondissent, boutons qui s'allument ; Espace / Entrée après de l'aide = « À revoir » ; indices en italique ; image du verso à côté si la place manque ; une phrase d'exemple pour chaque mot du Vocabulaire (🔊 lue par la voix du navigateur).</li>
                         <li><b>6 nov.</b> (suite) la carte notée part vers un coin ; combos inversés (justes à droite, erreurs à gauche) et comptés tout de suite ; la case rougit à chaque erreur ; ⚙ délai avant la carte suivante.</li>
                         <li><b>6 nov.</b> (fin) 🔊 / 🔇 mode muet dans la barre de révision ; « Type d'entrée » et « Complet / Simple » rangés dans ⚙ (⚙ aussi pendant la révision) ; cartes déjà sues plus rapides (≈ 1,3 s, 1,9 s avec le son).</li>
+                        <li><b>6 nov.</b> (soir) la carte part vite et la suivante arrive aussitôt du fond de l'écran ; « jours d'affilée » sur l'accueil.</li>
                         <li><b>5 nov.</b> combos dans la marge (mots justes et jours d'affilée) ; ⛶ plein écran ; 📋 tableaux de conjugaison dans 🔍 ; réponse lente notée « Difficile » ; ✓ pour « déjà connu » ; 📝 Vocabulaire perso avec ＋ ; paquets plus légers pour le navigateur.</li>
                         <li><b>4 nov.</b> 📝 Relecture dans 🔍 (F6 pour commenter) ; paquets en italien ; interface en italien.</li>
                         <li><b>3 nov.</b> le site ouvre directement l'appli.</li>
@@ -3460,7 +3476,15 @@
         // ═══════════════════════════════════════════════
         // HOME
         // ═══════════════════════════════════════════════
+        // Days in a row (#144): on the home page, in the combos' style — not on the cards.
+        function renderStreak() {
+            var el = document.getElementById("h-streak"), o = comboState();
+            var on = settings().combo !== false && o.days >= 2 && o.lastDay >= TODAY - 1;
+            el.hidden = !on;
+            if (on) el.innerHTML = '<span class="h-streak-n">' + o.days + '</span><span class="h-streak-l">' + t9n("🔥 jours d'affilée") + '</span>';
+        }
         function renderHome() {
+            renderStreak();
             var sources = loadSources();
             var el = document.getElementById("h-sources");
             if (!sources.length) {
@@ -5123,7 +5147,7 @@
             var t = sess.tt; sess.tt = null;
             if (!t) return;
             var end = Date.now(), prev = t.t0, parts = [];
-            [["son", "audio"], ["lecture", "read"], ["note", "flash"], ["fondu", "end"]].forEach(function (x) {
+            [["son", "audio"], ["lecture", "read"], ["note", "flash"], ["sortie", "out"], ["entrée", "end"]].forEach(function (x) {
                 var at = x[1] === "end" ? end : t[x[1]];
                 if (!at) return;
                 parts.push(x[0] + " " + (at - prev));
@@ -5507,27 +5531,37 @@
             updateCounts();
             // Songs: only the line changes (no fade), after a short pause so
             // the rating colour on the line is seen.
-            if (sess.lyrics) { setTimeout(function () { showCard(); ttReport(); }, 350); return; }
+            if (sess.lyrics) { setTimeout(function () { ttMark("out"); showCard(); ttReport(); }, 350); return; }
             var content = document.getElementById("s-content");
             // Only these three: max-height (#99, the card's fitted size) lives in this style too (#103).
             var fade = function (o, y, tr) { content.style.opacity = o; content.style.transform = "translateY(" + y + "px)"; content.style.transition = tr; };
             // Torn off like a calendar page, towards the rating's corner (#133):
             // À revoir ↙, Difficile ↖, Correct ↘, Facile ↗.
             var dir = { 1: [-1, 1], 2: [-1, -1], 3: [1, 1], 4: [1, -1] }[q] || [0, -1];
-            var d = sess.quick ? 0.2 : 0.4; sess.quick = false; // a card already known leaves faster (#138)
+            // A quick exit for every card (#143): the reading time is before, in flash / the back.
+            var d = 0.18; sess.quick = false;
             if (animationsOn()) {
                 content.style.transformOrigin = dir[0] < 0 ? "100% 0" : "0 0";
                 content.style.transition = "opacity " + d + "s ease-in, transform " + d + "s ease-in";
                 content.style.opacity = 0;
-                content.style.transform = "translate(" + dir[0] * 140 + "px," + dir[1] * 90 + "px) rotate(" + dir[0] * dir[1] * -9 + "deg) scale(.82)";
+                content.style.transform = "translate(" + dir[0] * 110 + "px," + dir[1] * 70 + "px) rotate(" + dir[0] * dir[1] * -8 + "deg) scale(.85)";
             } else fade(0, -10, "opacity " + d + "s, transform " + d + "s");
             setTimeout(function () {
                 content.style.transformOrigin = "";
-                fade(0, 10, "none");
-                content.offsetHeight;
-                fade(1, 0, "opacity " + d + "s, transform " + d + "s");
+                ttMark("out");
                 showCard();
-                setTimeout(ttReport, d * 1000);
+                if (animationsOn()) {
+                    // The next card is there at once, coming up from the back of
+                    // the screen with the combos' golden glow (#143).
+                    fade(1, 0, "none");
+                    content.classList.remove("card-enter"); void content.offsetWidth; content.classList.add("card-enter");
+                    setTimeout(function () { content.classList.remove("card-enter"); placeCombos(); ttReport(); }, 360);
+                } else {
+                    fade(0, 6, "none");
+                    content.offsetHeight;
+                    fade(1, 0, "opacity .15s, transform .15s");
+                    setTimeout(ttReport, 150);
+                }
             }, d * 1000);
         }
 
@@ -5594,11 +5628,13 @@
                     "plein écran (en haut de l'écran de révision)": "schermo intero (in alto nella schermata di studio)",
                     "Nouveautés": "Novità",
                     "Combos (ordinateur)": "Combo (computer)", "Animations et combos": "Animazioni e combo",
-                    "Comme dans un jeu de combat : à droite de la carte les mots justes d'affilée (sans aide) et les jours d'affilée, à gauche les erreurs de la carte et les cartes ratées d'affilée (ordinateur) ; un mot juste rebondit, la carte tremble à une erreur, les boutons du bas s'allument à l'appui de leur touche, et la carte notée part vers un coin (À revoir ↙, Difficile ↖, Correct ↘, Facile ↗).": "Come in un picchiaduro: a destra della carta le parole giuste di fila (senza aiuto) e i giorni di fila, a sinistra gli errori della carta e le carte sbagliate di fila (computer); una parola giusta rimbalza, la carta trema a un errore, i pulsanti in basso si accendono quando premi il loro tasto, e la carta valutata vola verso un angolo (Da rivedere ↙, Difficile ↖, Giusto ↘, Facile ↗).",
-                    "compte à droite de la carte les mots justes d'affilée (sans aide) et les jours d'affilée ; « À revoir » le casse. À gauche, les erreurs de la carte et les cartes ratées d'affilée.": "conta a destra della carta le parole giuste di fila (senza aiuto) e i giorni di fila; « Da rivedere » la rompe. A sinistra, gli errori della carta e le carte sbagliate di fila.",
+                    "Comme dans un jeu de combat : à droite de la carte les mots justes d'affilée (sans aide), à gauche les erreurs de la carte et les cartes ratées d'affilée (ordinateur) ; les jours d'affilée sont sur l'accueil ; un mot juste rebondit, la carte tremble à une erreur, les boutons du bas s'allument à l'appui de leur touche, et la carte notée part vers un coin (À revoir ↙, Difficile ↖, Correct ↘, Facile ↗).": "Come in un picchiaduro: a destra della carta le parole giuste di fila (senza aiuto), a sinistra gli errori della carta e le carte sbagliate di fila (computer); i giorni di fila sono nella pagina iniziale; una parola giusta rimbalza, la carta trema a un errore, i pulsanti in basso si accendono quando premi il loro tasto, e la carta valutata vola verso un angolo (Da rivedere ↙, Difficile ↖, Giusto ↘, Facile ↗).",
+                    "compte à droite de la carte les mots justes d'affilée (sans aide) ; « À revoir » le casse. À gauche, les erreurs de la carte et les cartes ratées d'affilée. Les jours d'affilée s'affichent sur l'accueil.": "conta a destra della carta le parole giuste di fila (senza aiuto); « Da rivedere » la rompe. A sinistra, gli errori della carta e le carte sbagliate di fila. I giorni di fila sono nella pagina iniziale.",
+                    "🔥 jours d'affilée": "🔥 giorni di fila",
                     "Quand tout est montré après de l'aide,": "Quando tutto è mostrato dopo un aiuto,", "ou": "o", "= « À revoir » et carte suivante.": "= « Da rivedere » e carta successiva.",
                     "combo d'erreurs à droite, carte qui tremble, mots qui rebondissent, boutons qui s'allument ; Espace / Entrée après de l'aide = « À revoir » ; indices en italique ; image du verso à côté si la place manque ; une phrase d'exemple pour chaque mot du Vocabulaire (🔊 lue par la voix du navigateur).": "combo degli errori a destra, carta che trema, parole che rimbalzano, pulsanti che si accendono; Spazio / Invio dopo un aiuto = « Da rivedere »; suggerimenti in corsivo; immagine del retro di fianco se manca spazio; una frase d'esempio per ogni parola del Vocabolario (🔊 letta dalla voce del browser).",
                     "Au verso,": "Sul retro,",
+                    "(soir) la carte part vite et la suivante arrive aussitôt du fond de l'écran ; « jours d'affilée » sur l'accueil.": "(sera) la carta esce in fretta e la successiva arriva subito dal fondo dello schermo; « giorni di fila » nella pagina iniziale.",
                     "(fin) 🔊 / 🔇 mode muet dans la barre de révision ; « Type d'entrée » et « Complet / Simple » rangés dans ⚙ (⚙ aussi pendant la révision) ; cartes déjà sues plus rapides (≈ 1,3 s, 1,9 s avec le son).": "(fine) 🔊 / 🔇 modalità muta nella barra di studio; « Tipo di risposta » e « Completo / Semplice » spostati in ⚙ (⚙ anche durante lo studio); carte già sapute più veloci (≈ 1,3 s, 1,9 s con l'audio).",
                     "Dans": "In", "⚙ Réglages": "⚙ Impostazioni", ", « Type d'entrée » (⚙ est aussi en haut de l'écran de révision, à côté de ⛶ et de 🔊 / 🔇 pour le mode muet).": ", « Tipo di risposta » (⚙ è anche in alto nella schermata di studio, accanto a ⛶ e a 🔊 / 🔇 per la modalità muta).",
                     "Type d'entrée": "Tipo di risposta", "Rendu des cartes": "Visualizzazione delle carte", "▫️ Simple": "▫️ Semplice",
@@ -5803,14 +5839,14 @@
             var el = document.getElementById("combo");
             o = o || comboState();
             document.body.classList.toggle("combo-on", settings().combo !== false);
-            el.classList.toggle("live", o.hits >= 2 || cls === "broken" || o.days >= 2);
+            el.classList.toggle("live", o.hits >= 2 || cls === "broken");
             // hotter colour as the combo grows
             var heat = Math.min(1, o.hits / 50);
             el.style.setProperty("--combo-c", "hsl(" + Math.round(45 - 45 * heat) + ", 95%, " + Math.round(52 - 8 * heat) + "%)");
             if (cls !== "broken") document.getElementById("combo-n").textContent = o.hits >= 2 ? o.hits : "";
             el.querySelector(".combo-hits").style.visibility = o.hits >= 2 || cls === "broken" ? "visible" : "hidden";
             document.getElementById("combo-label").textContent = t9n(label || "");
-            document.getElementById("combo-days").textContent = o.days >= 2 ? "🔥 " + o.days + " jours d'affilée" : "";
+            document.getElementById("combo-days").textContent = ""; // days in a row: on the home page (#144)
             el.classList.remove("pop", "milestone", "broken");
             if (cls) { void el.offsetWidth; el.classList.add(cls); }
             placeCombos();
