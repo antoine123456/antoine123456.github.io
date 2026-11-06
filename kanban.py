@@ -56,7 +56,10 @@ def parse(text):
             else:
                 col = "pending"
             tag = mark if mark and mark not in MARKS else None
-            card = {"col": col, "section": section, "group": group, "tag": tag, "text": body, "notes": []}
+            # « @v1 », « @volet1 »… : the GitHub milestone of the issue (#129)
+            ms = re.findall(r"(?<!\S)@([\w-]+)", body)
+            body = re.sub(r"\s*(?<!\S)@[\w-]+", "", body).strip()
+            card = {"col": col, "section": section, "group": group, "tag": tag, "ms": ms, "text": body, "notes": []}
             cards.append(card)
             last = card
         elif line.startswith((" ", "\t")) and card:
@@ -93,12 +96,14 @@ def render(cards, issues):
         badges = f'<span class="b {kind if c["section"] != "Pending" else "pend"}">{label}</span>'
         if c["tag"]:
             badges += f'<span class="b tag">{html.escape(c["tag"])}</span>'
+        for m in c["ms"]:
+            badges += f'<span class="b ms">{html.escape(m)}</span>'
         if c["group"]:
             badges += f'<span class="b grp">{html.escape(c["group"])}</span>'
         text = re.sub(r"\s*\((#\d+[^)]*)\)\s*$", r" <span class=detail>(\1)</span>", html.escape(c["text"]))
         notes = "".join(f"<li>{html.escape(n)}</li>" for n in c["notes"] if n)
         allt = c["text"] + " " + " ".join(c["notes"])
-        return (f'<div class="card {kind}" data-q="{html.escape(allt.lower())}" data-kind="{kind}">'
+        return (f'<div class="card {kind}" data-q="{html.escape(allt.lower())}" data-kind="{kind}" data-ms="{" ".join(c["ms"])}">'
                 f'<div class="badges">{badges}</div><div class="txt">{text}</div>'
                 + (f'<details><summary>{len(c["notes"])} note(s)</summary><ul>{notes}</ul></details>' if notes else "")
                 + f'<div class="chips">{chips(allt)}</div></div>')
@@ -109,7 +114,9 @@ def render(cards, issues):
         cols.append(f'<section class="col" data-col="{key}"><h2>{name} <span class="n">{len(cs)}</span></h2>'
                     + "".join(card_html(c) for c in cs) + "</section>")
     stamp = time.strftime("%d/%m %H:%M")
-    return PAGE.replace("{{COLS}}", "".join(cols)).replace("{{STAMP}}", stamp)
+    tags = sorted({m for c in cards for m in c["ms"]})
+    msb = "".join(f'<button data-m="{html.escape(m)}">{html.escape(m)}</button>' for m in tags)
+    return PAGE.replace("{{MS}}", msb).replace("{{COLS}}", "".join(cols)).replace("{{STAMP}}", stamp)
 
 
 PAGE = """<!doctype html><html lang=fr><meta charset=utf-8>
@@ -131,7 +138,7 @@ main{display:grid;grid-template-columns:repeat(4,minmax(240px,1fr));gap:12px;pad
 .col[data-col=done] .card{opacity:.72}
 .badges{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:4px}
 .b{font-size:10.5px;border-radius:5px;padding:1px 6px;background:#8882}.b.idea{color:var(--idea)}.b.corr{color:var(--corr)}.b.pend{color:var(--pend)}
-.b.tag{background:var(--pend);color:#fff}.b.grp{color:var(--mute)}
+.b.tag{background:var(--pend);color:#fff}.b.ms{background:#2e9b5722;color:var(--done);font-weight:600}.sep{width:1px;height:20px;background:#8885}.b.grp{color:var(--mute)}
 .detail{color:var(--mute);font-size:12.5px}details{font-size:12.5px;color:var(--mute);margin-top:4px}details ul{margin:4px 0;padding-left:18px}
 .chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}.iss{font-size:11.5px;text-decoration:none;border-radius:999px;padding:0 7px;border:1px solid var(--idea);color:var(--idea)}
 .iss.closed{border-color:var(--done);color:var(--done)}
@@ -140,18 +147,20 @@ main{display:grid;grid-template-columns:repeat(4,minmax(240px,1fr));gap:12px;pad
 </style>
 <header><h1>Kanban des idées</h1><input id=q placeholder="Filtrer…">
 <button data-k=all class=on>Tout</button><button data-k=idea>Idées</button><button data-k=corr>Corrections</button>
-<button id=hd>Masquer « Fait »</button><span class=stamp>idee.md · {{STAMP}}</span></header>
+<span class=sep></span><button data-m="" class=on>tous</button>{{MS}}<span class=sep></span><button id=hd>Masquer « Fait »</button><span class=stamp>idee.md · {{STAMP}}</span></header>
 <main>{{COLS}}</main>
 <script>
 // Filters survive the reloads of --watch.
-var kind="all",hideDone=false;try{hideDone=localStorage.kbHide==="1";kind=localStorage.kbKind||"all";document.getElementById("q").value=localStorage.kbQ||"";
+var kind="all",ms="",hideDone=false;try{hideDone=localStorage.kbHide==="1";kind=localStorage.kbKind||"all";ms=localStorage.kbMs||"";
+document.querySelectorAll("[data-m]").forEach(function(x){x.classList.toggle("on",x.dataset.m===ms)});document.getElementById("q").value=localStorage.kbQ||"";
 document.querySelectorAll("[data-k]").forEach(function(x){x.classList.toggle("on",x.dataset.k===kind)})}catch(e){}
-function apply(){var q=document.getElementById("q").value.toLowerCase();try{localStorage.kbQ=q;localStorage.kbKind=kind}catch(e){}
-document.querySelectorAll(".card").forEach(function(c){c.classList.toggle("hide",(q&&c.dataset.q.indexOf(q)<0)||(kind!=="all"&&c.dataset.kind!==kind))});
+function apply(){var q=document.getElementById("q").value.toLowerCase();try{localStorage.kbQ=q;localStorage.kbKind=kind;localStorage.kbMs=ms}catch(e){}
+document.querySelectorAll(".card").forEach(function(c){c.classList.toggle("hide",(q&&c.dataset.q.indexOf(q)<0)||(kind!=="all"&&c.dataset.kind!==kind)||(ms&&(" "+c.dataset.ms+" ").indexOf(" "+ms+" ")<0))});
 document.querySelector("[data-col=done]").classList.toggle("hide",hideDone);document.getElementById("hd").classList.toggle("on",hideDone);
 document.querySelector("main").style.gridTemplateColumns=hideDone?"repeat(3,minmax(240px,1fr))":"";}
 document.getElementById("q").oninput=apply;
 document.querySelectorAll("[data-k]").forEach(function(b){b.onclick=function(){kind=b.dataset.k;document.querySelectorAll("[data-k]").forEach(function(x){x.classList.toggle("on",x===b)});apply()}});
+document.querySelectorAll("[data-m]").forEach(function(b){b.onclick=function(){ms=b.dataset.m;document.querySelectorAll("[data-m]").forEach(function(x){x.classList.toggle("on",x===b)});apply()}});
 document.getElementById("hd").onclick=function(){hideDone=!hideDone;try{localStorage.kbHide=hideDone?"1":"0"}catch(e){}apply()};
 apply();
 // --watch : kanban.py rewrites this file when idee.md changes; reload then.
