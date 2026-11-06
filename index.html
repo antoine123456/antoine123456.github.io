@@ -3994,7 +3994,9 @@
                     + '<button class="b-flag" onclick="browseFlag(' + sl.dataset.i + ')">🚩 ' + (fl ? "Modifier" : "Commenter") + ' <span class="t-key">F6</span></button></div>' : '');
             var css = cardStyle(browse.sid, c);
             mountCardHtml(sl.querySelector(".b-front"), displayQuestion(rc.question), css);
-            mountCardHtml(sl.querySelector(".b-back"), rc !== c && rc.answer != null ? rc.answer : b.back, css);
+            // like in study: the back only adds what the recto doesn't show (#128)
+            var backHtml = rc.rf ? RF_CSS + rc.rf.topBack + rc.rf.bottomBack : (rc !== c && rc.answer != null ? rc.answer : b.back);
+            mountCardHtml(sl.querySelector(".b-back"), backHtml, css);
             sl.querySelector(".b-back").insertAdjacentHTML("afterend", infoHtml(c));
         }
 
