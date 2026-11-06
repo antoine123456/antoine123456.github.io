@@ -298,10 +298,10 @@
         /* Combo (#117): fighting-game counter in the left margin, desktop only,
            fading into the page towards the card ("fuzzy" edge). */
         .combo { position: fixed; top: 34%; left: 12px; width: 220px; z-index: 5; pointer-events: none;
-            display: none; text-align: right; padding: 18px 40px 18px 10px;
-            background: radial-gradient(ellipse at 70% 45%, rgba(245, 179, 1, .14), transparent 70%); border-radius: 50%; } /* soft glow instead of a fade over the digit (#119) */
+            display: none; text-align: left; padding: 18px 10px 18px 40px;
+            background: radial-gradient(ellipse at 30% 45%, rgba(245, 179, 1, .14), transparent 70%); border-radius: 50%; } /* soft glow instead of a fade over the digit (#119) */
         @media (min-width: 1180px) { body.combo-on .combo.live { display: block; } }
-        .combo-err { text-align: left; padding: 18px 10px 18px 40px; background: radial-gradient(ellipse at 30% 45%, rgba(220, 38, 38, .13), transparent 70%); }
+        .combo-err { text-align: right; padding: 18px 40px 18px 10px; background: radial-gradient(ellipse at 70% 45%, rgba(220, 38, 38, .13), transparent 70%); }
         .combo-err .combo-err-n { background: linear-gradient(180deg, #fca5a5 0%, #dc2626 55%, #7f1d1d 100%); -webkit-background-clip: text; background-clip: text; font-size: 64px; }
         .combo-err.pop .combo-n { animation: comboPop .32s cubic-bezier(.2, 1.6, .4, 1); }
         .s-question.shake { animation: cardShake .38s; }
@@ -1058,6 +1058,9 @@
         .wc-box .wc-inp {
             display: block;
         }
+
+        /* Errors (#131): the box reddens a little more at each miss. */
+        .wc-box.err-tint .wc-inp { background-color: rgba(220, 38, 38, var(--err-a, 0)); border-radius: 5px 5px 0 0; transition: background-color .25s; }
 
         /* Hint: the word in small orange under the blank. (A greyed-out
            version inside the blank was tried — git tag indice-fantome.) */
@@ -1853,7 +1856,7 @@
                     <button id="st-val-live" onclick="setSetting('validate', 'live')">Pendant la frappe</button>
                     <button id="st-val-enter" onclick="setSetting('validate', 'enter')">Entrée pour valider</button>
                 </div></div>
-            <div class="st-note">Pendant la frappe : le mot se vérifie tout seul, une erreur ajoute un petit point sous le mot.
+            <div class="st-note">Pendant la frappe : le mot se vérifie tout seul, à chaque erreur, la case du mot rougit un peu plus.
                 Entrée pour valider : tu tapes le mot puis Entrée ; à chaque erreur, toute la carte rougit, et les erreurs comptent pour toute la réponse.</div>
             <div class="st-row"><span>Après le verso complet</span>
                 <div class="st-switch">
@@ -1862,12 +1865,19 @@
                 </div></div>
             <div class="st-note">Maintenir Espace : la carte suivante vient seule après quelques secondes, Espace tenu la garde affichée.
                 Espace pour suivant : le verso reste jusqu'à ce que tu appuies sur Espace.</div>
+            <div class="st-row"><span>Délai avant la carte suivante</span>
+                <div class="st-switch">
+                    <button id="st-adv-auto" onclick="setSetting('advance', 'auto')">Auto</button>
+                    <button id="st-adv-slow" onclick="setSetting('advance', 'slow')">Toujours lent</button>
+                    <button id="st-adv-fast" onclick="setSetting('advance', 'fast')">Toujours rapide</button>
+                </div></div>
+            <div class="st-note">Temps laissé au verso, une fois le son fini. Auto : une nouvelle carte, une carte en cours d'apprentissage ou ratée garde le temps de relire (≈ 2,5 s) ; une carte déjà sue et juste passe vite (≈ 0,7 s).</div>
             <div class="st-row"><span>Animations et combos</span>
                 <div class="st-switch">
                     <button id="st-combo-on" onclick="setSetting('combo', true)">Affichés</button>
                     <button id="st-combo-off" onclick="setSetting('combo', false)">Cachés</button>
                 </div></div>
-            <div class="st-note">Comme dans un jeu de combat : à gauche de la carte les mots justes d'affilée (sans aide) et les jours d'affilée, à droite les erreurs de la carte et les cartes ratées d'affilée (ordinateur) ; un mot juste rebondit, la carte tremble à une erreur, les boutons du bas s'allument à l'appui de leur touche.</div>
+            <div class="st-note">Comme dans un jeu de combat : à droite de la carte les mots justes d'affilée (sans aide) et les jours d'affilée, à gauche les erreurs de la carte et les cartes ratées d'affilée (ordinateur) ; un mot juste rebondit, la carte tremble à une erreur, les boutons du bas s'allument à l'appui de leur touche, et la carte notée part vers un coin (À revoir ↙, Difficile ↖, Correct ↘, Facile ↗).</div>
             <div class="st-row"><span>Mode debug</span>
                 <div class="st-switch">
                     <button id="st-debug-off" onclick="setSetting('debug', false)">Arrêté</button>
@@ -1942,14 +1952,14 @@
                         <div class="b-sep">verso</div>
                         <div class="g-words">
                             <div class="word-col"><input class="wc-inp ok" value="la" readonly tabindex="-1"><div class="wc-attempts"></div></div>
-                            <div class="word-col"><div class="wc-box"><input class="wc-inp err" value="serpi" readonly tabindex="-1"><div class="wc-attempts">●</div></div></div>
+                            <div class="word-col"><div class="wc-box err-tint" style="--err-a:.1"><input class="wc-inp err" value="serpi" readonly tabindex="-1"></div></div>
                         </div>
                     </div></div>
-                    Un mot par case. <span style="color:var(--green)">Vert</span> = juste, <span style="color:var(--red)">rouge</span> = pas encore ; chaque erreur ajoute un petit point <span style="color:var(--red)">●</span> sous le mot.
+                    Un mot par case. <span style="color:var(--green)">Vert</span> = juste, <span style="color:var(--red)">rouge</span> = pas encore ; à chaque erreur, la case <span style="color:var(--red)">rougit</span> un peu plus.
                     Les accents sont facultatifs. Dès qu'un mot est juste, on passe à la case suivante.
                     Dans ⚙, « Entrée pour valider » : le mot n'est vérifié qu'à Entrée, et toute la carte rougit à chaque erreur (erreurs comptées sur toute la réponse).
                     Une carte juste mais tapée lentement (30 s par défaut, réglable dans ⚙) est notée « Difficile ».
-                    Sur ordinateur, un <b>combo</b> compte à gauche de la carte les mots justes d'affilée (sans aide) et les jours d'affilée ; « À revoir » le casse. À droite, les erreurs de la carte et les cartes ratées d'affilée.
+                    Sur ordinateur, un <b>combo</b> compte à droite de la carte les mots justes d'affilée (sans aide) et les jours d'affilée ; « À revoir » le casse. À gauche, les erreurs de la carte et les cartes ratées d'affilée.
                     Quand tout est montré après de l'aide, <b>Espace</b> ou <b>Entrée</b> = « À revoir » et carte suivante.
                 </div>
             </div>
@@ -1964,7 +1974,7 @@
                     <div class="g-demo"><div class="g-card">
                         <div class="g-words">
                             <div class="word-col"><input class="wc-inp" value="" placeholder="···" readonly tabindex="-1"><div class="wc-hint on">la</div></div>
-                            <div class="word-col"><div class="wc-box"><input class="wc-inp given" value="serpiente" readonly tabindex="-1"><div class="wc-attempts">●●●</div></div></div>
+                            <div class="word-col"><div class="wc-box err-tint" style="--err-a:.3"><input class="wc-inp given" value="serpiente" readonly tabindex="-1"></div></div>
                         </div>
                     </div></div>
                     <b>Indice</b> montre le mot <span style="color:var(--orange)">en orange</span> sous la case ; <b>Voir la réponse</b> montre tout.
@@ -1986,7 +1996,8 @@
                         <div class="g-card s-question rated-good" style="font-size:14px;padding:6px 10px;margin:0">carte réussie</div>
                         <div class="g-card s-question rated-again" style="font-size:14px;padding:6px 10px;margin:0">à revoir</div>
                     </div>
-                    La carte prend la couleur de la note.
+                    La carte prend la couleur de la note, puis part vers un coin : À revoir ↙, Difficile ↖, Correct ↘, Facile ↗.
+                    Le délai avant la carte suivante se règle dans ⚙ (Auto : rapide pour une carte déjà sue et juste).
                 </div>
             </div>
 
@@ -2046,6 +2057,7 @@
                 <div class="g-body">
                     <ul class="g-news">
                         <li><b>6 nov.</b> combo d'erreurs à droite, carte qui tremble, mots qui rebondissent, boutons qui s'allument ; Espace / Entrée après de l'aide = « À revoir » ; indices en italique ; image du verso à côté si la place manque ; une phrase d'exemple pour chaque mot du Vocabulaire (🔊 lue par la voix du navigateur).</li>
+                        <li><b>6 nov.</b> (suite) la carte notée part vers un coin ; combos inversés (justes à droite, erreurs à gauche) et comptés tout de suite ; la case rougit à chaque erreur ; ⚙ délai avant la carte suivante.</li>
                         <li><b>5 nov.</b> combos dans la marge (mots justes et jours d'affilée) ; ⛶ plein écran ; 📋 tableaux de conjugaison dans 🔍 ; réponse lente notée « Difficile » ; ✓ pour « déjà connu » ; 📝 Vocabulaire perso avec ＋ ; paquets plus légers pour le navigateur.</li>
                         <li><b>4 nov.</b> 📝 Relecture dans 🔍 (F6 pour commenter) ; paquets en italien ; interface en italien.</li>
                         <li><b>3 nov.</b> le site ouvre directement l'appli.</li>
@@ -2282,7 +2294,7 @@
 
         // ⚙ Settings (#56, #57, #92), per user / browser.
         var LS_SETTINGS = NS + "settings";
-        var SETTINGS_DEFAULT = { newPerDay: NEW_LIMIT, reviewsPerDay: 0, minutesPerDay: 0, maxErrors: 3, spaceMode: "hold", debug: false, validate: "live", slowSeconds: 30, combo: true };
+        var SETTINGS_DEFAULT = { newPerDay: NEW_LIMIT, reviewsPerDay: 0, minutesPerDay: 0, maxErrors: 3, spaceMode: "hold", debug: false, validate: "live", slowSeconds: 30, combo: true, advance: "auto" };
         function settings() {
             var o = {};
             try { o = JSON.parse(localStorage.getItem(LS_SETTINGS) || "{}") || {}; } catch (e) { }
@@ -2358,6 +2370,7 @@
             document.getElementById("st-val-enter").classList.toggle("on", o.validate === "enter");
             document.getElementById("st-space-hold").classList.toggle("on", o.spaceMode !== "next");
             document.getElementById("st-space-next").classList.toggle("on", o.spaceMode === "next");
+            ["auto", "slow", "fast"].forEach(function (k) { document.getElementById("st-adv-" + k).classList.toggle("on", (o.advance || "auto") === k); });
             document.getElementById("st-combo-on").classList.toggle("on", o.combo !== false);
             document.getElementById("st-combo-off").classList.toggle("on", o.combo === false);
             document.body.classList.toggle("combo-on", o.combo !== false);
@@ -4739,6 +4752,16 @@
             // Keyboard (incl. Space = Correct in normal mode): the card and,
             // if the rating pills are showing, the matching pill (#29).
             if (viaButton) flashRateButton(q); else { highlightCard(q); flashRateButton(q); }
+            comboNow(q);
+        }
+        // The combos count the instant the answer is decided, not after the
+        // back and the transition (#132); advanceCard doesn't count it twice.
+        function comboNow(q) {
+            var key = sess.qIdx + ":" + sess.done;
+            if (sess.comboKey === key) return;
+            sess.comboKey = key;
+            comboHit(q);
+            missStreak(q);
         }
 
         // What each rating would do to THIS card right now — shown above the
@@ -5073,7 +5096,9 @@
                     wordRows.slice().forEach(function (e, j) { if (!e.solved && !e.given) giveAnswer(e, j); });
                 return;
             }
-            entry.attempts.textContent = "●".repeat(Math.min(entry.errors, 5));
+            // Each miss reddens the word's box a little more (#131, no more dots).
+            entry.box.classList.add("err-tint");
+            entry.box.style.setProperty("--err-a", Math.min(0.34, 0.1 * entry.errors));
             if (entry.errors >= settings().maxErrors) giveAnswer(entry, i);
         }
 
@@ -5194,10 +5219,20 @@
                     if (pendingNext !== go) return;
                     if (holdBack) deferredNext = go; // held: move on once released
                     else continueAfterAnswer();
-                }, RICH_BACK_READ_MS);
+                }, backReadMs(card, q));
             });
         }
-        var RICH_BACK_READ_MS = 2500;
+        var RICH_BACK_READ_MS = 2500, QUICK_BACK_READ_MS = 700;
+        // ⚙ « Délai avant la carte suivante » (#130). Auto: a new card, one
+        // still being learnt or one missed keeps the time to read its back;
+        // a card already known and answered right moves on quickly.
+        function backReadMs(card, q) {
+            var m = settings().advance || "auto";
+            if (m === "slow") return RICH_BACK_READ_MS;
+            if (m === "fast") return QUICK_BACK_READ_MS;
+            var s = sess.srs[card.id];
+            return s && s.state === "review" && q >= 2 ? QUICK_BACK_READ_MS : RICH_BACK_READ_MS;
+        }
 
         // Holding Space (or a finger on the screen / the ⏸ pill) keeps the
         // back on screen; released, the card moves on if its time is up (#67).
@@ -5543,8 +5578,7 @@
                 jour_ms: dayStats().ms });
             saveSRS(sess.srsKey, sess.srs); // after every card, not only on leaving the session (#78)
             if (wasNew) recordNewIntroduced(sess.srsKey);
-            comboHit(q);
-            missStreak(q);
+            comboNow(q);
             sess.done++;
             sess.qIdx++;
             if (sess.lyrics) sess.lyricsSeen[card.id] = true;
@@ -5568,8 +5602,17 @@
             var content = document.getElementById("s-content");
             // Only these three: max-height (#99, the card's fitted size) lives in this style too (#103).
             var fade = function (o, y, tr) { content.style.opacity = o; content.style.transform = "translateY(" + y + "px)"; content.style.transition = tr; };
-            fade(0, -10, "opacity .4s, transform .4s");
+            // Torn off like a calendar page, towards the rating's corner (#133):
+            // À revoir ↙, Difficile ↖, Correct ↘, Facile ↗.
+            var dir = { 1: [-1, 1], 2: [-1, -1], 3: [1, 1], 4: [1, -1] }[q] || [0, -1];
+            if (animationsOn()) {
+                content.style.transformOrigin = dir[0] < 0 ? "100% 0" : "0 0";
+                content.style.transition = "opacity .4s ease-in, transform .4s ease-in";
+                content.style.opacity = 0;
+                content.style.transform = "translate(" + dir[0] * 140 + "px," + dir[1] * 90 + "px) rotate(" + dir[0] * dir[1] * -9 + "deg) scale(.82)";
+            } else fade(0, -10, "opacity .4s, transform .4s");
             setTimeout(function () {
+                content.style.transformOrigin = "";
                 fade(0, 10, "none");
                 content.offsetHeight;
                 fade(1, 0, "opacity .4s, transform .4s");
@@ -5640,11 +5683,15 @@
                     "plein écran (en haut de l'écran de révision)": "schermo intero (in alto nella schermata di studio)",
                     "Nouveautés": "Novità",
                     "Combos (ordinateur)": "Combo (computer)", "Animations et combos": "Animazioni e combo",
-                    "Comme dans un jeu de combat : à gauche de la carte les mots justes d'affilée (sans aide) et les jours d'affilée, à droite les erreurs de la carte et les cartes ratées d'affilée (ordinateur) ; un mot juste rebondit, la carte tremble à une erreur, les boutons du bas s'allument à l'appui de leur touche.": "Come in un picchiaduro: a sinistra della carta le parole giuste di fila (senza aiuto) e i giorni di fila, a destra gli errori della carta e le carte sbagliate di fila (computer); una parola giusta rimbalza, la carta trema a un errore, i pulsanti in basso si accendono quando premi il loro tasto.",
-                    "compte à gauche de la carte les mots justes d'affilée (sans aide) et les jours d'affilée ; « À revoir » le casse. À droite, les erreurs de la carte et les cartes ratées d'affilée.": "conta a sinistra della carta le parole giuste di fila (senza aiuto) e i giorni di fila; « Da rivedere » la rompe. A destra, gli errori della carta e le carte sbagliate di fila.",
+                    "Comme dans un jeu de combat : à droite de la carte les mots justes d'affilée (sans aide) et les jours d'affilée, à gauche les erreurs de la carte et les cartes ratées d'affilée (ordinateur) ; un mot juste rebondit, la carte tremble à une erreur, les boutons du bas s'allument à l'appui de leur touche, et la carte notée part vers un coin (À revoir ↙, Difficile ↖, Correct ↘, Facile ↗).": "Come in un picchiaduro: a destra della carta le parole giuste di fila (senza aiuto) e i giorni di fila, a sinistra gli errori della carta e le carte sbagliate di fila (computer); una parola giusta rimbalza, la carta trema a un errore, i pulsanti in basso si accendono quando premi il loro tasto, e la carta valutata vola verso un angolo (Da rivedere ↙, Difficile ↖, Giusto ↘, Facile ↗).",
+                    "compte à droite de la carte les mots justes d'affilée (sans aide) et les jours d'affilée ; « À revoir » le casse. À gauche, les erreurs de la carte et les cartes ratées d'affilée.": "conta a destra della carta le parole giuste di fila (senza aiuto) e i giorni di fila; « Da rivedere » la rompe. A sinistra, gli errori della carta e le carte sbagliate di fila.",
                     "Quand tout est montré après de l'aide,": "Quando tutto è mostrato dopo un aiuto,", "ou": "o", "= « À revoir » et carte suivante.": "= « Da rivedere » e carta successiva.",
                     "combo d'erreurs à droite, carte qui tremble, mots qui rebondissent, boutons qui s'allument ; Espace / Entrée après de l'aide = « À revoir » ; indices en italique ; image du verso à côté si la place manque ; une phrase d'exemple pour chaque mot du Vocabulaire (🔊 lue par la voix du navigateur).": "combo degli errori a destra, carta che trema, parole che rimbalzano, pulsanti che si accendono; Spazio / Invio dopo un aiuto = « Da rivedere »; suggerimenti in corsivo; immagine del retro di fianco se manca spazio; una frase d'esempio per ogni parola del Vocabolario (🔊 letta dalla voce del browser).",
-                    "Au verso,": "Sul retro,", "joue l'enregistrement de la phrase d'exemple ; s'il n'y en a pas (phrases écrites pour le Vocabulaire), la voix du navigateur la lit.": "riproduce la registrazione della frase d'esempio; se non c'è (frasi scritte per il Vocabolario), la legge la voce del browser.",
+                    "Au verso,": "Sul retro,",
+                    "La carte prend la couleur de la note, puis part vers un coin : À revoir ↙, Difficile ↖, Correct ↘, Facile ↗. Le délai avant la carte suivante se règle dans ⚙ (Auto : rapide pour une carte déjà sue et juste).": "La carta prende il colore del voto, poi vola verso un angolo: Da rivedere ↙, Difficile ↖, Giusto ↘, Facile ↗. Il tempo prima della carta successiva si regola in ⚙ (Auto: veloce per una carta già saputa e giusta).",
+                    "(suite) la carte notée part vers un coin ; combos inversés (justes à droite, erreurs à gauche) et comptés tout de suite ; la case rougit à chaque erreur ; ⚙ délai avant la carte suivante.": "(seguito) la carta valutata vola verso un angolo; combo invertite (giuste a destra, errori a sinistra) e contate subito; la casella diventa rossa a ogni errore; ⚙ tempo prima della carta successiva.",
+                    "Délai avant la carte suivante": "Tempo prima della carta successiva", "Auto": "Auto", "Toujours lent": "Sempre lento", "Toujours rapide": "Sempre veloce",
+                    "Temps laissé au verso, une fois le son fini. Auto : une nouvelle carte, une carte en cours d'apprentissage ou ratée garde le temps de relire (≈ 2,5 s) ; une carte déjà sue et juste passe vite (≈ 0,7 s).": "Tempo lasciato al retro, finito l'audio. Auto: una carta nuova, in apprendimento o sbagliata tiene il tempo per rileggere (≈ 2,5 s); una carta già saputa e giusta passa in fretta (≈ 0,7 s).", "joue l'enregistrement de la phrase d'exemple ; s'il n'y en a pas (phrases écrites pour le Vocabulaire), la voix du navigateur la lit.": "riproduce la registrazione della frase d'esempio; se non c'è (frasi scritte per il Vocabolario), la legge la voce del browser.",
                     "6 nov.": "6 nov.", "Affichés": "Visibili", "Cachés": "Nascosti",
                     "Dans la marge, comme dans un jeu de combat : les mots justes d'affilée (sans aide) et les jours d'affilée. « À revoir » casse le combo.": "Nel margine, come in un picchiaduro: le parole giuste di fila (senza aiuto) e i giorni di fila. « Da rivedere » rompe la combo.",
                     "LÉGENDAIRE !": "LEGGENDARIO!", "INCROYABLE !": "INCREDIBILE!", "GÉNIAL !": "FANTASTICO!", "SUPER !": "SUPER!", "BIEN !": "BENE!", "COMBO PERDU": "COMBO PERSA",
@@ -5698,7 +5745,7 @@
                     "Erreurs acceptées avant que le mot soit donné": "Errori ammessi prima che la parola venga data",
                     "Nombre d'essais faux sur un même mot avant que l'appli l'écrive pour toi ; la carte est alors notée « À revoir ».": "Numero di tentativi sbagliati sulla stessa parola prima che l'app la scriva per te; la carta viene allora valutata « Da rivedere ».",
                     "Vérification des mots": "Controllo delle parole", "Pendant la frappe": "Durante la scrittura", "Entrée pour valider": "Invio per confermare",
-                    "Pendant la frappe : le mot se vérifie tout seul, une erreur ajoute un petit point sous le mot. Entrée pour valider : tu tapes le mot puis Entrée ; à chaque erreur, toute la carte rougit, et les erreurs comptent pour toute la réponse.": "Durante la scrittura: la parola si controlla da sola, un errore aggiunge un puntino sotto la parola. Invio per confermare: scrivi la parola e premi Invio; a ogni errore tutta la carta diventa più rossa, e gli errori contano per tutta la risposta.",
+                    "Pendant la frappe : le mot se vérifie tout seul, à chaque erreur, la case du mot rougit un peu plus. Entrée pour valider : tu tapes le mot puis Entrée ; à chaque erreur, toute la carte rougit, et les erreurs comptent pour toute la réponse.": "Durante la scrittura: la parola si controlla da sola, a ogni errore la casella della parola diventa un po' più rossa. Invio per confermare: scrivi la parola e premi Invio; a ogni errore tutta la carta diventa più rossa, e gli errori contano per tutta la risposta.",
                     "Après le verso complet": "Dopo il retro completo", "Espace pour suivant": "Spazio per andare avanti",
                     "Maintenir Espace : la carte suivante vient seule après quelques secondes, Espace tenu la garde affichée. Espace pour suivant : le verso reste jusqu'à ce que tu appuies sur Espace.": "Tieni premuto Spazio: la carta successiva arriva da sola dopo qualche secondo, tenendo premuto Spazio resta visibile. Spazio per andare avanti: il retro resta finché non premi Spazio.",
                     "Mode debug": "Modalità debug", "Arrêté": "Spenta", "Journal actif": "Registro attivo", "Vider": "Svuota",
@@ -5710,7 +5757,7 @@
                     "= nouvelles cartes du jour,": "= nuove carte del giorno,", "= à revoir aujourd'hui,": "= da rivedere oggi,", "= déjà sues.": "= già sapute.",
                     ": parcourir les cartes (carrousel pour les images, liste pour les mots).": ": sfogliare le carte (carosello per le immagini, elenco per le parole).",
                     "Un mot par case.": "Una parola per casella.", "Vert": "Verde", "= juste,": "= giusto,", "rouge": "rosso",
-                    "= pas encore ; chaque erreur ajoute un petit point": "= non ancora; ogni errore aggiunge un puntino", "sous le mot.": "sotto la parola.",
+                    "= pas encore ; à chaque erreur, la case": "= non ancora; a ogni errore, la casella", "rougit": "diventa rossa", "un peu plus.": "un po' di più.",
                     "sous le mot. Les accents sont facultatifs. Dès qu'un mot est juste, on passe à la case suivante.": "sotto la parola. Gli accenti sono facoltativi. Appena una parola è giusta, si passa alla casella successiva.",
                     "Besoin d'aide ?": "Serve aiuto?", "montre le mot": "mostra la parola", "en orange": "in arancione", "sous la case ;": "sotto la casella;",
                     "montre tout. Après": "mostra tutto. Dopo", "3 erreurs": "3 errori",
@@ -5887,8 +5934,9 @@
             if (!q) return;
             var r = q.getBoundingClientRect(), mid = r.top + Math.min(r.height, window.innerHeight - r.top) / 2;
             var c = document.getElementById("combo"), e = document.getElementById("combo-err");
-            c.style.left = Math.max(8, r.left - c.offsetWidth + 46) + "px"; c.style.top = Math.max(60, mid - c.offsetHeight / 2) + "px";
-            e.style.left = (r.right - 46) + "px"; e.style.top = Math.max(60, mid - e.offsetHeight / 2) + "px";
+            // Right answers on the right, errors on the left (#133).
+            c.style.left = (r.right - 46) + "px"; c.style.top = Math.max(60, mid - c.offsetHeight / 2) + "px";
+            e.style.left = Math.max(8, r.left - e.offsetWidth + 46) + "px"; e.style.top = Math.max(60, mid - e.offsetHeight / 2) + "px";
         }
         window.addEventListener("resize", placeCombos);
 
