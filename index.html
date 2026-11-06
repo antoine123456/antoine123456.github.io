@@ -297,10 +297,20 @@
         .fm-modal { max-width: 480px; padding-bottom: 18px; }
         /* Combo (#117): fighting-game counter in the left margin, desktop only,
            fading into the page towards the card ("fuzzy" edge). */
-        .combo { position: fixed; top: 34%; left: max(12px, calc(50% - 360px - 250px)); width: 220px; z-index: 5; pointer-events: none;
+        .combo { position: fixed; top: 34%; left: 12px; width: 220px; z-index: 5; pointer-events: none;
             display: none; text-align: right; padding: 18px 40px 18px 10px;
             background: radial-gradient(ellipse at 70% 45%, rgba(245, 179, 1, .14), transparent 70%); border-radius: 50%; } /* soft glow instead of a fade over the digit (#119) */
         @media (min-width: 1180px) { body.combo-on .combo.live { display: block; } }
+        .combo-err { text-align: left; padding: 18px 10px 18px 40px; background: radial-gradient(ellipse at 30% 45%, rgba(220, 38, 38, .13), transparent 70%); }
+        .combo-err .combo-err-n { background: linear-gradient(180deg, #fca5a5 0%, #dc2626 55%, #7f1d1d 100%); -webkit-background-clip: text; background-clip: text; font-size: 64px; }
+        .combo-err.pop .combo-n { animation: comboPop .32s cubic-bezier(.2, 1.6, .4, 1); }
+        .s-question.shake { animation: cardShake .38s; }
+        @keyframes cardShake { 0%, 100% { translate: 0 0; } 20% { translate: -7px 0; } 40% { translate: 6px 0; } 60% { translate: -4px 0; } 80% { translate: 2px 0; } }
+        .key-flash { animation: keyFlash .35s ease-out; }
+        @keyframes keyFlash { 0% { transform: scale(1); } 35% { transform: scale(1.06); box-shadow: 0 0 0 4px rgba(245, 179, 1, .35); } 100% { transform: scale(1); } }
+        .wc-box.word-pop { animation: wordPop .45s cubic-bezier(.2, 1.6, .4, 1); }
+        @keyframes wordPop { 0% { transform: scale(1); } 40% { transform: scale(1.18) rotate(-2deg); filter: drop-shadow(0 0 6px rgba(22, 163, 74, .55)); } 100% { transform: scale(1); } }
+        @media (prefers-reduced-motion: reduce) { .s-question.shake, .key-flash, .wc-box.word-pop { animation: none !important; } }
         .combo-n { font: italic 900 96px/0.9 "Impact", "Arial Black", system-ui, sans-serif; letter-spacing: -2px;
             background: linear-gradient(180deg, #ffd23f 0%, var(--combo-c, #f5b301) 50%, #c2410c 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
             -webkit-text-stroke: 2px rgba(60, 20, 0, .55); filter: drop-shadow(0 3px 0 rgba(0, 0, 0, .25)); transform-origin: 80% 60%;
@@ -1056,7 +1066,9 @@
             visibility: hidden;
             min-height: 1.6em;
             font-family: var(--ans-font, Georgia, serif);
-            font-size: 13px;
+            font-size: 14px;
+            font-style: italic;   /* #121 */
+            font-weight: 600;
             color: var(--orange);
         }
 
@@ -1850,12 +1862,12 @@
                 </div></div>
             <div class="st-note">Maintenir Espace : la carte suivante vient seule après quelques secondes, Espace tenu la garde affichée.
                 Espace pour suivant : le verso reste jusqu'à ce que tu appuies sur Espace.</div>
-            <div class="st-row"><span>Combos (ordinateur)</span>
+            <div class="st-row"><span>Animations et combos</span>
                 <div class="st-switch">
                     <button id="st-combo-on" onclick="setSetting('combo', true)">Affichés</button>
                     <button id="st-combo-off" onclick="setSetting('combo', false)">Cachés</button>
                 </div></div>
-            <div class="st-note">Dans la marge, comme dans un jeu de combat : les mots justes d'affilée (sans aide) et les jours d'affilée. « À revoir » casse le combo.</div>
+            <div class="st-note">Comme dans un jeu de combat : à gauche de la carte les mots justes d'affilée (sans aide) et les jours d'affilée, à droite les erreurs de la carte et les cartes ratées d'affilée (ordinateur) ; un mot juste rebondit, la carte tremble à une erreur, les boutons du bas s'allument à l'appui de leur touche.</div>
             <div class="st-row"><span>Mode debug</span>
                 <div class="st-switch">
                     <button id="st-debug-off" onclick="setSetting('debug', false)">Arrêté</button>
@@ -1937,7 +1949,8 @@
                     Les accents sont facultatifs. Dès qu'un mot est juste, on passe à la case suivante.
                     Dans ⚙, « Entrée pour valider » : le mot n'est vérifié qu'à Entrée, et toute la carte rougit à chaque erreur (erreurs comptées sur toute la réponse).
                     Une carte juste mais tapée lentement (30 s par défaut, réglable dans ⚙) est notée « Difficile ».
-                    Sur ordinateur, un <b>combo</b> compte dans la marge les mots justes d'affilée (sans aide) et les jours d'affilée ; « À revoir » le casse.
+                    Sur ordinateur, un <b>combo</b> compte à gauche de la carte les mots justes d'affilée (sans aide) et les jours d'affilée ; « À revoir » le casse. À droite, les erreurs de la carte et les cartes ratées d'affilée.
+                    Quand tout est montré après de l'aide, <b>Espace</b> ou <b>Entrée</b> = « À revoir » et carte suivante.
                 </div>
             </div>
 
@@ -2031,6 +2044,7 @@
                 <div class="g-num">9</div><div class="g-h">Nouveautés</div>
                 <div class="g-body">
                     <ul class="g-news">
+                        <li><b>6 nov.</b> combo d'erreurs à droite, carte qui tremble, mots qui rebondissent, boutons qui s'allument ; Espace / Entrée après de l'aide = « À revoir » ; indices en italique ; image du verso à côté si la place manque.</li>
                         <li><b>5 nov.</b> combos dans la marge (mots justes et jours d'affilée) ; ⛶ plein écran ; 📋 tableaux de conjugaison dans 🔍 ; réponse lente notée « Difficile » ; ✓ pour « déjà connu » ; 📝 Vocabulaire perso avec ＋ ; paquets plus légers pour le navigateur.</li>
                         <li><b>4 nov.</b> 📝 Relecture dans 🔍 (F6 pour commenter) ; paquets en italien ; interface en italien.</li>
                         <li><b>3 nov.</b> le site ouvre directement l'appli.</li>
@@ -2087,6 +2101,10 @@
             <div class="combo-label" id="combo-label"></div>
             <div class="combo-days" id="combo-days"></div>
         </div>
+        <div class="combo combo-err" id="combo-err" aria-hidden="true">
+            <div class="combo-n combo-err-n" id="combo-err-n"></div>
+            <div class="combo-days" id="combo-err-streak"></div>
+        </div>
         <div class="s-bottom">
             <div class="s-actions" id="s-actions"></div>
             <div class="s-counts">
@@ -2137,9 +2155,18 @@
         // no import.
         var LS_USER = "ankitrain_user", LS_NAMES = "ankitrain_names";
         var GHOST = "fantome", OWNER = "antoine";
-        var USER = /[?&]fantome\b/.test(location.search) ? GHOST
-            : (function () { try { return localStorage.getItem(LS_USER) || ""; } catch (e) { return ""; } })();
-        var NS = !USER || USER === OWNER ? "ankitrain_v1_" : "ankitrain_u_" + encodeURIComponent(USER) + "_";
+        // ?fantome=<name> (#122): that user's cloud data, read-only — loaded
+        // into a separate namespace, wiped at each start, never written back.
+        var VIEW_AS = (function () { var m = location.search.match(/[?&]fantome=([^&#]+)/); return m ? decodeURIComponent(m[1]) : ""; })();
+        var READONLY = !!VIEW_AS;
+        var USER = VIEW_AS || (/[?&]fantome\b/.test(location.search) ? GHOST
+            : (function () { try { return localStorage.getItem(LS_USER) || ""; } catch (e) { return ""; } })());
+        var NS = READONLY ? "ankitrain_u_view_" + encodeURIComponent(USER) + "_"
+            : !USER || USER === OWNER ? "ankitrain_v1_" : "ankitrain_u_" + encodeURIComponent(USER) + "_";
+        if (READONLY) try { // always start from the cloud copy
+            var viewKeys = []; for (var vk = 0; vk < localStorage.length; vk++) { var kk = localStorage.key(vk); if (kk && kk.indexOf(NS) === 0) viewKeys.push(kk); }
+            viewKeys.forEach(function (k) { localStorage.removeItem(k); });
+        } catch (e) { }
         // Decks per user (#111): a listed user gets only these bundled decks;
         // antoine gets them all (except the restricted ones); others: none.
         var USER_DECKS = {
@@ -2148,7 +2175,7 @@
         };
         var LISTED_USERS = ["chiara"]; // shown in the name list even before their first sync
         var USER_LANGS = { chiara: "it" }; // interface language per user (#112), French otherwise
-        var UI_LANG_USER = USER_LANGS[USER] || null;
+        var UI_LANG_USER = READONLY ? null : (USER_LANGS[USER] || null); // the read-only view stays in French
         var FULL_DECKS = USER === OWNER || !!USER_DECKS[USER];
         var decksReady = false; // bundled decks loaded at startup (#115)
         // The ghost only gets these bundled decks (#79); null = all of them.
@@ -2171,6 +2198,7 @@
             var names = knownNames();
             (extra || []).forEach(function (n) { if (n !== GHOST && names.indexOf(n) === -1) names.push(n); });
             if (USER === GHOST) names.push(GHOST);
+            if (READONLY && names.indexOf(USER) === -1) names.push(USER);
             el.innerHTML = (USER ? "" : '<option value="" selected>— choisir —</option>')
                 + names.map(function (n) {
                     return '<option value="' + esc(n) + '"' + (n === USER ? " selected" : "") + ">"
@@ -3112,6 +3140,7 @@
         }
 
         function pushAllToFirestore() {
+            if (READONLY) return Promise.resolve(); // ?fantome=<name>: never writes (#122)
             if (!FIREBASE_ENABLED || !fbUser || !fbDb) return Promise.resolve();
             var sources = loadSources();
             var userRef = fbDb.collection("users").doc(fbUser.uid);
@@ -3191,6 +3220,18 @@
             var userRef = fbDb.collection("users").doc(fbUser.uid);
             return userRef.get().then(function (userDoc) {
                 var cloud = userDoc.exists ? userDoc.data() : null;
+                // Reset from afar (#122): a resetAt newer than the last one seen here
+                // wipes this name's local copy first, so it isn't sent back.
+                if (cloud && cloud.resetAt && !READONLY) {
+                    var seenReset = 0; try { seenReset = +localStorage.getItem(NS + "reset_seen") || 0; } catch (e) { }
+                    if (cloud.resetAt > seenReset) {
+                        var drop = []; for (var ri = 0; ri < localStorage.length; ri++) { var rk = localStorage.key(ri); if (rk && rk.indexOf(NS) === 0) drop.push(rk); }
+                        drop.forEach(function (k) { localStorage.removeItem(k); });
+                        MEM_CARDS = {};
+                        try { localStorage.setItem(NS + "reset_seen", String(cloud.resetAt)); } catch (e) { }
+                        dlog("remise à zéro", { utilisateur: USER, effacees: drop.length });
+                    }
+                }
                 var localSources = loadSources();
 
                 if (!cloud || !cloud.sources || !cloud.sources.length) {
@@ -3271,6 +3312,7 @@
         function saveFlaggedRaw(sid, fl) { try { localStorage.setItem(LS_FLAGGED + sid, JSON.stringify(fl)); } catch (e) { } }
 
         function deleteSourceFromFirestore(sourceId) {
+            if (READONLY) return Promise.resolve();
             if (!FIREBASE_ENABLED || !fbUser || !fbDb) return Promise.resolve();
             var srcRef = fbDb.collection("users").doc(fbUser.uid).collection("sources").doc(String(sourceId));
             return srcRef.collection("cardChunks").get().then(function (snap) {
@@ -3281,6 +3323,7 @@
             }).catch(function (err) { console.error("Firestore source delete failed:", err); });
         }
         function wipeFirestoreForUser() {
+            if (READONLY) return Promise.resolve();
             if (!FIREBASE_ENABLED || !fbUser || !fbDb) return Promise.resolve();
             var userRef = fbDb.collection("users").doc(fbUser.uid);
             return userRef.collection("sources").get().then(function (snap) {
@@ -3743,7 +3786,8 @@
             if (sess.canEnrich && fullRender()) queue = queue.map(enrichedCard);
             sess.queue = queue;
             sess.qIdx = 0;
-            setTimeout(function () { renderCombo(); }, 0);
+            sess.cardErrCount = 0;
+            setTimeout(function () { renderCombo(); renderErrCombo(""); }, 0);
             dlog("séance", {
                 source: src.id, paquet: deckName, tag: tag || null, piste: track || "principale",
                 cartes: queue.length, nouvelles: queue.filter(function (c) { var s = srs[c.id]; return !s || s.state === "new"; }).length,
@@ -3838,7 +3882,12 @@
         // more than the typed words (image, sentence…), then the info sheet.
         function renderBack(container, card) {
             container.innerHTML = answerHasMore(card) ? '<div class="s-verso-body"></div>' : "";
-            if (answerHasMore(card)) mountCardHtml(container.querySelector(".s-verso-body"), backWithoutRepeats(card), cardStyle(sess.sourceId, card));
+            if (answerHasMore(card)) {
+                var host = container.querySelector(".s-verso-body");
+                mountCardHtml(host, backWithoutRepeats(card), cardStyle(sess.sourceId, card));
+                // not enough height for text + picture: the picture goes beside the text (#124)
+                if (sess.backSide) host.shadowRoot.querySelector(".card").classList.add("rf-side");
+            }
             container.insertAdjacentHTML("beforeend", infoHtml(card));
         }
         function showRichBack(container, card) {
@@ -4225,6 +4274,9 @@
             + ".rf-tr{font-size:15px;opacity:.7;font-style:italic;margin-top:2px}"
             // Fixed height: the space is there before the picture loads, so the back doesn't jump (#87).
             + ".rf-img img{height:200px;max-height:none;max-width:100%;object-fit:cover;border-radius:10px;margin-top:6px}"
+            + ".card.rf-side{display:grid;grid-template-columns:1fr auto;column-gap:18px;align-items:center}"
+            + ".card.rf-side>*:not(.rf-img){grid-column:1}.card.rf-side>.rf-img{grid-column:2;grid-row:1/span 9}"
+            + ".card.rf-side .rf-img img{height:170px;margin-top:0}.card.rf-side>.rf-play{justify-self:center}"
             + ".rf-play{margin-top:4px;border:1.5px solid rgba(128,128,128,.35);background:none;color:inherit;border-radius:999px;padding:3px 12px;font-size:13px;cursor:pointer}"
             + "</style>";
         // A display copy of the card (same id, words, audio): new front and back.
@@ -4487,6 +4539,9 @@
             advancing = false; cardErrors = 0; wordRows = []; revealed = false; pendingNext = null;
             sess.cardShownAt = Date.now();
             sess.cardMisses = 0;
+            sess.cardErrCount = 0;
+            sess.backSide = false;
+            if (document.getElementById("combo-err")) setTimeout(function () { renderErrCombo(""); placeCombos(); }, 0);
             if (sess.queue[sess.qIdx]) {
                 var dc = sess.queue[sess.qIdx], ds = sess.srs[dc.id];
                 dlog("carte", { id: dc.id, etat: ds ? ds.state : "new", estimation_ms: Math.round(estimateMs(dc, sess.srs, gapFactor())), mode: studyMode() });
@@ -4558,7 +4613,14 @@
             if (flip) {
                 if (card.rf) showRefoldZones(card, true);
                 else mountCardHtml(document.getElementById("s-verso-body"), card.answer != null ? card.answer : esc((card.words || []).join(" ")), cardStyle(sess.sourceId, card));
-            } else if (hasRichAnswer(card)) renderBack(document.getElementById("s-verso-extra"), card);
+            } else if (hasRichAnswer(card)) {
+                sess.backSide = false;
+                renderBack(document.getElementById("s-verso-extra"), card);
+                // Will it all fit? If not and the back has a picture, put it beside the text (#124).
+                var room = document.querySelector("#study .s-main").clientHeight - 24;
+                var need = rIn.offsetHeight + vIn.offsetHeight + 60;
+                if (need > room && /rf-img/.test(card.answer || "")) { sess.backSide = true; renderBack(document.getElementById("s-verso-extra"), card); }
+            }
             var half = Math.max(rIn.offsetHeight, vIn.offsetHeight), vFull = vIn.offsetHeight;
             if (flip) {
                 if (card.rf) showRefoldZones(card, false);
@@ -4978,10 +5040,21 @@
             entry.inp.className = "wc-inp ok";
             entry.box.classList.add("solved");
             entry.solved = true;
+            if (animationsOn()) { entry.box.classList.remove("word-pop"); void entry.box.offsetWidth; entry.box.classList.add("word-pop"); } // #127
+        }
+        function animationsOn() { return settings().combo !== false; }
+        // A key pressed → its pill in the bottom bar lights up (#126).
+        function keyFlash(what) {
+            if (!animationsOn()) return;
+            var el = typeof what === "number" ? document.querySelector('.t-rate[data-q="' + what + '"]')
+                : document.querySelector("#s-actions " + what);
+            if (!el) return;
+            el.classList.remove("key-flash"); void el.offsetWidth; el.classList.add("key-flash");
         }
 
         function addError(entry, i) {
             entry.errors++;
+            errorHit();
             cardErrors = Math.max(cardErrors, entry.errors);
             if (settings().validate === "enter") {
                 // The whole card reddens; misses add up over the answer and,
@@ -5138,7 +5211,7 @@
         document.addEventListener("keydown", function (e) {
             if (e.key !== " " || !pendingNext || document.getElementById("study").style.display !== "flex") return;
             e.preventDefault();
-            if (settings().spaceMode === "next") { if (!e.repeat) continueAfterAnswer(); return; }
+            if (settings().spaceMode === "next") { if (!e.repeat) { keyFlash(".s-pill"); continueAfterAnswer(); } return; }
             if (!e.repeat) setHold(true);
         }, true);
         document.addEventListener("keyup", function (e) { if (e.key === " ") setHold(false); });
@@ -5400,6 +5473,11 @@
             if (pendingNext && e.key === "Enter") {
                 e.preventDefault();
                 continueAfterAnswer();
+            } else if (barState === "rating" && studyMode() !== "flip" && (e.key === " " || e.key === "Enter") && !e.metaKey && !e.ctrlKey) {
+                // Whole answer shown after help (hints, given word, F8): Espace / Entrée = À revoir (F2) and on (#120).
+                e.preventDefault();
+                keyFlash(1);
+                rate(1);
             } else if (studyMode() === "flip" && !e.metaKey && !e.ctrlKey && (e.key === " " || e.key === "Enter" || e.key === "F1")) {
                 // Like Anki: Space/Entrée shows the answer, then counts as "Correct".
                 e.preventDefault();
@@ -5412,11 +5490,14 @@
                 if (!e.repeat) conjHold(true); // until F1 is released
             } else if (e.key === "F1") {
                 e.preventDefault();
+                keyFlash(".s-pill-hint");
                 revealCurrent();
             } else if (e.key === "F8") {
                 e.preventDefault();
+                keyFlash(".s-pill:not(.s-pill-hint)");
                 showFullAnswer();
             } else if (e.key === "F6") {
+                keyFlash(".s-flag");
                 e.preventDefault();
                 toggleFlagCurrent();
             } else if (e.key === "F2" || e.key === "F4") {
@@ -5429,12 +5510,14 @@
                 else showFullAnswer();
             } else if (FKEY_RATING.hasOwnProperty(e.key)) {
                 e.preventDefault();
+                keyFlash(FKEY_RATING[e.key]);
                 rate(FKEY_RATING[e.key]);
             } else if (ARROW_RATING.hasOwnProperty(e.key) && !e.metaKey && !e.ctrlKey && !e.altKey && !e.shiftKey) {
                 var el = document.activeElement;
                 var typing = el && (el.classList.contains("wc-inp") || el.tagName === "SELECT") && el.id !== "kb-keeper";
                 if (typing) return;
                 e.preventDefault();
+                keyFlash(ARROW_RATING[e.key]);
                 rate(ARROW_RATING[e.key]);
             }
         });
@@ -5456,6 +5539,7 @@
             saveSRS(sess.srsKey, sess.srs); // after every card, not only on leaving the session (#78)
             if (wasNew) recordNewIntroduced(sess.srsKey);
             comboHit(q);
+            missStreak(q);
             sess.done++;
             sess.qIdx++;
             if (sess.lyrics) sess.lyricsSeen[card.id] = true;
@@ -5550,7 +5634,12 @@
                     "Une carte juste, mais tapée après ce temps, est notée « Difficile » au lieu de « Correct » : elle reviendra plus tôt. Tout à gauche : jamais.": "Una carta giusta ma scritta dopo questo tempo viene valutata « Difficile » invece di « Giusto »: tornerà prima. Tutto a sinistra: mai.",
                     "plein écran (en haut de l'écran de révision)": "schermo intero (in alto nella schermata di studio)",
                     "Nouveautés": "Novità",
-                    "Combos (ordinateur)": "Combo (computer)", "Affichés": "Visibili", "Cachés": "Nascosti",
+                    "Combos (ordinateur)": "Combo (computer)", "Animations et combos": "Animazioni e combo",
+                    "Comme dans un jeu de combat : à gauche de la carte les mots justes d'affilée (sans aide) et les jours d'affilée, à droite les erreurs de la carte et les cartes ratées d'affilée (ordinateur) ; un mot juste rebondit, la carte tremble à une erreur, les boutons du bas s'allument à l'appui de leur touche.": "Come in un picchiaduro: a sinistra della carta le parole giuste di fila (senza aiuto) e i giorni di fila, a destra gli errori della carta e le carte sbagliate di fila (computer); una parola giusta rimbalza, la carta trema a un errore, i pulsanti in basso si accendono quando premi il loro tasto.",
+                    "compte à gauche de la carte les mots justes d'affilée (sans aide) et les jours d'affilée ; « À revoir » le casse. À droite, les erreurs de la carte et les cartes ratées d'affilée.": "conta a sinistra della carta le parole giuste di fila (senza aiuto) e i giorni di fila; « Da rivedere » la rompe. A destra, gli errori della carta e le carte sbagliate di fila.",
+                    "Quand tout est montré après de l'aide,": "Quando tutto è mostrato dopo un aiuto,", "ou": "o", "= « À revoir » et carte suivante.": "= « Da rivedere » e carta successiva.",
+                    "combo d'erreurs à droite, carte qui tremble, mots qui rebondissent, boutons qui s'allument ; Espace / Entrée après de l'aide = « À revoir » ; indices en italique ; image du verso à côté si la place manque.": "combo degli errori a destra, carta che trema, parole che rimbalzano, pulsanti che si accendono; Spazio / Invio dopo un aiuto = « Da rivedere »; suggerimenti in corsivo; immagine del retro di fianco se manca spazio.",
+                    "6 nov.": "6 nov.", "Affichés": "Visibili", "Cachés": "Nascosti",
                     "Dans la marge, comme dans un jeu de combat : les mots justes d'affilée (sans aide) et les jours d'affilée. « À revoir » casse le combo.": "Nel margine, come in un picchiaduro: le parole giuste di fila (senza aiuto) e i giorni di fila. « Da rivedere » rompe la combo.",
                     "LÉGENDAIRE !": "LEGGENDARIO!", "INCROYABLE !": "INCREDIBILE!", "GÉNIAL !": "FANTASTICO!", "SUPER !": "SUPER!", "BIEN !": "BENE!", "COMBO PERDU": "COMBO PERSA",
                     "Sur ordinateur, un": "Sul computer, una", "compte dans la marge les mots justes d'affilée (sans aide) et les jours d'affilée ; « À revoir » le casse.": "conta nel margine le parole giuste di fila (senza aiuto) e i giorni di fila; « Da rivedere » la rompe.",
@@ -5659,6 +5748,7 @@
                     [/^Réponse lente notée « Difficile » après$/, "Risposta lenta valutata « Difficile » dopo"], [/^(\d+) s$/, "$1 s"],
                     [/^(\d+) tableaux$/, "$1 tabelle"],
                     [/^🔥 (\d+) jours d'affilée$/, "🔥 $1 giorni di fila"],
+                    [/^💀 (\d+) cartes ratées d'affilée$/, "💀 $1 carte sbagliate di fila"],
                     [/^Pas encore assez de mesures \((\d+)\) : valeurs de départ\. Le calcul s'affine à chaque carte\.$/, "Non ci sono ancora abbastanza misure ($1): valori iniziali. Il calcolo migliora a ogni carta."],
                     [/^⏱ (\d+) min atteintes — tu peux t'arrêter après cette carte$/, "⏱ $1 min raggiunti — puoi fermarti dopo questa carta"],
                     [/^⏱ Temps de révision du jour atteint \((\d+) min\) — ⚙ pour le changer, ou \+20$/, "⏱ Tempo di studio di oggi raggiunto ($1 min) — ⚙ per cambiarlo, o +20"],
@@ -5753,8 +5843,48 @@
             document.getElementById("combo-days").textContent = o.days >= 2 ? "🔥 " + o.days + " jours d'affilée" : "";
             el.classList.remove("pop", "milestone", "broken");
             if (cls) { void el.offsetWidth; el.classList.add(cls); }
+            placeCombos();
             if (cls === "broken") setTimeout(function () { if (el.classList.contains("broken")) { document.getElementById("combo-n").textContent = ""; el.classList.remove("broken"); renderCombo(); } }, 1600);
         }
+
+        // ── Error combo (#125) ── on the right of the card: misses on this card,
+        // and cards missed in a row (« À revoir »); the card shakes on a miss.
+        var LS_MISS = "ankitrain_v1_miss_streak";
+        function errorHit() {
+            sess.cardErrCount = (sess.cardErrCount || 0) + 1;
+            if (!animationsOn()) return;
+            var q = document.querySelector("#s-content .s-question");
+            if (q) { q.classList.remove("shake"); void q.offsetWidth; q.classList.add("shake"); }
+            renderErrCombo("pop");
+        }
+        function missStreak(q) {
+            var n = 0; try { n = +localStorage.getItem(LS_MISS) || 0; } catch (e) { }
+            n = q === 1 ? n + 1 : 0;
+            try { localStorage.setItem(LS_MISS, String(n)); } catch (e) { }
+            sess.cardErrCount = 0;
+            renderErrCombo(q === 1 && n >= 2 ? "pop" : "");
+        }
+        function renderErrCombo(cls) {
+            var el = document.getElementById("combo-err");
+            var n = 0; try { n = +localStorage.getItem(LS_MISS) || 0; } catch (e) { }
+            var m = sess.cardErrCount || 0;
+            el.classList.toggle("live", animationsOn() && (m >= 1 || n >= 2));
+            document.getElementById("combo-err-n").textContent = m >= 1 ? "✗" + m : "";
+            document.getElementById("combo-err-streak").textContent = n >= 2 ? "💀 " + n + " cartes ratées d'affilée" : "";
+            el.classList.remove("pop");
+            if (cls) { void el.offsetWidth; el.classList.add(cls); }
+            placeCombos();
+        }
+        // Both counters sit astride the card's edges ("fuzzy", #128).
+        function placeCombos() {
+            var q = document.querySelector("#s-content .s-question");
+            if (!q) return;
+            var r = q.getBoundingClientRect(), mid = r.top + Math.min(r.height, window.innerHeight - r.top) / 2;
+            var c = document.getElementById("combo"), e = document.getElementById("combo-err");
+            c.style.left = Math.max(8, r.left - c.offsetWidth + 46) + "px"; c.style.top = Math.max(60, mid - c.offsetHeight / 2) + "px";
+            e.style.left = (r.right - 46) + "px"; e.style.top = Math.max(60, mid - e.offsetHeight / 2) + "px";
+        }
+        window.addEventListener("resize", placeCombos);
 
         // ⛶ Full screen (#62): the whole page, Échap or ⛶ to leave.
         function toggleFullscreen() {
