@@ -84,6 +84,50 @@ def words_to_type(meaning):
     return [t for t in (re.sub(r"^[^\w]+|[^\w]+$", "", x) for x in first.split()) if t]
 
 
+# Generated example sentences (#68) for the words the Spanish deck gives none:
+# vocab_phrases.tsv (key, sentence es, fr, it). The word is put in bold —
+# the whole expression if it appears as is, else the first word of the
+# sentence sharing its stem (lista for listo, matan for matar).
+def generated_sentences():
+    rows = {}
+    path = os.path.join(HERE, "vocab_phrases.tsv")
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                if line.startswith("#") or not line.strip():
+                    continue
+                p = line.rstrip("\n").split("\t")
+                rows[int(p[0])] = p[1:4]
+    return rows
+
+
+def _fold(s):
+    import unicodedata
+    return "".join(c for c in unicodedata.normalize("NFD", s.lower()) if unicodedata.category(c) != "Mn")
+
+
+def bold_word(sentence, es):
+    # Folding keeps one character per letter, so positions match the original.
+    fs = _fold(sentence)
+    core = _fold(re.sub(r"^(el|la|los|las|un|una|lo)\s+", "", es.strip(), flags=re.I))
+    forms = [f for f in re.split(r"[;,/]\s*|\s{2,}", core) if f.strip()] or [core]
+    for f in forms:
+        m = re.search(r"(?<!\w)" + re.escape(f.strip()) + r"(?!\w)", fs)
+        if m:
+            break
+    else:
+        m = None
+        variants = [v for v in re.split(r"[\s;,/]+", core) if len(v) >= 2]
+        for t in re.finditer(r"\w+", fs):
+            if any(t.group() == v or (len(v) >= 4 and t.group().startswith(v[:max(3, len(v) - 2)])) for v in variants):
+                m = t
+                break
+    if not m:
+        return html.escape(sentence)
+    a, b = m.span()
+    return html.escape(sentence[:a]) + "<b>" + html.escape(sentence[a:b]) + "</b>" + html.escape(sentence[b:])
+
+
 def translated(cards, lang):
     """A copy of the deck's cards in another language (#109)."""
     L = LANGS[lang]
@@ -102,8 +146,11 @@ def translated(cards, lang):
         t = dict(c, id=str(L["id_base"] + int(c["id"]) - ID_BASE), fr=r[0], answer=html.escape(r[0]), words=words_to_type(r[0]))
         if c.get("pos"):
             t["pos"] = L["pos"].get(c["pos"], c["pos"])
-        if c.get("s"):
+        if c.get("sg"):
+            t["sf"] = c.get("sit", "")
+        elif c.get("s"):
             t["sf"] = r[1] if len(r) > 1 else ""
+        t.pop("sit", None)
         out.append(t)
     return out
 
@@ -243,14 +290,16 @@ def main():
         """Comme Refold, qui illustre la phrase : un mot sans image propre
         (abstrait, verbe…) prend l'image d'un autre nom illustré de sa phrase
         d'exemple — « el cliente siempre tiene razón » → l'image de cliente."""
-        sentence = re.sub(r"<[^>]+>", "", w["e"].get("s", ""))
+        sentence = re.sub(r"<[^>]+>", "", w["e"].get("s", "") or (gen.get(w["i"]) or [""])[0])
         for t in toks(sentence):
             if t not in core and imgs.get(t):
                 return imgs[t], t
         return None, None
 
+    gen = generated_sentences()
     cards, review = [], []  # review : (carte, nom de la phrase qui fournit l'image ou None)
     for i, w in enumerate(items, 1):
+        w["i"] = i
         e = w["e"]
         core = toks(ARTICLE.sub("", w["es"]))
         img = imgs.get(core[0]) if e.get("pos", "").startswith("nom") and len(core) == 1 else None
@@ -271,15 +320,20 @@ def main():
                 "tags": ["vocabulaire"]}
         if e.get("pos"): card["pos"] = e["pos"]
         if e.get("s"): card["s"], card["sf"] = e["s"], e.get("sf", "")
+        elif i in gen:
+            card["s"], card["sf"], card["sg"] = bold_word(gen[i][0], w["es"]), gen[i][1], True
+            card["sit"] = gen[i][2] if len(gen[i]) > 2 else ""
         if w["audio"]: card["audioQuestion"] = [w["audio"]]
         if e.get("sa"): card["sa"] = e["sa"]
         if img: card["img"] = img["url"]
         cards.append(card)
         if img: review.append((card, via))
 
+    cards_it = translated(cards, "it")
+    for c in cards:
+        c.pop("sit", None)
     with open(os.path.join(HERE, "vocabulaire.json"), "w", encoding="utf-8") as f:
         json.dump(deck_json(cards, "fr"), f, ensure_ascii=False, separators=(",", ":"))
-    cards_it = translated(cards, "it")
     with open(os.path.join(HERE, LANGS["it"]["json"]), "w", encoding="utf-8") as f:
         json.dump(deck_json(cards_it, "it"), f, ensure_ascii=False, separators=(",", ":"))
     print(f"{len(cards_it)} mots en italien → {LANGS['it']['json']}")
