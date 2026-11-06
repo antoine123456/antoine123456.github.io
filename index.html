@@ -1997,6 +1997,7 @@
                         <span class="s-mode-toggle">⌨️ Saisie</span><span class="s-mode-toggle">🃏 Normal</span><span class="s-mode-toggle">🎧 Dictée</span>
                     </div>
                     Menu en haut de l'écran de révision. <b>Saisie</b> : on tape la réponse. <b>Normal</b> : comme Anki, <b>Espace</b> retourne la carte, puis on note avec les boutons ou <b>1–4</b> (Espace = Correct). <b>Dictée</b> (paquet espagnol) : on écoute et on tape l'espagnol entendu, sur les cartes déjà apprises — progression à part.
+                    <br>Au verso, <b>🔊 la phrase</b> joue l'enregistrement de la phrase d'exemple ; s'il n'y en a pas (phrases écrites pour le Vocabulaire), la voix du navigateur la lit.
                 </div>
             </div>
 
@@ -2044,7 +2045,7 @@
                 <div class="g-num">9</div><div class="g-h">Nouveautés</div>
                 <div class="g-body">
                     <ul class="g-news">
-                        <li><b>6 nov.</b> combo d'erreurs à droite, carte qui tremble, mots qui rebondissent, boutons qui s'allument ; Espace / Entrée après de l'aide = « À revoir » ; indices en italique ; image du verso à côté si la place manque.</li>
+                        <li><b>6 nov.</b> combo d'erreurs à droite, carte qui tremble, mots qui rebondissent, boutons qui s'allument ; Espace / Entrée après de l'aide = « À revoir » ; indices en italique ; image du verso à côté si la place manque ; une phrase d'exemple pour chaque mot du Vocabulaire (🔊 lue par la voix du navigateur).</li>
                         <li><b>5 nov.</b> combos dans la marge (mots justes et jours d'affilée) ; ⛶ plein écran ; 📋 tableaux de conjugaison dans 🔍 ; réponse lente notée « Difficile » ; ✓ pour « déjà connu » ; 📝 Vocabulaire perso avec ＋ ; paquets plus légers pour le navigateur.</li>
                         <li><b>4 nov.</b> 📝 Relecture dans 🔍 (F6 pour commenter) ; paquets en italien ; interface en italien.</li>
                         <li><b>3 nov.</b> le site ouvre directement l'appli.</li>
@@ -4314,7 +4315,9 @@
             var pos = c.pos ? '<div class="rf-pos">' + esc(c.pos) + '</div>' : "";
             var sent = c.s ? '<div class="rf-sent">' + c.s + '</div>' : "";
             var tr = c.sf ? '<div class="rf-tr">' + esc(c.sf) + '</div>' : "";
-            var play = c.sa ? '<button class="rf-play" onclick="playAudioList([\'' + c.sa + '\'])">' + t9n("🔊 la phrase") + '</button>' : "";
+            // Generated sentences (#68) have no recording: the browser's voice reads them.
+            var play = c.sa ? '<button class="rf-play" onclick="playAudioList([\'' + c.sa + '\'])">' + t9n("🔊 la phrase") + '</button>'
+                : c.s ? '<button class="rf-play" data-say="' + esc(htmlToText(c.s)).replace(/"/g, "&quot;") + '" onclick="speakText(this.dataset.say, \'es\')">' + t9n("🔊 la phrase") + '</button>' : "";
             var img = c.img ? '<div class="rf-img"><img src="' + esc(c.img) + '" alt=""></div>' : "";
             return Object.assign({}, c, {
                 question: RF_CSS + '<div class="rf-word">' + esc(c.es) + '</div>' + sent,
@@ -5640,7 +5643,8 @@
                     "Comme dans un jeu de combat : à gauche de la carte les mots justes d'affilée (sans aide) et les jours d'affilée, à droite les erreurs de la carte et les cartes ratées d'affilée (ordinateur) ; un mot juste rebondit, la carte tremble à une erreur, les boutons du bas s'allument à l'appui de leur touche.": "Come in un picchiaduro: a sinistra della carta le parole giuste di fila (senza aiuto) e i giorni di fila, a destra gli errori della carta e le carte sbagliate di fila (computer); una parola giusta rimbalza, la carta trema a un errore, i pulsanti in basso si accendono quando premi il loro tasto.",
                     "compte à gauche de la carte les mots justes d'affilée (sans aide) et les jours d'affilée ; « À revoir » le casse. À droite, les erreurs de la carte et les cartes ratées d'affilée.": "conta a sinistra della carta le parole giuste di fila (senza aiuto) e i giorni di fila; « Da rivedere » la rompe. A destra, gli errori della carta e le carte sbagliate di fila.",
                     "Quand tout est montré après de l'aide,": "Quando tutto è mostrato dopo un aiuto,", "ou": "o", "= « À revoir » et carte suivante.": "= « Da rivedere » e carta successiva.",
-                    "combo d'erreurs à droite, carte qui tremble, mots qui rebondissent, boutons qui s'allument ; Espace / Entrée après de l'aide = « À revoir » ; indices en italique ; image du verso à côté si la place manque.": "combo degli errori a destra, carta che trema, parole che rimbalzano, pulsanti che si accendono; Spazio / Invio dopo un aiuto = « Da rivedere »; suggerimenti in corsivo; immagine del retro di fianco se manca spazio.",
+                    "combo d'erreurs à droite, carte qui tremble, mots qui rebondissent, boutons qui s'allument ; Espace / Entrée après de l'aide = « À revoir » ; indices en italique ; image du verso à côté si la place manque ; une phrase d'exemple pour chaque mot du Vocabulaire (🔊 lue par la voix du navigateur).": "combo degli errori a destra, carta che trema, parole che rimbalzano, pulsanti che si accendono; Spazio / Invio dopo un aiuto = « Da rivedere »; suggerimenti in corsivo; immagine del retro di fianco se manca spazio; una frase d'esempio per ogni parola del Vocabolario (🔊 letta dalla voce del browser).",
+                    "Au verso,": "Sul retro,", "joue l'enregistrement de la phrase d'exemple ; s'il n'y en a pas (phrases écrites pour le Vocabulaire), la voix du navigateur la lit.": "riproduce la registrazione della frase d'esempio; se non c'è (frasi scritte per il Vocabolario), la legge la voce del browser.",
                     "6 nov.": "6 nov.", "Affichés": "Visibili", "Cachés": "Nascosti",
                     "Dans la marge, comme dans un jeu de combat : les mots justes d'affilée (sans aide) et les jours d'affilée. « À revoir » casse le combo.": "Nel margine, come in un picchiaduro: le parole giuste di fila (senza aiuto) e i giorni di fila. « Da rivedere » rompe la combo.",
                     "LÉGENDAIRE !": "LEGGENDARIO!", "INCROYABLE !": "INCREDIBILE!", "GÉNIAL !": "FANTASTICO!", "SUPER !": "SUPER!", "BIEN !": "BENE!", "COMBO PERDU": "COMBO PERSA",
