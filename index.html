@@ -2155,9 +2155,18 @@
         // no import.
         var LS_USER = "ankitrain_user", LS_NAMES = "ankitrain_names";
         var GHOST = "fantome", OWNER = "antoine";
-        var USER = /[?&]fantome\b/.test(location.search) ? GHOST
-            : (function () { try { return localStorage.getItem(LS_USER) || ""; } catch (e) { return ""; } })();
-        var NS = !USER || USER === OWNER ? "ankitrain_v1_" : "ankitrain_u_" + encodeURIComponent(USER) + "_";
+        // ?fantome=<name> (#122): that user's cloud data, read-only — loaded
+        // into a separate namespace, wiped at each start, never written back.
+        var VIEW_AS = (function () { var m = location.search.match(/[?&]fantome=([^&#]+)/); return m ? decodeURIComponent(m[1]) : ""; })();
+        var READONLY = !!VIEW_AS;
+        var USER = VIEW_AS || (/[?&]fantome\b/.test(location.search) ? GHOST
+            : (function () { try { return localStorage.getItem(LS_USER) || ""; } catch (e) { return ""; } })());
+        var NS = READONLY ? "ankitrain_u_view_" + encodeURIComponent(USER) + "_"
+            : !USER || USER === OWNER ? "ankitrain_v1_" : "ankitrain_u_" + encodeURIComponent(USER) + "_";
+        if (READONLY) try { // always start from the cloud copy
+            var viewKeys = []; for (var vk = 0; vk < localStorage.length; vk++) { var kk = localStorage.key(vk); if (kk && kk.indexOf(NS) === 0) viewKeys.push(kk); }
+            viewKeys.forEach(function (k) { localStorage.removeItem(k); });
+        } catch (e) { }
         // Decks per user (#111): a listed user gets only these bundled decks;
         // antoine gets them all (except the restricted ones); others: none.
         var USER_DECKS = {
@@ -2166,7 +2175,7 @@
         };
         var LISTED_USERS = ["chiara"]; // shown in the name list even before their first sync
         var USER_LANGS = { chiara: "it" }; // interface language per user (#112), French otherwise
-        var UI_LANG_USER = USER_LANGS[USER] || null;
+        var UI_LANG_USER = READONLY ? null : (USER_LANGS[USER] || null); // the read-only view stays in French
         var FULL_DECKS = USER === OWNER || !!USER_DECKS[USER];
         var decksReady = false; // bundled decks loaded at startup (#115)
         // The ghost only gets these bundled decks (#79); null = all of them.
@@ -2189,6 +2198,7 @@
             var names = knownNames();
             (extra || []).forEach(function (n) { if (n !== GHOST && names.indexOf(n) === -1) names.push(n); });
             if (USER === GHOST) names.push(GHOST);
+            if (READONLY && names.indexOf(USER) === -1) names.push(USER);
             el.innerHTML = (USER ? "" : '<option value="" selected>— choisir —</option>')
                 + names.map(function (n) {
                     return '<option value="' + esc(n) + '"' + (n === USER ? " selected" : "") + ">"
@@ -3130,6 +3140,7 @@
         }
 
         function pushAllToFirestore() {
+            if (READONLY) return Promise.resolve(); // ?fantome=<name>: never writes (#122)
             if (!FIREBASE_ENABLED || !fbUser || !fbDb) return Promise.resolve();
             var sources = loadSources();
             var userRef = fbDb.collection("users").doc(fbUser.uid);
@@ -3209,6 +3220,18 @@
             var userRef = fbDb.collection("users").doc(fbUser.uid);
             return userRef.get().then(function (userDoc) {
                 var cloud = userDoc.exists ? userDoc.data() : null;
+                // Reset from afar (#122): a resetAt newer than the last one seen here
+                // wipes this name's local copy first, so it isn't sent back.
+                if (cloud && cloud.resetAt && !READONLY) {
+                    var seenReset = 0; try { seenReset = +localStorage.getItem(NS + "reset_seen") || 0; } catch (e) { }
+                    if (cloud.resetAt > seenReset) {
+                        var drop = []; for (var ri = 0; ri < localStorage.length; ri++) { var rk = localStorage.key(ri); if (rk && rk.indexOf(NS) === 0) drop.push(rk); }
+                        drop.forEach(function (k) { localStorage.removeItem(k); });
+                        MEM_CARDS = {};
+                        try { localStorage.setItem(NS + "reset_seen", String(cloud.resetAt)); } catch (e) { }
+                        dlog("remise à zéro", { utilisateur: USER, effacees: drop.length });
+                    }
+                }
                 var localSources = loadSources();
 
                 if (!cloud || !cloud.sources || !cloud.sources.length) {
@@ -3289,6 +3312,7 @@
         function saveFlaggedRaw(sid, fl) { try { localStorage.setItem(LS_FLAGGED + sid, JSON.stringify(fl)); } catch (e) { } }
 
         function deleteSourceFromFirestore(sourceId) {
+            if (READONLY) return Promise.resolve();
             if (!FIREBASE_ENABLED || !fbUser || !fbDb) return Promise.resolve();
             var srcRef = fbDb.collection("users").doc(fbUser.uid).collection("sources").doc(String(sourceId));
             return srcRef.collection("cardChunks").get().then(function (snap) {
@@ -3299,6 +3323,7 @@
             }).catch(function (err) { console.error("Firestore source delete failed:", err); });
         }
         function wipeFirestoreForUser() {
+            if (READONLY) return Promise.resolve();
             if (!FIREBASE_ENABLED || !fbUser || !fbDb) return Promise.resolve();
             var userRef = fbDb.collection("users").doc(fbUser.uid);
             return userRef.collection("sources").get().then(function (snap) {
