@@ -1,0 +1,238 @@
+{
+ "version": 1,
+ "source": "🧪 Test transitions",
+ "decks": [
+  {
+   "id": "test-transitions-1",
+   "name": "🧪 Test transitions",
+   "cards": [
+    {
+     "id": "1103000000001",
+     "key": 9000,
+     "es": "no",
+     "fr": "non",
+     "question": "no",
+     "answer": "non",
+     "words": [
+      "non"
+     ],
+     "tags": [
+      "vocabulaire",
+      "test"
+     ],
+     "s": "<b>no</b> me gusta la pasta",
+     "sf": "je n'aime pas les pâtes",
+     "audioQuestion": [
+      "default_media/spanishdict-5e0104c0-19bbeb52-36d21ff6-bb96e184-41fe81be.mp3"
+     ],
+     "sa": "default_media/spanishdict-c946965b-ff7b4c59-a24ed8a2-e3708e84-817c3fda.mp3",
+     "testKnown": true,
+     "pos": "test : sue, avec son"
+    },
+    {
+     "id": "1103000000011",
+     "key": 9001,
+     "es": "y",
+     "fr": "et",
+     "question": "y",
+     "answer": "et",
+     "words": [
+      "et"
+     ],
+     "tags": [
+      "vocabulaire",
+      "test"
+     ],
+     "s": "me gustan el té <b>y</b> el café",
+     "sf": "j'aime le thé et le café",
+     "audioQuestion": [
+      "default_media/spanishdict-5c461269-35133279-b158dd84-6a29fadb-7b4cd839.mp3"
+     ],
+     "sa": "default_media/spanishdict-1d7fbfbf-ea0919d1-23d062e9-247cd039-8718aadc.mp3",
+     "img": "https://commons.wikimedia.org/wiki/Special:FilePath/A_small_cup_of_coffee.JPG?width=500",
+     "testKnown": false,
+     "pos": "test : nouvelle, avec son"
+    },
+    {
+     "id": "1103000000021",
+     "key": 9002,
+     "es": "es",
+     "fr": "il est, elle est, c'est (permanent)",
+     "question": "es",
+     "answer": "il est, elle est, c&#x27;est (permanent)",
+     "words": [
+      "il",
+      "est",
+      "permanent"
+     ],
+     "tags": [
+      "vocabulaire",
+      "test"
+     ],
+     "s": "creo que <b>es</b> guay",
+     "sf": "je pense que c'est cool",
+     "audioQuestion": [
+      "default_media/spanishdict-680650b9-7e618274-870ab866-2d6670c3-cf3559ae.mp3"
+     ],
+     "sa": "default_media/spanishdict-ab29851d-1ffd4ee5-4dd87de9-0d97cc8e-8c001afb.mp3",
+     "testKnown": true,
+     "pos": "test : sue, avec son"
+    },
+    {
+     "id": "1103000000031",
+     "key": 9003,
+     "es": "en",
+     "fr": "dans sur à",
+     "question": "en",
+     "answer": "dans sur à",
+     "words": [
+      "dans",
+      "sur",
+      "à"
+     ],
+     "tags": [
+      "vocabulaire",
+      "test"
+     ],
+     "s": "<b>en</b> realidad me gusta",
+     "sf": "en fait j'aime ça",
+     "audioQuestion": [
+      "default_media/spanishdict-693314f2-9cddd580-a367ea41-a9cff882-fa459584.mp3"
+     ],
+     "sa": "default_media/spanishdict-38bca994-73c6593c-03ce9aab-f68fa8ca-a706e6d9.mp3",
+     "testKnown": false,
+     "pos": "test : nouvelle, avec son"
+    },
+    {
+     "id": "1103000000041",
+     "key": 9004,
+     "es": "por",
+     "fr": "par pour",
+     "question": "por",
+     "answer": "par pour",
+     "words": [
+      "par",
+      "pour"
+     ],
+     "tags": [
+      "vocabulaire",
+      "test"
+     ],
+     "s": "mañana <b>por</b> la mañana",
+     "sf": "demain matin",
+     "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Ambiance_du_matin.jpg?width=500",
+     "testKnown": true,
+     "pos": "test : sue, sans son"
+    },
+    {
+     "id": "1103000000051",
+     "key": 9005,
+     "es": "por qué",
+     "fr": "pourquoi",
+     "question": "por qué",
+     "answer": "pourquoi",
+     "words": [
+      "pourquoi"
+     ],
+     "tags": [
+      "vocabulaire",
+      "test"
+     ],
+     "s": "<b>por qué</b> estás tan triste",
+     "sf": "pourquoi est-ce que tu es si triste ?",
+     "testKnown": false,
+     "pos": "test : nouvelle, sans son"
+    },
+    {
+     "id": "1103000000061",
+     "key": 9006,
+     "es": "qué",
+     "fr": "qu'est-ce que, quel, quelle, quels, quelles",
+     "question": "qué",
+     "answer": "qu&#x27;est-ce que, quel, quelle, quels, quelles",
+     "words": [
+      "qu'est-ce",
+      "que"
+     ],
+     "tags": [
+      "vocabulaire",
+      "test"
+     ],
+     "s": "de <b>qué</b> equipo eres",
+     "sf": "quelle équipe est-ce que tu soutiens ?",
+     "testKnown": true,
+     "pos": "test : sue, sans son"
+    },
+    {
+     "id": "1103000000071",
+     "key": 9007,
+     "es": "me",
+     "fr": "moi, à moi, me",
+     "question": "me",
+     "answer": "moi, à moi, me",
+     "words": [
+      "moi"
+     ],
+     "tags": [
+      "vocabulaire",
+      "test"
+     ],
+     "s": "<b>me</b> gusta el pan",
+     "sf": "j'aime le pain",
+     "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Assorted_bread.jpg?width=500",
+     "testKnown": false,
+     "pos": "test : nouvelle, sans son"
+    },
+    {
+     "id": "1103000000081",
+     "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇫🇷 ➡️ 🇪🇸\n<br/><br/>\n\nsalut",
+     "words": [
+      "hola"
+     ],
+     "tags": [
+      "test"
+     ],
+     "audioAnswer": [
+      "default_media/spanishdict-7c8cc0bc-15608163-6b7ab690-3a4febd0-30863641.mp3"
+     ],
+     "srs": {
+      "state": "review",
+      "step": 0,
+      "interval": 49,
+      "ease": 2.3,
+      "dueOffset": 49,
+      "reps": 8,
+      "lapses": 1,
+      "easyCount": 0
+     },
+     "testKnown": true
+    },
+    {
+     "id": "1103000000091",
+     "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇫🇷 ➡️ 🇪🇸\n<br/><br/>\n\nquoi de neuf ?",
+     "words": [
+      "qué",
+      "pasa"
+     ],
+     "tags": [
+      "test"
+     ],
+     "audioAnswer": [
+      "default_media/spanishdict-fe6c1c83-6233e0b6-78c4c577-8de43639-47e6aa1c.mp3"
+     ],
+     "srs": {
+      "state": "review",
+      "step": 0,
+      "interval": 8,
+      "ease": 2.25,
+      "dueOffset": 8,
+      "reps": 11,
+      "lapses": 2,
+      "easyCount": 0
+     },
+     "testKnown": false
+    }
+   ]
+  }
+ ]
+}
