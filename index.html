@@ -2551,7 +2551,7 @@
             if (String(sid).indexOf("test-transitions") === 0) s = {};
             try { localStorage.setItem(LS_SRS + sid, JSON.stringify(s)); } catch (e) { } scheduleSync();
         }
-        function isTestDeck() { return sess.sourceId === "test-transitions"; }
+        function isTestDeck() { return sess.sourceId === "test-transitions" && document.getElementById("study").style.display === "flex"; }
 
         // How many new cards have actually been INTRODUCED today (first
         // rating of a card that was still "new"), persisted per source so
@@ -3619,6 +3619,7 @@
             // « 🧪 Test transitions » (#138): every session starts the same —
             // the « sue » cards due today, the others new, none held back.
             var testDeck = src.id === "test-transitions" && !track;
+            sess.testCombo = null; sess.testMiss = 0;
             if (testDeck) allCards.forEach(function (c) {
                 srs[c.id] = c.testKnown ? Object.assign(defaultSRS(), { state: "review", interval: 3, due: TODAY, reps: 3 }) : defaultSRS();
             });
@@ -4707,7 +4708,6 @@
         // The combos count the instant the answer is decided, not after the
         // back and the transition (#132); advanceCard doesn't count it twice.
         function comboNow(q) {
-            if (isTestDeck()) return;
             var key = sess.qIdx + ":" + sess.done;
             if (sess.comboKey === key) return;
             sess.comboKey = key;
@@ -5893,10 +5893,12 @@
         var COMBO_STEPS = [[100, "LÉGENDAIRE !"], [50, "INCROYABLE !"], [25, "GÉNIAL !"], [10, "SUPER !"], [5, "BIEN !"]];
         function comboState() {
             var o = {};
+            // « 🧪 Test transitions »: the combos show, but in memory only (#147, #148).
+            if (isTestDeck()) return Object.assign({ hits: 0, best: 0, days: 0, lastDay: TODAY }, sess.testCombo);
             try { o = JSON.parse(localStorage.getItem(LS_COMBO) || "{}") || {}; } catch (e) { }
             return Object.assign({ hits: 0, best: 0, days: 0, lastDay: null }, o);
         }
-        function saveCombo(o) { try { localStorage.setItem(LS_COMBO, JSON.stringify(o)); } catch (e) { } }
+        function saveCombo(o) { if (isTestDeck()) { sess.testCombo = o; return; } try { localStorage.setItem(LS_COMBO, JSON.stringify(o)); } catch (e) { } }
         function comboHit(q) {
             var o = comboState(), el = document.getElementById("combo");
             if (o.lastDay !== TODAY) { o.days = o.lastDay === TODAY - 1 ? o.days + 1 : 1; o.lastDay = TODAY; }
@@ -5942,16 +5944,22 @@
             if (q) { q.classList.remove("shake"); void q.offsetWidth; q.classList.add("shake"); }
             renderErrCombo("pop");
         }
-        function missStreak(q) {
+        function missCount() {
+            if (isTestDeck()) return sess.testMiss || 0;
             var n = 0; try { n = +localStorage.getItem(LS_MISS) || 0; } catch (e) { }
+            return n;
+        }
+        function missStreak(q) {
+            var n = missCount();
             n = q === 1 ? n + 1 : 0;
-            try { localStorage.setItem(LS_MISS, String(n)); } catch (e) { }
+            if (isTestDeck()) sess.testMiss = n;
+            else try { localStorage.setItem(LS_MISS, String(n)); } catch (e) { }
             sess.cardErrCount = 0;
             renderErrCombo(q === 1 && n >= 2 ? "pop" : "");
         }
         function renderErrCombo(cls) {
             var el = document.getElementById("combo-err");
-            var n = 0; try { n = +localStorage.getItem(LS_MISS) || 0; } catch (e) { }
+            var n = missCount();
             var m = sess.cardErrCount || 0;
             el.classList.toggle("live", animationsOn() && (m >= 1 || n >= 2));
             document.getElementById("combo-err-n").textContent = m >= 1 ? "✗" + m : "";
@@ -5960,11 +5968,19 @@
             if (cls) { void el.offsetWidth; el.classList.add(cls); }
             placeCombos();
         }
+        // Where the card sits once still (#148): offsets ignore transforms, so the
+        // flight to a corner and the zoom in from the back don't move the counters.
+        function layoutRect(el) {
+            var x = 0, y = 0, w = el.offsetWidth, h = el.offsetHeight;
+            for (var e = el; e; e = e.offsetParent) { x += e.offsetLeft - (e === el ? 0 : e.scrollLeft); y += e.offsetTop - (e === el ? 0 : e.scrollTop); }
+            x -= window.scrollX; y -= window.scrollY;
+            return { left: x, top: y, right: x + w, bottom: y + h, width: w, height: h };
+        }
         // Both counters sit astride the card's edges ("fuzzy", #128).
         function placeCombos() {
             var q = document.querySelector("#s-content .s-question");
             if (!q) return;
-            var r = q.getBoundingClientRect(), mid = r.top + Math.min(r.height, window.innerHeight - r.top) / 2;
+            var r = layoutRect(q), mid = r.top + Math.min(r.height, window.innerHeight - r.top) / 2;
             var c = document.getElementById("combo"), e = document.getElementById("combo-err");
             // Right answers on the right, errors on the left (#133).
             c.style.left = (r.right - 46) + "px"; c.style.top = Math.max(60, mid - c.offsetHeight / 2) + "px";
