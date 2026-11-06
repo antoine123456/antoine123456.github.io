@@ -2651,7 +2651,12 @@
             scheduleSync();
         }
         function loadSRS(sid) { try { return JSON.parse(localStorage.getItem(LS_SRS + sid) || "{}"); } catch (e) { return {}; } }
-        function saveSRS(sid, s) { try { localStorage.setItem(LS_SRS + sid, JSON.stringify(s)); } catch (e) { } scheduleSync(); }
+        function saveSRS(sid, s) {
+            // « 🧪 Test transitions » keeps nothing (#147): back to new after each use.
+            if (String(sid).indexOf("test-transitions") === 0) s = {};
+            try { localStorage.setItem(LS_SRS + sid, JSON.stringify(s)); } catch (e) { } scheduleSync();
+        }
+        function isTestDeck() { return sess.sourceId === "test-transitions"; }
 
         // How many new cards have actually been INTRODUCED today (first
         // rating of a card that was still "new"), persisted per source so
@@ -4868,6 +4873,7 @@
         // The combos count the instant the answer is decided, not after the
         // back and the transition (#132); advanceCard doesn't count it twice.
         function comboNow(q) {
+            if (isTestDeck()) return;
             var key = sess.qIdx + ":" + sess.done;
             if (sess.comboKey === key) return;
             sess.comboKey = key;
@@ -5739,13 +5745,16 @@
             sess.srs[card.id] = applyRating(sess.srs[card.id] || defaultSRS(), q, ctx);
             sess.srs[card.id].lastReview = Date.now(); // for cross-device merge on sign-in
             var spentMs = Date.now() - (sess.cardShownAt || Date.now());
-            recordCardTime(sess.srs[card.id], wasNew, Math.min(CARD_MS_CAP, spentMs));
-            recordObs(kindBefore, card, sBefore, Math.min(CARD_MS_CAP, spentMs), q);
+            // The test deck counts nowhere: day stats, time model, new cards, combos (#147).
+            if (!isTestDeck()) {
+                recordCardTime(sess.srs[card.id], wasNew, Math.min(CARD_MS_CAP, spentMs));
+                recordObs(kindBefore, card, sBefore, Math.min(CARD_MS_CAP, spentMs), q);
+            }
             dlog("note", { id: card.id, note: q, passage: kindBefore, prevu_ms: predicted, temps_ms: spentMs, compte_ms: Math.min(CARD_MS_CAP, spentMs), nouvelle: wasNew,
                 moyenne_carte_ms: sess.srs[card.id].ms, etat: sess.srs[card.id].state, intervalle: sess.srs[card.id].interval,
                 jour_ms: dayStats().ms });
             saveSRS(sess.srsKey, sess.srs); // after every card, not only on leaving the session (#78)
-            if (wasNew) recordNewIntroduced(sess.srsKey);
+            if (wasNew && !isTestDeck()) recordNewIntroduced(sess.srsKey);
             comboNow(q);
             sess.done++;
             sess.qIdx++;
