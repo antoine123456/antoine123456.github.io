@@ -2076,6 +2076,7 @@
                         <li><b>6 nov.</b> (suite) la carte notée part vers un coin ; combos inversés (justes à droite, erreurs à gauche) et comptés tout de suite ; la case rougit à chaque erreur ; ⚙ délai avant la carte suivante.</li>
                         <li><b>6 nov.</b> (fin) 🔊 / 🔇 mode muet dans la barre de révision ; « Type d'entrée » et « Complet / Simple » rangés dans ⚙ (⚙ aussi pendant la révision) ; cartes déjà sues plus rapides (≈ 1,3 s, 1,9 s avec le son).</li>
                         <li><b>6 nov.</b> (soir) la carte part vite et la suivante arrive aussitôt du fond de l'écran ; « jours d'affilée » sur l'accueil ; la carte tient toujours à l'écran (image à côté, plus petite, texte plus petit, défilement) ; réponse longue sur une ligne ; « ▸ phrase » / « ▸ image » sur téléphone.</li>
+                        <li><b>6 nov.</b> (nuit) le sens déjà tapé n'est plus réécrit sous les cases (même avec « … » ou une virgule), ni une phrase d'exemple qui n'est que le mot ; « ¡bien! » = « super ! ».</li>
                         <li><b>5 nov.</b> combos dans la marge (mots justes et jours d'affilée) ; ⛶ plein écran ; 📋 tableaux de conjugaison dans 🔍 ; réponse lente notée « Difficile » ; ✓ pour « déjà connu » ; 📝 Vocabulaire perso avec ＋ ; paquets plus légers pour le navigateur.</li>
                         <li><b>4 nov.</b> 📝 Relecture dans 🔍 (F6 pour commenter) ; paquets en italien ; interface en italien.</li>
                         <li><b>3 nov.</b> le site ouvre directement l'appli.</li>
@@ -3848,18 +3849,23 @@
         // a block whose text is on the recto (the example sentence) goes,
         // and so does the meaning once it has been typed.
         function backWithoutRepeats(card) {
-            if (!card.enriched) return card.answer;
-            var norm = function (t) { return String(t || "").replace(/\s+/g, " ").trim().toLowerCase(); };
+            if (!card.enriched && !/class="rf-/.test(card.answer || "")) return card.answer;
+            // Letters and digits only: « … mais plus maintenant » is what was
+            // typed (« mais plus maintenant »), whatever the dots, commas or accents (#150).
+            var norm = function (t) { return noAcc(String(t || "").toLowerCase()).replace(/[^\p{L}\p{N}]+/gu, ""); };
             var front = document.createElement("template"), back = document.createElement("template");
             front.innerHTML = card.question || "";
             back.innerHTML = card.answer;
             var seen = {};
             front.content.querySelectorAll("div").forEach(function (d) { seen[norm(d.textContent)] = true; });
+            var typed = norm((card.words || []).join(" "));
             back.content.querySelectorAll("div[class^='rf-']").forEach(function (d) {
-                // The meaning goes only if it is exactly what was typed (other meanings stay, #88).
-                var typed = norm((card.words || []).join(" ")).replace(/[^\p{L}\p{N} ]/gu, "");
-                if (seen[norm(d.textContent)] || (d.className === "rf-mean" && studyMode() !== "flip"
-                    && norm(d.textContent).replace(/[^\p{L}\p{N} ]/gu, "") === typed)) d.remove();
+                var t = norm(d.textContent);
+                if (!t) return;
+                // The meaning goes only if it is exactly what was typed (other meanings stay, #88);
+                // any block already on screen (front, or an earlier block of the back) goes too.
+                if (seen[t] || (t === typed && (d.className !== "rf-mean" || studyMode() !== "flip"))) d.remove();
+                else seen[t] = true;
             });
             return back.innerHTML;
         }
@@ -4236,6 +4242,13 @@
             + ".rf-fold>summary::before{content:'▸ '}.rf-fold[open]>summary::before{content:'▾ '}"
             + ".rf-play{margin-top:4px;border:1.5px solid rgba(128,128,128,.35);background:none;color:inherit;border-radius:999px;padding:3px 12px;font-size:13px;cursor:pointer}"
             + "</style>";
+        // An "example sentence" that is only the word itself (« la red » / « le
+        // réseau », a proverb) would show the same text twice: left out (#150).
+        function sentIsWord(s, sf, words) {
+            var sq = function (t) { return noAcc(htmlToText(String(t || "")).toLowerCase()).replace(/[^\p{L}\p{N}]+/gu, ""); };
+            var w = words.map(sq);
+            return !!(s || sf) && ((s && w.indexOf(sq(s)) >= 0) || (sf && w.indexOf(sq(sf)) >= 0));
+        }
         // A display copy of the card (same id, words, audio): new front and back.
         function enrichedCard(c) {
             if (c.es != null) return vocabCard(c);
@@ -4244,6 +4257,7 @@
             var esFirst = /🇪🇸\s*➡️\s*🇫🇷/u.test(c.question || "") || c.lang === "es";
             var shown = htmlToText(displayQuestion(c.question));
             var answer = (c.words || []).join(" ");
+            if (sentIsWord(e.s, e.sf, [shown, answer])) e = Object.assign({}, e, { s: "", sf: "", sa: "" });
             var pos = e.pos ? '<div class="rf-pos">' + esc(e.pos) + '</div>' : "";
             var play = e.sa ? '<button class="rf-play" onclick="playAudioList([\'' + e.sa + '\'])">' + t9n("🔊 la phrase") + '</button>' : "";
             var sentEs = e.s ? '<div class="rf-sent">' + e.s + '</div>' : "";
@@ -4266,6 +4280,7 @@
         // laid out here, Refold-style — word + example sentence on the front,
         // meaning, word class, sentence + translation, 🔊 and image on the back.
         function vocabCard(c) {
+            if (sentIsWord(c.s, c.sf, [c.es, c.fr])) c = Object.assign({}, c, { s: "", sf: "", sa: "" });
             var pos = c.pos ? '<div class="rf-pos">' + esc(c.pos) + '</div>' : "";
             var sent = c.s ? '<div class="rf-sent">' + c.s + '</div>' : "";
             var tr = c.sf ? '<div class="rf-tr">' + esc(c.sf) + '</div>' : "";
@@ -5715,6 +5730,7 @@
                     "combo d'erreurs à droite, carte qui tremble, mots qui rebondissent, boutons qui s'allument ; Espace / Entrée après de l'aide = « À revoir » ; indices en italique ; image du verso à côté si la place manque ; une phrase d'exemple pour chaque mot du Vocabulaire (🔊 lue par la voix du navigateur).": "combo degli errori a destra, carta che trema, parole che rimbalzano, pulsanti che si accendono; Spazio / Invio dopo un aiuto = « Da rivedere »; suggerimenti in corsivo; immagine del retro di fianco se manca spazio; una frase d'esempio per ogni parola del Vocabolario (🔊 letta dalla voce del browser).",
                     "Au verso,": "Sul retro,", "phrase": "frase", "image": "immagine",
                     "(soir) la carte part vite et la suivante arrive aussitôt du fond de l'écran ; « jours d'affilée » sur l'accueil ; la carte tient toujours à l'écran (image à côté, plus petite, texte plus petit, défilement) ; réponse longue sur une ligne ; « ▸ phrase » / « ▸ image » sur téléphone.": "(sera) la carta esce in fretta e la successiva arriva subito dal fondo dello schermo; « giorni di fila » nella pagina iniziale; la carta sta sempre nello schermo (immagine di fianco, più piccola, testo più piccolo, scorrimento); risposta lunga su una riga; « ▸ frase » / « ▸ immagine » sul telefono.",
+                    "(nuit) le sens déjà tapé n'est plus réécrit sous les cases (même avec « … » ou une virgule), ni une phrase d'exemple qui n'est que le mot ; « ¡bien! » = « super ! ».": "(notte) il significato già scritto non viene più ripetuto sotto le caselle (anche con « … » o una virgola), né una frase d'esempio che è solo la parola; « ¡bien! » = « super ! ».",
                     "Une réponse longue rétrécit pour tenir sur une ligne. Si la carte ne tient pas à l'écran, l'image passe à côté du texte, puis rapetisse, puis le texte ; ce qui reste défile dans la carte (dégradé en bas). Sur téléphone, « ▸ phrase » et « ▸ image » replient le verso.": "Una risposta lunga si restringe per stare su una riga. Se la carta non sta nello schermo, l'immagine va di fianco al testo, poi si rimpicciolisce, poi il testo; il resto scorre nella carta (sfumatura in basso). Sul telefono, « ▸ frase » e « ▸ immagine » ripiegano il retro.",
                     "(fin) 🔊 / 🔇 mode muet dans la barre de révision ; « Type d'entrée » et « Complet / Simple » rangés dans ⚙ (⚙ aussi pendant la révision) ; cartes déjà sues plus rapides (≈ 1,3 s, 1,9 s avec le son).": "(fine) 🔊 / 🔇 modalità muta nella barra di studio; « Tipo di risposta » e « Completo / Semplice » spostati in ⚙ (⚙ anche durante lo studio); carte già sapute più veloci (≈ 1,3 s, 1,9 s con l'audio).",
                     "Dans": "In", "⚙ Réglages": "⚙ Impostazioni", ", « Type d'entrée » (⚙ est aussi en haut de l'écran de révision, à côté de ⛶ et de 🔊 / 🔇 pour le mode muet).": ", « Tipo di risposta » (⚙ è anche in alto nella schermata di studio, accanto a ⛶ e a 🔊 / 🔇 per la modalità muta).",
