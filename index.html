@@ -155,6 +155,10 @@
         }
 
         .conj-panel {
+            max-width: calc(100% - 24px);
+            max-height: calc(100% - 24px);
+            overflow: auto;
+            box-sizing: border-box;
             background: var(--bg);
             border: 1.5px solid var(--border-2);
             border-radius: 18px;
@@ -5500,7 +5504,25 @@
             if (!html) return;
             ov.innerHTML = '<div class="conj-panel">' + html + '</div>';
             ov.hidden = false;
+            fitConjOverlay();
             revealed = true;
+        }
+        // On a phone the keyboard stays open while typing: the overlay is
+        // laid out on the visible part of the screen (visualViewport), not
+        // the whole page, so the table sits in the middle of what is seen
+        // instead of low down / behind the keyboard.
+        function fitConjOverlay() {
+            var ov = document.getElementById("conj-overlay"), vv = window.visualViewport;
+            if (!ov || ov.hidden || !vv) return;
+            ov.style.inset = "auto";
+            ov.style.top = vv.offsetTop + "px";
+            ov.style.left = vv.offsetLeft + "px";
+            ov.style.width = vv.width + "px";
+            ov.style.height = vv.height + "px";
+        }
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener("resize", fitConjOverlay);
+            window.visualViewport.addEventListener("scroll", fitConjOverlay);
         }
 
         // ── Normal (Anki-style) mode: show the back, then rate it ──
