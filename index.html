@@ -2199,7 +2199,7 @@
         // Decks per user (#111): a listed user gets only these bundled decks;
         // antoine gets them all (except the restricted ones); others: none.
         var USER_DECKS = {
-            fantome: ["vocabulaire", "grammaire", "vocabolario", "grammatica"], // to try new decks (#79, #101, #109, #110)
+            fantome: ["vocabulaire", "grammaire", "vocabolario", "grammatica", "test-transitions"], // to try new decks (#79, #101, #109, #110, #138)
             chiara: ["vocabolario", "grammatica"]                              // Italian decks (#111)
         };
         var LISTED_USERS = ["chiara"]; // shown in the name list even before their first sync
@@ -2995,7 +2995,8 @@
         // already have it (progress kept).
         var EXTRA_BUNDLED = [{ url: "arbres.json", id: "arbres", v: 2 }, { url: "songs.json", id: "chansons", v: 1 }, { url: "grammaire.json", id: "grammaire", v: 1 }, { url: "guide.json", id: "guide", v: 1 }, { url: "demo_riche.json", id: "demo-riche", v: 1 }, { url: "vocabulaire.json", id: "vocabulaire", v: 1 },
             { url: "vocabolario.json", id: "vocabolario", v: 1, restricted: true }, // Italian decks: only for
-            { url: "grammatica.json", id: "grammatica", v: 1, restricted: true }]   // users who list them (#109–#111)
+            { url: "grammatica.json", id: "grammatica", v: 1, restricted: true },   // users who list them (#109–#111)
+            { url: "test_transitions.json", id: "test-transitions", v: 1, restricted: true }] // the ghost's timing test deck (#138)
             .filter(function (b) { return deckAllowed(b.id) && (!b.restricted || !!USER_DECKS[USER]); });
         var LS_BUNDLED_SEEN = NS + "bundled_seen"; // {id: version} (was [id…] = version 1)
         function loadExtraBundledDecks() {
