@@ -1909,7 +1909,7 @@
                     <button id="st-adv-slow" onclick="setSetting('advance', 'slow')">Toujours lent</button>
                     <button id="st-adv-fast" onclick="setSetting('advance', 'fast')">Toujours rapide</button>
                 </div></div>
-            <div class="st-note">Temps laissé au verso, une fois le son fini. Auto : une nouvelle carte, une carte en cours d'apprentissage ou ratée garde le temps de relire (≈ 2,5 s) ; une carte déjà sue et juste passe vite (≈ 0,7 s, comptées pendant le son), avec une transition plus courte.</div>
+            <div class="st-note">Temps laissé au verso, une fois le son fini. Auto : une carte vue pour la première fois, ou ratée, garde le temps de relire (≈ 2,5 s) ; une carte déjà vue et juste (même revenue dans la séance) passe vite (≈ 0,7 s, comptées pendant le son), avec une transition plus courte.</div>
             <div class="st-row"><span>Animations et combos</span>
                 <div class="st-switch">
                     <button id="st-combo-on" onclick="setSetting('combo', true)">Affichés</button>
@@ -2036,7 +2036,7 @@
                         <div class="g-card s-question rated-again" style="font-size:14px;padding:6px 10px;margin:0">à revoir</div>
                     </div>
                     La carte prend la couleur de la note, puis part vers un coin : À revoir ↙, Difficile ↖, Correct ↘, Facile ↗.
-                    Le délai avant la carte suivante se règle dans ⚙ (Auto : rapide pour une carte déjà sue et juste).
+                    Le délai avant la carte suivante se règle dans ⚙ (Auto : lent seulement la première fois qu'on voit une carte, ou si on la rate).
                 </div>
             </div>
 
@@ -5333,7 +5333,7 @@
             var card = sess.queue[sess.qIdx];
             var srs0 = sess.srs[card.id];
             sess.tt = { t0: Date.now(), quick: quickNext(card, q),
-                kind: (srs0 && srs0.state === "review" ? "sue" : "nouvelle") + ((card.audioAnswer || []).length || card.sa || (card.audioQuestion || []).length ? ", avec son" : ", sans son") };
+                kind: (!srs0 || srs0.state === "new" ? "nouvelle" : srs0.state === "review" ? "sue" : "en apprentissage") + ((card.audioAnswer || []).length || card.sa || (card.audioQuestion || []).length ? ", avec son" : ", sans son") };
             sess.quick = sess.tt.quick;
             keepKeyboard();
             if (!hasRichAnswer(card)) {
@@ -5367,8 +5367,10 @@
         function quickNext(card, q) {
             var m = settings().advance || "auto";
             if (m !== "auto") return m === "fast";
+            // Slow only the first time a card is ever seen, or when it's missed now (#149):
+            // back later in the session (learning, after « À revoir ») and right → quick.
             var s = sess.srs[card.id];
-            return !!s && s.state === "review" && q >= 2;
+            return !!s && s.state !== "new" && q >= 2;
         }
         // Each step of the time between an answer and the next card (#138):
         // logged in debug mode, shown after each card in « 🧪 Test transitions ».
@@ -5886,10 +5888,10 @@
                     "Saisie : on tape la réponse. Normal : comme Anki, Espace retourne la carte puis on note. Dictée : on écoute et on tape l'espagnol entendu (paquets avec le son espagnol, sur les cartes déjà apprises).": "Scrittura: si scrive la risposta. Normale: come Anki, Spazio gira la carta e poi si valuta. Dettato: si ascolta e si scrive lo spagnolo sentito (mazzi con l'audio spagnolo, sulle carte già imparate).",
                     "Complet : phrase d'exemple, nature / genre et image des paquets enrichis. Simple : seulement le mot et sa traduction. Réglage de cet appareil.": "Completo: frase d'esempio, categoria / genere e immagine dei mazzi arricchiti. Semplice: solo la parola e la sua traduzione. Impostazione di questo dispositivo.",
                     "Son automatique (mode muet)": "Audio automatico (modalità muta)", "🔇 Mode muet": "🔇 Modalità muta", "🔊 Son activé": "🔊 Audio attivo",
-                    "La carte prend la couleur de la note, puis part vers un coin : À revoir ↙, Difficile ↖, Correct ↘, Facile ↗. Le délai avant la carte suivante se règle dans ⚙ (Auto : rapide pour une carte déjà sue et juste).": "La carta prende il colore del voto, poi vola verso un angolo: Da rivedere ↙, Difficile ↖, Giusto ↘, Facile ↗. Il tempo prima della carta successiva si regola in ⚙ (Auto: veloce per una carta già saputa e giusta).",
+                    "La carte prend la couleur de la note, puis part vers un coin : À revoir ↙, Difficile ↖, Correct ↘, Facile ↗. Le délai avant la carte suivante se règle dans ⚙ (Auto : lent seulement la première fois qu'on voit une carte, ou si on la rate).": "La carta prende il colore del voto, poi vola verso un angolo: Da rivedere ↙, Difficile ↖, Giusto ↘, Facile ↗. Il tempo prima della carta successiva si regola in ⚙ (Auto: lento solo la prima volta che si vede una carta, o se la si sbaglia).",
                     "(suite) la carte notée part vers un coin ; combos inversés (justes à droite, erreurs à gauche) et comptés tout de suite ; la case rougit à chaque erreur ; ⚙ délai avant la carte suivante.": "(seguito) la carta valutata vola verso un angolo; combo invertite (giuste a destra, errori a sinistra) e contate subito; la casella diventa rossa a ogni errore; ⚙ tempo prima della carta successiva.",
                     "Délai avant la carte suivante": "Tempo prima della carta successiva", "Auto": "Auto", "Toujours lent": "Sempre lento", "Toujours rapide": "Sempre veloce",
-                    "Temps laissé au verso, une fois le son fini. Auto : une nouvelle carte, une carte en cours d'apprentissage ou ratée garde le temps de relire (≈ 2,5 s) ; une carte déjà sue et juste passe vite (≈ 0,7 s, comptées pendant le son), avec une transition plus courte.": "Tempo lasciato al retro, finito l'audio. Auto: una carta nuova, in apprendimento o sbagliata tiene il tempo per rileggere (≈ 2,5 s); una carta già saputa e giusta passa in fretta (≈ 0,7 s, contati durante l'audio), con una transizione più breve.", "joue l'enregistrement de la phrase d'exemple ; s'il n'y en a pas (phrases écrites pour le Vocabulaire), la voix du navigateur la lit.": "riproduce la registrazione della frase d'esempio; se non c'è (frasi scritte per il Vocabolario), la legge la voce del browser.",
+                    "Temps laissé au verso, une fois le son fini. Auto : une carte vue pour la première fois, ou ratée, garde le temps de relire (≈ 2,5 s) ; une carte déjà vue et juste (même revenue dans la séance) passe vite (≈ 0,7 s, comptées pendant le son), avec une transition plus courte.": "Tempo lasciato al retro, finito l'audio. Auto: una carta vista per la prima volta, o sbagliata, tiene il tempo per rileggere (≈ 2,5 s); una carta già vista e giusta (anche tornata nella sessione) passa in fretta (≈ 0,7 s, contati durante l'audio), con una transizione più breve.", "joue l'enregistrement de la phrase d'exemple ; s'il n'y en a pas (phrases écrites pour le Vocabulaire), la voix du navigateur la lit.": "riproduce la registrazione della frase d'esempio; se non c'è (frasi scritte per il Vocabolario), la legge la voce del browser.",
                     "6 nov.": "6 nov.", "Affichés": "Visibili", "Cachés": "Nascosti",
                     "Dans la marge, comme dans un jeu de combat : les mots justes d'affilée (sans aide) et les jours d'affilée. « À revoir » casse le combo.": "Nel margine, come in un picchiaduro: le parole giuste di fila (senza aiuto) e i giorni di fila. « Da rivedere » rompe la combo.",
                     "LÉGENDAIRE !": "LEGGENDARIO!", "INCROYABLE !": "INCREDIBILE!", "GÉNIAL !": "FANTASTICO!", "SUPER !": "SUPER!", "BIEN !": "BENE!", "COMBO PERDU": "COMBO PERSA",
