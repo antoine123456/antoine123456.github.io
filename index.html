@@ -1477,6 +1477,11 @@
             transition: border-color .15s, color .15s;
         }
 
+        /* Icon buttons of the study bar (#135): same size whatever the glyph (⚙ ⛶ are text, 🔊 an emoji). */
+        #s-settings-btn, #s-lyrics-opts, #s-fs-btn, #s-mute-btn { width: 32px; height: 26px; padding: 0; font-size: 15px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+        #s-mute-btn.on { border-color: var(--red); }
+        #s-fs-btn { font-size: 19px; }
+
         .s-mode-select {
             appearance: none;
             -webkit-appearance: none;
@@ -1822,6 +1827,19 @@
                     lettres et de mots, rareté du mot, oublis, et les reprises d'une nouvelle carte ; un peu plus pour toutes après plusieurs jours sans réviser.
                     Une barre de temps défile pendant la séance ; « +20 » permet de continuer au-delà.</div>
             </div>
+            <div class="st-row"><span>Type d'entrée</span>
+                <div class="st-switch">
+                    <button id="st-mode-type" onclick="chooseStudyMode('type')">⌨️ Saisie</button>
+                    <button id="st-mode-flip" onclick="chooseStudyMode('flip')">🃏 Normal</button>
+                    <button id="st-mode-dictee" onclick="chooseStudyMode('dictee')">🎧 Dictée</button>
+                </div></div>
+            <div class="st-note">Saisie : on tape la réponse. Normal : comme Anki, Espace retourne la carte puis on note. Dictée : on écoute et on tape l'espagnol entendu (paquets avec le son espagnol, sur les cartes déjà apprises).</div>
+            <div class="st-row"><span>Rendu des cartes</span>
+                <div class="st-switch">
+                    <button id="st-full-on" onclick="chooseFullRender(true)">✨ Complet</button>
+                    <button id="st-full-off" onclick="chooseFullRender(false)">▫️ Simple</button>
+                </div></div>
+            <div class="st-note">Complet : phrase d'exemple, nature / genre et image des paquets enrichis. Simple : seulement le mot et sa traduction. Réglage de cet appareil.</div>
             <label class="st-row"><span>Erreurs acceptées avant que le mot soit donné <b id="st-err-v"></b></span>
                 <input type="range" id="st-err" min="1" max="6" step="1" oninput="setSetting('maxErrors', +this.value)"></label>
             <div class="st-note">Nombre d'essais faux sur un même mot avant que l'appli l'écrive pour toi ; la carte est alors notée « À revoir ».</div>
@@ -1984,7 +2002,7 @@
                     <div class="g-demo">
                         <span class="s-mode-toggle">⌨️ Saisie</span><span class="s-mode-toggle">🃏 Normal</span><span class="s-mode-toggle">🎧 Dictée</span>
                     </div>
-                    Menu en haut de l'écran de révision. <b>Saisie</b> : on tape la réponse. <b>Normal</b> : comme Anki, <b>Espace</b> retourne la carte, puis on note avec les boutons ou <b>1–4</b> (Espace = Correct). <b>Dictée</b> (paquet espagnol) : on écoute et on tape l'espagnol entendu, sur les cartes déjà apprises — progression à part.
+                    Dans <b>⚙ Réglages</b>, « Type d'entrée » (⚙ est aussi en haut de l'écran de révision, à côté de ⛶ et de 🔊 / 🔇 pour le mode muet). <b>Saisie</b> : on tape la réponse. <b>Normal</b> : comme Anki, <b>Espace</b> retourne la carte, puis on note avec les boutons ou <b>1–4</b> (Espace = Correct). <b>Dictée</b> (paquet espagnol) : on écoute et on tape l'espagnol entendu, sur les cartes déjà apprises — progression à part.
                     <br>Au verso, <b>🔊 la phrase</b> joue l'enregistrement de la phrase d'exemple ; s'il n'y en a pas (phrases écrites pour le Vocabulaire), la voix du navigateur la lit.
                 </div>
             </div>
@@ -1997,7 +2015,7 @@
                         <div class="ly-hint" style="margin:6px 0 2px">Il devient triste en contemplant la ville…</div>
                         <div><span class="ly-blank" style="width:2em"></span> <span class="ly-blank" style="width:3em"></span> <span class="ly-blank" style="width:3.5em"></span> <span class="ly-blank" style="width:5em"></span></div>
                     </div></div>
-                    Chaque ligne est une carte, dans l'ordre de la chanson : les lignes sues s'affichent, les autres sont à compléter. <span class="s-mode-toggle" style="pointer-events:none">⚙</span> pour changer l'indice et le rythme des nouvelles lignes.
+                    Chaque ligne est une carte, dans l'ordre de la chanson : les lignes sues s'affichent, les autres sont à compléter. <span class="s-mode-toggle" style="pointer-events:none">🎵</span> pour changer l'indice et le rythme des nouvelles lignes.
                 </div>
             </div>
 
@@ -2035,6 +2053,7 @@
                     <ul class="g-news">
                         <li><b>6 nov.</b> combo d'erreurs à droite, carte qui tremble, mots qui rebondissent, boutons qui s'allument ; Espace / Entrée après de l'aide = « À revoir » ; indices en italique ; image du verso à côté si la place manque ; une phrase d'exemple pour chaque mot du Vocabulaire (🔊 lue par la voix du navigateur).</li>
                         <li><b>6 nov.</b> (suite) la carte notée part vers un coin ; combos inversés (justes à droite, erreurs à gauche) et comptés tout de suite ; la case rougit à chaque erreur ; ⚙ délai avant la carte suivante.</li>
+                        <li><b>6 nov.</b> (fin) 🔊 / 🔇 mode muet dans la barre de révision ; « Type d'entrée » et « Complet / Simple » rangés dans ⚙ (⚙ aussi pendant la révision).</li>
                         <li><b>5 nov.</b> combos dans la marge (mots justes et jours d'affilée) ; ⛶ plein écran ; 📋 tableaux de conjugaison dans 🔍 ; réponse lente notée « Difficile » ; ✓ pour « déjà connu » ; 📝 Vocabulaire perso avec ＋ ; paquets plus légers pour le navigateur.</li>
                         <li><b>4 nov.</b> 📝 Relecture dans 🔍 (F6 pour commenter) ; paquets en italien ; interface en italien.</li>
                         <li><b>3 nov.</b> le site ouvre directement l'appli.</li>
@@ -2050,14 +2069,11 @@
     <div id="study">
         <div class="s-topbar">
             <button class="s-back" onclick="goHome()">← Quitter</button>
-            <select class="s-mode-toggle s-mode-select" id="s-mode-select" onchange="setStudyMode(this.value)" title="Mode d'étude">
-                <option value="type">⌨️ Saisie</option>
-                <option value="flip">🃏 Normal</option>
-                <option value="dictee">🎧 Dictée</option>
-            </select>
-            <button class="s-mode-toggle" id="s-lyrics-opts" onclick="toggleLyricsMenu(event)" title="Options des chansons" style="display:none">⚙</button>
+            <!-- Type d'entrée and Complet / Simple live in ⚙ (#136); the bar keeps ⛶ and mute (#135). -->
+            <button class="s-mode-toggle" id="s-settings-btn" onclick="openSettings()" title="Réglages">⚙️</button>
+            <button class="s-mode-toggle" id="s-lyrics-opts" onclick="toggleLyricsMenu(event)" title="Options des chansons" style="display:none">🎵</button>
             <button class="s-mode-toggle" id="s-fs-btn" onclick="toggleFullscreen()" title="Plein écran">⛶</button>
-            <button class="s-mode-toggle" id="s-full-toggle" onclick="toggleFullRender()" title="Rendu complet : phrase d'exemple, nature / genre (réglage de cet appareil)" style="display:none"></button>
+            <button class="s-mode-toggle" id="s-mute-btn" onclick="toggleMute()" title="Son automatique (mode muet)">🔊</button>
             <div class="ly-menu" id="ly-menu" hidden>
                 <label>Indice
                     <select name="hint" onchange="onLyricsHintChange(this.value)">
@@ -2247,7 +2263,7 @@
             return Math.max(0, Math.floor(timeLeftMs() / (newCardCostMs() * gapFactor())));
         }
         function openSettings() { renderSettings(); document.getElementById("settings").hidden = false; }
-        function closeSettings() { document.getElementById("settings").hidden = true; if (document.getElementById("home").style.display !== "none") renderHome(); }
+        function closeSettings() { document.getElementById("settings").hidden = true; if (document.getElementById("home").style.display !== "none") renderHome(); else if (studyOpen()) keepKeyboard(); }
         function renderSettings() {
             var o = settings(), d = dayStats();
             var set = function (id, v, label) { document.getElementById(id).value = v; document.getElementById(id + "-v").textContent = label; };
@@ -2265,6 +2281,9 @@
             document.getElementById("st-val-enter").classList.toggle("on", o.validate === "enter");
             document.getElementById("st-space-hold").classList.toggle("on", o.spaceMode !== "next");
             document.getElementById("st-space-next").classList.toggle("on", o.spaceMode === "next");
+            ["type", "flip", "dictee"].forEach(function (k) { document.getElementById("st-mode-" + k).classList.toggle("on", storedStudyMode() === k); });
+            document.getElementById("st-full-on").classList.toggle("on", fullRender());
+            document.getElementById("st-full-off").classList.toggle("on", !fullRender());
             ["auto", "slow", "fast"].forEach(function (k) { document.getElementById("st-adv-" + k).classList.toggle("on", (o.advance || "auto") === k); });
             document.getElementById("st-combo-on").classList.toggle("on", o.combo !== false);
             document.getElementById("st-combo-off").classList.toggle("on", o.combo === false);
@@ -4106,16 +4125,31 @@
         function fullRender() {
             try { return localStorage.getItem(LS_FULL) !== "0"; } catch (e) { return true; }
         }
-        function updateFullToggle() {
-            var b = document.getElementById("s-full-toggle");
-            if (!b) return;
-            b.style.display = sess.canEnrich ? "" : "none";
-            b.textContent = fullRender() ? "✨ Complet" : "▫️ Simple";
+        function updateFullToggle() { updateMuteBtn(); }
+        function studyOpen() { return document.getElementById("study").style.display === "flex"; }
+        // ⚙ « Rendu des cartes » (#136, was a button in the study bar).
+        function chooseFullRender(on) {
+            if (on === fullRender()) return;
+            try { localStorage.setItem(LS_FULL, on ? "1" : "0"); } catch (e) { }
+            renderSettings();
+            if (studyOpen()) restartStudy();
         }
-        function toggleFullRender() {
-            try { localStorage.setItem(LS_FULL, fullRender() ? "0" : "1"); } catch (e) { }
+        // Mute (#135): no sound played by itself (card audio, read-aloud);
+        // a 🔊 button that is clicked still plays. Per device.
+        var LS_MUTE = "ankitrain_v1_mute";
+        function muted() { try { return localStorage.getItem(LS_MUTE) === "1"; } catch (e) { return false; } }
+        function toggleMute() {
+            try { localStorage.setItem(LS_MUTE, muted() ? "0" : "1"); } catch (e) { }
+            if (muted()) { document.getElementById("audio-player").pause(); if (window.speechSynthesis) window.speechSynthesis.cancel(); }
             if (document.activeElement) document.activeElement.blur();
-            restartStudy();
+            updateMuteBtn();
+            toast(muted() ? "🔇 Mode muet" : "🔊 Son activé");
+        }
+        function updateMuteBtn() {
+            var b = document.getElementById("s-mute-btn");
+            if (!b) return;
+            b.textContent = muted() ? "🔇" : "🔊";
+            b.classList.toggle("on", muted());
         }
         var RF_CSS = "<style>"
             + ".rf-word{font-size:40px;font-weight:600;letter-spacing:.5px;margin:2px 0 8px}"
@@ -4671,7 +4705,7 @@
         }
         function playCardAudio(which, onDone) {
             var card = sess.queue[sess.qIdx];
-            if (!card) { if (onDone) onDone(); return; }
+            if (!card || muted()) { if (onDone) onDone(); return; }
             if (card.dictee) {
                 // The Spanish is the question; nothing more to play after.
                 if (which === "a") { if (onDone) onDone(); return; }
@@ -5176,11 +5210,17 @@
             if (m === "dictee" && !sess.canDictee) return "type";
             return m === "flip" || m === "dictee" ? m : "type";
         }
-        function updateModeToggle() {
-            var sel = document.getElementById("s-mode-select");
-            if (!sel) return;
-            sel.querySelector('option[value="dictee"]').hidden = !sess.canDictee;
-            sel.value = studyMode();
+        function storedStudyMode() {
+            var m = "type";
+            try { m = localStorage.getItem(LS_MODE) || "type"; } catch (e) { }
+            return m === "flip" || m === "dictee" ? m : "type";
+        }
+        function updateModeToggle() { }
+        // ⚙ « Type d'entrée » (#136, was a menu in the study bar).
+        function chooseStudyMode(v) {
+            if (studyOpen()) setStudyMode(v);
+            else try { localStorage.setItem(LS_MODE, v); } catch (e) { }
+            renderSettings();
         }
         function setStudyMode(v) {
             var before = studyMode();
@@ -5523,6 +5563,12 @@
                     "Quand tout est montré après de l'aide,": "Quando tutto è mostrato dopo un aiuto,", "ou": "o", "= « À revoir » et carte suivante.": "= « Da rivedere » e carta successiva.",
                     "combo d'erreurs à droite, carte qui tremble, mots qui rebondissent, boutons qui s'allument ; Espace / Entrée après de l'aide = « À revoir » ; indices en italique ; image du verso à côté si la place manque ; une phrase d'exemple pour chaque mot du Vocabulaire (🔊 lue par la voix du navigateur).": "combo degli errori a destra, carta che trema, parole che rimbalzano, pulsanti che si accendono; Spazio / Invio dopo un aiuto = « Da rivedere »; suggerimenti in corsivo; immagine del retro di fianco se manca spazio; una frase d'esempio per ogni parola del Vocabolario (🔊 letta dalla voce del browser).",
                     "Au verso,": "Sul retro,",
+                    "(fin) 🔊 / 🔇 mode muet dans la barre de révision ; « Type d'entrée » et « Complet / Simple » rangés dans ⚙ (⚙ aussi pendant la révision).": "(fine) 🔊 / 🔇 modalità muta nella barra di studio; « Tipo di risposta » e « Completo / Semplice » spostati in ⚙ (⚙ anche durante lo studio).",
+                    "Dans": "In", "⚙ Réglages": "⚙ Impostazioni", ", « Type d'entrée » (⚙ est aussi en haut de l'écran de révision, à côté de ⛶ et de 🔊 / 🔇 pour le mode muet).": ", « Tipo di risposta » (⚙ è anche in alto nella schermata di studio, accanto a ⛶ e a 🔊 / 🔇 per la modalità muta).",
+                    "Type d'entrée": "Tipo di risposta", "Rendu des cartes": "Visualizzazione delle carte", "▫️ Simple": "▫️ Semplice",
+                    "Saisie : on tape la réponse. Normal : comme Anki, Espace retourne la carte puis on note. Dictée : on écoute et on tape l'espagnol entendu (paquets avec le son espagnol, sur les cartes déjà apprises).": "Scrittura: si scrive la risposta. Normale: come Anki, Spazio gira la carta e poi si valuta. Dettato: si ascolta e si scrive lo spagnolo sentito (mazzi con l'audio spagnolo, sulle carte già imparate).",
+                    "Complet : phrase d'exemple, nature / genre et image des paquets enrichis. Simple : seulement le mot et sa traduction. Réglage de cet appareil.": "Completo: frase d'esempio, categoria / genere e immagine dei mazzi arricchiti. Semplice: solo la parola e la sua traduzione. Impostazione di questo dispositivo.",
+                    "Son automatique (mode muet)": "Audio automatico (modalità muta)", "🔇 Mode muet": "🔇 Modalità muta", "🔊 Son activé": "🔊 Audio attivo",
                     "La carte prend la couleur de la note, puis part vers un coin : À revoir ↙, Difficile ↖, Correct ↘, Facile ↗. Le délai avant la carte suivante se règle dans ⚙ (Auto : rapide pour une carte déjà sue et juste).": "La carta prende il colore del voto, poi vola verso un angolo: Da rivedere ↙, Difficile ↖, Giusto ↘, Facile ↗. Il tempo prima della carta successiva si regola in ⚙ (Auto: veloce per una carta già saputa e giusta).",
                     "(suite) la carte notée part vers un coin ; combos inversés (justes à droite, erreurs à gauche) et comptés tout de suite ; la case rougit à chaque erreur ; ⚙ délai avant la carte suivante.": "(seguito) la carta valutata vola verso un angolo; combo invertite (giuste a destra, errori a sinistra) e contate subito; la casella diventa rossa a ogni errore; ⚙ tempo prima della carta successiva.",
                     "Délai avant la carte suivante": "Tempo prima della carta successiva", "Auto": "Auto", "Toujours lent": "Sempre lento", "Toujours rapide": "Sempre veloce",
