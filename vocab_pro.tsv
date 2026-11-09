@@ -1287,3 +1287,267 @@
 5987	el líquido	nom masculin	liquide	liquido	no se permiten <b>líquidos</b> en el avión	les liquides ne sont pas autorisés dans l'avion	non sono ammessi liquidi in aereo
 5993	el carbón	nom masculin	charbon	carbone	hacemos la barbacoa con <b>carbón</b>	nous faisons le barbecue au charbon	facciamo il barbecue con il carbone
 5995	secuestrar	verbe	enlever; kidnapper	rapire; sequestrare	<b>secuestraron</b> al hijo del empresario	ils ont enlevé le fils de l'homme d'affaires	hanno rapito il figlio dell'imprenditore
+6003	la medicación	nom féminin	traitement (médicaments)	terapia; farmaci	toma su <b>medicación</b> cada mañana	il prend son traitement chaque matin	prende la terapia ogni mattina
+6006	el ácido	nom masculin	acide	acido	el limón tiene <b>ácido</b>	le citron contient de l'acide	il limone contiene acido
+6007	la agresión	nom féminin	agression	aggressione	denunció una <b>agresión</b>	il a porté plainte pour une agression	ha denunciato un'aggressione
+6009	la consulta	nom féminin	consultation; cabinet	visita; ambulatorio	el médico pasa <b>consulta</b> por la tarde	le médecin consulte l'après-midi	il medico riceve il pomeriggio
+6014	el órgano	nom masculin	organe; orgue	organo	el corazón es un <b>órgano</b> vital	le cœur est un organe vital	il cuore è un organo vitale
+6017	el barro	nom masculin	boue	fango	los niños juegan en el <b>barro</b>	les enfants jouent dans la boue	i bambini giocano nel fango
+6023	múltiple	adjectif	multiple	multiplo	es un examen de opción <b>múltiple</b>	c'est un QCM	è un esame a scelta multipla
+6025	apartar	verbe	écarter; mettre de côté	scostare; mettere da parte	<b>aparta</b> la silla, por favor	écarte la chaise, s'il te plaît	sposta la sedia, per favore
+6032	la multa	nom féminin	amende	multa	me pusieron una <b>multa</b> por aparcar mal	j'ai eu une amende pour mauvais stationnement	mi hanno fatto una multa per divieto di sosta
+6040	el quirófano	nom masculin	bloc opératoire	sala operatoria	el paciente está en el <b>quirófano</b>	le patient est au bloc	il paziente è in sala operatoria
+6043	la misa	nom féminin	messe	messa	van a <b>misa</b> los domingos	ils vont à la messe le dimanche	vanno a messa la domenica
+6044	la riqueza	nom féminin	richesse	ricchezza	la <b>riqueza</b> no lo es todo	la richesse ne fait pas tout	la ricchezza non è tutto
+6047	el criado	nom masculin	domestique	servo; domestico	el <b>criado</b> abrió la puerta	le domestique a ouvert la porte	il domestico ha aperto la porta
+6048	la ida	nom féminin	aller	andata	compré un billete de <b>ida</b> y vuelta	j'ai acheté un billet aller-retour	ho comprato un biglietto di andata e ritorno
+6050	la observación	nom féminin	observation; remarque	osservazione	hizo una <b>observación</b> interesante	il a fait une remarque intéressante	ha fatto un'osservazione interessante
+6051	detenerse	verbe	s'arrêter	fermarsi	el coche se <b>detuvo</b> en el semáforo	la voiture s'est arrêtée au feu	la macchina si è fermata al semaforo
+6052	asistir	verbe	assister (à); aller (à)	partecipare; assistere	no pude <b>asistir</b> a la reunión	je n'ai pas pu aller à la réunion	non ho potuto partecipare alla riunione	faux ami
+6056	el voluntario	nom masculin	bénévole; volontaire	volontario	trabaja como <b>voluntario</b> en un hospital	il est bénévole dans un hôpital	fa il volontario in un ospedale
+6057	el puñado	nom masculin	poignée	manciata	solo vinieron un <b>puñado</b> de personas	seule une poignée de personnes est venue	sono venute solo una manciata di persone
+6058	la profundidad	nom féminin	profondeur	profondità	el lago tiene diez metros de <b>profundidad</b>	le lac a dix mètres de profondeur	il lago ha dieci metri di profondità
+6068	el músculo	nom masculin	muscle	muscolo	me duelen los <b>músculos</b>	j'ai mal aux muscles	mi fanno male i muscoli
+6072	la depresión	nom féminin	dépression	depressione	sufre de <b>depresión</b>	il souffre de dépression	soffre di depressione
+6073	las afueras	nom féminin	banlieue; environs	periferia	vivimos en las <b>afueras</b> de Madrid	nous habitons en banlieue de Madrid	viviamo nella periferia di Madrid
+6075	sordo	adjectif	sourd	sordo	mi abuelo está un poco <b>sordo</b>	mon grand-père est un peu sourd	mio nonno è un po' sordo
+6076	en vano	expression	en vain	invano	lo intentó <b>en vano</b>	il a essayé en vain	ci ha provato invano
+6077	la brigada	nom féminin	brigade	brigata; squadra	llegó la <b>brigada</b> de bomberos	la brigade de pompiers est arrivée	è arrivata la squadra dei pompieri
+6081	la pila	nom féminin	pile; tas; évier	pila; mucchio	el mando necesita <b>pilas</b> nuevas	la télécommande a besoin de piles neuves	il telecomando ha bisogno di pile nuove
+6083	la bahía	nom féminin	baie	baia	la <b>bahía</b> está llena de barcos	la baie est pleine de bateaux	la baia è piena di barche
+6085	el ayuntamiento	nom masculin	mairie	municipio; comune	la boda es en el <b>ayuntamiento</b>	le mariage a lieu à la mairie	il matrimonio è in comune
+6087	acceder	verbe	accéder; accepter	accedere	no puedo <b>acceder</b> a mi cuenta	je n'arrive pas à accéder à mon compte	non riesco ad accedere al mio account
+6088	comprometerse	verbe	s'engager; se fiancer	impegnarsi; fidanzarsi	se <b>comprometieron</b> en verano	ils se sont fiancés en été	si sono fidanzati in estate
+6091	la píldora	nom féminin	pilule	pillola	toma una <b>píldora</b> para dormir	il prend un somnifère	prende una pillola per dormire
+6096	ansioso	adjectif	anxieux; impatient	ansioso	estoy <b>ansioso</b> por verte	j'ai hâte de te voir	non vedo l'ora di vederti
+6109	pacífico	adjectif	pacifique; paisible	pacifico	es un pueblo muy <b>pacífico</b>	c'est un village très paisible	è un paese molto pacifico
+6110	la obligación	nom féminin	obligation	obbligo	no tienes ninguna <b>obligación</b>	tu n'as aucune obligation	non hai nessun obbligo
+6118	coincidir	verbe	coïncider; être d'accord	coincidere	<b>coincido</b> contigo	je suis d'accord avec toi	sono d'accordo con te
+6122	espectacular	adjectif	spectaculaire	spettacolare	el paisaje es <b>espectacular</b>	le paysage est spectaculaire	il paesaggio è spettacolare
+6123	la filosofía	nom féminin	philosophie	filosofia	estudia <b>filosofía</b> en la universidad	il étudie la philosophie à l'université	studia filosofia all'università
+6125	la contraseña	nom féminin	mot de passe	password	olvidé mi <b>contraseña</b>	j'ai oublié mon mot de passe	ho dimenticato la password
+6126	pillar	verbe	attraper; surprendre (Espagne)	beccare; prendere	me <b>pilló</b> la lluvia	la pluie m'a surpris	mi ha beccato la pioggia
+6130	supuestamente	adverbe	soi-disant; censément	presumibilmente	<b>supuestamente</b> llega hoy	il est censé arriver aujourd'hui	presumibilmente arriva oggi
+6131	el veredicto	nom masculin	verdict	verdetto	el jurado dio su <b>veredicto</b>	le jury a rendu son verdict	la giuria ha emesso il verdetto
+6134	el jabón	nom masculin	savon	sapone	lávate las manos con <b>jabón</b>	lave-toi les mains avec du savon	lavati le mani con il sapone
+6138	la concentración	nom féminin	concentration	concentrazione	este trabajo requiere <b>concentración</b>	ce travail demande de la concentration	questo lavoro richiede concentrazione
+6141	la factura	nom féminin	facture	fattura; bolletta	llegó la <b>factura</b> de la luz	la facture d'électricité est arrivée	è arrivata la bolletta della luce
+6144	el submarino	nom masculin	sous-marin	sottomarino	el <b>submarino</b> navega bajo el agua	le sous-marin navigue sous l'eau	il sottomarino naviga sott'acqua
+6147	el afecto	nom masculin	affection	affetto	le tiene mucho <b>afecto</b>	il a beaucoup d'affection pour lui	gli vuole molto bene
+6155	cristiano	adjectif	chrétien	cristiano	es una tradición <b>cristiana</b>	c'est une tradition chrétienne	è una tradizione cristiana
+6157	la invasión	nom féminin	invasion	invasione	la <b>invasión</b> duró dos años	l'invasion a duré deux ans	l'invasione è durata due anni
+6164	solucionar	verbe	résoudre	risolvere	vamos a <b>solucionar</b> el problema	nous allons résoudre le problème	risolveremo il problema
+6167	el oriente	nom masculin	orient; est	oriente	el sol sale por el <b>oriente</b>	le soleil se lève à l'est	il sole sorge a oriente
+6168	el especialista	nom masculin	spécialiste	specialista	te mando al <b>especialista</b>	je t'envoie chez le spécialiste	ti mando dallo specialista
+6172	suizo	adjectif	suisse	svizzero	me encanta el chocolate <b>suizo</b>	j'adore le chocolat suisse	adoro il cioccolato svizzero
+6173	la tapa	nom féminin	couvercle; tapas	coperchio; stuzzichino	pedimos unas <b>tapas</b> en el bar	nous avons commandé des tapas au bar	abbiamo ordinato degli stuzzichini al bar
+6175	la votación	nom féminin	vote	votazione	la <b>votación</b> es secreta	le vote est secret	la votazione è segreta
+6178	el heredero	nom masculin	héritier	erede	es el único <b>heredero</b>	c'est le seul héritier	è l'unico erede
+6187	arrogante	adjectif	arrogant	arrogante	no seas tan <b>arrogante</b>	ne sois pas si arrogant	non essere così arrogante
+6189	excitante	adjectif	excitant; passionnant	eccitante; emozionante	es un viaje <b>excitante</b>	c'est un voyage passionnant	è un viaggio emozionante
+6198	el brillo	nom masculin	éclat; brillance	brillantezza; luccichio	me gusta el <b>brillo</b> de sus ojos	j'aime l'éclat de ses yeux	mi piace il luccichio dei suoi occhi
+6201	corresponder	verbe	correspondre; revenir à	corrispondere; spettare	no me <b>corresponde</b> decidir	ce n'est pas à moi de décider	non spetta a me decidere
+6208	admirar	verbe	admirer	ammirare	<b>admiro</b> tu paciencia	j'admire ta patience	ammiro la tua pazienza
+6214	retirado	adjectif	retraité; isolé	in pensione; appartato	mi abuelo está <b>retirado</b>	mon grand-père est à la retraite	mio nonno è in pensione
+6223	divertirse	verbe	s'amuser	divertirsi	¡que te <b>diviertas</b>!	amuse-toi bien !	divertiti!
+6224	astuto	adjectif	rusé; malin	astuto	el zorro es muy <b>astuto</b>	le renard est très rusé	la volpe è molto astuta
+6225	el hueco	nom masculin	trou; espace libre	buco; spazio	no hay <b>hueco</b> para aparcar	il n'y a pas de place pour se garer	non c'è posto per parcheggiare
+6232	el oficio	nom masculin	métier	mestiere	aprendió el <b>oficio</b> de su padre	il a appris le métier de son père	ha imparato il mestiere del padre
+6235	dorado	adjectif	doré	dorato	tiene el pelo <b>dorado</b>	il a les cheveux dorés	ha i capelli dorati
+6236	el marinero	nom masculin	marin	marinaio	el <b>marinero</b> sube al barco	le marin monte sur le bateau	il marinaio sale sulla nave
+6238	el torneo	nom masculin	tournoi	torneo	ganó el <b>torneo</b> de tenis	il a gagné le tournoi de tennis	ha vinto il torneo di tennis
+6242	el hacha	nom féminin	hache	ascia	corta la leña con un <b>hacha</b>	il coupe le bois avec une hache	taglia la legna con l'ascia
+6248	destrozar	verbe	détruire; mettre en pièces	distruggere	el perro <b>destrozó</b> el sofá	le chien a mis le canapé en pièces	il cane ha distrutto il divano
+6253	la etiqueta	nom féminin	étiquette	etichetta	quita la <b>etiqueta</b> del precio	enlève l'étiquette du prix	togli l'etichetta del prezzo
+6258	la referencia	nom féminin	référence	riferimento	hago <b>referencia</b> a tu carta	je fais référence à ta lettre	faccio riferimento alla tua lettera
+6259	el polo	nom masculin	pôle; polo	polo	hace mucho frío en el <b>polo</b> norte	il fait très froid au pôle Nord	fa molto freddo al polo nord
+6260	la maldad	nom féminin	méchanceté	cattiveria	lo hizo sin <b>maldad</b>	il l'a fait sans méchanceté	l'ha fatto senza cattiveria
+6266	el costo	nom masculin	coût	costo	el <b>costo</b> de la vida sube	le coût de la vie augmente	il costo della vita aumenta
+6267	el recorrido	nom masculin	parcours; trajet	percorso	hicimos un <b>recorrido</b> por el museo	nous avons fait le tour du musée	abbiamo fatto un giro del museo
+6272	el núcleo	nom masculin	noyau	nucleo	es el <b>núcleo</b> del problema	c'est le cœur du problème	è il nucleo del problema
+6279	el grabado	nom masculin	gravure	incisione	compró un <b>grabado</b> antiguo	il a acheté une gravure ancienne	ha comprato un'incisione antica
+6284	honorable	adjectif	honorable	onorevole	es un hombre <b>honorable</b>	c'est un homme honorable	è un uomo onorevole
+6286	la bodega	nom féminin	cave (à vin); chai	cantina	visitamos una <b>bodega</b> en La Rioja	nous avons visité une cave dans La Rioja	abbiamo visitato una cantina nella Rioja	faux ami
+6288	el traficante	nom masculin	trafiquant	trafficante	detuvieron al <b>traficante</b>	ils ont arrêté le trafiquant	hanno arrestato il trafficante
+6290	la renta	nom féminin	revenu; loyer	reddito; affitto	declara su <b>renta</b> cada año	il déclare ses revenus chaque année	dichiara il suo reddito ogni anno
+6296	tímido	adjectif	timide	timido	mi hijo es muy <b>tímido</b>	mon fils est très timide	mio figlio è molto timido
+6297	conveniente	adjectif	pratique; souhaitable	conveniente; opportuno	no es <b>conveniente</b> salir ahora	il n'est pas conseillé de sortir maintenant	non è opportuno uscire ora
+6301	la inocencia	nom féminin	innocence	innocenza	demostró su <b>inocencia</b>	il a prouvé son innocence	ha dimostrato la sua innocenza
+6307	retroceder	verbe	reculer	indietreggiare	el coche <b>retrocedió</b> unos metros	la voiture a reculé de quelques mètres	la macchina è indietreggiata di qualche metro
+6313	el terapeuta	nom masculin	thérapeute	terapeuta	habla con su <b>terapeuta</b> cada semana	il parle à son thérapeute chaque semaine	parla con il suo terapeuta ogni settimana
+6316	la derrota	nom féminin	défaite	sconfitta	fue una <b>derrota</b> dura	ce fut une défaite difficile	è stata una sconfitta dura
+6321	la orilla	nom féminin	rive; bord	riva	paseamos por la <b>orilla</b> del río	nous nous promenons au bord de la rivière	passeggiamo lungo la riva del fiume
+6325	la chimenea	nom féminin	cheminée	camino	encendimos la <b>chimenea</b>	nous avons allumé la cheminée	abbiamo acceso il camino
+6338	confidencial	adjectif	confidentiel	confidenziale	es información <b>confidencial</b>	c'est une information confidentielle	è un'informazione riservata
+6341	el pirata	nom masculin	pirate	pirata	los <b>piratas</b> buscan el tesoro	les pirates cherchent le trésor	i pirati cercano il tesoro
+6347	la cicatriz	nom féminin	cicatrice	cicatrice	tiene una <b>cicatriz</b> en la frente	il a une cicatrice sur le front	ha una cicatrice sulla fronte
+6348	borrar	verbe	effacer	cancellare	<b>borra</b> la pizarra, por favor	efface le tableau, s'il te plaît	cancella la lavagna, per favore
+6349	la fundación	nom féminin	fondation	fondazione	trabaja en una <b>fundación</b>	il travaille dans une fondation	lavora in una fondazione
+6352	iniciar	verbe	commencer; lancer	iniziare; avviare	<b>inicia</b> la sesión con tu contraseña	connecte-toi avec ton mot de passe	accedi con la tua password
+6353	reservado	adjectif	réservé	riservato	esta mesa está <b>reservada</b>	cette table est réservée	questo tavolo è riservato
+6354	justamente	adverbe	justement	proprio	<b>justamente</b> hablaba de ti	justement, je parlais de toi	stavo proprio parlando di te
+6359	adelantado	adjectif	en avance	in anticipo	el reloj va <b>adelantado</b>	la montre avance	l'orologio è avanti
+6362	la sábana	nom féminin	drap	lenzuolo	cambia las <b>sábanas</b> de la cama	change les draps du lit	cambia le lenzuola del letto
+6363	el argumento	nom masculin	argument; intrigue	argomento; trama	el <b>argumento</b> de la película es simple	l'intrigue du film est simple	la trama del film è semplice	faux ami
+6380	la cobertura	nom féminin	réseau (téléphone); couverture	copertura; campo	aquí no hay <b>cobertura</b>	ici il n'y a pas de réseau	qui non c'è campo
+6382	la escritura	nom féminin	écriture	scrittura	tiene una <b>escritura</b> muy clara	il a une écriture très claire	ha una scrittura molto chiara
+6384	el billetero	nom masculin	portefeuille	portafoglio	perdí el <b>billetero</b>	j'ai perdu mon portefeuille	ho perso il portafoglio
+6386	el vapor	nom masculin	vapeur	vapore	cocina las verduras al <b>vapor</b>	cuis les légumes à la vapeur	cuoci le verdure al vapore
+6387	la cosecha	nom féminin	récolte	raccolto	este año la <b>cosecha</b> es buena	cette année la récolte est bonne	quest'anno il raccolto è buono
+6390	capturar	verbe	capturer	catturare	<b>capturaron</b> al ladrón	ils ont capturé le voleur	hanno catturato il ladro
+6391	el cuñado	nom masculin	beau-frère	cognato	mi <b>cuñado</b> es muy simpático	mon beau-frère est très sympa	mio cognato è molto simpatico
+6396	la tranquilidad	nom féminin	calme; tranquillité	tranquillità	busco <b>tranquilidad</b> en el campo	je cherche le calme à la campagne	cerco tranquillità in campagna
+6400	traicionar	verbe	trahir	tradire	nunca te <b>traicionaré</b>	je ne te trahirai jamais	non ti tradirò mai
+6401	la furia	nom féminin	fureur	furia	gritó con <b>furia</b>	il a crié avec fureur	ha gridato con furia
+6416	el granero	nom masculin	grange	granaio	guardan el heno en el <b>granero</b>	ils rangent le foin dans la grange	tengono il fieno nel granaio
+6418	quienquiera	pronom	quiconque	chiunque	<b>quienquiera</b> que sea, que espere	qui que ce soit, qu'il attende	chiunque sia, che aspetti
+6421	la disciplina	nom féminin	discipline	disciplina	el deporte exige <b>disciplina</b>	le sport exige de la discipline	lo sport richiede disciplina
+6424	retirarse	verbe	se retirer; prendre sa retraite	ritirarsi	se <b>retiró</b> a los sesenta años	il a pris sa retraite à soixante ans	è andato in pensione a sessant'anni
+6427	el privilegio	nom masculin	privilège	privilegio	es un <b>privilegio</b> trabajar aquí	c'est un privilège de travailler ici	è un privilegio lavorare qui
+6428	la secuencia	nom féminin	séquence; suite	sequenza	recuerda la <b>secuencia</b> de números	retiens la suite de nombres	ricorda la sequenza di numeri
+6432	la semilla	nom féminin	graine	seme	planta las <b>semillas</b> en primavera	plante les graines au printemps	pianta i semi in primavera
+6435	aprovechar	verbe	profiter de	approfittare	<b>aprovecha</b> el buen tiempo	profite du beau temps	approfitta del bel tempo
+6441	acompañar	verbe	accompagner	accompagnare	te <b>acompaño</b> a la estación	je t'accompagne à la gare	ti accompagno alla stazione
+6448	el circuito	nom masculin	circuit	circuito	el <b>circuito</b> eléctrico falló	le circuit électrique a lâché	il circuito elettrico si è guastato
+6453	la aprobación	nom féminin	approbation; accord	approvazione	necesitas la <b>aprobación</b> del director	il te faut l'accord du directeur	serve l'approvazione del direttore
+6454	la novedad	nom féminin	nouveauté; nouvelle	novità	¿alguna <b>novedad</b>?	quoi de neuf ?	qualche novità?
+6456	el ego	nom masculin	ego	ego	tiene un <b>ego</b> enorme	il a un ego énorme	ha un ego enorme
+6466	la inspiración	nom féminin	inspiration	ispirazione	busca <b>inspiración</b> en la naturaleza	il cherche l'inspiration dans la nature	cerca ispirazione nella natura
+6467	aterrador	adjectif	terrifiant	terrificante	fue una noche <b>aterradora</b>	ce fut une nuit terrifiante	è stata una notte terrificante
+6489	inevitable	adjectif	inévitable	inevitabile	el cambio es <b>inevitable</b>	le changement est inévitable	il cambiamento è inevitabile
+6494	lastimar	verbe	blesser; faire mal	ferire; far male	no quiero <b>lastimarte</b>	je ne veux pas te faire de mal	non voglio farti male
+6496	espantoso	adjectif	épouvantable	spaventoso	hace un tiempo <b>espantoso</b>	il fait un temps épouvantable	fa un tempo spaventoso
+6501	la claridad	nom féminin	clarté	chiarezza	explica las cosas con <b>claridad</b>	il explique les choses avec clarté	spiega le cose con chiarezza
+6506	el bicho	nom masculin	bestiole	insetto; bestiolina	hay un <b>bicho</b> en la pared	il y a une bestiole sur le mur	c'è una bestiolina sul muro
+6510	el chofer	nom masculin	chauffeur	autista	el <b>chofer</b> nos llevó al hotel	le chauffeur nous a conduits à l'hôtel	l'autista ci ha portato all'albergo
+6515	físicamente	adverbe	physiquement	fisicamente	estoy agotado <b>físicamente</b>	je suis épuisé physiquement	sono esausto fisicamente
+6517	el ejecutivo	nom masculin	cadre; dirigeant	dirigente	es un <b>ejecutivo</b> de una gran empresa	c'est un cadre d'une grande entreprise	è un dirigente di una grande azienda
+6518	el escondite	nom masculin	cachette	nascondiglio	los niños juegan al <b>escondite</b>	les enfants jouent à cache-cache	i bambini giocano a nascondino
+6523	femenino	adjectif	féminin	femminile	es un nombre <b>femenino</b>	c'est un prénom féminin	è un nome femminile
+6526	torpe	adjectif	maladroit	goffo; maldestro	soy muy <b>torpe</b>, siempre rompo algo	je suis très maladroit, je casse toujours quelque chose	sono molto goffo, rompo sempre qualcosa
+6528	la partícula	nom féminin	particule	particella	hay <b>partículas</b> de polvo en el aire	il y a des particules de poussière dans l'air	ci sono particelle di polvere nell'aria
+6529	el enano	nom masculin	nain	nano	Blancanieves y los siete <b>enanos</b>	Blanche-Neige et les sept nains	Biancaneve e i sette nani
+6534	la denuncia	nom féminin	plainte	denuncia	puse una <b>denuncia</b> en la comisaría	j'ai porté plainte au commissariat	ho sporto denuncia al commissariato
+6539	apoyar	verbe	soutenir; appuyer	sostenere; appoggiare	mis padres me <b>apoyan</b>	mes parents me soutiennent	i miei genitori mi sostengono
+6540	obsesionado	adjectif	obsédé	ossessionato	está <b>obsesionado</b> con el trabajo	il est obsédé par le travail	è ossessionato dal lavoro
+6541	retirar	verbe	retirer	ritirare	<b>retiré</b> dinero del cajero	j'ai retiré de l'argent au distributeur	ho ritirato soldi al bancomat
+6546	la detención	nom féminin	arrestation; détention	arresto	la <b>detención</b> fue a las seis	l'arrestation a eu lieu à six heures	l'arresto è avvenuto alle sei
+6548	el perímetro	nom masculin	périmètre	perimetro	vigilan el <b>perímetro</b> del edificio	ils surveillent le périmètre du bâtiment	sorvegliano il perimetro dell'edificio
+6549	el bloqueo	nom masculin	blocage; blocus	blocco	tengo un <b>bloqueo</b> mental	j'ai un trou de mémoire	ho un blocco mentale
+6557	el vagabundo	nom masculin	vagabond; sans-abri	vagabondo; senzatetto	un <b>vagabundo</b> duerme en el banco	un sans-abri dort sur le banc	un senzatetto dorme sulla panchina
+6561	el investigador	nom masculin	chercheur; enquêteur	ricercatore; investigatore	es <b>investigador</b> en biología	il est chercheur en biologie	è ricercatore in biologia
+6562	el suministro	nom masculin	approvisionnement; fourniture	fornitura	cortaron el <b>suministro</b> de agua	ils ont coupé l'eau	hanno interrotto la fornitura d'acqua
+6565	conversar	verbe	converser; discuter	conversare; chiacchierare	nos gusta <b>conversar</b> después de cenar	nous aimons discuter après le dîner	ci piace chiacchierare dopo cena
+6572	el vicepresidente	nom masculin	vice-président	vicepresidente	el <b>vicepresidente</b> dio un discurso	le vice-président a fait un discours	il vicepresidente ha tenuto un discorso
+6573	la transferencia	nom féminin	virement; transfert	bonifico; trasferimento	te hago una <b>transferencia</b>	je te fais un virement	ti faccio un bonifico
+6574	la garantía	nom féminin	garantie	garanzia	el móvil tiene dos años de <b>garantía</b>	le portable a deux ans de garantie	il cellulare ha due anni di garanzia
+6575	la torta	nom féminin	gâteau (Amérique); galette	torta	hice una <b>torta</b> de cumpleaños	j'ai fait un gâteau d'anniversaire	ho fatto una torta di compleanno
+6576	tremendo	adjectif	énorme; terrible	tremendo	tengo un hambre <b>tremenda</b>	j'ai une faim terrible	ho una fame tremenda
+6589	la dulzura	nom féminin	douceur	dolcezza	habla con mucha <b>dulzura</b>	il parle avec beaucoup de douceur	parla con molta dolcezza
+6592	el pasaje	nom masculin	billet (de transport); passage	biglietto; passaggio	compré el <b>pasaje</b> de avión	j'ai acheté le billet d'avion	ho comprato il biglietto aereo
+6597	vulnerable	adjectif	vulnérable	vulnerabile	los niños son muy <b>vulnerables</b>	les enfants sont très vulnérables	i bambini sono molto vulnerabili
+6603	la merced	nom féminin	merci (à la merci de)	mercé	estamos a <b>merced</b> del tiempo	nous sommes à la merci du temps	siamo in balia del tempo
+6604	el portal	nom masculin	entrée (d'immeuble); portail	portone; portale	te espero en el <b>portal</b>	je t'attends dans l'entrée de l'immeuble	ti aspetto al portone
+6607	la linterna	nom féminin	lampe de poche	torcia	lleva una <b>linterna</b> por si acaso	prends une lampe de poche au cas où	porta una torcia per sicurezza
+6611	el vestuario	nom masculin	vestiaire; garde-robe	spogliatoio; guardaroba	los jugadores están en el <b>vestuario</b>	les joueurs sont au vestiaire	i giocatori sono negli spogliatoi
+6613	garantizar	verbe	garantir	garantire	te <b>garantizo</b> que funciona	je te garantis que ça marche	ti garantisco che funziona
+6620	caber	verbe	tenir; rentrer (dans)	starci; entrare	no <b>cabe</b> todo en la maleta	tout ne rentre pas dans la valise	non ci sta tutto nella valigia
+6624	la gorra	nom féminin	casquette	berretto	lleva una <b>gorra</b> roja	il porte une casquette rouge	porta un berretto rosso
+6625	la revisión	nom féminin	révision; contrôle	revisione; controllo	llevo el coche a la <b>revisión</b>	j'emmène la voiture au contrôle	porto la macchina alla revisione
+6633	evidentemente	adverbe	évidemment	evidentemente	<b>evidentemente</b>, tenías razón	évidemment, tu avais raison	evidentemente avevi ragione
+6637	el caramelo	nom masculin	bonbon; caramel	caramella	el niño quiere un <b>caramelo</b>	l'enfant veut un bonbon	il bambino vuole una caramella
+6643	la salvación	nom féminin	salut; secours	salvezza	fue su <b>salvación</b>	ce fut son salut	è stata la sua salvezza
+6645	el baloncesto	nom masculin	basket-ball	pallacanestro	juega al <b>baloncesto</b> en el colegio	il joue au basket à l'école	gioca a pallacanestro a scuola
+6646	el pacto	nom masculin	pacte	patto	hicieron un <b>pacto</b> de silencio	ils ont conclu un pacte de silence	hanno fatto un patto di silenzio
+6648	el vientre	nom masculin	ventre	ventre; pancia	tiene dolor de <b>vientre</b>	il a mal au ventre	ha mal di pancia
+6660	el tomate	nom masculin	tomate	pomodoro	compra <b>tomates</b> para la ensalada	achète des tomates pour la salade	compra pomodori per l'insalata
+6661	el césped	nom masculin	pelouse; gazon	prato	no pises el <b>césped</b>	ne marche pas sur la pelouse	non calpestare il prato
+6662	inicial	adjectif	initial	iniziale	la idea <b>inicial</b> era otra	l'idée de départ était différente	l'idea iniziale era un'altra
+6663	el aplauso	nom masculin	applaudissement	applauso	un fuerte <b>aplauso</b> para el cantante	une salve d'applaudissements pour le chanteur	un grande applauso per il cantante
+6671	el canalla	nom masculin	canaille; crapule	canaglia	ese hombre es un <b>canalla</b>	cet homme est une crapule	quell'uomo è una canaglia
+6679	respetar	verbe	respecter	rispettare	hay que <b>respetar</b> a los mayores	il faut respecter les aînés	bisogna rispettare gli anziani
+6680	filmar	verbe	filmer	filmare	<b>filmaron</b> la película en Sevilla	ils ont tourné le film à Séville	hanno girato il film a Siviglia
+6684	la ansiedad	nom féminin	anxiété	ansia	sufre de <b>ansiedad</b> antes de los exámenes	il souffre d'anxiété avant les examens	soffre d'ansia prima degli esami
+6685	el puño	nom masculin	poing	pugno	golpeó la mesa con el <b>puño</b>	il a frappé la table du poing	ha battuto il pugno sul tavolo
+6692	la retirada	nom féminin	retrait; retraite (recul)	ritirata	el ejército ordenó la <b>retirada</b>	l'armée a ordonné la retraite	l'esercito ha ordinato la ritirata
+6694	la curva	nom féminin	virage; courbe	curva	reduce la velocidad en la <b>curva</b>	ralentis dans le virage	rallenta in curva
+6700	romano	adjectif	romain	romano	visitamos un teatro <b>romano</b>	nous avons visité un théâtre romain	abbiamo visitato un teatro romano
+6701	el portero	nom masculin	gardien de but; concierge	portiere	el <b>portero</b> paró el penalti	le gardien a arrêté le penalty	il portiere ha parato il rigore
+6706	el algodón	nom masculin	coton	cotone	es una camiseta de <b>algodón</b>	c'est un tee-shirt en coton	è una maglietta di cotone
+6712	el entusiasmo	nom masculin	enthousiasme	entusiasmo	trabaja con mucho <b>entusiasmo</b>	il travaille avec beaucoup d'enthousiasme	lavora con molto entusiasmo
+6713	la instalación	nom féminin	installation	installazione; impianto	la <b>instalación</b> eléctrica es vieja	l'installation électrique est vieille	l'impianto elettrico è vecchio
+6714	el manejo	nom masculin	maniement; gestion	uso; gestione	el <b>manejo</b> del programa es fácil	l'utilisation du programme est facile	l'uso del programma è facile
+6718	poseer	verbe	posséder	possedere	<b>posee</b> tres casas	il possède trois maisons	possiede tre case
+6719	castigar	verbe	punir	punire	<b>castigaron</b> al niño sin postre	l'enfant a été puni et privé de dessert	hanno punito il bambino senza dolce
+6720	el cohete	nom masculin	fusée	razzo	lanzaron un <b>cohete</b> al espacio	ils ont lancé une fusée dans l'espace	hanno lanciato un razzo nello spazio
+6727	la fórmula	nom féminin	formule	formula	aprende la <b>fórmula</b> de memoria	apprends la formule par cœur	impara la formula a memoria
+6730	el jamón	nom masculin	jambon	prosciutto	un bocadillo de <b>jamón</b>, por favor	un sandwich au jambon, s'il vous plaît	un panino al prosciutto, per favore
+6732	el sensor	nom masculin	capteur	sensore	la luz tiene un <b>sensor</b> de movimiento	la lumière a un détecteur de mouvement	la luce ha un sensore di movimento
+6733	la esencia	nom féminin	essence (fond)	essenza	es la <b>esencia</b> del problema	c'est le fond du problème	è l'essenza del problema
+6735	la renuncia	nom féminin	démission; renoncement	dimissioni; rinuncia	presentó su <b>renuncia</b>	il a présenté sa démission	ha presentato le dimissioni
+6737	la fusión	nom féminin	fusion	fusione	la <b>fusión</b> de las dos empresas	la fusion des deux entreprises	la fusione delle due aziende
+6742	vago	adjectif	paresseux; vague	pigro; vago	no seas <b>vago</b> y ayúdame	ne sois pas paresseux et aide-moi	non essere pigro e aiutami	faux ami
+6748	revelar	verbe	révéler; développer (photos)	rivelare	no <b>reveles</b> el secreto	ne révèle pas le secret	non rivelare il segreto
+6749	la sugerencia	nom féminin	suggestion	suggerimento	¿tienes alguna <b>sugerencia</b>?	tu as une suggestion ?	hai qualche suggerimento?
+6755	legalmente	adverbe	légalement	legalmente	<b>legalmente</b> no puedes hacerlo	légalement, tu ne peux pas le faire	legalmente non puoi farlo
+6759	el promedio	nom masculin	moyenne	media	tiene un <b>promedio</b> de nueve	il a une moyenne de neuf	ha una media di nove
+6760	la tela	nom féminin	tissu; toile	stoffa; tela	compré <b>tela</b> para hacer cortinas	j'ai acheté du tissu pour faire des rideaux	ho comprato della stoffa per fare le tende
+6764	arder	verbe	brûler	bruciare	la casa <b>ardió</b> toda la noche	la maison a brûlé toute la nuit	la casa è bruciata tutta la notte
+6770	la especialidad	nom féminin	spécialité	specialità	la paella es la <b>especialidad</b> de la casa	la paella est la spécialité de la maison	la paella è la specialità della casa
+6772	griego	adjectif	grec	greco	me encanta la comida <b>griega</b>	j'adore la cuisine grecque	adoro la cucina greca
+6773	conservar	verbe	garder; conserver	conservare	<b>conserva</b> el recibo	garde le reçu	conserva la ricevuta
+6775	el crucero	nom masculin	croisière	crociera	hicimos un <b>crucero</b> por el Mediterráneo	nous avons fait une croisière en Méditerranée	abbiamo fatto una crociera nel Mediterraneo
+6776	esencial	adjectif	essentiel	essenziale	el agua es <b>esencial</b> para la vida	l'eau est essentielle à la vie	l'acqua è essenziale per la vita
+6779	la cerradura	nom féminin	serrure	serratura	cambiamos la <b>cerradura</b> de la puerta	nous avons changé la serrure de la porte	abbiamo cambiato la serratura della porta
+6780	el récord	nom masculin	record	record	batió el <b>récord</b> del mundo	il a battu le record du monde	ha battuto il record mondiale
+6782	atascarse	verbe	se coincer; être bloqué	incastrarsi; bloccarsi	la puerta se <b>atascó</b>	la porte s'est coincée	la porta si è bloccata
+6783	la distracción	nom féminin	distraction	distrazione	el móvil es una gran <b>distracción</b>	le portable est une grande source de distraction	il cellulare è una grande distrazione
+6795	arrancar	verbe	démarrer; arracher	avviare; strappare	el coche no <b>arranca</b>	la voiture ne démarre pas	la macchina non parte
+6800	la manada	nom féminin	troupeau; meute	branco; mandria	una <b>manada</b> de lobos	une meute de loups	un branco di lupi
+6802	el bienestar	nom masculin	bien-être	benessere	cuida tu <b>bienestar</b>	prends soin de ton bien-être	prenditi cura del tuo benessere
+6806	la fiscalía	nom féminin	parquet; ministère public	procura	la <b>fiscalía</b> investiga el caso	le parquet enquête sur l'affaire	la procura indaga sul caso
+6812	mediante	préposition	au moyen de; par	mediante	pagó <b>mediante</b> transferencia	il a payé par virement	ha pagato mediante bonifico
+6814	expresar	verbe	exprimer	esprimere	le cuesta <b>expresar</b> sus sentimientos	il a du mal à exprimer ses sentiments	fa fatica a esprimere i suoi sentimenti
+6816	tierno	adjectif	tendre	tenero	la carne está muy <b>tierna</b>	la viande est très tendre	la carne è molto tenera
+6825	agotar	verbe	épuiser	esaurire	se <b>agotaron</b> las entradas	les billets sont épuisés	i biglietti sono esauriti
+6832	la competición	nom féminin	compétition	gara; competizione	ganó la <b>competición</b> de natación	il a gagné la compétition de natation	ha vinto la gara di nuoto
+6836	brutal	adjectif	brutal; énorme	brutale	el cambio fue <b>brutal</b>	le changement a été énorme	il cambiamento è stato brutale
+6839	el guardaespaldas	nom masculin	garde du corps	guardia del corpo	el cantante tiene dos <b>guardaespaldas</b>	le chanteur a deux gardes du corps	il cantante ha due guardie del corpo
+6840	pretender	verbe	avoir l'intention de; prétendre	pretendere; intendere	¿qué <b>pretendes</b> hacer?	qu'est-ce que tu as l'intention de faire ?	cosa intendi fare?	faux ami
+6841	la inyección	nom féminin	piqûre; injection	iniezione	la enfermera me puso una <b>inyección</b>	l'infirmière m'a fait une piqûre	l'infermiera mi ha fatto un'iniezione
+6844	la flecha	nom féminin	flèche	freccia	sigue las <b>flechas</b> hasta la salida	suis les flèches jusqu'à la sortie	segui le frecce fino all'uscita
+6846	la armadura	nom féminin	armure	armatura	el caballero lleva una <b>armadura</b>	le chevalier porte une armure	il cavaliere indossa un'armatura
+6851	el cruce	nom masculin	croisement; carrefour	incrocio	gira a la derecha en el <b>cruce</b>	tourne à droite au carrefour	gira a destra all'incrocio
+6858	el coco	nom masculin	noix de coco; croque-mitaine	cocco	bebimos agua de <b>coco</b>	nous avons bu de l'eau de coco	abbiamo bevuto acqua di cocco
+6869	usualmente	adverbe	habituellement	solitamente	<b>usualmente</b> desayuno café	d'habitude je prends un café au petit-déjeuner	solitamente faccio colazione con il caffè
+6873	el cigarro	nom masculin	cigare; cigarette	sigaro; sigaretta	fuma un <b>cigarro</b> después de comer	il fume une cigarette après le repas	fuma una sigaretta dopo pranzo
+6876	honrar	verbe	honorer	onorare	<b>honramos</b> su memoria	nous honorons sa mémoire	onoriamo la sua memoria
+6881	el obispo	nom masculin	évêque	vescovo	el <b>obispo</b> visitó la parroquia	l'évêque a visité la paroisse	il vescovo ha visitato la parrocchia
+6883	el maletero	nom masculin	coffre (de voiture)	bagagliaio	pon las maletas en el <b>maletero</b>	mets les valises dans le coffre	metti le valigie nel bagagliaio
+6894	la salchicha	nom féminin	saucisse	salsiccia	asamos <b>salchichas</b> en la barbacoa	nous avons grillé des saucisses au barbecue	abbiamo grigliato salsicce al barbecue
+6897	prever	verbe	prévoir	prevedere	nadie <b>previó</b> el problema	personne n'a prévu le problème	nessuno ha previsto il problema
+6900	el delincuente	nom masculin	délinquant	delinquente	detuvieron al <b>delincuente</b>	ils ont arrêté le délinquant	hanno arrestato il delinquente
+6906	el fotógrafo	nom masculin	photographe	fotografo	el <b>fotógrafo</b> hizo fotos de la boda	le photographe a fait les photos du mariage	il fotografo ha fatto le foto del matrimonio
+6911	el fracasado	nom masculin	raté (personne)	fallito	no eres un <b>fracasado</b>	tu n'es pas un raté	non sei un fallito
+6912	sereno	adjectif	serein; calme	sereno	mantén la mente <b>serena</b>	garde l'esprit serein	mantieni la mente serena
+6913	el mantenimiento	nom masculin	entretien; maintenance	manutenzione	el ascensor está en <b>mantenimiento</b>	l'ascenseur est en maintenance	l'ascensore è in manutenzione
+6914	ardiente	adjectif	ardent; brûlant	ardente	tiene un deseo <b>ardiente</b> de viajar	il a un désir ardent de voyager	ha un desiderio ardente di viaggiare
+6916	el protector	nom masculin	protection; crème solaire	protezione	ponte <b>protector</b> solar	mets de la crème solaire	mettiti la crema solare
+6918	la portada	nom féminin	couverture (de livre); une	copertina; prima pagina	sale en la <b>portada</b> de la revista	il est en couverture du magazine	è sulla copertina della rivista
+6922	la bandeja	nom féminin	plateau	vassoio	trae la comida en una <b>bandeja</b>	il apporte le repas sur un plateau	porta il cibo su un vassoio
+6924	la envidia	nom féminin	envie; jalousie	invidia	me da <b>envidia</b> tu viaje	ton voyage me rend jaloux	invidio il tuo viaggio
+6926	vaciar	verbe	vider	svuotare	<b>vacía</b> la papelera	vide la corbeille	svuota il cestino
+6928	el ballet	nom masculin	ballet	balletto	su hija hace <b>ballet</b>	sa fille fait de la danse classique	sua figlia fa danza classica
+6937	la órbita	nom féminin	orbite	orbita	el satélite está en <b>órbita</b>	le satellite est en orbite	il satellite è in orbita
+6938	eventualmente	adverbe	éventuellement	eventualmente	<b>eventualmente</b> podríamos cambiar la fecha	éventuellement, on pourrait changer la date	eventualmente potremmo cambiare la data
+6941	tardar	verbe	mettre (du temps); tarder	metterci; tardare	¿cuánto <b>tardas</b> en llegar?	combien de temps tu mets pour arriver ?	quanto ci metti ad arrivare?
+6943	el flujo	nom masculin	flux	flusso	hay mucho <b>flujo</b> de turistas	il y a un grand flux de touristes	c'è un grande flusso di turisti
+6955	triple	adjectif	triple	triplo	pagó el <b>triple</b> de lo normal	il a payé le triple du prix normal	ha pagato il triplo del normale
+6958	el pantano	nom masculin	marais; lac de barrage	palude	hay ranas en el <b>pantano</b>	il y a des grenouilles dans le marais	ci sono rane nella palude
+6962	la misericordia	nom féminin	miséricorde	misericordia	ten <b>misericordia</b>	aie pitié	abbi misericordia
+6971	divino	adjectif	divin	divino	este postre está <b>divino</b>	ce dessert est divin	questo dolce è divino
+6974	detestar	verbe	détester	detestare	<b>detesto</b> madrugar	je déteste me lever tôt	detesto alzarmi presto
+6975	el granjero	nom masculin	fermier	contadino; fattore	el <b>granjero</b> ordeña las vacas	le fermier trait les vaches	il fattore munge le mucche
+6990	operar	verbe	opérer	operare	lo <b>operaron</b> de la rodilla	il s'est fait opérer du genou	l'hanno operato al ginocchio
+6993	la pausa	nom féminin	pause	pausa	hagamos una <b>pausa</b>	faisons une pause	facciamo una pausa
+6994	el asilo	nom masculin	asile; maison de retraite	asilo; casa di riposo	pidió <b>asilo</b> político	il a demandé l'asile politique	ha chiesto asilo politico
