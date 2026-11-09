@@ -52,9 +52,9 @@ def rows():
             if line.startswith("#") or not line.strip():
                 continue
             p = line.rstrip("\n").split("\t")
-            if len(p) != 8:
+            if len(p) not in (8, 9):
                 raise SystemExit("ligne incomplète : " + line)
-            out.append(dict(zip(["rank", "es", "pos", "fr", "it", "s", "sf", "sit"], p)))
+            out.append(dict(zip(["rank", "es", "pos", "fr", "it", "s", "sf", "sit", "tags"], p)))
     return out
 
 
@@ -66,7 +66,8 @@ def card(r, lang, n_same_rank):
     words, sep = typed_meanings(meaning)
     c = {"id": str(L["id_base"] + rank * 100 + n_same_rank * 10 + 1), "key": rank, "es": r["es"], "fr": shown,
          "question": html.escape(r["es"]), "answer": html.escape(shown),
-         "words": words or words_to_type(meaning), "tags": ["vocabulaire", "mots fréquents"],
+         "words": words or words_to_type(meaning),
+         "tags": ["vocabulaire"] + [t.strip() for t in r.get("tags", "").split(",") if t.strip()],
          "pos": r["pos"] if lang == "fr" else POS_IT.get(r["pos"], r["pos"]),
          "s": r["s"], "sf": r["sf"] if lang == "fr" else r["sit"], "sg": True}
     if sep:
