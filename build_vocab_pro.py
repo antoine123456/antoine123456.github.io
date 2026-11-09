@@ -1,21 +1,19 @@
 #!/usr/bin/env python3
 """
-build_vocab_pro.py — Paquet « Mots fréquents » (#161).
+build_vocab_pro.py — les mots fréquents du Vocabulaire (#161, #170).
 
 Les mots qu'on entend le plus dans les films et séries espagnols (liste de
 fréquences FrequencyWords 2018, tirée des sous-titres OpenSubtitles) et qui
-ne sont dans aucun autre paquet de l'appli. La liste a été regroupée par mot
-du dictionnaire (quería → querer), puis triée à la main : ni prénoms, ni
+manquaient aux paquets de l'appli. La liste a été regroupée par mot du
+dictionnaire (quería → querer), puis triée à la main : ni prénoms, ni
 anglais, ni abréviations, ni interjections, ni grossièretés, ni grammaire
 (pronoms, démonstratifs, formes conjuguées : c'est le paquet Grammaire).
 Chaque mot a sa nature, son sens en français et en italien, et une phrase
 d'exemple écrite pour lui (lue par la voix du navigateur) — vocab_pro.tsv.
 
-Étapes (sous-paquets numérotés : la suivante s'ouvre quand 80 % de la
-précédente est apprise) : 1 = rangs 1–1 000, 2 = 1 001–2 000,
-3 = 2 001–3 000 ; plus tard 4 = 3 001–5 000, 5 = 5 001–10 000.
-
-Sorties : vocab_pro.json (français), vocab_pro_it.json (italien).
+Ce ne sont pas un paquet à part : build_vocab.py les range dans les niveaux
+du Vocabulaire (et du Vocabolario) selon leur fréquence, avec leurs propres
+ids (rang × 100). Lancer build_vocab.py ; ce script seul vérifie la liste :
     python3 build_vocab_pro.py
 """
 import html
@@ -89,18 +87,8 @@ def deck_json(cards, lang):
 
 
 def main():
-    rs = sorted(rows(), key=lambda r: int(r["rank"]))
-    for lang in LANGS:
-        seen, cards = {}, []
-        for r in rs:
-            k = seen.get(r["rank"], 0)
-            seen[r["rank"]] = k + 1
-            cards.append(card(r, lang, k))
-        ids = [c["id"] for c in cards]
-        assert len(ids) == len(set(ids)), "ids en double"
-        with open(os.path.join(HERE, LANGS[lang]["json"]), "w", encoding="utf-8") as f:
-            json.dump(deck_json(cards, lang), f, ensure_ascii=False, separators=(",", ":"))
-        print(f"{len(cards)} mots → {LANGS[lang]['json']} ({', '.join(str(sum(1 for c in cards if step_of(c['key']) == n)) for n in range(1, 4))} par étape)")
+    rs = rows()
+    print(f"{len(rs)} mots fréquents dans vocab_pro.tsv — à construire avec build_vocab.py")
 
 
 if __name__ == "__main__":
