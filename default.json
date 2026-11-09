@@ -421,6 +421,9 @@
             "vous",
             "plaît"
           ],
+          "sep": [
+            3
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-2c176cb7-5d36d4a6-6dece336-ef69f0d2-ce337672.mp3"
@@ -1248,6 +1251,10 @@
             "moi",
             "me"
           ],
+          "sep": [
+            1,
+            3
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-eac3f68c-4a591008-e2653978-d5699020-ab9b3222.mp3"
@@ -1292,6 +1299,10 @@
             "à",
             "toi",
             "te"
+          ],
+          "sep": [
+            1,
+            3
           ],
           "tags": [],
           "audioQuestion": [
@@ -1813,6 +1824,10 @@
             "faux",
             "tort"
           ],
+          "sep": [
+            1,
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-fbaaf3bf-cd82dc03-87c3e33e-e89b1ac7-c760dda8.mp3"
@@ -2161,6 +2176,9 @@
             "rêve",
             "le",
             "sommeil"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -4082,6 +4100,10 @@
             "c'est",
             "permanent"
           ],
+          "sep": [
+            2,
+            4
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-680650b9-7e618274-870ab866-2d6670c3-cf3559ae.mp3"
@@ -4128,6 +4150,10 @@
             "est",
             "c'est",
             "temporaire"
+          ],
+          "sep": [
+            2,
+            4
           ],
           "tags": [],
           "audioQuestion": [
@@ -5217,6 +5243,9 @@
             "quelle",
             "question"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-0b05b801-3ae9d6f0-ceb1a351-537457b8-00d99b0f.mp3"
@@ -5261,6 +5290,10 @@
             "mon",
             "ma",
             "mes"
+          ],
+          "sep": [
+            1,
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -5307,6 +5340,10 @@
             "ta",
             "tes"
           ],
+          "sep": [
+            1,
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-2f9747fe-e2e67d90-b47c5c90-a2d2cc1a-99e4b852.mp3"
@@ -5349,6 +5386,9 @@
           "words": [
             "zéro",
             "0"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -5393,6 +5433,9 @@
             "un",
             "1"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-79326078-54629f70-2fd9d42a-383d3bd7-fa8b4522.mp3"
@@ -5435,6 +5478,9 @@
           "words": [
             "deux",
             "2"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -5479,6 +5525,9 @@
             "trois",
             "3"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-3ee569ba-87abd5f2-beb62bad-fb2bc715-b72bd7c3.mp3"
@@ -5521,6 +5570,9 @@
           "words": [
             "quatre",
             "4"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -5565,6 +5617,9 @@
             "cinq",
             "5"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-0f727ba2-f0be2d36-3526e220-afcdcaca-2d8ada61.mp3"
@@ -5607,6 +5662,9 @@
           "words": [
             "six",
             "6"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -5651,6 +5709,9 @@
             "sept",
             "7"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-62b03ae3-077fa4c2-9a45cda0-be400fc0-c27adf1e.mp3"
@@ -5693,6 +5754,9 @@
           "words": [
             "huit",
             "8"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -5737,6 +5801,9 @@
             "neuf",
             "9"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-df40d937-894f0cce-3c6ab3c6-1b2445ca-8d579f4b.mp3"
@@ -5779,6 +5846,9 @@
           "words": [
             "dix",
             "10"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -7194,6 +7264,9 @@
             "opinion",
             "croire"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-118ecca0-a975f357-ec87d6b8-517c2a42-10d55354.mp3"
@@ -7239,6 +7312,9 @@
             "je",
             "crois"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-a88f8e6e-d7f9b1b4-e34eabd8-b75da5b4-6afd171f.mp3"
@@ -7283,6 +7359,9 @@
             "penses",
             "tu",
             "crois"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -7330,6 +7409,9 @@
             "il",
             "elle",
             "croit"
+          ],
+          "sep": [
+            3
           ],
           "tags": [],
           "audioQuestion": [
@@ -7503,6 +7585,9 @@
             "formidable",
             "merveilleux"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-77d5d371-1bbc379e-91d28f01-36ced9df-6fc07d3f.mp3"
@@ -7587,6 +7672,9 @@
           "words": [
             "beau",
             "séduisant"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -7800,6 +7888,10 @@
             "agréable",
             "sympa"
           ],
+          "sep": [
+            1,
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-7efbf3c2-d46e607b-ec1fce73-1922bc80-6697e0e1.mp3"
@@ -7843,6 +7935,9 @@
             "laid",
             "moche"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-c1290687-867e8c54-1a3dd9b2-3a50e45c-4a746536.mp3"
@@ -7885,6 +7980,9 @@
           "words": [
             "cool",
             "super"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -7971,6 +8069,9 @@
             "petit",
             "court"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-9a50d18c-6472c2c1-e0797c82-1fa39778-9a297d09.mp3"
@@ -8056,6 +8157,9 @@
             "long",
             "grand"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-fbe83d68-a0952973-2fb7fa41-0618a71c-ee62abda.mp3"
@@ -8102,6 +8206,12 @@
             "quelle",
             "quels",
             "quelles"
+          ],
+          "sep": [
+            2,
+            3,
+            4,
+            5
           ],
           "tags": [],
           "audioQuestion": [
@@ -8957,6 +9067,10 @@
             "raconter",
             "déclarer"
           ],
+          "sep": [
+            1,
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-5ebb17a8-c841e8e0-5805a7f3-6a5a30bb-de869fb7.mp3"
@@ -9093,6 +9207,9 @@
           "words": [
             "savoir",
             "connaître"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -9833,6 +9950,9 @@
             "bien",
             "bon"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-8db2178a-0ddcfab9-b8445124-bd17f3a0-8d7a925e.mp3"
@@ -9875,6 +9995,9 @@
           "words": [
             "mauvais",
             "mal"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -10076,6 +10199,9 @@
             "parler",
             "dire"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-3c2f7bb0-1ebbd108-c15573b8-9e5ac276-c886d655.mp3"
@@ -10163,6 +10289,9 @@
             "quelques",
             "quelques",
             "uns"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -10865,6 +10994,9 @@
             "le",
             "plat"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-e13a9c5a-bbafcc69-3351283e-15ea533c-fc5e94bf.mp3"
@@ -11267,6 +11399,12 @@
             "quelque",
             "quelques"
           ],
+          "sep": [
+            1,
+            2,
+            3,
+            4
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-93c91f4e-10c335c2-6e9ade6a-9900c010-e00e5108.mp3"
@@ -11312,6 +11450,11 @@
             "de",
             "des",
             "aucun"
+          ],
+          "sep": [
+            1,
+            2,
+            3
           ],
           "tags": [],
           "audioQuestion": [
@@ -11847,6 +11990,9 @@
             "onze",
             "11"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-ba4e9f27-ea82f3c9-5bb0bf09-e9b1cc95-426230b8.mp3"
@@ -11889,6 +12035,9 @@
           "words": [
             "douze",
             "12"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -11933,6 +12082,9 @@
             "treize",
             "13"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-90efadf9-6ee7dae7-40ab3709-13c0aa46-ab1176c1.mp3"
@@ -11975,6 +12127,9 @@
           "words": [
             "quatorze",
             "14"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -12019,6 +12174,9 @@
             "quinze",
             "15"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-4d3e9097-2f83c0f5-9ee85f2e-0048675e-73bf53c8.mp3"
@@ -12052,6 +12210,9 @@
             "seize",
             "16"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-8c5a7f73-c6ce1890-0bd70418-bd93350a-1726282e.mp3"
@@ -12074,6 +12235,9 @@
           "words": [
             "dix-sept",
             "17"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -12098,6 +12262,9 @@
             "dix-huit",
             "18"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-59cadb60-21c4e083-deea7151-85410f43-dac0edd3.mp3"
@@ -12121,6 +12288,9 @@
             "dix-neuf",
             "19"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-0f9b4aac-da46818f-6c53e0aa-bed57677-3d4bd05c.mp3"
@@ -12143,6 +12313,9 @@
           "words": [
             "vingt",
             "20"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -12484,6 +12657,9 @@
             "la",
             "cliente"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-32c2397c-4e3a32e8-a02f08a2-b1bf1e9c-840c5a99.mp3"
@@ -12497,6 +12673,9 @@
             "cliente",
             "la",
             "cliente"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -12676,6 +12855,9 @@
             "de",
             "singulier"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-50a6147d-2c45439e-d44771ea-8344fc96-592206ea.mp3"
@@ -12702,6 +12884,9 @@
             "de",
             "pluriel"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-dfa50761-738d5787-324b4f58-1b6cee03-524d8c14.mp3"
@@ -12727,6 +12912,10 @@
             "la",
             "au",
             "aux"
+          ],
+          "sep": [
+            2,
+            3
           ],
           "tags": [],
           "audioQuestion": [
@@ -13064,6 +13253,11 @@
             "ça",
             "celui-ci"
           ],
+          "sep": [
+            1,
+            2,
+            3
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-d7defebc-80d8fc62-b378364a-2ef25c6c-538a75b7.mp3"
@@ -13076,6 +13270,9 @@
             "este",
             "esto",
             "esta"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -13091,6 +13288,11 @@
             "ça",
             "celui-là"
           ],
+          "sep": [
+            1,
+            2,
+            3
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-19cbe70d-53b20d0f-1776b13b-1ba27f88-f5486c3e.mp3"
@@ -13103,6 +13305,9 @@
             "ese",
             "eso",
             "esa"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -13117,6 +13322,11 @@
             "toutes",
             "chaque",
             "chacun"
+          ],
+          "sep": [
+            1,
+            2,
+            3
           ],
           "tags": [],
           "audioQuestion": [
@@ -13143,6 +13353,10 @@
             "toute",
             "tout",
             "le"
+          ],
+          "sep": [
+            1,
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -13193,6 +13407,10 @@
             "sur",
             "à"
           ],
+          "sep": [
+            1,
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-693314f2-9cddd580-a367ea41-a9cff882-fa459584.mp3"
@@ -13217,6 +13435,9 @@
             "fait",
             "en",
             "réalité"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -13853,6 +14074,9 @@
             "l'ami",
             "l'amie"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-eae185de-665eb741-311584de-18a4096e-f0a58ae5.mp3"
@@ -13866,6 +14090,9 @@
             "amigo",
             "la",
             "amiga"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -13881,6 +14108,9 @@
             "copain",
             "le",
             "fiancé"
+          ],
+          "sep": [
+            3
           ],
           "tags": [],
           "audioQuestion": [
@@ -13909,6 +14139,9 @@
             "la",
             "fiancée"
           ],
+          "sep": [
+            3
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-c4f5d4f8-65a1e6b9-76615607-88e01860-9c419d74.mp3"
@@ -13934,6 +14167,9 @@
             "mari",
             "l'époux"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-450339cd-1cf8af6f-46594bbd-84885329-a31ec4e1.mp3"
@@ -13958,6 +14194,9 @@
             "la",
             "femme",
             "l'épouse"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -13996,6 +14235,9 @@
             "la",
             "adulta"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-b00e7751-ddc053d9-9b538b99-6bba4718-d4c89fe9.mp3"
@@ -14008,6 +14250,9 @@
             "le",
             "garçon",
             "l'enfant"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -14033,6 +14278,9 @@
             "la",
             "fille",
             "l'enfant"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -14071,6 +14319,9 @@
             "bebé",
             "la",
             "bebé"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -14181,6 +14432,9 @@
             "une",
             "personne"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-ad124beb-0346a0c2-7e054267-a5b65630-3a668d82.mp3"
@@ -14226,6 +14480,9 @@
             "ces",
             "ceux-ci"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-deec62d5-a71233d2-a69ee610-dfb711b8-8f78344c.mp3"
@@ -14249,6 +14506,9 @@
           "words": [
             "ces",
             "ceux-là"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -14276,6 +14536,9 @@
             "singulier",
             "pluriel"
           ],
+          "sep": [
+            3
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-c5348a47-879286f2-b7ba3fcf-d8b6f4c6-b4f6dc2b.mp3"
@@ -14287,6 +14550,9 @@
           "words": [
             "quién",
             "quiénes"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioAnswer": [
@@ -14945,6 +15211,9 @@
             "excuse-moi",
             "excusez-moi"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-b0470130-5cb92705-b294cba8-1e2f8f2f-048da485.mp3"
@@ -15042,6 +15311,10 @@
             "juste",
             "seulement",
             "seul"
+          ],
+          "sep": [
+            1,
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -15936,6 +16209,9 @@
             "sac",
             "à",
             "main"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -17362,6 +17638,9 @@
             "bête",
             "stupide"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-eab5a485-1dff8a11-bdb2b3d4-06514e32-ed4946f5.mp3"
@@ -17407,6 +17686,9 @@
             "grand",
             "haut"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-1ccc8839-87b86736-9715667a-72e5497f-cd3d5cc2.mp3"
@@ -17429,6 +17711,9 @@
           "words": [
             "calme",
             "tranquille"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -17915,6 +18200,9 @@
             "l'appartement",
             "l'étage"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-10879b3b-14e831f0-e9283ef7-dd2d7430-cf8d1a0d.mp3"
@@ -18004,6 +18292,9 @@
           "words": [
             "tellement",
             "si"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -18320,6 +18611,9 @@
             "trente",
             "30"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-6595ea02-5749f50e-bf579d05-bab7c4d0-9cc83d2e.mp3"
@@ -18342,6 +18636,9 @@
           "words": [
             "quarante",
             "40"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -18366,6 +18663,9 @@
             "cinquante",
             "50"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-2ff3a47c-a267308d-63cbb57b-4c37aa29-02e85dd0.mp3"
@@ -18388,6 +18688,9 @@
           "words": [
             "soixante",
             "60"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -18412,6 +18715,9 @@
             "soixante-dix",
             "70"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-40806bc3-0d42addc-dda909f8-956b7869-ad31ccfa.mp3"
@@ -18434,6 +18740,9 @@
           "words": [
             "quatre-vingts",
             "80"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -18458,6 +18767,9 @@
             "quatre-vingt-dix",
             "90"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-2cf9f1f8-9237ecf9-ce8294e3-08bce264-33ab5ab4.mp3"
@@ -18481,6 +18793,9 @@
             "cent",
             "100"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-3f425146-2f4c4020-f3642c1a-f5e2237a-3f45d9ef.mp3"
@@ -18503,6 +18818,9 @@
           "words": [
             "quarante-six",
             "46"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -18529,6 +18847,9 @@
             "vingt-quatre",
             "24"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-0010d760-d0bb87e8-7d8ff770-59ae86c8-f9bb8dc3.mp3"
@@ -18552,6 +18873,9 @@
             "trois",
             "cents",
             "300"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -19124,6 +19448,9 @@
             "voir",
             "regarder"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-30671add-40fd1bd5-915cf3f5-9bd55bf8-fe8dc82b.mp3"
@@ -19542,6 +19869,9 @@
             "elle",
             "va"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-0a916dad-fd5d6960-27688e5f-8f7abb7c-1ce8970b.mp3"
@@ -19613,6 +19943,9 @@
             "vous",
             "allez",
             "formel"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -19686,6 +20019,9 @@
             "gare",
             "la",
             "saison"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -19909,6 +20245,9 @@
             "l'étranger",
             "l'étrangère"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-721b3f6b-e46cb269-9bb2a405-219c9e0d-a538b1db.mp3"
@@ -19922,6 +20261,9 @@
             "extranjero",
             "la",
             "extranjera"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -20452,6 +20794,9 @@
             "les",
             "espèces"
           ],
+          "sep": [
+            3
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-cef86e86-5df9bbec-2e4b5a0a-ab8976b8-95b6021d.mp3"
@@ -20555,6 +20900,9 @@
             "l'addition",
             "le",
             "compte"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -20725,6 +21073,9 @@
           "words": [
             "apporter",
             "amener"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -21006,6 +21357,9 @@
             "essayer",
             "tester"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-ef0436c9-173bb61c-cefa6c95-f1d34bc1-0bb0eb97.mp3"
@@ -21052,6 +21406,10 @@
             "penser",
             "réfléchir",
             "considérer"
+          ],
+          "sep": [
+            1,
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -21486,6 +21844,9 @@
             "le",
             "bâtiment"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-7a497341-92ac7c5b-c4b9d8c0-7ddd598a-8779b30d.mp3"
@@ -21560,6 +21921,9 @@
             "vous",
             "faire"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-9ad99c85-f3aad685-4d46889b-0b4fa7a2-57dd8dc8.mp3"
@@ -21605,6 +21969,10 @@
             "suivre",
             "poursuivre",
             "continuer"
+          ],
+          "sep": [
+            1,
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -21718,6 +22086,9 @@
             "rapide",
             "rapidement"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-c843becf-28351197-141710be-4e2ec506-20a1cd86.mp3"
@@ -21740,6 +22111,9 @@
           "words": [
             "lent",
             "lentement"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -21809,6 +22183,9 @@
           "words": [
             "étroit",
             "strict"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -22348,6 +22725,9 @@
             "la",
             "journaliste"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-74c5d291-6e74ee3c-3683e497-ffd9a705-36894fb5.mp3"
@@ -22361,6 +22741,9 @@
             "periodista",
             "la",
             "periodista"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -22376,6 +22759,9 @@
             "la",
             "docteur"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-c75726ed-25d87a88-ef6695d2-88be377d-5c2501b3.mp3"
@@ -22389,6 +22775,9 @@
             "médico",
             "la",
             "médica"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -22404,6 +22793,9 @@
             "la",
             "psychologue"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-27038647-7bfcf12f-eb052feb-61c93c5d-5d9de215.mp3"
@@ -22417,6 +22809,9 @@
             "psicólogo",
             "la",
             "psicóloga"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -22432,6 +22827,9 @@
             "la",
             "dentiste"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-57f83f33-dc8852f6-4394ed03-8a9d0600-298d7133.mp3"
@@ -22445,6 +22843,9 @@
             "dentista",
             "la",
             "dentista"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -22460,6 +22861,9 @@
             "la",
             "professeure"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-06c8fc8d-7f621e7e-06aab87a-0d0b012f-81159e71.mp3"
@@ -22474,6 +22878,9 @@
             "la",
             "profesora"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-06c8fc8d-7f621e7e-06aab87a-0d0b012f-81159e71.mp3"
@@ -22485,6 +22892,9 @@
           "words": [
             "l'écrivain",
             "l'écrivaine"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -22500,6 +22910,9 @@
             "la",
             "escritora"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-e1917b1d-1483eb07-c49098bc-980c6d35-cc3f2b57.mp3"
@@ -22511,6 +22924,9 @@
           "words": [
             "l'avocat",
             "l'avocate"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -22525,6 +22941,9 @@
             "abogado",
             "la",
             "abogada"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -22551,6 +22970,9 @@
             "la",
             "artista"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-336d6d1e-772cba70-e27ccc17-7ddf1d02-906d77a5.mp3"
@@ -22562,6 +22984,9 @@
           "words": [
             "l'étudiant",
             "l'étudiante"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -22576,6 +23001,9 @@
             "estudiante",
             "la",
             "estudiante"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -22656,6 +23084,10 @@
             "chérie",
             "mon",
             "amour"
+          ],
+          "sep": [
+            1,
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -22801,6 +23233,9 @@
             "doigt",
             "l'orteil"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-9434028b-33ef3182-a64fa458-19c0700f-e33cd8a7.mp3"
@@ -22825,6 +23260,9 @@
             "la",
             "tête",
             "l'esprit"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -23137,6 +23575,9 @@
             "le",
             "sein"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-5a97f6be-3e628dcf-99745ce7-7de14ae4-68bde6e0.mp3"
@@ -23417,6 +23858,10 @@
             "porter",
             "apporter",
             "emmener"
+          ],
+          "sep": [
+            1,
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -23792,6 +24237,9 @@
             "le",
             "rôle"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-8ad231d1-823d6181-849c58ca-f3c2b187-523971ae.mp3"
@@ -23819,6 +24267,9 @@
             "salle",
             "de",
             "bain"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -23900,6 +24351,10 @@
             "elle",
             "devrait"
           ],
+          "sep": [
+            2,
+            4
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-ffdc205b-7907f102-b24a11a3-c14f79f8-9606e7d0.mp3"
@@ -23945,6 +24400,9 @@
           "words": [
             "sentir",
             "ressentir"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -24562,6 +25020,9 @@
             "la",
             "façon"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-e4c76d1e-ee1aa94c-9b8abb3d-8034094f-9936daf3.mp3"
@@ -24693,6 +25154,9 @@
             "la",
             "chambre"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-e25b9db4-3bac1a6a-dccb04c8-deb3dc1c-d6407e67.mp3"
@@ -24718,6 +25182,9 @@
             "cuisine",
             "la",
             "cuisinière"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -24791,6 +25258,9 @@
             "l'invité",
             "l'invitée"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-ce745582-b589dc68-5143eb34-9b3b9ab3-f6521621.mp3"
@@ -24804,6 +25274,9 @@
             "invitado",
             "la",
             "invitada"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -24845,6 +25318,9 @@
             "en",
             "haut"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-d2eb166f-b7e590a8-80d1c44d-b1a33eb5-7f47ffbf.mp3"
@@ -24868,6 +25344,9 @@
             "bas",
             "en",
             "bas"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -25026,6 +25505,9 @@
             "bague",
             "l'anneau"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-d7f90774-462f7c5e-0d99cd5c-affe7004-6911008b.mp3"
@@ -25123,6 +25605,9 @@
             "l'horloge",
             "la",
             "montre"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -25223,6 +25708,9 @@
             "le",
             "bisou"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-4ab66cb6-f09b81f3-df5d67de-f19810ea-ec2c8145.mp3"
@@ -25295,6 +25783,10 @@
             "son",
             "sa",
             "ses"
+          ],
+          "sep": [
+            1,
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -26088,6 +26580,9 @@
             "proche",
             "de"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-d0da46c3-c51193ef-27e2ff98-b42beecc-eff3f41d.mp3"
@@ -26626,6 +27121,9 @@
             "notre",
             "nos"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-6b59cabb-74c81e34-6a633155-00d0d19c-07202b4f.mp3"
@@ -26648,6 +27146,9 @@
           "words": [
             "votre",
             "vos"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -27831,6 +28332,9 @@
             "supposer",
             "deviner"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-dad231b2-cad86eaa-b209e55a-af092c9e-db184434.mp3"
@@ -27881,6 +28385,9 @@
             "attendre",
             "espérer"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-319fe094-99a51f45-1cea4f3d-a83e8f52-42938e4d.mp3"
@@ -27929,6 +28436,9 @@
           "words": [
             "trucs",
             "choses"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -28364,6 +28874,9 @@
             "rendre",
             "visite"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-d3c7c5ac-cf865ac2-86a61dbd-f402fdf4-e58e9b7e.mp3"
@@ -28691,6 +29204,9 @@
             "la",
             "soirée"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-c454a913-1da2c866-073488e6-9a452e5b-1136e11a.mp3"
@@ -28716,6 +29232,9 @@
             "soir",
             "la",
             "nuit"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -28808,6 +29327,9 @@
             "après-midi",
             "ce",
             "soir"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -29025,6 +29547,9 @@
             "marcher",
             "se",
             "promener"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -29333,6 +29858,9 @@
             "chez",
             "soi"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-e49c655c-6e1eb259-8cddb6c8-e5e045e9-59e75c63.mp3"
@@ -29510,6 +30038,9 @@
             "premier",
             "1er"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-07f96954-6f6d9526-651ec0eb-ff5999fd-28af1f6d.mp3"
@@ -29532,6 +30063,9 @@
           "words": [
             "deuxième",
             "2ème"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -29556,6 +30090,9 @@
             "troisième",
             "3ème"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-d6600314-d9d124d6-2d1127fc-80e2c10c-b7931bb0.mp3"
@@ -29578,6 +30115,9 @@
           "words": [
             "quatrième",
             "4ème"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -29602,6 +30142,9 @@
             "cinquième",
             "5ème"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-66416722-710a66a4-b78a8a46-2567d8fd-1542f725.mp3"
@@ -29624,6 +30167,9 @@
           "words": [
             "sixième",
             "6ème"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -29648,6 +30194,9 @@
             "septième",
             "7ème"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-2c6a9777-b7fa5d94-a08e294b-5b7d0cd2-9ebc3d7c.mp3"
@@ -29670,6 +30219,9 @@
           "words": [
             "huitième",
             "8ème"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -29694,6 +30246,9 @@
             "neuvième",
             "9ème"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-7d36d928-f16b8d90-14ae8552-b4640d4b-4b08a761.mp3"
@@ -29716,6 +30271,9 @@
           "words": [
             "dixième",
             "10ème"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -30137,6 +30695,9 @@
             "soldes",
             "soldé"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-9d42f4cc-c304cc72-e9252c64-bce67855-6335ec0c.mp3"
@@ -30160,6 +30721,9 @@
             "le",
             "marché",
             "l'affaire"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -30352,6 +30916,9 @@
           "words": [
             "assez",
             "suffisant"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -30834,6 +31401,9 @@
             "placard",
             "l'armoire"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-4f25fb14-50568539-d8b66eee-73033e9e-db2bb3d7.mp3"
@@ -31281,6 +31851,9 @@
             "photo",
             "la",
             "caméra"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -32399,6 +32972,10 @@
             "parti",
             "politique"
           ],
+          "sep": [
+            2,
+            4
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-fc54fd03-5343d40e-adc04f5a-fb3e6ec9-5d5e02e0.mp3"
@@ -32482,6 +33059,9 @@
           "words": [
             "peut-être",
             "égal"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -32977,6 +33557,9 @@
             "prendre",
             "temps"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-1ffb5517-ef49a1e3-0ecc7e3b-6dcd1876-7e19bc66.mp3"
@@ -33151,6 +33734,9 @@
             "pièce",
             "de",
             "théâtre"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -33902,6 +34488,9 @@
             "après",
             "ensuite"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-d5dfbb16-cc7e23b4-274818ba-38e94788-28a507ab.mp3"
@@ -34126,6 +34715,9 @@
             "la",
             "dissertation"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-0f76b612-15d2bc01-bbae4b16-a1085ec3-074d63f3.mp3"
@@ -34169,6 +34761,9 @@
           "words": [
             "laver",
             "nettoyer"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -34346,6 +34941,9 @@
           "words": [
             "renvoyer",
             "rembourser"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -34569,6 +35167,9 @@
             "le",
             "trajet"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-31666dfd-e434cc93-baa3a9f1-ee96fe86-6917eca2.mp3"
@@ -34616,6 +35217,9 @@
             "quitter",
             "partir"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-90ee39fa-270d27c9-f78ce9d5-a6f488f6-fb18954d.mp3"
@@ -34640,6 +35244,10 @@
             "certain",
             "en",
             "sécurité"
+          ],
+          "sep": [
+            1,
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -35114,6 +35722,9 @@
             "émouvant",
             "excitant"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-06e1845d-f68835f1-929c8a99-b0ce859a-6dc4ad6d.mp3"
@@ -35136,6 +35747,9 @@
           "words": [
             "amusant",
             "drôle"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -35183,6 +35797,9 @@
             "amusant",
             "blague"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-a7fd9ec1-1d0f0103-b2d9a96c-af998684-94c9a948.mp3"
@@ -35207,6 +35824,9 @@
             "reposer",
             "se",
             "relaxer"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -35529,6 +36149,9 @@
             "une",
             "douche"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-440d2c36-9a595afd-a8e4a3b4-a1c467fa-b2111d7c.mp3"
@@ -35713,6 +36336,9 @@
             "dernier",
             "final"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-8d04245e-8ae21600-e5fa2a9a-c76d975e-348593b7.mp3"
@@ -35738,6 +36364,9 @@
             "la",
             "nuit",
             "dernière"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -35813,6 +36442,9 @@
             "y",
             "a"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-80a53f40-d79c8c39-e203e81a-f22eb5bd-d017a1a7.mp3"
@@ -35862,6 +36494,9 @@
           "words": [
             "passé",
             "dernier"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -35985,6 +36620,9 @@
             "j'me",
             "suis",
             "débrouillé"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -36915,6 +37553,9 @@
             "le",
             "thème"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-bc1d17a8-049de2e0-fd4371a4-638c952c-b8cca5e8.mp3"
@@ -37133,6 +37774,10 @@
             "parler",
             "dire"
           ],
+          "sep": [
+            2,
+            3
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-fd0a59a9-248a6b2b-c62830b9-4519ec79-d5df1fc0.mp3"
@@ -37343,6 +37988,9 @@
             "le",
             "châtiment"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-f253cc4a-9c75b66a-b888e45c-a6d30679-a66977c4.mp3"
@@ -37440,6 +38088,9 @@
             "disputer",
             "discuter"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-bd2b9527-94a53505-42f44b8c-ed5bc8e7-3449b332.mp3"
@@ -37463,6 +38114,10 @@
             "dire",
             "raconter",
             "compter"
+          ],
+          "sep": [
+            1,
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -37533,6 +38188,9 @@
             "gêné",
             "embarrassé"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-b7267674-07a122ff-85129acc-a9790c59-f287643d.mp3"
@@ -37556,6 +38214,9 @@
             "la",
             "honte",
             "l'embarras"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -37583,6 +38244,10 @@
             "faire",
             "honte"
           ],
+          "sep": [
+            1,
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-083f0ab8-8782f04c-56454f46-9dff51b5-eff12883.mp3"
@@ -37608,6 +38273,9 @@
             "mettre",
             "en",
             "colère"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -38034,6 +38702,9 @@
             "volonté",
             "l'envie"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-3f08ab32-6070d4c6-52252144-63cfaa44-9e5e494d.mp3"
@@ -38281,6 +38952,9 @@
           "words": [
             "sur",
             "environ"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -38899,6 +39573,9 @@
             "jouer",
             "de"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-5a2a53e5-c1910cda-9adc4363-2e1ebea2-dc39c6f4.mp3"
@@ -39083,6 +39760,9 @@
             "un",
             "type",
             "de"
+          ],
+          "sep": [
+            3
           ],
           "tags": [],
           "audioQuestion": [
@@ -39400,6 +40080,9 @@
             "laisser",
             "quitter"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-ea9195df-cb7f8a2c-24bbe5d7-3a923402-90132e91.mp3"
@@ -39545,6 +40228,9 @@
             "encore",
             "toujours"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-36953110-87f49cc4-fa1c1bff-06149b5a-c2f15bd9.mp3"
@@ -39595,6 +40281,9 @@
             "en",
             "général"
           ],
+          "sep": [
+            3
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-53aea833-968b5d91-c1e3daf8-9bde3eca-a54d1069.mp3"
@@ -39643,6 +40332,10 @@
             "dedans",
             "à",
             "l'intérieur"
+          ],
+          "sep": [
+            1,
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -39697,6 +40390,9 @@
             "dans",
             "deux",
             "heures"
+          ],
+          "sep": [
+            3
           ],
           "tags": [],
           "audioQuestion": [
@@ -39890,6 +40586,9 @@
             "le",
             "lieu"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-2b488610-4369b158-9773eb3f-077020df-6828261d.mp3"
@@ -40031,6 +40730,9 @@
             "guía",
             "turística"
           ],
+          "sep": [
+            3
+          ],
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-8d469612-906e51bc-29c5f2b9-9539e290-2908f7b3.mp3"
@@ -40142,6 +40844,9 @@
           "words": [
             "remarquable",
             "exceptionnel"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -40282,6 +40987,9 @@
             "meilleur",
             "mieux"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-3d4a86ee-3d8a1e2e-b30d3655-f8560eb9-654c327d.mp3"
@@ -40306,6 +41014,9 @@
             "meilleur",
             "le",
             "mieux"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -40545,6 +41256,9 @@
             "la",
             "présidente"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-81922d81-f8e608ca-7198ac68-ff360667-be524bc8.mp3"
@@ -40558,6 +41272,9 @@
             "presidente",
             "la",
             "presidenta"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -40573,6 +41290,9 @@
             "la",
             "ministre"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-a91e061f-aca0742f-dde355ab-89d83bba-679901f2.mp3"
@@ -40586,6 +41306,9 @@
             "ministro",
             "la",
             "ministra"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -40603,6 +41326,9 @@
             "Première",
             "ministre"
           ],
+          "sep": [
+            3
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-dd9d8e7e-02982f06-2d2556d7-8ee31959-b9138e87.mp3"
@@ -40618,6 +41344,9 @@
             "la",
             "primera",
             "ministra"
+          ],
+          "sep": [
+            3
           ],
           "tags": [],
           "audioAnswer": [
@@ -40681,6 +41410,9 @@
             "la",
             "politicienne"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-8e8b346f-0c3b6415-7b73f624-d20aca28-e447d33d.mp3"
@@ -40694,6 +41426,9 @@
             "político",
             "la",
             "política"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -40780,6 +41515,9 @@
             "la",
             "leader"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-31b6d209-ee3e5061-baf6c2ec-caf66e46-fb08e34d.mp3"
@@ -40793,6 +41531,9 @@
             "líder",
             "la",
             "líder"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -40808,6 +41549,9 @@
             "la",
             "général"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-a18f34c7-f8abd888-80418e9e-412712ed-da65aa75.mp3"
@@ -40821,6 +41565,9 @@
             "general",
             "la",
             "general"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -40836,6 +41583,9 @@
             "la",
             "soldate"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-529ab70f-c22da0de-1c2d96e8-969e05a2-391cb9d0.mp3"
@@ -40849,6 +41599,9 @@
             "soldado",
             "la",
             "soldado"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -41028,6 +41781,9 @@
             "la",
             "républicaine"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-0cf9c4c6-73a84fd8-d7e7813c-525fc594-ce8672da.mp3"
@@ -41041,6 +41797,9 @@
             "republicano",
             "la",
             "republicana"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -41078,6 +41837,9 @@
             "la",
             "démocrate"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-99f62d1d-71e05558-83792844-cae1832c-63e66779.mp3"
@@ -41091,6 +41853,9 @@
             "demócrata",
             "la",
             "demócrata"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -41128,6 +41893,9 @@
             "la",
             "communiste"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-89efd069-8d9d4e35-fa2fb6af-1f1c0c5f-5c609298.mp3"
@@ -41141,6 +41909,9 @@
             "comunista",
             "la",
             "comunista"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -41446,6 +42217,10 @@
             "la",
             "chance"
           ],
+          "sep": [
+            1,
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-b512f777-5a7d4338-e656f974-ebb9a098-615f7f7c.mp3"
@@ -41573,6 +42348,9 @@
             "pas",
             "le",
             "passage"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -41706,6 +42484,9 @@
             "une",
             "opinion",
             "penser"
+          ],
+          "sep": [
+            3
           ],
           "tags": [],
           "audioQuestion": [
@@ -42305,6 +43086,9 @@
             "spécialement",
             "particulièrement"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-1f936bd2-0ca7ffd2-21e18f14-1d456087-9d810f05.mp3"
@@ -42642,6 +43426,9 @@
             "la",
             "mémoire"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-c1bbc254-149df103-1c707498-c380213f-3df1a4e6.mp3"
@@ -42854,6 +43641,10 @@
             "reculé",
             "lointain"
           ],
+          "sep": [
+            1,
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-b901b14f-f2893646-738e9287-e5fb7edc-2d7cfc49.mp3"
@@ -42920,6 +43711,9 @@
           "words": [
             "horrible",
             "affreux"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -42991,6 +43785,9 @@
             "à",
             "moi"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-50a9723e-fa8e8ce6-cdf123ee-94c9af44-221c5c2c.mp3"
@@ -43015,6 +43812,9 @@
             "toi",
             "à",
             "toi"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -43420,6 +44220,9 @@
             "maintenir",
             "garder"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-68b346c9-86749814-a2a1d483-667f995e-759e03f7.mp3"
@@ -43490,6 +44293,9 @@
           "words": [
             "baisser",
             "descendre"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -44190,6 +44996,9 @@
             "humide",
             "mouillé"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-d628b1a4-9ec85c28-652dc621-0fbb1de1-545d016d.mp3"
@@ -44279,6 +45088,9 @@
           "words": [
             "alors",
             "donc"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -44512,6 +45324,9 @@
             "la",
             "joueuse"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-685a391d-90827116-93678d55-aa80e6dc-a20fa870.mp3"
@@ -44525,6 +45340,9 @@
             "jugador",
             "la",
             "jugadora"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -44713,6 +45531,9 @@
           "words": [
             "expulser",
             "sortir"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -45102,6 +45923,9 @@
             "tout",
             "de",
             "suite"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -45549,6 +46373,9 @@
             "la",
             "débutante"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-b392d7cf-a1951800-243074dc-d56a73bd-fedd4370.mp3"
@@ -45562,6 +46389,9 @@
             "principiante",
             "la",
             "principiante"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -45651,6 +46481,9 @@
             "vivant",
             "je",
             "vis"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -46201,6 +47034,9 @@
             "rare",
             "étrange"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-fbf960ff-96ab83f4-bf76d798-ced67344-5c55004c.mp3"
@@ -46389,6 +47225,9 @@
             "commerce",
             "l'affaire"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-6662a8c9-b9384584-7377264f-137e6ab3-fa6bc09f.mp3"
@@ -46507,6 +47346,9 @@
             "la",
             "réussite"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-af4bc2a0-66195ebb-7474d459-d1605413-2891b2e0.mp3"
@@ -46557,6 +47399,9 @@
             "plus",
             "plus",
             "maintenant"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -46919,6 +47764,9 @@
             "la",
             "pause"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-d6bbd044-6d7387ce-43c1041a-c3269f25-81b582eb.mp3"
@@ -47024,6 +47872,9 @@
             "tomber",
             "faire",
             "tomber"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -47136,6 +47987,9 @@
             "régler",
             "ranger"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-07a35345-25487db6-dbf40e82-9689da38-b2bd6cc0.mp3"
@@ -47226,6 +48080,9 @@
             "préoccupé",
             "inquiet"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-451c7251-7fd475c6-93c87810-6ccdfca9-e3bf50b9.mp3"
@@ -47270,6 +48127,9 @@
           "words": [
             "tendu",
             "nerveux"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -47342,6 +48202,9 @@
             "par",
             "pour"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-60caee0e-14692942-a47ee143-3b9dcdf0-80b02cc0.mp3"
@@ -47386,6 +48249,9 @@
           "words": [
             "autour",
             "environ"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -47609,6 +48475,9 @@
             "la",
             "candidate"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-f9bf123e-c939d6b0-33a96896-e7b816ee-42b1ed2e.mp3"
@@ -47622,6 +48491,9 @@
             "candidato",
             "la",
             "candidata"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -47873,6 +48745,9 @@
           "words": [
             "suggérer",
             "proposer"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -48480,6 +49355,9 @@
             "chance",
             "la",
             "probabilité"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -49268,6 +50146,9 @@
             "besoin",
             "manquer"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-36538fd9-b2976c15-7f159bc0-de96fc43-90347c0e.mp3"
@@ -49618,6 +50499,9 @@
             "l'idiot",
             "l'idiote"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-5d707c2e-633a5eed-8438fd8c-3c470e71-581c8807.mp3"
@@ -49632,6 +50516,9 @@
             "la",
             "idiota"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-5d707c2e-633a5eed-8438fd8c-3c470e71-581c8807.mp3"
@@ -49644,6 +50531,10 @@
             "l'entretien",
             "l'entrevue",
             "l'interview"
+          ],
+          "sep": [
+            1,
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -49693,6 +50584,9 @@
             "l'entraîneur",
             "l'entraîneuse"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-1d5949ca-74f2fa37-c3f65b45-5b01d862-0d42bea4.mp3"
@@ -49707,6 +50601,9 @@
             "la",
             "entrenadora"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-1d5949ca-74f2fa37-c3f65b45-5b01d862-0d42bea4.mp3"
@@ -49720,6 +50617,9 @@
             "score",
             "le",
             "classement"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -49768,6 +50668,9 @@
             "rater",
             "le",
             "bus"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -49902,6 +50805,9 @@
           "words": [
             "devant",
             "d'avance"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -50277,6 +51183,9 @@
             "faute",
             "l'erreur"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-5c593c66-0f8cead6-d73b05bf-0394a35e-05bd4e2b.mp3"
@@ -50326,6 +51235,9 @@
             "faire",
             "une",
             "erreur"
+          ],
+          "sep": [
+            3
           ],
           "tags": [],
           "audioQuestion": [
@@ -50806,6 +51718,9 @@
             "la",
             "membre"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-13c3a1bf-fad77a5f-da0cb0ae-244563ae-5b09b432.mp3"
@@ -50980,6 +51895,9 @@
             "finir",
             "terminer"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-e456643e-9e0ad903-1aee2afe-ceb3382e-3612671d.mp3"
@@ -51002,6 +51920,9 @@
           "words": [
             "presque",
             "quasiment"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -51501,6 +52422,9 @@
             "le",
             "choix"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-d76ee6f4-4fb3c769-37b6a1c7-8a4c8ef7-8e58c91f.mp3"
@@ -51654,6 +52578,9 @@
           "words": [
             "raisonnable",
             "sage"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -51998,6 +52925,9 @@
             "vanter",
             "présumer"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-2e9f84eb-2aec5039-fca91341-d7e76f44-01dc8a28.mp3"
@@ -52074,6 +53004,9 @@
             "la",
             "pratique",
             "l'expérience"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -52260,6 +53193,9 @@
             "un",
             "autre"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-2647e7ba-5486e6e9-75478ef2-c81cb9b1-fb40007b.mp3"
@@ -52312,6 +53248,9 @@
             "à",
             "qui",
             "questions"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -52786,6 +53725,9 @@
             "bête",
             "idiot"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-e6d61f8b-3142416d-ffd88ff6-d38110a8-37403941.mp3"
@@ -53127,6 +54069,9 @@
             "montrer",
             "signaler"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-aa00bdc9-48720dbe-927c2155-5bb7b7f2-fa2a9ea0.mp3"
@@ -53226,6 +54171,9 @@
             "que",
             "aussi",
             "que"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -53537,6 +54485,9 @@
             "juste",
             "moi"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-1259e46d-143d8b86-288cccee-b65f9635-052b501a.mp3"
@@ -53561,6 +54512,9 @@
             "toi-même",
             "juste",
             "toi"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -53863,6 +54817,9 @@
             "face",
             "affronter"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-12e63328-91b17fcb-24966e6d-2ac39ed4-cd641c47.mp3"
@@ -53985,6 +54942,9 @@
             "arriver",
             "se",
             "passer"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -54308,6 +55268,9 @@
             "étage",
             "volume"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-63868f43-538c1bd9-fb3ace04-a1c9198f-3ad81b9a.mp3"
@@ -54621,6 +55584,9 @@
             "la",
             "meutrière"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-eb80c56a-c5a69420-35a5f8e0-161920da-b43ca6fc.mp3"
@@ -54634,6 +55600,9 @@
             "asesino",
             "la",
             "asesina"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -54695,6 +55664,9 @@
             "la",
             "voleuse"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-1a885447-58331411-f6114890-d0d38a5c-218f6b44.mp3"
@@ -54708,6 +55680,9 @@
             "ladrón",
             "la",
             "ladrona"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -54745,6 +55720,9 @@
             "la",
             "suspecte"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-171e3591-a1a7bd64-4516d07d-dda1f3a1-92e61e7a.mp3"
@@ -54758,6 +55736,9 @@
             "sospechoso",
             "la",
             "sospechosa"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -54773,6 +55754,9 @@
             "la",
             "témoin"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-aabcb27b-6d744af6-b7779d06-840e48ad-ef8a65cb.mp3"
@@ -54786,6 +55770,9 @@
             "testigo",
             "la",
             "testigo"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -55280,6 +56267,9 @@
             "chute",
             "d'eau"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-f5add77f-48dd7b27-ef34bce1-178e5da6-c1e8e4db.mp3"
@@ -55353,6 +56343,9 @@
             "signe",
             "le",
             "panneau"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -55520,6 +56513,10 @@
             "finalement",
             "au",
             "final"
+          ],
+          "sep": [
+            1,
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -55788,6 +56785,9 @@
             "crème",
             "la",
             "lotion"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -56213,6 +57213,9 @@
             "la",
             "patiente"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-c32ece31-9e22b3e1-3b52db7a-e092ffe6-701f1e6f.mp3"
@@ -56226,6 +57229,9 @@
             "paciente",
             "la",
             "paciente"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -56384,6 +57390,9 @@
             "se",
             "remettre"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-6d697ece-b0bb9951-0788adde-ae4873c6-5f4a70b5.mp3"
@@ -56428,6 +57437,9 @@
           "words": [
             "éviter",
             "empêcher"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -56573,6 +57585,9 @@
             "en",
             "mauvaise",
             "santé"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -56821,6 +57836,9 @@
             "le",
             "test"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-00e1c3f5-edd5746e-d6aef2f0-f9d2befe-68a4e42c.mp3"
@@ -56891,6 +57909,10 @@
             "prouver",
             "démontrer",
             "montrer"
+          ],
+          "sep": [
+            1,
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -57271,6 +58293,9 @@
             "l'expert",
             "l'experte"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-ea69922d-e2213281-710c6978-6cf68315-593471b5.mp3"
@@ -57284,6 +58309,9 @@
             "experto",
             "la",
             "experta"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -57323,6 +58351,9 @@
             "la",
             "musicienne"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-8980bcb6-9194362a-cfd5ad9e-f2f253d7-35a0f104.mp3"
@@ -57336,6 +58367,9 @@
             "músico",
             "la",
             "música"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -57397,6 +58431,9 @@
             "la",
             "designer"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-237180ac-4caf5e4f-153c0807-4d07a629-9762ab0b.mp3"
@@ -57410,6 +58447,9 @@
             "diseñador",
             "la",
             "diseñadora"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -57425,6 +58465,9 @@
             "les",
             "études",
             "universitaires"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -57453,6 +58496,9 @@
             "faire",
             "des",
             "études"
+          ],
+          "sep": [
+            3
           ],
           "tags": [],
           "audioQuestion": [
@@ -57509,6 +58555,10 @@
             "transformer",
             "se",
             "devenir"
+          ],
+          "sep": [
+            2,
+            4
           ],
           "tags": [],
           "audioQuestion": [
@@ -57886,6 +58936,9 @@
             "virer",
             "quelqu'un"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-684481c3-48a62773-66079bc7-b40c50aa-1b5f66f6.mp3"
@@ -57937,6 +58990,10 @@
             "attaché",
             "à"
           ],
+          "sep": [
+            1,
+            3
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-e2d2c877-2a07cab3-a4e9ae49-42301839-7a4c3543.mp3"
@@ -57962,6 +59019,9 @@
             "faire",
             "la",
             "paix"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -58010,6 +59070,9 @@
             "se",
             "vous"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-f7eaab3f-d8a23b6d-20fd22b9-182e0512-540a4ffb.mp3"
@@ -58021,6 +59084,9 @@
           "words": [
             "se",
             "os"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioAnswer": [
@@ -58509,6 +59575,9 @@
             "la",
             "gymnaste"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-595a7959-e99f9fcd-7b8e9b97-97062c2b-92851e2d.mp3"
@@ -58522,6 +59591,9 @@
             "gimnasta",
             "la",
             "gimnasta"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -59350,6 +60422,9 @@
             "au",
             "chômage"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-e23ecf39-c8df342d-57fe808e-ed1bed48-f0790fa1.mp3"
@@ -59682,6 +60757,9 @@
             "la",
             "conne"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-ddb0267b-8cf6a4c3-2e7356f4-7cd02217-5accbb9a.mp3"
@@ -59695,6 +60773,9 @@
             "gilipollas",
             "la",
             "gilipollas"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -59776,6 +60857,9 @@
             "doux",
             "sucré"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-8b9391d0-c51661ab-827674c2-591fa499-59e10bac.mp3"
@@ -59820,6 +60904,9 @@
           "words": [
             "aimable",
             "gentil"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -60024,6 +61111,9 @@
             "mariage",
             "le",
             "ménage"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -60437,6 +61527,9 @@
             "la",
             "voie"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-e1e015cf-15849392-5bdb716a-dc6f3296-4d9c8fb5.mp3"
@@ -60540,6 +61633,9 @@
             "sable",
             "l'arène"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-ab1f2a65-01c8bc13-4f95ac7d-51e54674-172f4918.mp3"
@@ -60622,6 +61718,9 @@
             "faire",
             "un",
             "effort"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -61013,6 +62112,9 @@
             "honnête",
             "franchement"
           ],
+          "sep": [
+            3
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-65a6d504-c0234e34-deb1d862-b9d9cac0-5a3bd4ea.mp3"
@@ -61120,6 +62222,9 @@
             "la",
             "prisionera"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-5abe03dc-1b11cf2d-3e1797a4-342fe761-c2125489.mp3"
@@ -61197,6 +62302,9 @@
             "juez",
             "la",
             "jueza"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -61331,6 +62439,9 @@
             "se",
             "souvenir"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-87f2bc83-6ded843d-06bf79a3-ba7f4354-5241cf06.mp3"
@@ -61354,6 +62465,10 @@
             "sembler",
             "apparaître",
             "ressembler"
+          ],
+          "sep": [
+            1,
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -61380,6 +62495,9 @@
             "comment",
             "est-elle"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-6534f705-e43653e4-1d7a5634-42626e1d-206b77d6.mp3"
@@ -61404,6 +62522,9 @@
             "sonner",
             "avoir",
             "l'air"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -61800,6 +62921,9 @@
             "désordre",
             "le",
             "bazar"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -62203,6 +63327,10 @@
             "rapporter",
             "signaler"
           ],
+          "sep": [
+            1,
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-1c014240-553308da-91b6bc35-9cb205f7-5f60e8fb.mp3"
@@ -62544,6 +63672,10 @@
             "élever",
             "soulever"
           ],
+          "sep": [
+            1,
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-788c93da-be3da446-4fb5cba8-a049e0c0-62c200e3.mp3"
@@ -62568,6 +63700,9 @@
             "la",
             "tête",
             "acquiescer"
+          ],
+          "sep": [
+            3
           ],
           "tags": [],
           "audioQuestion": [
@@ -62619,6 +63754,9 @@
             "secouer",
             "la",
             "tête"
+          ],
+          "sep": [
+            5
           ],
           "tags": [],
           "audioQuestion": [
@@ -63190,6 +64328,9 @@
             "la",
             "firme"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-12084c0e-79fb4441-818e8a47-715e8a90-37a4cb11.mp3"
@@ -63330,6 +64471,10 @@
             "grandir",
             "s'agrandir",
             "s'accroître"
+          ],
+          "sep": [
+            1,
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -63562,6 +64707,9 @@
             "l'ingénieur",
             "l'ingénieure"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-d0985459-75e8f224-caa6f995-b8d90be7-81047d9f.mp3"
@@ -63575,6 +64723,9 @@
             "ingeniero",
             "la",
             "ingeniera"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -63982,6 +65133,9 @@
             "placer",
             "mettre"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-ef66874f-02843ec7-c6771a88-0b860f00-e3b20c36.mp3"
@@ -64314,6 +65468,9 @@
             "à",
             "cette",
             "heure-ci"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -64780,6 +65937,9 @@
             "médias",
             "sociaux"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-4f45cfd4-59e9c6e9-6ce4994b-70bc1264-ce1d1efa.mp3"
@@ -64873,6 +66033,9 @@
           "words": [
             "passer",
             "transmettre"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -64978,6 +66141,9 @@
             "la",
             "astronauta"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-1e3d0f89-fe73059f-3f3229c4-470eab8f-679e9928.mp3"
@@ -65062,6 +66228,9 @@
             "le",
             "navire"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-9024014b-cc24eea8-aea9c543-c9e15680-2886185e.mp3"
@@ -65125,6 +66294,9 @@
             "la",
             "extraterrestre"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-8788c5ef-9d1cdcc8-dcf37825-86fe99ec-d2488167.mp3"
@@ -65137,6 +66309,9 @@
             "l'espace",
             "le",
             "cosmos"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -66109,6 +67284,9 @@
             "embaucher",
             "engager"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-8b06d314-9ec7f834-57694680-1efea262-b951dc6e.mp3"
@@ -66219,6 +67397,9 @@
           "words": [
             "requérir",
             "exiger"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -66718,6 +67899,9 @@
             "la",
             "propriétaire"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-d2634e78-a2a60483-2f3a865e-7c2ace06-720cd973.mp3"
@@ -66731,6 +67915,9 @@
             "propietario",
             "la",
             "propietaria"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -66748,6 +67935,9 @@
             "propriétaire",
             "terrien"
           ],
+          "sep": [
+            3
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-7fec0b8f-4dcc1363-b20c264d-34b9bb50-72d198bf.mp3"
@@ -66761,6 +67951,9 @@
             "terrateniente",
             "la",
             "terrateniente"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -66776,6 +67969,9 @@
             "se",
             "diriger",
             "vers"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -67145,6 +68341,10 @@
             "le",
             "talent"
           ],
+          "sep": [
+            1,
+            3
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-8e50ebf5-62758a64-192bf009-f8c41824-aab13efc.mp3"
@@ -67170,6 +68370,9 @@
             "un",
             "examen",
             "suspendre"
+          ],
+          "sep": [
+            3
           ],
           "tags": [],
           "audioQuestion": [
@@ -67267,6 +68470,9 @@
             "le",
             "management"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-5d3437c2-df40ac0c-29861820-500f9da8-f44f3703.mp3"
@@ -67293,6 +68499,9 @@
             "le",
             "devoir",
             "scolaire"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -67367,6 +68576,9 @@
             "challenge",
             "le",
             "défi"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -67492,6 +68704,9 @@
             "la",
             "partenaire"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-c18f3936-4c66fccb-932dc4ca-1990c76e-542aebba.mp3"
@@ -67505,6 +68720,9 @@
             "socio",
             "la",
             "socia"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -67585,6 +68803,9 @@
           "words": [
             "réussir",
             "parvenir"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -67701,6 +68922,9 @@
             "la",
             "fonctionnaire"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-12f52e35-fcbeeecf-fa6046e7-fda9967d-b577528e.mp3"
@@ -67715,6 +68939,9 @@
             "la",
             "funcionaria"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-12f52e35-fcbeeecf-fa6046e7-fda9967d-b577528e.mp3"
@@ -67726,6 +68953,9 @@
           "words": [
             "l'ennemi",
             "l'ennemie"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -68075,6 +69305,9 @@
             "recherche",
             "l'enquête"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-47d44171-757cd41d-216b6ae8-5fe07050-6d87cb34.mp3"
@@ -68172,6 +69405,9 @@
             "la",
             "scientifique"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-eee9dad1-c772b764-2ec1136b-2da36895-dd65ab38.mp3"
@@ -68185,6 +69421,9 @@
             "científico",
             "la",
             "científica"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -68224,6 +69463,9 @@
             "la",
             "participante"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-3e207d9e-e6374011-c45b8d93-83ec6bab-ccf533b0.mp3"
@@ -68237,6 +69479,9 @@
             "participante",
             "la",
             "participante"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -68415,6 +69660,9 @@
             "baser",
             "fonder"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-301e131b-03e487cf-0eceea75-e146b666-57c9f71f.mp3"
@@ -68580,6 +69828,9 @@
             "relaxé",
             "reposé"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-92c63c33-d1fccf25-db75f038-84e3c302-0ab9cfa6.mp3"
@@ -68604,6 +69855,10 @@
             "de",
             "même",
             "aussi"
+          ],
+          "sep": [
+            1,
+            3
           ],
           "tags": [],
           "audioQuestion": [
@@ -68801,6 +70056,9 @@
             "le",
             "lycée"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-449b4ab1-84a37607-c6fcbbe5-21b73403-6e157db7.mp3"
@@ -68947,6 +70205,9 @@
             "la",
             "pompière"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-90e22ae6-f3a27335-4954122c-b7a6a322-26cb4169.mp3"
@@ -68960,6 +70221,9 @@
             "bombero",
             "la",
             "bombera"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -69046,6 +70310,9 @@
             "batte",
             "se",
             "disputer"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -69181,6 +70448,10 @@
             "accrocher",
             "raccrocher"
           ],
+          "sep": [
+            1,
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-14374a45-6e1a9e94-0413a623-c44d4409-576da12f.mp3"
@@ -69272,6 +70543,9 @@
             "inclus",
             "même"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-3da12ccb-fb0cef3e-273820ac-1518f8db-50327478.mp3"
@@ -69294,6 +70568,9 @@
           "words": [
             "jamais",
             "déjà"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -69962,6 +71239,9 @@
             "l'objet",
             "l'article"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-18d4368b-5a3ee1fa-4d96405a-6d4e8ed7-b769140e.mp3"
@@ -70035,6 +71315,9 @@
             "plante",
             "l'usine"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-9a89f1e8-b02b879d-c79b06e8-c10a6f4d-5b863b36.mp3"
@@ -70084,6 +71367,9 @@
             "tour",
             "le",
             "virement"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -70224,6 +71510,9 @@
             "la",
             "concierge"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-4cd609be-9c179206-0e9c3689-8c42d4d8-9e12e355.mp3"
@@ -70248,6 +71537,9 @@
             "l'assemblée",
             "le",
             "comité"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -70321,6 +71613,9 @@
             "jouer",
             "acteur",
             "performer"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -70510,6 +71805,9 @@
             "de",
             "l'assemblée"
           ],
+          "sep": [
+            4
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-c2ef300f-ea3196d4-f7fffd15-71581b17-24d06922.mp3"
@@ -70562,6 +71860,9 @@
             "consommateur",
             "la",
             "consommatrice"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -70819,6 +72120,9 @@
             "important",
             "significatif"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-624520d4-b09b17e2-3476121f-2ca8c091-ad339d2c.mp3"
@@ -70939,6 +72243,9 @@
             "source",
             "la",
             "fontaine"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -71292,6 +72599,9 @@
             "regarder",
             "fixement"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-018e14e2-de436372-bf92246f-ff158ead-80c595ab.mp3"
@@ -71341,6 +72651,9 @@
             "enlever",
             "éliminer"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-495c898a-2ce942a0-1aab5cf4-8cd29e5b-a940cd20.mp3"
@@ -71363,6 +72676,9 @@
           "words": [
             "nommer",
             "appeler"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -71766,6 +73082,9 @@
             "l'officier",
             "l'officière"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-865218db-8c419e7b-7b954495-870438d8-fa5e0f69.mp3"
@@ -71779,6 +73098,9 @@
             "agente",
             "la",
             "agente"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -71894,6 +73216,9 @@
             "but",
             "l'intention"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-a71e46a8-a15f1a51-6a27574a-89731fe8-2f1b7e45.mp3"
@@ -71987,6 +73312,9 @@
           "words": [
             "radicalement",
             "dramatiquement"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
@@ -72383,6 +73711,9 @@
             "le",
             "comportement"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-dcc2b36a-0683708b-15dba42b-5a790180-518d269c.mp3"
@@ -72453,6 +73784,9 @@
             "lâcher",
             "dénouer"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-b4e6d7ea-ee00c0df-91c589d3-2c5db4c2-4ae72a16.mp3"
@@ -72501,6 +73835,9 @@
             "en",
             "rapport",
             "à"
+          ],
+          "sep": [
+            3
           ],
           "tags": [],
           "audioQuestion": [
@@ -72553,6 +73890,9 @@
             "à",
             "la",
             "surface"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -73034,6 +74374,9 @@
             "périmé",
             "obsolète"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-889d34ee-09589651-cd46b325-6cac8cd4-afd2b0f3.mp3"
@@ -73244,6 +74587,9 @@
             "la",
             "fabrique"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-01dd2698-dcd06e56-0606fe54-4cfc3fdb-0cc13699.mp3"
@@ -73269,6 +74615,9 @@
             "travailleur",
             "la",
             "travailleuse"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -73361,6 +74710,9 @@
             "citoyen",
             "la",
             "citoyenne"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -73612,6 +74964,9 @@
             "l'expéditeur",
             "l'expéditrice"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-35b594be-2bc7bda4-786e2819-8d300560-a193549b.mp3"
@@ -73680,6 +75035,9 @@
             "autoriser",
             "permettre"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-cda65901-f9033515-7ec6f57a-7f745dbe-e5460338.mp3"
@@ -73727,6 +75085,9 @@
             "soutenir",
             "tenir"
           ],
+          "sep": [
+            1
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-16976b51-1760c3ae-b823e17e-ac744372-5e623d54.mp3"
@@ -73751,6 +75112,9 @@
             "piège",
             "la",
             "triche"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioQuestion": [
@@ -74363,6 +75727,9 @@
             "la",
             "directrice"
           ],
+          "sep": [
+            2
+          ],
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-833efbb9-45654558-f0625e36-db9dbb8a-ccbeb375.mp3"
@@ -74376,6 +75743,9 @@
             "director",
             "la",
             "directora"
+          ],
+          "sep": [
+            2
           ],
           "tags": [],
           "audioAnswer": [
@@ -74434,6 +75804,9 @@
           "words": [
             "concevoir",
             "designer"
+          ],
+          "sep": [
+            1
           ],
           "tags": [],
           "audioQuestion": [
