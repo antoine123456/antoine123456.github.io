@@ -36,13 +36,31 @@ def sides(card):
     """(espagnol, français, audio espagnol) d'une carte, selon son sens."""
     q = plain(card["question"])
     ws = card.get("words") or []
-    # « encore; toujours » : the meanings keep their « ; » (sep = where each starts, #154)
+    notes = card.get("notes") or {}
+    # « encore; toujours » : the meanings keep their « ; » (sep = where each starts,
+    # #154) and their notes in brackets « c'est (permanent) » (#173)
     cut = [0] + list(card.get("sep") or []) + [len(ws)]
-    w = "; ".join(" ".join(ws[a:b]) for a, b in zip(cut, cut[1:]) if b > a)
+    def with_notes(a, b):
+        out = [notes["-1"]] if a == 0 and "-1" in notes else []
+        for k in range(a, b):
+            out.append(ws[k])
+            if str(k) in notes:
+                out.append(notes[str(k)])
+        return " ".join(out)
+    w = "; ".join(with_notes(a, b) for a, b in zip(cut, cut[1:]) if b > a)
     if "🇪🇸 ➡️ 🇫🇷" in q or card.get("lang") == "es":
         return q.replace("🇪🇸 ➡️ 🇫🇷", "").strip(), w, card.get("audioQuestion") or []
-    # FR→ES: the Spanish typed words stay as they were (they are the word's key)
-    return " ".join(ws), q.replace("🇫🇷 ➡️ 🇪🇸", "").strip(), card.get("audioAnswer") or []
+    # FR→ES: the Spanish words exactly as they were typed before #173 (notes'
+    # words included, no brackets) — they are the word's key in the Vocabulaire
+    from senses import _tokens
+    old = []
+    if "-1" in notes:
+        old += _tokens(notes["-1"])
+    for k, t in enumerate(ws):
+        old.append(t)
+        if str(k) in notes:
+            old += _tokens(notes[str(k)])
+    return " ".join(old), q.replace("🇫🇷 ➡️ 🇪🇸", "").strip(), card.get("audioAnswer") or []
 
 
 def deck_rank(name):
