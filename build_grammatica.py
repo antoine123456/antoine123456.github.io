@@ -60,7 +60,11 @@ PAREN = {
     "pronom obligatoire": "pronome obbligatorio",
     "ir a + infinitif — futur proche": "ir a + infinito — futuro prossimo",
     "il va y avoir": "ci sarà",
+    "devoir → je devrais…": "dovere → dovrei…",
 }
+# Cards added to grammaire.json after the first build (deber, #155): their own
+# ids, after all the others, so that no card already here changes id.
+LATE = ["1791382981350", "1791382981351", "1791382981352", "1791382981353", "1791382981354", "1791382981355"]
 # Déjà neutres (espagnol) : gardés tels quels.
 NEUTRAL = {"ser / estar", "por / para", "gustar", "a + el", "de + el", "muy / mucho", "un / una", "le + lo"}
 TENSES = {"présent": "presente", "passé simple": "passato remoto", "futur": "futuro", "conditionnel": "condizionale"}
@@ -90,9 +94,12 @@ def main():
     for d in src["decks"]:
         cards = []
         for c in d["cards"]:
-            i += 1
             t = {k: v for k, v in c.items() if k != "srs"}  # fresh progress
-            t["id"] = str(ID_BASE + i * 10 + 1)
+            if c["id"] in LATE:
+                t["id"] = str(ID_BASE + (5000 + LATE.index(c["id"])) * 10 + 1)
+            else:
+                i += 1
+                t["id"] = str(ID_BASE + i * 10 + 1)
             t["question"] = translate_question(c["question"])
             t["tags"] = [TAGS.get(x, x) for x in c.get("tags", [])]
             cards.append(t)
