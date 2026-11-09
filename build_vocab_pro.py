@@ -63,15 +63,18 @@ def card(r, lang, n_same_rank):
     rank = int(r["rank"])
     meaning = r["fr"] if lang == "fr" else r["it"]
     shown = re.sub(r"\s*;\s*", ", ", meaning)
-    words, sep = typed_meanings(meaning)
+    from build_vocab import typed
+    words, sep, notes = typed(meaning)
     c = {"id": str(L["id_base"] + rank * 100 + n_same_rank * 10 + 1), "key": rank, "es": r["es"], "fr": shown,
          "question": html.escape(r["es"]), "answer": html.escape(shown),
-         "words": words or words_to_type(meaning),
+         "words": words,
          "tags": ["vocabulaire"] + [t.strip() for t in r.get("tags", "").split(",") if t.strip()],
          "pos": r["pos"] if lang == "fr" else POS_IT.get(r["pos"], r["pos"]),
          "s": r["s"], "sf": r["sf"] if lang == "fr" else r["sit"], "sg": True}
     if sep:
         c["sep"] = sep
+    if notes:
+        c["notes"] = notes
     return c
 
 

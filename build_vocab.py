@@ -95,29 +95,30 @@ LIAISON = {"entonces", "sin embargo", "además", "así que", "aunque", "pues", "
 EXCLUDE = {"debería", "estos (estas)", "este (esto; esta)"}
 
 
-def typed_meanings(meaning):
-    """(words, sep): every meaning, a « / » between them in the app (#154),
-    when they are short (4 words in all); else only the first (#88)."""
-    senses = [x.strip() for x in meaning.split(";") if x.strip()]
-    tok = lambda t: [w for w in (re.sub(r"^[^\w]+|[^\w]+$", "", x) for x in t.split()) if w]
-    groups = [tok(x) for x in senses]
-    groups = [g for g in groups if g]
-    if len(groups) > 1 and sum(len(g) for g in groups) <= 4:
-        sep, k = [], 0
-        for g in groups[:-1]:
-            k += len(g)
-            sep.append(k)
-        return [w for g in groups for w in g], sep
-    return None, None
-
-
-def words_to_type(meaning):
-    """First meaning (+ its note in brackets), no punctuation (#88, #90)."""
-    first = re.split(r"\s*[;,]\s*", meaning)[0].strip()
+def typed(meaning, comma=False):
+    """(words, sep, notes) to type for a meaning (senses.py): every meaning, a
+    « / » between them (#154), when they are short (4 words in all); else only
+    the first (#88) — split at « ; » (and « , » when comma). A note in brackets
+    is shown in grey after the boxes, not typed (#173)."""
+    from senses import split_answer
+    w, sep, notes = split_answer(meaning)
+    if sep and len(w) <= 4:
+        return w, sep, notes
+    first = re.split(r"\s*[;,]\s*" if comma else r"\s*;\s*", meaning)[0].strip()
     note = re.search(r"\([^)]*\)\s*$", meaning)
     if note and note.group(0).strip() not in first:
         first += " " + note.group(0).strip()
-    return [t for t in (re.sub(r"^[^\w]+|[^\w]+$", "", x) for x in first.split()) if t]
+    w, _, notes = split_answer(first, senses=False)
+    return w, [], notes
+
+
+def typed_meanings(meaning):  # kept for older callers
+    w, sep, _ = typed(meaning)
+    return (w, sep) if sep else (None, None)
+
+
+def words_to_type(meaning):  # kept for older callers
+    return typed(meaning, comma=True)[0]
 
 
 # Generated example sentences (#68) for the words the Spanish deck gives none:
@@ -179,7 +180,7 @@ def translated(cards, lang):
         r = rows.get(c["key"])
         if not r:
             continue
-        t = dict(c, id=str(L["id_base"] + int(c["id"]) - ID_BASE), fr=r[0], answer=html.escape(r[0]), words=words_to_type(r[0]))
+        t = dict(c, id=str(L["id_base"] + int(c["id"]) - ID_BASE), fr=r[0], answer=html.escape(r[0]), words=typed(r[0], comma=True)[0])
         if c.get("pos"):
             t["pos"] = L["pos"].get(c["pos"], c["pos"])
         if c.get("sg"):
@@ -188,6 +189,10 @@ def translated(cards, lang):
             t["sf"] = r[1] if len(r) > 1 else ""
         t.pop("sit", None)
         t.pop("sep", None)  # the Italian meaning: its own words
+        t.pop("notes", None)
+        _, it_sep, it_notes = typed(r[0], comma=True)
+        if it_sep: t["sep"] = it_sep
+        if it_notes: t["notes"] = it_notes
         if c.get("n"):
             t["n"] = c.get("nit") or ""
         t.pop("nit", None)
@@ -359,18 +364,15 @@ def main():
         # « il est; elle est; c'est (permanent) » : shown with commas, and only
         # the first meaning (+ its note in brackets) is to type (#88).
         fr = re.sub(r"\s*;\s*", ", ", w["fr"])
-        first = w["fr"].split(";")[0].strip()
-        note = re.search(r"\([^)]*\)\s*$", w["fr"])
-        if note and note.group(0).strip() not in first:
-            first += " " + note.group(0).strip()
+        words, sep, notes = typed(w["fr"])
         card = {"id": str(ID_BASE + i * 10 + 1), "key": i, "es": w["es"], "fr": fr,
                 "question": html.escape(w["es"]), "answer": html.escape(fr),
-                # No punctuation to type (#90): « ? », « ... » alone are dropped, « (permanent) » → permanent.
-                "words": [t for t in (re.sub(r"^[^\w]+|[^\w]+$", "", x) for x in first.split()) if t],
-                "tags": ["vocabulaire"]}
-        all_words, sep = typed_meanings(w["fr"])
-        if all_words:
-            card["words"], card["sep"] = all_words, sep
+                # No punctuation to type (#90); « (permanent) » shown in grey, not typed (#173).
+                "words": words, "tags": ["vocabulaire"]}
+        if sep:
+            card["sep"] = sep
+        if notes:
+            card["notes"] = notes
         if fix.get("n"):
             card["n"], card["nit"] = fix["n"], fix.get("nit", "")
         if e.get("pos"): card["pos"] = e["pos"]
