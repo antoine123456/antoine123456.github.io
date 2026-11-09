@@ -86,6 +86,10 @@ OVERRIDES = {
                        "n": "algún devant un nom masculin (algún día = un jour), alguna au féminin ; au pluriel algunos / algunas = quelques. Dans une question : un (¿tienes algún libro? = tu as un livre ?).",
                        "nit": "algún davanti a un nome maschile (algún día = un giorno), alguna al femminile; al plurale algunos / algunas = alcuni / alcune. In una domanda: un (¿tienes algún libro? = hai un libro?)."},
 }
+# Labels to study them apart from the home page (« Idées vocabulaire », #161).
+FAUX_AMIS = {"presumir", "proporcionar", "gracioso", "embarazada", "éxito", "largo", "contestar"}
+LIAISON = {"entonces", "sin embargo", "además", "así que", "aunque", "pues", "al final", "mientras"}
+
 # Grammar, not vocabulary: already in the Grammaire deck (#155). Left out
 # without shifting the other cards' ids (each keeps its rank).
 EXCLUDE = {"debería", "estos (estas)", "este (esto; esta)"}
@@ -377,6 +381,8 @@ def main():
         if w["audio"]: card["audioQuestion"] = [w["audio"]]
         if e.get("sa"): card["sa"] = e["sa"]
         if img: card["img"] = img["url"]
+        if w["es"] in FAUX_AMIS: card["tags"].append("faux ami")
+        if w["es"] in LIAISON: card["tags"].append("mot de liaison")
         card["lvl"], card["_r"] = level_of(i), rank(w)
         cards.append(card)
         if img: review.append((card, via))

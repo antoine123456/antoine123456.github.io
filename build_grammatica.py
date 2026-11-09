@@ -61,16 +61,42 @@ PAREN = {
     "ir a + infinitif — futur proche": "ir a + infinito — futuro prossimo",
     "il va y avoir": "ci sarà",
     "devoir → je devrais…": "dovere → dovrei…",
+    "referirse — tú : se référer, parler de": "referirse — tú: riferirsi, parlare di",
+    "levantarse — se lever": "levantarse — alzarsi",
+    "quejarse — se plaindre": "quejarse — lamentarsi",
+    "llamarse — tú": "llamarse — tú",
+    "acordarse — yo : se souvenir": "acordarse — yo: ricordarsi",
+    "soler — j'ai l'habitude de": "soler — ho l'abitudine di",
+    "soler — nosotros": "soler — nosotros",
+    "soler — tú": "soler — tú",
+    "soler — il fait d'habitude": "soler — di solito fa",
+    "haber — vosotros : passé composé": "haber — vosotros: passato prossimo",
+    "haber — yo": "haber — yo",
+    "haber — ellos": "haber — ellos",
+    "il y a": "c'è / ci sono",
+    "toi, qu'en penses-tu ? — le sujet d'abord, puis qué": "tu, cosa ne pensi? — prima il soggetto, poi qué",
+    "qu'est-ce que tu me racontes ? — qué + pronom + verbe": "cosa mi racconti? — qué + pronome + verbo",
+    "nous pouvons toujours — l'adverbe avant le verbe": "possiamo sempre — l'avverbio prima del verbo",
+    "quelque chose de grand — l'adjectif après, sans « de »": "qualcosa di grande — l'aggettivo dopo, senza « de »",
+    "une très belle ville — l'adjectif après le nom": "una città molto bella — l'aggettivo dopo il nome",
+    "regarder (la télé) — yo : ver": "guardare (la tv) — yo: ver",
+    "regarde ! — tú : mirar": "guarda! — tú: mirar",
+    "voir — yo": "vedere — yo",
+    "regarder (avec attention) — yo": "guardare (con attenzione) — yo",
+    "avoir — auxiliaire": "avere — ausiliare",
 }
 # Cards added to grammaire.json after the first build (deber, #155): their own
 # ids, after all the others, so that no card already here changes id.
-LATE = ["1791382981350", "1791382981351", "1791382981352", "1791382981353", "1791382981354", "1791382981355"]
+LATE = ["1791382981350", "1791382981351", "1791382981352", "1791382981353", "1791382981354", "1791382981355",
+        # « Idées vocabulaire » → Grammaire (#171): pronominaux, soler, haber, ordre des mots, ver / mirar
+        "1791382981361", "1791382981362", "1791382981363", "1791382981364", "1791382981365", "1791382981366", "1791382981367", "1791382981368", "1791382981369", "1791382981370", "1791382981371", "1791382981372", "1791382981373", "1791382981374", "1791382981375", "1791382981376", "1791382981377", "1791382981378", "1791382981379", "1791382981380", "1791382981381", "1791382981382", "1791382981383", "1791382981384", "1791382981385", "1791382981386", "1791382981387", "1791382981388"]
 # Déjà neutres (espagnol) : gardés tels quels.
 NEUTRAL = {"ser / estar", "por / para", "gustar", "a + el", "de + el", "muy / mucho", "un / una", "le + lo"}
 TENSES = {"présent": "presente", "passé simple": "passato remoto", "futur": "futuro", "conditionnel": "condizionale"}
 # Tags in Italian, except « conjugaison »: the app finds conjugation cards by it.
 TAGS = {"grammaire": "grammatica", "Pronoms": "pronomi", "articles": "articoli", "gérondif": "gerundio",
-        "négation": "negazione", "obligation": "obbligo", "passés": "passati", "subjonctif": "congiuntivo"}
+        "négation": "negazione", "obligation": "obbligo", "passés": "passati", "subjonctif": "congiuntivo",
+        "pronominaux": "pronominali", "ordre": "ordine"}
 
 
 def translate_question(q):
@@ -108,7 +134,7 @@ def main():
     def translated_parts(q):  # only what was translated: the grey (…) and the tense
         return " ".join(re.findall(r"<span style='opacity:\.6'>\((.*)\)</span>", q) + re.findall(r"<br>([^<·]*) ·", q))
     left = [c["question"] for d in decks for c in d["cards"]
-            if re.search(r"[êçëœ]|é(?!l\b)|présent|passé|futur\b|conditionnel", translated_parts(c["question"]))]
+            if re.search(r"[êçëœ]|(?<!qu)é(?!l\b)|présent|passé|futur\b|conditionnel", translated_parts(c["question"]))]
     if left:
         raise SystemExit("Français restant :\n" + "\n".join(left[:10]))
     with open(os.path.join(HERE, "grammatica.json"), "w", encoding="utf-8") as f:
