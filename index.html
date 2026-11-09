@@ -1989,7 +1989,7 @@
                     Un mot par case. <span style="color:var(--green)">Vert</span> = juste, <span style="color:var(--red)">rouge</span> = pas encore ; à chaque erreur, la case <span style="color:var(--red)">rougit</span> un peu plus.
                     Les accents sont facultatifs. Dès qu'un mot est juste, on passe à la case suivante.
                     Dans ⚙, « Entrée pour valider » : le mot n'est vérifié qu'à Entrée, et toute la carte rougit à chaque erreur (erreurs comptées sur toute la réponse).
-                    Une carte juste mais tapée lentement (30 s par défaut, réglable dans ⚙) est notée « Difficile ».
+                    Une carte juste mais tapée lentement (30 s par défaut, réglable dans ⚙) est notée « Difficile ». Le temps ne compte pas quand l'onglet ou la fenêtre n'est plus devant.
                     Sur ordinateur, un <b>combo</b> compte à droite de la carte les mots justes d'affilée (sans aide) ; « À revoir » le casse. À gauche, les erreurs de la carte et les cartes ratées d'affilée. Les jours d'affilée s'affichent sur l'accueil.
                     Quand tout est montré après de l'aide, <b>Espace</b> ou <b>Entrée</b> = « À revoir » et carte suivante.
                     <br>Une réponse longue rétrécit pour tenir sur une ligne. Si la carte ne tient pas à l'écran, l'image passe à côté du texte, puis rapetisse, puis le texte ; ce qui reste défile dans la carte (dégradé en bas). Sur téléphone, « ▸ phrase » et « ▸ image » replient le verso. Plusieurs sens (« encore / toujours ») : les cases de chaque sens sont séparées par un « / », qu'on ne tape pas.
@@ -2089,6 +2089,7 @@
                 <div class="g-body">
                     <ul class="g-news">
                         <li><b>9 nov.</b> les cases ne rapetissent plus au retour d'une carte, et la carte s'agrandit quand le verso arrive au lieu de défiler ; plusieurs sens séparés par un « / » (« encore / toujours ») ; Vocabulaire : ya no, algún et bien expliqués, debería et este / estos rangés dans Grammaire (deber au conditionnel).</li>
+                        <li><b>9 nov.</b> (suite) carte ratée sur erreurs : le clavier ne fait rien pendant la transition (pas de note ni de lettres dans la carte suivante) ; le chrono s'arrête quand l'onglet ou la fenêtre n'est plus devant ; Grammaire : même écriture pour les verbes et les phrases à trous.</li>
                         <li><b>6 nov.</b> combo d'erreurs à droite, carte qui tremble, mots qui rebondissent, boutons qui s'allument ; Espace / Entrée après de l'aide = « À revoir » ; indices en italique ; image du verso à côté si la place manque ; une phrase d'exemple pour chaque mot du Vocabulaire (🔊 lue par la voix du navigateur).</li>
                         <li><b>6 nov.</b> (suite) la carte notée part vers un coin ; combos inversés (justes à droite, erreurs à gauche) et comptés tout de suite ; la case rougit à chaque erreur ; ⚙ délai avant la carte suivante.</li>
                         <li><b>6 nov.</b> (fin) 🔊 / 🔇 mode muet dans la barre de révision ; « Type d'entrée » et « Complet / Simple » rangés dans ⚙ (⚙ aussi pendant la révision) ; cartes déjà sues plus rapides (≈ 1,3 s, 1,9 s avec le son).</li>
@@ -4530,8 +4531,11 @@
         // CARD DISPLAY
         // ═══════════════════════════════════════════════
         function showCard() {
+            if (keyLock.on) { keyLock.on = false; keyLock.until = Date.now() + KEY_LOCK_AFTER_MS; }
+            sess.failedByErrors = false;
             advancing = false; cardErrors = 0; wordRows = []; revealed = false; pendingNext = null;
             sess.cardShownAt = Date.now();
+            if (awaySince) awaySince = Date.now(); // a card shown while away starts at the return
             sess.cardMisses = 0;
             sess.cardErrCount = 0;
             sess.backSide = false; sess.backFit = [];
@@ -4721,6 +4725,7 @@
                 return;
             }
             advancing = true;
+            if (sess.failedByErrors) keyLock.on = true; // until the next card is there (#157)
             keepKeyboard();
             flashForPendingRating(q, viaButton);
             playCardAudio("both", function () { ttMark("audio"); advanceCard(q); });
@@ -4847,6 +4852,27 @@
             }
         }
 
+        // Time on the card, minus the time away (#158): another tab, another
+        // window or app in front → the clock stops; back → it goes on from there.
+        var awaySince = null;
+        function cardElapsed() {
+            var now = Date.now();
+            return now - (sess.cardShownAt || now) - (awaySince ? now - awaySince : 0);
+        }
+        function setAway(away) {
+            if (document.getElementById("study").style.display !== "flex") { awaySince = null; return; }
+            if (away && !awaySince) { awaySince = Date.now(); dlog("chrono", { pause: true }); }
+            else if (!away && awaySince) {
+                var gone = Date.now() - awaySince;
+                awaySince = null;
+                if (sess.cardShownAt) sess.cardShownAt += gone;
+                dlog("chrono", { reprise: true, absent_ms: gone });
+            }
+        }
+        document.addEventListener("visibilitychange", function () { setAway(document.visibilityState === "hidden"); });
+        window.addEventListener("blur", function () { setAway(true); });
+        window.addEventListener("focus", function () { if (document.visibilityState === "visible") setAway(false); });
+
         // Time bar (#58): today's study time against the ⚙ time per day.
         var timeTimer = null, timeToastDone = false;
         function updateTimeBar() {
@@ -4856,7 +4882,7 @@
             bar.hidden = !on;
             if (!on) { clearInterval(timeTimer); timeTimer = null; return; }
             if (!timeTimer) timeTimer = setInterval(updateTimeBar, 1000);
-            var ms = dayStats().ms + Math.min(CARD_MS_CAP, Date.now() - (sess.cardShownAt || Date.now()));
+            var ms = dayStats().ms + Math.min(CARD_MS_CAP, cardElapsed());
             var r = ms / (m * 60000);
             var fill = document.getElementById("time-fill");
             fill.style.width = Math.min(100, r * 100) + "%";
@@ -4904,6 +4930,10 @@
                 while (w.nextNode()) { if (w.currentNode.textContent.trim()) { el = w.currentNode.parentElement; break; } }
             }
             if (!el) return;
+            // A word in bold / italics inside a line (« <b>ser</b> (être) ») is not the
+            // recto's writing: the line around it is — verbs and gap sentences alike (#159).
+            while (/^(B|STRONG|I|EM|SPAN|U|SMALL)$/.test(el.tagName) && el.parentElement
+                && el.parentElement.textContent.trim() !== el.textContent.trim()) el = el.parentElement;
             var cs = getComputedStyle(el);
             words.style.setProperty("--ans-font", cs.fontFamily);
             words.style.setProperty("--ans-size", cs.fontSize);
@@ -5111,6 +5141,7 @@
                 var q = document.querySelector("#s-content .s-question");
                 if (q) { q.classList.add("err-tint"); q.style.setProperty("--err-a", Math.min(0.32, 0.09 * sess.cardMisses)); }
                 entry.inp.className = "wc-inp";
+                if (sess.cardMisses >= settings().maxErrors) sess.failedByErrors = true;
                 if (sess.cardMisses >= settings().maxErrors)
                     wordRows.slice().forEach(function (e, j) { if (!e.solved && !e.given) giveAnswer(e, j); });
                 return;
@@ -5118,7 +5149,7 @@
             // Each miss reddens the word's box a little more (#131, no more dots).
             entry.box.classList.add("err-tint");
             entry.box.style.setProperty("--err-a", Math.min(0.34, 0.1 * entry.errors));
-            if (entry.errors >= settings().maxErrors) giveAnswer(entry, i);
+            if (entry.errors >= settings().maxErrors) { sess.failedByErrors = true; giveAnswer(entry, i); }
         }
 
         // 3 misses: the right word replaces what was typed (in red), the
@@ -5189,6 +5220,8 @@
             var extra = document.getElementById("s-verso-extra");
             if (card && extra && hasRichAnswer(card)) showRichBack(extra, card);
             setBarState("rating");
+            // the answer was given on errors: the keys already on their way rate nothing (#157)
+            if (sess.failedByErrors) keyLock.until = Date.now() + KEY_LOCK_RATING_MS;
         }
 
         // "Voir la réponse": the whole answer at once, then rating pills.
@@ -5216,8 +5249,10 @@
             var q = revealed ? 1 : 3;
             // Right but slow (#54): « Difficile », like Anki keeps track of answer times.
             var slow = settings().slowSeconds;
-            if (q === 3 && slow && Date.now() - (sess.cardShownAt || Date.now()) > slow * 1000) q = 2;
+            if (q === 3 && slow && cardElapsed() > slow * 1000) q = 2;
             flashForPendingRating(q);
+            // Missed on errors: the hands were still typing — nothing typed now acts (#157).
+            if (q === 1 && sess.failedByErrors) keyLock.on = true;
             var card = sess.queue[sess.qIdx];
             var srs0 = sess.srs[card.id];
             sess.tt = { t0: Date.now(), quick: quickNext(card, q),
@@ -5249,6 +5284,19 @@
             });
         }
         var RICH_BACK_READ_MS = 2500, QUICK_BACK_READ_MS = 700;
+        // A card missed on errors ends while the fingers are still on the keys:
+        // Entrée / Espace / F2 would rate it at once, letters would land in the
+        // next card. So the keyboard does nothing for 0,8 s once the answer is
+        // given, and from the rating until a little after the next card is
+        // there (#157). Échap and clicks still work.
+        var keyLock = { on: false, until: 0 }, KEY_LOCK_AFTER_MS = 300, KEY_LOCK_RATING_MS = 800;
+        window.addEventListener("keydown", function (e) {
+            if (!keyLock.on && Date.now() >= keyLock.until) return;
+            if (document.getElementById("study").style.display !== "flex") { keyLock.on = false; return; }
+            if (["Escape", "Shift", "Control", "Alt", "Meta", "CapsLock"].indexOf(e.key) !== -1) return;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+        }, true);
         // ⚙ « Délai avant la carte suivante » (#130). Auto: a new card, one
         // still being learnt or one missed keeps the time to read its back;
         // a card already known and answered right moves on quickly.
@@ -5605,6 +5653,8 @@
         });
         document.addEventListener("keydown", function (e) {
             if (document.getElementById("study").style.display !== "flex") return;
+            // the very Entrée that gave the answer on errors must not also rate it (#157)
+            if (keyLock.on || Date.now() < keyLock.until) return;
             if (pendingNext && e.key === "Enter") {
                 e.preventDefault();
                 continueAfterAnswer();
@@ -5666,7 +5716,7 @@
             var ctx = { requeueIn: null };
             sess.srs[card.id] = applyRating(sess.srs[card.id] || defaultSRS(), q, ctx);
             sess.srs[card.id].lastReview = Date.now(); // for cross-device merge on sign-in
-            var spentMs = Date.now() - (sess.cardShownAt || Date.now());
+            var spentMs = cardElapsed();
             // The test deck counts nowhere: day stats, time model, new cards, combos (#147).
             if (!isTestDeck()) {
                 recordCardTime(sess.srs[card.id], wasNew, Math.min(CARD_MS_CAP, spentMs));
@@ -5803,6 +5853,7 @@
                     "(soir) la carte part vite et la suivante arrive aussitôt du fond de l'écran ; « jours d'affilée » sur l'accueil ; la carte tient toujours à l'écran (image à côté, plus petite, texte plus petit, défilement) ; réponse longue sur une ligne ; « ▸ phrase » / « ▸ image » sur téléphone.": "(sera) la carta esce in fretta e la successiva arriva subito dal fondo dello schermo; « giorni di fila » nella pagina iniziale; la carta sta sempre nello schermo (immagine di fianco, più piccola, testo più piccolo, scorrimento); risposta lunga su una riga; « ▸ frase » / « ▸ immagine » sul telefono.",
                     "(nuit) le sens déjà tapé n'est plus réécrit sous les cases (même avec « … » ou une virgule), ni une phrase d'exemple qui n'est que le mot ; « ¡bien! » = « super ! ».": "(notte) il significato già scritto non viene più ripetuto sotto le caselle (anche con « … » o una virgola), né una frase d'esempio che è solo la parola; « ¡bien! » = « super ! ».",
                     "les cases ne rapetissent plus au retour d'une carte, et la carte s'agrandit quand le verso arrive au lieu de défiler ; plusieurs sens séparés par un « / » (« encore / toujours ») ; Vocabulaire : ya no, algún et bien expliqués, debería et este / estos rangés dans Grammaire (deber au conditionnel).": "le caselle non si rimpiccioliscono più al ritorno di una carta, e la carta si allarga quando arriva il retro invece di scorrere; più significati separati da una « / » (« ancora / sempre »); Vocabolario: ya no, algún e bien spiegati, debería e este / estos spostati in Grammatica (deber al condizionale).",
+                    "(suite) carte ratée sur erreurs : le clavier ne fait rien pendant la transition (pas de note ni de lettres dans la carte suivante) ; le chrono s'arrête quand l'onglet ou la fenêtre n'est plus devant ; Grammaire : même écriture pour les verbes et les phrases à trous.": "(seguito) carta sbagliata per errori: la tastiera non fa nulla durante la transizione (né voto né lettere nella carta successiva); il cronometro si ferma quando la scheda o la finestra non è più davanti; Grammatica: stessa scrittura per i verbi e le frasi da completare.",
                     "Une réponse longue rétrécit pour tenir sur une ligne. Si la carte ne tient pas à l'écran, l'image passe à côté du texte, puis rapetisse, puis le texte ; ce qui reste défile dans la carte (dégradé en bas). Sur téléphone, « ▸ phrase » et « ▸ image » replient le verso. Plusieurs sens (« encore / toujours ») : les cases de chaque sens sont séparées par un « / », qu'on ne tape pas.": "Una risposta lunga si restringe per stare su una riga. Se la carta non sta nello schermo, l'immagine va di fianco al testo, poi si rimpicciolisce, poi il testo; il resto scorre nella carta (sfumatura in basso). Sul telefono, « ▸ frase » e « ▸ immagine » ripiegano il retro. Più significati (« ancora / sempre »): le caselle di ogni significato sono separate da una « / », che non si scrive.",
                     "(fin) 🔊 / 🔇 mode muet dans la barre de révision ; « Type d'entrée » et « Complet / Simple » rangés dans ⚙ (⚙ aussi pendant la révision) ; cartes déjà sues plus rapides (≈ 1,3 s, 1,9 s avec le son).": "(fine) 🔊 / 🔇 modalità muta nella barra di studio; « Tipo di risposta » e « Completo / Semplice » spostati in ⚙ (⚙ anche durante lo studio); carte già sapute più veloci (≈ 1,3 s, 1,9 s con l'audio).",
                     "Dans": "In", "⚙ Réglages": "⚙ Impostazioni", ", « Type d'entrée » (⚙ est aussi en haut de l'écran de révision, à côté de ⛶ et de 🔊 / 🔇 pour le mode muet).": ", « Tipo di risposta » (⚙ è anche in alto nella schermata di studio, accanto a ⛶ e a 🔊 / 🔇 per la modalità muta).",
@@ -5814,7 +5865,9 @@
                     "(suite) la carte notée part vers un coin ; combos inversés (justes à droite, erreurs à gauche) et comptés tout de suite ; la case rougit à chaque erreur ; ⚙ délai avant la carte suivante.": "(seguito) la carta valutata vola verso un angolo; combo invertite (giuste a destra, errori a sinistra) e contate subito; la casella diventa rossa a ogni errore; ⚙ tempo prima della carta successiva.",
                     "Délai avant la carte suivante": "Tempo prima della carta successiva", "Auto": "Auto", "Toujours lent": "Sempre lento", "Toujours rapide": "Sempre veloce",
                     "Temps laissé au verso, une fois le son fini. Auto : une carte vue pour la première fois, ou ratée, garde le temps de relire (≈ 2,5 s) ; une carte déjà vue et juste (même revenue dans la séance) passe vite (≈ 0,7 s, comptées pendant le son), avec une transition plus courte.": "Tempo lasciato al retro, finito l'audio. Auto: una carta vista per la prima volta, o sbagliata, tiene il tempo per rileggere (≈ 2,5 s); una carta già vista e giusta (anche tornata nella sessione) passa in fretta (≈ 0,7 s, contati durante l'audio), con una transizione più breve.", "joue l'enregistrement de la phrase d'exemple ; s'il n'y en a pas (phrases écrites pour le Vocabulaire), la voix du navigateur la lit.": "riproduce la registrazione della frase d'esempio; se non c'è (frasi scritte per il Vocabolario), la legge la voce del browser.",
-                    "6 nov.": "6 nov.", "9 nov.": "9 nov.", "Affichés": "Visibili", "Cachés": "Nascosti",
+                    "6 nov.": "6 nov.", "9 nov.": "9 nov.",
+                    "un peu plus. Les accents sont facultatifs. Dès qu'un mot est juste, on passe à la case suivante. Dans ⚙, « Entrée pour valider » : le mot n'est vérifié qu'à Entrée, et toute la carte rougit à chaque erreur (erreurs comptées sur toute la réponse). Une carte juste mais tapée lentement (30 s par défaut, réglable dans ⚙) est notée « Difficile ». Le temps ne compte pas quand l'onglet ou la fenêtre n'est plus devant. Sur ordinateur, un": "un po' di più. Gli accenti sono facoltativi. Appena una parola è giusta, si passa alla casella successiva. In ⚙, « Invio per confermare »: la parola si controlla solo con Invio e tutta la carta diventa rossa a ogni errore (errori contati su tutta la risposta). Una carta giusta ma scritta lentamente (30 s di default, regolabile in ⚙) viene valutata « Difficile ». Il tempo non conta quando la scheda o la finestra non è più davanti. Sul computer, un",
+                    "compte à droite de la carte les mots justes d'affilée (sans aide) ; « À revoir » le casse. À gauche, les erreurs de la carte et les cartes ratées d'affilée. Les jours d'affilée s'affichent sur l'accueil. Quand tout est montré après de l'aide,": "conta a destra della carta le parole giuste di fila (senza aiuto); « Da rivedere » lo interrompe. A sinistra, gli errori della carta e le carte sbagliate di fila. I giorni di fila sono nella pagina iniziale. Quando tutto è mostrato dopo un aiuto,", "Affichés": "Visibili", "Cachés": "Nascosti",
                     "Dans la marge, comme dans un jeu de combat : les mots justes d'affilée (sans aide) et les jours d'affilée. « À revoir » casse le combo.": "Nel margine, come in un picchiaduro: le parole giuste di fila (senza aiuto) e i giorni di fila. « Da rivedere » rompe la combo.",
                     "LÉGENDAIRE !": "LEGGENDARIO!", "INCROYABLE !": "INCREDIBILE!", "GÉNIAL !": "FANTASTICO!", "SUPER !": "SUPER!", "BIEN !": "BENE!", "COMBO PERDU": "COMBO PERSA",
                     "Sur ordinateur, un": "Sul computer, una", "compte dans la marge les mots justes d'affilée (sans aide) et les jours d'affilée ; « À revoir » le casse.": "conta nel margine le parole giuste di fila (senza aiuto) e i giorni di fila; « Da rivedere » la rompe.",
