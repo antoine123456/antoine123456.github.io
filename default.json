@@ -852,9 +852,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nestás ",
           "words": [
             "tu",
-            "es",
-            "temporaire"
+            "es"
           ],
+          "notes": {
+            "1": "(temporaire)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-9a7a16c3-44987964-3e75f5bf-9b4bf3e2-ce36bfbd.mp3"
@@ -896,9 +898,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\neres ",
           "words": [
             "tu",
-            "es",
-            "permanent"
+            "es"
           ],
+          "notes": {
+            "1": "(permanent)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-355aa7aa-639d57d8-1e3f1618-7a171e6d-9e744bf3.mp3"
@@ -1026,9 +1030,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nestoy ",
           "words": [
             "je",
-            "suis",
-            "temporaire"
+            "suis"
           ],
+          "notes": {
+            "1": "(temporaire)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-d43cee8a-6170d084-cfd671a1-239a4db3-f1be8e22.mp3"
@@ -1070,9 +1076,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nsoy ",
           "words": [
             "je",
-            "suis",
-            "permanent"
+            "suis"
           ],
+          "notes": {
+            "1": "(permanent)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-5bae91e1-0baea9a4-2ba2a5cf-d3d8887a-dbfb5877.mp3"
@@ -2223,12 +2231,11 @@
           "words": [
             "je",
             "suis",
-            "malade",
-            "dit",
-            "par",
-            "un",
-            "homme"
+            "malade"
           ],
+          "notes": {
+            "2": "(dit par un homme)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-9f63acd5-9c43df56-a350a39d-6787478a-9b8a75e1.mp3"
@@ -2272,12 +2279,11 @@
           "words": [
             "je",
             "suis",
-            "malade",
-            "dit",
-            "par",
-            "une",
-            "femme"
+            "malade"
           ],
+          "notes": {
+            "2": "(dit par une femme)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-13e0125d-a83dbcdf-785cc710-e9aa5756-bb1cdd8f.mp3"
@@ -2636,9 +2642,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nla pasta ",
           "words": [
             "les",
-            "pâtes",
-            "singulier"
+            "pâtes"
           ],
+          "notes": {
+            "1": "(singulier)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-d4d38891-8b95de67-4e66e2d4-d90d4d08-5e9188ec.mp3"
@@ -2771,9 +2779,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nla verdura ",
           "words": [
             "les",
-            "légumes",
-            "singulier"
+            "légumes"
           ],
+          "notes": {
+            "1": "(singulier)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-d5317e3d-4a8bb7a6-1d9c2829-bdc94a6f-867f29cd.mp3"
@@ -3912,10 +3922,11 @@
           "id": "1569356574092",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nme gusta ",
           "words": [
-            "j'aime",
-            "une",
-            "chose"
+            "j'aime"
           ],
+          "notes": {
+            "0": "(une chose)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-eaed1549-c6743bd9-3d9ada93-156a3dbb-98469f08.mp3"
@@ -3958,10 +3969,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nte gusta ",
           "words": [
             "tu",
-            "aimes",
-            "une",
-            "chose"
+            "aimes"
           ],
+          "notes": {
+            "1": "(une chose)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-d6faca2e-8caf29e3-0936698f-f0f4c0d7-b7d33181.mp3"
@@ -4003,10 +4015,11 @@
           "id": "1569356574094",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nme gustan ",
           "words": [
-            "j'aime",
-            "plusieurs",
-            "choses"
+            "j'aime"
           ],
+          "notes": {
+            "0": "(plusieurs choses)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-e9a8d579-e38a90db-6c95e791-fe166abd-c8f39208.mp3"
@@ -4049,10 +4062,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nte gustan ",
           "words": [
             "tu",
-            "aimes",
-            "plusieurs",
-            "choses"
+            "aimes"
           ],
+          "notes": {
+            "1": "(plusieurs choses)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-530d28d0-ea7e8520-78d16191-6b6540a0-1269722a.mp3"
@@ -4097,13 +4111,15 @@
             "est",
             "elle",
             "est",
-            "c'est",
-            "permanent"
+            "c'est"
           ],
           "sep": [
             2,
             4
           ],
+          "notes": {
+            "4": "(permanent)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-680650b9-7e618274-870ab866-2d6670c3-cf3559ae.mp3"
@@ -4148,13 +4164,15 @@
             "est",
             "elle",
             "est",
-            "c'est",
-            "temporaire"
+            "c'est"
           ],
           "sep": [
             2,
             4
           ],
+          "notes": {
+            "4": "(temporaire)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-bc05cac5-831c8720-8bd8bdb1-a40424e0-b17d2865.mp3"
@@ -5240,12 +5258,14 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\ncuál ",
           "words": [
             "quel",
-            "quelle",
-            "question"
+            "quelle"
           ],
           "sep": [
             1
           ],
+          "notes": {
+            "1": "(question)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-0b05b801-3ae9d6f0-ceb1a351-537457b8-00d99b0f.mp3"
@@ -5265,9 +5285,11 @@
           "id": "1569170667876",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇫🇷 ➡️ 🇪🇸\n<br/><br/>\n\nmon; ma; mes",
           "words": [
-            "mi",
-            "mis"
+            "mi"
           ],
+          "notes": {
+            "0": "(mis)"
+          },
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-6a3c37f1-0ad1924d-c73bfbe2-9ee3f463-58e8fbe7.mp3"
@@ -5314,9 +5336,11 @@
           "id": "1569170667877",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇫🇷 ➡️ 🇪🇸\n<br/><br/>\n\nton; ta; tes",
           "words": [
-            "tu",
-            "tus"
+            "tu"
           ],
+          "notes": {
+            "0": "(tus)"
+          },
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-2f9747fe-e2e67d90-b47c5c90-a2d2cc1a-99e4b852.mp3"
@@ -7261,12 +7285,14 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\ncreer ",
           "words": [
             "penser",
-            "opinion",
             "croire"
           ],
           "sep": [
-            2
+            1
           ],
+          "notes": {
+            "0": "(opinion)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-118ecca0-a975f357-ec87d6b8-517c2a42-10d55354.mp3"
@@ -7404,15 +7430,17 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\ncree ",
           "words": [
             "il",
-            "elle",
             "pense",
             "il",
-            "elle",
             "croit"
           ],
           "sep": [
-            3
+            2
           ],
+          "notes": {
+            "0": "(elle)",
+            "2": "(elle)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-bba971e4-e7d2c32a-a841daa8-97cd370f-73d7d17b.mp3"
@@ -8359,9 +8387,11 @@
           "id": "1569170667978",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇫🇷 ➡️ 🇪🇸\n<br/><br/>\n\ntrop (singulier)",
           "words": [
-            "demasiado",
-            "demasiada"
+            "demasiado"
           ],
+          "notes": {
+            "0": "(demasiada)"
+          },
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-a7bd8422-1e9c2cc1-9301a3ff-48ef8615-eb6fef51.mp3"
@@ -8381,9 +8411,11 @@
           "id": "1569356574190",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\ndemasiado (demasiada) ",
           "words": [
-            "trop",
-            "singulier"
+            "trop"
           ],
+          "notes": {
+            "0": "(singulier)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-a7bd8422-1e9c2cc1-9301a3ff-48ef8615-eb6fef51.mp3"
@@ -8403,9 +8435,11 @@
           "id": "1569170667979",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇫🇷 ➡️ 🇪🇸\n<br/><br/>\n\ntrop (pluriel)",
           "words": [
-            "demasiados",
-            "demasiadas"
+            "demasiados"
           ],
+          "notes": {
+            "0": "(demasiadas)"
+          },
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-c30e168a-d84fbf03-e3032b65-1d750da8-9916e69b.mp3"
@@ -8425,9 +8459,11 @@
           "id": "1569356574191",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\ndemasiados (demasiadas) ",
           "words": [
-            "trop",
-            "pluriel"
+            "trop"
           ],
+          "notes": {
+            "0": "(pluriel)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-c30e168a-d84fbf03-e3032b65-1d750da8-9916e69b.mp3"
@@ -10334,9 +10370,11 @@
           "id": "1569353259489",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\ndónde ",
           "words": [
-            "où",
-            "question"
+            "où"
           ],
+          "notes": {
+            "0": "(question)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-4d38c776-3c2438a1-37bbb21a-b4f8db3e-9766b953.mp3"
@@ -11424,9 +11462,11 @@
           "id": "1569356655028",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇫🇷 ➡️ 🇪🇸\n<br/><br/>\n\ndu; de; des; quelque; quelques",
           "words": [
-            "algún",
-            "alguna"
+            "algún"
           ],
+          "notes": {
+            "0": "(alguna)"
+          },
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-93c91f4e-10c335c2-6e9ade6a-9900c010-e00e5108.mp3"
@@ -11475,9 +11515,11 @@
           "id": "1569356655029",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇫🇷 ➡️ 🇪🇸\n<br/><br/>\n\ndu; de; des; aucun",
           "words": [
-            "ningún",
-            "ninguna"
+            "ningún"
           ],
+          "notes": {
+            "0": "(ninguna)"
+          },
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-183a161d-300114fb-b13d25d9-2c7cba81-a02f4738.mp3"
@@ -12460,9 +12502,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nla gente ",
           "words": [
             "les",
-            "gens",
-            "singulier"
+            "gens"
           ],
+          "notes": {
+            "1": "(singulier)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-9c91347b-3fea4c07-cab45590-ce20bb10-feeab29e.mp3"
@@ -12852,12 +12896,14 @@
           "words": [
             "beaucoup",
             "beaucoup",
-            "de",
-            "singulier"
+            "de"
           ],
           "sep": [
             1
           ],
+          "notes": {
+            "2": "(singulier)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-50a6147d-2c45439e-d44771ea-8344fc96-592206ea.mp3"
@@ -12867,9 +12913,11 @@
           "id": "1569356655071",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇫🇷 ➡️ 🇪🇸\n<br/><br/>\n\nbeaucoup; beaucoup de (singulier)",
           "words": [
-            "mucho",
-            "mucha"
+            "mucho"
           ],
+          "notes": {
+            "0": "(mucha)"
+          },
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-50a6147d-2c45439e-d44771ea-8344fc96-592206ea.mp3"
@@ -12881,12 +12929,14 @@
           "words": [
             "beaucoup",
             "beaucoup",
-            "de",
-            "pluriel"
+            "de"
           ],
           "sep": [
             1
           ],
+          "notes": {
+            "2": "(pluriel)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-dfa50761-738d5787-324b4f58-1b6cee03-524d8c14.mp3"
@@ -12896,9 +12946,11 @@
           "id": "1569356655072",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇫🇷 ➡️ 🇪🇸\n<br/><br/>\n\nbeaucoup; beaucoup de (pluriel)",
           "words": [
-            "muchos",
-            "muchas"
+            "muchos"
           ],
+          "notes": {
+            "0": "(muchas)"
+          },
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-dfa50761-738d5787-324b4f58-1b6cee03-524d8c14.mp3"
@@ -13337,9 +13389,11 @@
           "id": "1569356655087",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇫🇷 ➡️ 🇪🇸\n<br/><br/>\n\ntous; toutes; chaque; chacun",
           "words": [
-            "todos",
-            "todas"
+            "todos"
           ],
+          "notes": {
+            "0": "(todas)"
+          },
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-421c20c8-9f0e0f39-0127015e-80571886-80780752.mp3"
@@ -13367,9 +13421,11 @@
           "id": "1569356655088",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇫🇷 ➡️ 🇪🇸\n<br/><br/>\n\ntout; toute; tout le",
           "words": [
-            "todo",
-            "toda"
+            "todo"
           ],
+          "notes": {
+            "0": "(toda)"
+          },
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-49f1686d-53341ae6-3d15feab-ecc79bd3-971c1f85.mp3"
@@ -14428,13 +14484,14 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nconocer ",
           "words": [
             "rencontrer",
-            "connaître",
-            "une",
-            "personne"
+            "connaître"
           ],
           "sep": [
             1
           ],
+          "notes": {
+            "1": "(une personne)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-ad124beb-0346a0c2-7e054267-a5b65630-3a668d82.mp3"
@@ -14492,9 +14549,11 @@
           "id": "1569356655130",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇫🇷 ➡️ 🇪🇸\n<br/><br/>\n\nces; ceux-ci",
           "words": [
-            "estos",
-            "estas"
+            "estos"
           ],
+          "notes": {
+            "0": "(estas)"
+          },
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-deec62d5-a71233d2-a69ee610-dfb711b8-8f78344c.mp3"
@@ -14519,9 +14578,11 @@
           "id": "1569356655131",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇫🇷 ➡️ 🇪🇸\n<br/><br/>\n\nces; ceux-là",
           "words": [
-            "esos",
-            "esas"
+            "esos"
           ],
+          "notes": {
+            "0": "(esas)"
+          },
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-64419797-2a023144-29c406e9-04e39fa7-a779ff0d.mp3"
@@ -15623,9 +15684,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nla ropa ",
           "words": [
             "les",
-            "vêtements",
-            "singulier"
+            "vêtements"
           ],
+          "notes": {
+            "1": "(singulier)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-8bc39528-7811bb82-22a50963-46e53200-f7b2f2ce.mp3"
@@ -16235,9 +16298,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nla bolsa ",
           "words": [
             "le",
-            "sac",
-            "plastique"
+            "sac"
           ],
+          "notes": {
+            "1": "(plastique)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-b47b64e9-fd0a9afe-9622f175-671f23a2-367e38a4.mp3"
@@ -17924,9 +17989,11 @@
           "id": "1569353260053",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\ncuánto (cuánta) ",
           "words": [
-            "combien",
-            "indénombrable"
+            "combien"
           ],
+          "notes": {
+            "0": "(indénombrable)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-23293a68-2aef933c-a4081a90-1a07c8f6-a86484e4.mp3"
@@ -17936,9 +18003,11 @@
           "id": "1569356655270",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇫🇷 ➡️ 🇪🇸\n<br/><br/>\n\ncombien (indénombrable)",
           "words": [
-            "cuánto",
-            "cuánta"
+            "cuánto"
           ],
+          "notes": {
+            "0": "(cuánta)"
+          },
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-23293a68-2aef933c-a4081a90-1a07c8f6-a86484e4.mp3"
@@ -17948,9 +18017,11 @@
           "id": "1569353260056",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\ncuántos (cuántas) ",
           "words": [
-            "combien",
-            "dénombrable"
+            "combien"
           ],
+          "notes": {
+            "0": "(dénombrable)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-db05bfd9-6c43ff51-190256b4-6bb2e132-d0963b97.mp3"
@@ -17960,9 +18031,11 @@
           "id": "1569356655271",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇫🇷 ➡️ 🇪🇸\n<br/><br/>\n\ncombien (dénombrable)",
           "words": [
-            "cuántos",
-            "cuántas"
+            "cuántos"
           ],
+          "notes": {
+            "0": "(cuántas)"
+          },
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-db05bfd9-6c43ff51-190256b4-6bb2e132-d0963b97.mp3"
@@ -19084,9 +19157,11 @@
           "id": "1569353260199",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\ncuándo ",
           "words": [
-            "quand",
-            "question"
+            "quand"
           ],
+          "notes": {
+            "0": "(question)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-424fe7b8-d509a1ad-d1b534da-77e97eab-6e38f1ee.mp3"
@@ -19107,9 +19182,11 @@
           "id": "1569353260202",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nen punto ",
           "words": [
-            "pile",
-            "heure"
+            "pile"
           ],
+          "notes": {
+            "0": "(heure)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-2e8896b7-ff5a01ee-8779a303-0b95c779-820b92a6.mp3"
@@ -19182,9 +19259,11 @@
             "il",
             "est",
             "deux",
-            "heures",
-            "pile"
+            "heures"
           ],
+          "notes": {
+            "3": "(pile)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-43bc32ad-8f78d0d2-94245466-ac19e309-c8b4cdb7.mp3"
@@ -19418,9 +19497,11 @@
           "words": [
             "à",
             "une",
-            "heure",
-            "pile"
+            "heure"
           ],
+          "notes": {
+            "2": "(pile)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-89877c94-50148c74-12bca86f-ae84a722-cb50241e.mp3"
@@ -19941,12 +20022,14 @@
             "ils",
             "vont",
             "vous",
-            "allez",
-            "formel"
+            "allez"
           ],
           "sep": [
             2
           ],
+          "notes": {
+            "3": "(formel)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-d7824f82-b0432c18-53991b48-df8ef71b-bbd367a5.mp3"
@@ -20045,9 +20128,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nla estación de tren ",
           "words": [
             "la",
-            "gare",
-            "ferroviaire"
+            "gare"
           ],
+          "notes": {
+            "1": "(ferroviaire)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-dcc7d3c7-56497c8f-d885746a-c6a04d3a-c21125a5.mp3"
@@ -20790,13 +20875,15 @@
           "words": [
             "le",
             "liquide",
-            "argent",
             "les",
             "espèces"
           ],
           "sep": [
-            3
+            2
           ],
+          "notes": {
+            "1": "(argent)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-cef86e86-5df9bbec-2e4b5a0a-ab8976b8-95b6021d.mp3"
@@ -20821,9 +20908,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nla tarjeta ",
           "words": [
             "la",
-            "carte",
-            "bancaire"
+            "carte"
           ],
+          "notes": {
+            "1": "(bancaire)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-a6f60b2c-d202523a-6de7ec8b-1d4e71ff-6ef72e19.mp3"
@@ -21380,9 +21469,11 @@
           "id": "1569353289404",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nprobarse ",
           "words": [
-            "essayer",
-            "soi-même"
+            "essayer"
           ],
+          "notes": {
+            "0": "(soi-même)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-04ba0bae-a8cb15ad-6424f817-96430764-bc8a4803.mp3"
@@ -24293,9 +24384,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nlos servicios ",
           "words": [
             "les",
-            "toilettes",
-            "publiques"
+            "toilettes"
           ],
+          "notes": {
+            "1": "(publiques)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-d1437101-debb4928-2e59a0dd-53c12606-a4539c18.mp3"
@@ -24513,10 +24606,11 @@
           "id": "1569353289582",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nver a ... ",
           "words": [
-            "voir",
-            "un",
-            "spécialiste"
+            "voir"
           ],
+          "notes": {
+            "0": "(un spécialiste)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-bb921730-1d0a0f56-932a27fe-28b3d122-f9571c83.mp3"
@@ -25631,9 +25725,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nel móvil ",
           "words": [
             "le",
-            "téléphone",
             "portable"
           ],
+          "notes": {
+            "0": "(téléphone)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-3ba74bad-2137e637-409de7b8-81ca252d-b7e212eb.mp3"
@@ -25797,9 +25893,11 @@
           "id": "1569356691080",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇫🇷 ➡️ 🇪🇸\n<br/><br/>\n\nson; sa; ses",
           "words": [
-            "su",
-            "sus"
+            "su"
           ],
+          "notes": {
+            "0": "(sus)"
+          },
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-aff1518e-6d090d4e-f51fde10-bb195f57-29715d46.mp3"
@@ -27262,9 +27360,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nla asignatura ",
           "words": [
             "la",
-            "matière",
-            "école"
+            "matière"
           ],
+          "notes": {
+            "1": "(école)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-6819fb2f-405b2a92-ef417315-a737d3ce-4bd76ed5.mp3"
@@ -27714,9 +27814,11 @@
           "id": "1569353289772",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\namar ",
           "words": [
-            "aimer",
-            "quelqu'un"
+            "aimer"
           ],
+          "notes": {
+            "0": "(quelqu'un)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-c0afea66-f04d5141-79e1a863-7c81dfcf-bac979d4.mp3"
@@ -27737,10 +27839,11 @@
           "id": "1569353289774",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nme encanta ",
           "words": [
-            "j'aime",
-            "quelque",
-            "chose"
+            "j'aime"
           ],
+          "notes": {
+            "0": "(quelque chose)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-cb7555d2-8a02c100-c6cf951d-fabe7ff7-511e3ab5.mp3"
@@ -28090,9 +28193,11 @@
           "id": "1569353289797",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nllamar a ... ",
           "words": [
-            "appeler",
-            "quelqu'un"
+            "appeler"
           ],
+          "notes": {
+            "0": "(quelqu'un)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-d8b9717d-55fac7ad-12f01a3b-5282f360-f6d7b137.mp3"
@@ -29778,9 +29883,11 @@
           "id": "1569353289914",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nquedarse ",
           "words": [
-            "se",
             "rester"
           ],
+          "notes": {
+            "-1": "(se)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-6156b969-17aa001b-107f1451-22866039-ea0de682.mp3"
@@ -29801,10 +29908,12 @@
           "id": "1569353289916",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nquedarse despierto ",
           "words": [
-            "se",
             "rester",
             "éveillé"
           ],
+          "notes": {
+            "-1": "(se)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-02d225ce-6b2778dc-0e797cea-7973cc3a-373bde2c.mp3"
@@ -30646,6 +30755,9 @@
           "words": [
             "l'euro"
           ],
+          "notes": {
+            "0": "(€)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-2fbdb69d-8b1da2ca-24ff8651-c8f48da1-a4f8a53e.mp3"
@@ -31996,10 +32108,11 @@
           "id": "1569353290077",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\ndebajo de ... ",
           "words": [
-            "sous",
-            "quelque",
-            "chose"
+            "sous"
           ],
+          "notes": {
+            "0": "(quelque chose)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-4964bb89-e5c09ec0-7ff1d911-8309c9b1-61134d4b.mp3"
@@ -32021,10 +32134,11 @@
           "id": "1569353290078",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\ndetrás de ... ",
           "words": [
-            "derrière",
-            "quelque",
-            "chose"
+            "derrière"
           ],
+          "notes": {
+            "0": "(quelque chose)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-e25baea6-5d7680c7-35900c04-91434c16-165eb19e.mp3"
@@ -32046,10 +32160,11 @@
           "id": "1569353290081",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nen frente de ... ",
           "words": [
-            "devant",
-            "quelque",
-            "chose"
+            "devant"
           ],
+          "notes": {
+            "0": "(quelque chose)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-a73fc7b3-1944fd6e-06a24c94-aacb9ae4-4f644ffc.mp3"
@@ -32442,10 +32557,11 @@
           "id": "1569353290111",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nconducir ",
           "words": [
-            "conduire",
-            "un",
-            "véhicule"
+            "conduire"
           ],
+          "notes": {
+            "0": "(un véhicule)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-7859af15-1b116f3a-74f97eef-1c89ed27-aa60ec04.mp3"
@@ -32466,11 +32582,13 @@
           "id": "1569353290113",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nse ha retrasado ",
           "words": [
-            "se",
             "a",
             "été",
             "retardé"
           ],
+          "notes": {
+            "-1": "(se)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-159993ed-f8fc184e-56f61c07-eabd97c5-8367a5f7.mp3"
@@ -32969,13 +33087,15 @@
             "la",
             "partie",
             "le",
-            "parti",
-            "politique"
+            "parti"
           ],
           "sep": [
             2,
             4
           ],
+          "notes": {
+            "5": "(politique)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-fc54fd03-5343d40e-adc04f5a-fb3e6ec9-5d5e02e0.mp3"
@@ -33170,10 +33290,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇫🇷 ➡️ 🇪🇸\n<br/><br/>\n\nnous deux",
           "words": [
             "nosotros",
-            "dos",
-            "nosotras",
             "dos"
           ],
+          "notes": {
+            "1": "(nosotras dos)"
+          },
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-47c7b15e-2c1511f4-759c0519-bf715980-bf1ea3da.mp3"
@@ -33554,12 +33675,14 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\ndurar ",
           "words": [
             "durer",
-            "prendre",
-            "temps"
+            "prendre"
           ],
           "sep": [
             1
           ],
+          "notes": {
+            "1": "(temps)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-1ffb5517-ef49a1e3-0ecc7e3b-6dcd1876-7e19bc66.mp3"
@@ -35213,13 +35336,15 @@
           "id": "1569353290317",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nmarcharse ",
           "words": [
-            "se",
             "quitter",
             "partir"
           ],
           "sep": [
-            2
+            1
           ],
+          "notes": {
+            "-1": "(se)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-90ee39fa-270d27c9-f78ce9d5-a6f488f6-fb18954d.mp3"
@@ -35794,12 +35919,14 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\ngracioso ",
           "words": [
             "drôle",
-            "amusant",
-            "blague"
+            "amusant"
           ],
           "sep": [
             1
           ],
+          "notes": {
+            "1": "(blague)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-a7fd9ec1-1d0f0103-b2d9a96c-af998684-94c9a948.mp3"
@@ -39570,12 +39697,14 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\ntocar ",
           "words": [
             "toucher",
-            "jouer",
-            "de"
+            "jouer"
           ],
           "sep": [
             1
           ],
+          "notes": {
+            "1": "(de)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-5a2a53e5-c1910cda-9adc4363-2e1ebea2-dc39c6f4.mp3"
@@ -40262,9 +40391,11 @@
           "id": "1569356734402",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇫🇷 ➡️ 🇪🇸\n<br/><br/>\n\nensemble",
           "words": [
-            "juntos",
-            "juntas"
+            "juntos"
           ],
+          "notes": {
+            "0": "(juntas)"
+          },
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-aeda0e4b-52887605-37c42096-a968a2ce-cbfb2bbd.mp3"
@@ -44853,11 +44984,12 @@
           "id": "1569353312348",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nponerse ",
           "words": [
-            "se",
-            "mettre",
-            "des",
-            "vêtements"
+            "mettre"
           ],
+          "notes": {
+            "-1": "(se)",
+            "0": "(des vêtements)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-ab15cf24-004f1171-142d57b8-d49db936-29c5eddc.mp3"
@@ -44948,9 +45080,11 @@
           "id": "1569353312354",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\ncálido ",
           "words": [
-            "chaud",
-            "temps"
+            "chaud"
           ],
+          "notes": {
+            "0": "(temps)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-9d9d0a73-3a70fc90-d2fb466f-a834102a-c7c99c99.mp3"
@@ -45378,9 +45512,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nla falta ",
           "words": [
             "la",
-            "faute",
-            "sports"
+            "faute"
           ],
+          "notes": {
+            "1": "(sports)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-853c8b98-d659ec4b-c9a46bfe-47278868-7e466109.mp3"
@@ -45453,9 +45589,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nel gol ",
           "words": [
             "le",
-            "but",
-            "sports"
+            "but"
           ],
+          "notes": {
+            "1": "(sports)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-84472c52-56c26799-c37dc806-b66ee363-52b76555.mp3"
@@ -48813,10 +48951,12 @@
           "id": "1569353312587",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nponerse nervioso ",
           "words": [
-            "se",
             "rendre",
             "nerveux"
           ],
+          "notes": {
+            "-1": "(se)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-5394be95-8899dddf-bbfd2670-a6e5dbf0-bd573a7c.mp3"
@@ -50401,9 +50541,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nel punto ",
           "words": [
             "le",
-            "point",
-            "sports"
+            "point"
           ],
+          "notes": {
+            "1": "(sports)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-fa921ff6-2003a668-ccc5f723-d38b919b-af4da657.mp3"
@@ -50665,13 +50807,14 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nperder ",
           "words": [
             "perdre",
-            "rater",
-            "le",
-            "bus"
+            "rater"
           ],
           "sep": [
             1
           ],
+          "notes": {
+            "1": "(le bus)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-74da49df-1d104279-75708626-baf3669e-bffdbe68.mp3"
@@ -51284,9 +51427,11 @@
           "id": "1569353324446",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nherir ",
           "words": [
-            "blesser",
-            "quelqu'un"
+            "blesser"
           ],
+          "notes": {
+            "0": "(quelqu'un)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-95646372-040ae3a6-b5a94bb5-3bb866ba-e9ea060f.mp3"
@@ -51796,11 +51941,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nla temporada ",
           "words": [
             "la",
-            "saison",
-            "sports",
-            "TV",
-            "mode"
+            "saison"
           ],
+          "notes": {
+            "1": "(sports, TV, mode)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-0d449ea6-c524b14f-4c5e120a-6a5bd023-e226716d.mp3"
@@ -53205,9 +53350,11 @@
           "id": "1569356755652",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇫🇷 ➡️ 🇪🇸\n<br/><br/>\n\nautre; un autre",
           "words": [
-            "otro",
-            "otra"
+            "otro"
           ],
+          "notes": {
+            "0": "(otra)"
+          },
           "tags": [],
           "audioAnswer": [
             "default_media/spanishdict-2647e7ba-5486e6e9-75478ef2-c81cb9b1-fb40007b.mp3"
@@ -53246,12 +53393,14 @@
             "de",
             "qui",
             "à",
-            "qui",
-            "questions"
+            "qui"
           ],
           "sep": [
             1
           ],
+          "notes": {
+            "4": "(questions)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-2f143a05-81e50469-705c8d2d-43ce86f0-815f18bd.mp3"
@@ -55974,9 +56123,11 @@
           "id": "1569353324711",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\ndisparar ",
           "words": [
-            "tirer",
-            "pistolet"
+            "tirer"
           ],
+          "notes": {
+            "0": "(pistolet)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-4cc04571-9c3f2c56-653021a3-43270f8c-73ab414f.mp3"
@@ -56419,10 +56570,11 @@
           "id": "1569353324735",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nintentar ",
           "words": [
-            "essayer",
-            "de",
-            "faire"
+            "essayer"
           ],
+          "notes": {
+            "0": "(de faire)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-81bc6731-49578425-bbe81b4f-a1e133db-3c555773.mp3"
@@ -57533,9 +57685,11 @@
           "id": "1569353324796",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nsaludable ",
           "words": [
-            "sain",
-            "nourriture"
+            "sain"
           ],
+          "notes": {
+            "0": "(nourriture)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-9390dcdd-5a9bc027-770fc29e-117846c6-8e00732d.mp3"
@@ -57558,9 +57712,11 @@
           "words": [
             "en",
             "bonne",
-            "santé",
-            "personne"
+            "santé"
           ],
+          "notes": {
+            "2": "(personne)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-b720f6ed-dde6d15d-aa23fb1e-9de969b9-be969cea.mp3"
@@ -58463,12 +58619,14 @@
             "la",
             "carrière",
             "les",
-            "études",
-            "universitaires"
+            "études"
           ],
           "sep": [
             2
           ],
+          "notes": {
+            "3": "(universitaires)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-ea4c3422-594bd4dc-5fa1b0ad-1eeb26d6-23af06fb.mp3"
@@ -58553,13 +58711,15 @@
             "changer",
             "se",
             "transformer",
-            "se",
             "devenir"
           ],
           "sep": [
             2,
             4
           ],
+          "notes": {
+            "3": "(se)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-0b2d6420-9c329bc2-6af10610-c54d3552-bb5702ad.mp3"
@@ -58933,12 +59093,14 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nechar ",
           "words": [
             "jeter",
-            "virer",
-            "quelqu'un"
+            "virer"
           ],
           "sep": [
             1
           ],
+          "notes": {
+            "1": "(quelqu'un)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-684481c3-48a62773-66079bc7-b40c50aa-1b5f66f6.mp3"
@@ -60034,9 +60196,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nla presión arterial ",
           "words": [
             "la",
-            "tension",
-            "artérielle"
+            "tension"
           ],
+          "notes": {
+            "1": "(artérielle)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-5e40a799-a2953084-feecc985-0693381d-a42b7f9f.mp3"
@@ -60786,10 +60950,12 @@
           "id": "1569353325005",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nenamorarse ",
           "words": [
-            "se",
             "tomber",
             "amoureux"
           ],
+          "notes": {
+            "-1": "(se)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-f27fe337-801da0c3-b8876c9e-156b355c-71168500.mp3"
@@ -61084,9 +61250,11 @@
           "id": "1569353325029",
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\ndivorciarse ",
           "words": [
-            "se",
             "divorcer"
           ],
+          "notes": {
+            "-1": "(se)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-0111b72e-3241974c-78bd5aa7-938aea5e-dc8957b4.mp3"
@@ -61714,7 +61882,6 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nesforzarse ",
           "words": [
             "s'efforcer",
-            "se",
             "faire",
             "un",
             "effort"
@@ -61722,6 +61889,9 @@
           "sep": [
             1
           ],
+          "notes": {
+            "0": "(se)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-0066a4c5-617ff3f4-0f497669-8a9b0b8a-a8e031fc.mp3"
@@ -63276,10 +63446,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nla carta ",
           "words": [
             "la",
-            "lettre",
-            "message",
-            "écrit"
+            "lettre"
           ],
+          "notes": {
+            "1": "(message écrit)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-82549cbd-ea7cee9d-42acda16-d2f98be1-5ae32be8.mp3"
@@ -65933,13 +66104,14 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\npublicar ",
           "words": [
             "publier",
-            "poster",
-            "médias",
-            "sociaux"
+            "poster"
           ],
           "sep": [
             1
           ],
+          "notes": {
+            "1": "(médias sociaux)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-4f45cfd4-59e9c6e9-6ce4994b-70bc1264-ce1d1efa.mp3"
@@ -68367,13 +68539,14 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nsuspender ",
           "words": [
             "rater",
-            "un",
-            "examen",
             "suspendre"
           ],
           "sep": [
-            3
+            1
           ],
+          "notes": {
+            "0": "(un examen)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-ae34f5e6-111bfab0-bc9a5d86-7d433eb0-d572edb3.mp3"
@@ -68441,9 +68614,11 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nel puesto ",
           "words": [
             "le",
-            "poste",
-            "travail"
+            "poste"
           ],
+          "notes": {
+            "1": "(travail)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-70fb57bb-b73f1b67-32bb7308-5ece01bd-15addc1a.mp3"
@@ -68497,12 +68672,14 @@
             "la",
             "tâche",
             "le",
-            "devoir",
-            "scolaire"
+            "devoir"
           ],
           "sep": [
             2
           ],
+          "notes": {
+            "3": "(scolaire)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-38f5759a-6ea683eb-ce64a484-10ea6952-352420da.mp3"
@@ -71611,12 +71788,14 @@
           "question": "<style>.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n</style>🇪🇸 ➡️ 🇫🇷 \n<br/><br/>\n\nactuar ",
           "words": [
             "jouer",
-            "acteur",
             "performer"
           ],
           "sep": [
-            2
+            1
           ],
+          "notes": {
+            "0": "(acteur)"
+          },
           "tags": [],
           "audioQuestion": [
             "default_media/spanishdict-cf58c68b-13348a5f-208d1e55-98b1b31e-d8013d4d.mp3"
