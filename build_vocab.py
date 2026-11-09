@@ -192,12 +192,17 @@ def translated(cards, lang):
 
 
 def deck_json(cards, lang):
+    """Levels by « lvl » (frequency), each sorted by frequency rank; « range » =
+    the words' positions in the whole deck (the frequent words of #161 included)."""
     L = LANGS[lang]
-    return {"version": 1, "source": L["source"],
-            "decks": [{"id": f"{L['deck_id']}-{n}", "name": level_deck(n, lang)[0], "skippable": True,
-                       "range": [level_deck(n)[1], min(level_deck(n)[2] or len(cards), len(cards))],
-                       "cards": [c for c in cards if level_of(c["key"]) == n]}
-                      for n in range(1, len(LEVELS) + 1)]}
+    decks, pos = [], 0
+    for n in range(1, len(LEVELS) + 1):
+        cs = sorted((c for c in cards if c["lvl"] == n), key=lambda c: c["_r"])
+        decks.append({"id": f"{L['deck_id']}-{n}", "name": level_deck(n, lang)[0], "skippable": True,
+                      "range": [pos + 1, pos + len(cs)],
+                      "cards": [{k: v for k, v in c.items() if k not in ("lvl", "_r")} for c in cs]})
+        pos += len(cs)
+    return {"version": 1, "source": L["source"], "decks": decks}
 ID_BASE = 1_100_000_000_000  # ids déterministes, dans le passé (2004, avant Anki : ni futur refusé, ni collision)
 
 sys.path.insert(0, HERE)
@@ -372,10 +377,29 @@ def main():
         if w["audio"]: card["audioQuestion"] = [w["audio"]]
         if e.get("sa"): card["sa"] = e["sa"]
         if img: card["img"] = img["url"]
+        card["lvl"], card["_r"] = level_of(i), rank(w)
         cards.append(card)
         if img: review.append((card, via))
 
-    cards_it = translated(cards, "it")
+    # The frequent words heard in films and series (#161, vocab_pro.tsv) are part of
+    # this deck: each joins the level whose words are as frequent, keeping its own id.
+    import build_vocab_pro as bvp
+    top = {n: max(c["_r"] for c in cards if c["lvl"] == n) for n in range(1, len(LEVELS) + 1)}
+    lvl_of_rank = lambda r: next((n for n in range(1, len(LEVELS)) if r <= top[n]), len(LEVELS))
+    pro_rows, same = sorted(bvp.rows(), key=lambda r: int(r["rank"])), {}
+    pro_fr, pro_it = [], []
+    for r in pro_rows:
+        k = same.get(r["rank"], 0)
+        same[r["rank"]] = k + 1
+        for lang, out in (("fr", pro_fr), ("it", pro_it)):
+            c = bvp.card(r, lang, k)
+            c["lvl"], c["_r"] = lvl_of_rank(int(r["rank"])), int(r["rank"])
+            out.append(c)
+    print(f"{len(pro_fr)} mots fréquents ajoutés aux niveaux : "
+          + ", ".join(f"{n}: {sum(1 for c in pro_fr if c['lvl'] == n)}" for n in range(1, len(LEVELS) + 1)))
+
+    cards_it = translated(cards, "it") + pro_it
+    cards = cards + pro_fr
     for c in cards:
         c.pop("sit", None)
         c.pop("nit", None)
@@ -555,7 +579,7 @@ def build_apkg(cards, lang="fr"):
                 if c.get("img"):
                     n["Image"] = f'<img src="{c["img"]}">'
                 n.tags = ["vocabulaire"] + ([c["pos"].split()[0]] if c.get("pos") else [])
-                col.add_note(n, level_dids[level_of(c["key"])])
+                col.add_note(n, level_dids[c.get("lvl") or level_of(c["key"])])
                 # Mêmes ids que dans l'appli (ankisync fait le lien après import).
                 cid = col.db.scalar("select id from cards where nid = ?", n.id)
                 col.db.execute("update cards set id = ? where id = ?", int(c["id"]), cid)
