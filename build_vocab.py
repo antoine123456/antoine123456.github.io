@@ -75,6 +75,38 @@ LANGS = {
 }
 
 
+# Cards fixed by hand (flagged 🚩 in the app, #155), by Spanish word:
+# fr = meaning (« ; » between meanings), n / nit = a note on the back (fr / it).
+OVERRIDES = {
+    "bien": {"fr": "bien; super !"},
+    "ya no": {"fr": "plus maintenant; ne… plus",
+              "n": "ya no = ce qui était vrai ne l'est plus : ya no vivo aquí = je n'habite plus ici.",
+              "nit": "ya no = ciò che era vero non lo è più: ya no vivo aquí = non abito più qui."},
+    "algún (alguna)": {"fr": "quelque",
+                       "n": "algún devant un nom masculin (algún día = un jour), alguna au féminin ; au pluriel algunos / algunas = quelques. Dans une question : un (¿tienes algún libro? = tu as un livre ?).",
+                       "nit": "algún davanti a un nome maschile (algún día = un giorno), alguna al femminile; al plurale algunos / algunas = alcuni / alcune. In una domanda: un (¿tienes algún libro? = hai un libro?)."},
+}
+# Grammar, not vocabulary: already in the Grammaire deck (#155). Left out
+# without shifting the other cards' ids (each keeps its rank).
+EXCLUDE = {"debería", "estos (estas)", "este (esto; esta)"}
+
+
+def typed_meanings(meaning):
+    """(words, sep): every meaning, a « / » between them in the app (#154),
+    when they are short (4 words in all); else only the first (#88)."""
+    senses = [x.strip() for x in meaning.split(";") if x.strip()]
+    tok = lambda t: [w for w in (re.sub(r"^[^\w]+|[^\w]+$", "", x) for x in t.split()) if w]
+    groups = [tok(x) for x in senses]
+    groups = [g for g in groups if g]
+    if len(groups) > 1 and sum(len(g) for g in groups) <= 4:
+        sep, k = [], 0
+        for g in groups[:-1]:
+            k += len(g)
+            sep.append(k)
+        return [w for g in groups for w in g], sep
+    return None, None
+
+
 def words_to_type(meaning):
     """First meaning (+ its note in brackets), no punctuation (#88, #90)."""
     first = re.split(r"\s*[;,]\s*", meaning)[0].strip()
@@ -151,6 +183,10 @@ def translated(cards, lang):
         elif c.get("s"):
             t["sf"] = r[1] if len(r) > 1 else ""
         t.pop("sit", None)
+        t.pop("sep", None)  # the Italian meaning: its own words
+        if c.get("n"):
+            t["n"] = c.get("nit") or ""
+        t.pop("nit", None)
         out.append(t)
     return out
 
@@ -300,6 +336,11 @@ def main():
     cards, review = [], []  # review : (carte, nom de la phrase qui fournit l'image ou None)
     for i, w in enumerate(items, 1):
         w["i"] = i
+        if w["es"] in EXCLUDE:
+            continue
+        fix = OVERRIDES.get(w["es"], {})
+        if fix.get("fr"):
+            w["fr"] = fix["fr"]
         e = w["e"]
         core = toks(ARTICLE.sub("", w["es"]))
         img = imgs.get(core[0]) if e.get("pos", "").startswith("nom") and len(core) == 1 else None
@@ -318,6 +359,11 @@ def main():
                 # No punctuation to type (#90): « ? », « ... » alone are dropped, « (permanent) » → permanent.
                 "words": [t for t in (re.sub(r"^[^\w]+|[^\w]+$", "", x) for x in first.split()) if t],
                 "tags": ["vocabulaire"]}
+        all_words, sep = typed_meanings(w["fr"])
+        if all_words:
+            card["words"], card["sep"] = all_words, sep
+        if fix.get("n"):
+            card["n"], card["nit"] = fix["n"], fix.get("nit", "")
         if e.get("pos"): card["pos"] = e["pos"]
         if e.get("s"): card["s"], card["sf"] = e["s"], e.get("sf", "")
         elif i in gen:
@@ -332,6 +378,7 @@ def main():
     cards_it = translated(cards, "it")
     for c in cards:
         c.pop("sit", None)
+        c.pop("nit", None)
     with open(os.path.join(HERE, "vocabulaire.json"), "w", encoding="utf-8") as f:
         json.dump(deck_json(cards, "fr"), f, ensure_ascii=False, separators=(",", ":"))
     with open(os.path.join(HERE, LANGS["it"]["json"]), "w", encoding="utf-8") as f:

@@ -114,6 +114,27 @@ def card_words_and_question(question_html: str, answer_html: str):
     return words
 
 
+def sense_starts(question_html: str, answer_html: str, words: list) -> list:
+    """« encore; toujours » : index des mots où commence chaque sens après le
+    premier ([1]) — l'appli met un « / » entre leurs cases (#154). [] si un seul
+    sens, ou si le découpage ne retombe pas exactement sur `words`."""
+    idx = answer_html.lower().find(ANSWER_MARKER)
+    q_text = clean_for_words(question_html)
+    a_text = clean_for_words(answer_part(answer_html))
+    if idx == -1 and a_text.lower().startswith(q_text.lower()):
+        a_text = a_text[len(q_text):].strip()
+    parts = [[w for w in (strip_punct_edges(x) for x in p.split()) if w and any(ch.isalnum() for ch in w)]
+             for p in a_text.split(';')]
+    parts = [p for p in parts if p]
+    if len(parts) < 2 or sum(parts, []) != list(words):
+        return []
+    starts, k = [], 0
+    for p in parts[:-1]:
+        k += len(p)
+        starts.append(k)
+    return starts
+
+
 def strip_punct_edges(w: str) -> str:
     """Retire la ponctuation en début/fin de mot ("..." avant "cosa", "?"
     après "crees") tout en gardant celle à l'intérieur (apostrophes,
@@ -279,6 +300,7 @@ def process_collection(col, media: MediaCollector, deck_filter: list | None = No
         if not words:
             skipped += 1
             continue
+        sep = sense_starts(q_html, a_html, words)
 
         audio_q = [rel for tag in card.question_av_tags()
                    if (fn := getattr(tag, 'filename', None))
@@ -294,6 +316,7 @@ def process_collection(col, media: MediaCollector, deck_filter: list | None = No
             'question': q_html,
             'answer': ans_html,
             'words': words,
+            **({'sep': sep} if sep else {}),
             'tags': list(note.tags),
         }
         if audio_q:
@@ -470,6 +493,7 @@ def process_db_legacy(db_path: str, media: MediaCollector, media_bytes_fn) -> li
         if not words:
             skipped += 1
             continue
+        sep = sense_starts(q_html, a_html, words)
 
         resolve = lambda fn: {'data': media_bytes_fn(fn)}  # noqa: E731
         audio_q = [rel for fn in SOUND_TAG_RE.findall(q_html)
@@ -485,6 +509,7 @@ def process_db_legacy(db_path: str, media: MediaCollector, media_bytes_fn) -> li
             'question': q_html,
             'answer': ans_html,
             'words': words,
+            **({'sep': sep} if sep else {}),
             'tags': note['tags'],
         }
         if audio_q:

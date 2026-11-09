@@ -35,10 +35,14 @@ def plain(q):
 def sides(card):
     """(espagnol, français, audio espagnol) d'une carte, selon son sens."""
     q = plain(card["question"])
-    w = " ".join(card.get("words") or [])
+    ws = card.get("words") or []
+    # « encore; toujours » : the meanings keep their « ; » (sep = where each starts, #154)
+    cut = [0] + list(card.get("sep") or []) + [len(ws)]
+    w = "; ".join(" ".join(ws[a:b]) for a, b in zip(cut, cut[1:]) if b > a)
     if "🇪🇸 ➡️ 🇫🇷" in q or card.get("lang") == "es":
         return q.replace("🇪🇸 ➡️ 🇫🇷", "").strip(), w, card.get("audioQuestion") or []
-    return w, q.replace("🇫🇷 ➡️ 🇪🇸", "").strip(), card.get("audioAnswer") or []
+    # FR→ES: the Spanish typed words stay as they were (they are the word's key)
+    return " ".join(ws), q.replace("🇫🇷 ➡️ 🇪🇸", "").strip(), card.get("audioAnswer") or []
 
 
 def deck_rank(name):
