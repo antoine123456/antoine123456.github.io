@@ -3403,8 +3403,17 @@
                     if (syncPending) { syncPending = false; flushSync(); }
                 });
         }
+        // Back to the app (#181): what was done on another device meanwhile comes
+        // in — on the home page only (a session in progress keeps its cards).
+        var lastPull = Date.now();
         document.addEventListener("visibilitychange", function () {
-            if (document.visibilityState === "hidden") { clearTimeout(syncTimer); flushSync(); }
+            if (document.visibilityState === "hidden") { clearTimeout(syncTimer); flushSync(); return; }
+            if (!fbUser || READONLY || Date.now() - lastPull < 20000 || document.getElementById("study").style.display === "flex") return;
+            lastPull = Date.now();
+            var t0 = Date.now();
+            fetchAndMergeFromFirestore().then(function () {
+                setSyncStatus("synced"); dlog("synchro réception", { ok: true, retour: true, duree_ms: Date.now() - t0 }); renderHome();
+            }, function (err) { dlog("synchro réception", { ok: false, retour: true, erreur: String(err) }); });
         });
         window.addEventListener("pagehide", function () { clearTimeout(syncTimer); flushSync(); });
         window.addEventListener("online", function () { if (fbUser) scheduleSync(); });
@@ -3480,6 +3489,11 @@
             dump.sources.forEach(function (s) {
                 dump.perSource[s.id] = { cards: loadCards(s.id), srs: loadSRS(s.id), newCount: loadNewCount(s.id), flagged: loadFlagged(s.id) };
             });
+            // only the last two are kept: one per pull used to pile up until storage was full (#181)
+            try {
+                var old = []; for (var bi = 0; bi < localStorage.length; bi++) { var bk = localStorage.key(bi); if (bk && bk.indexOf(NS + "backup_") === 0) old.push(bk); }
+                old.sort().slice(0, Math.max(0, old.length - 1)).forEach(function (k) { localStorage.removeItem(k); });
+            } catch (e) { }
             try { localStorage.setItem(NS + "backup_" + Date.now(), JSON.stringify(dump)); } catch (e) { }
         }
 
