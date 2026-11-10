@@ -187,7 +187,7 @@ def translated(cards, lang):
         t = dict(c, id=str(L["id_base"] + int(c["id"]) - ID_BASE), fr=r[0], answer=html.escape(r[0]), words=typed(r[0], comma=True)[0])
         if c.get("pos"):
             t["pos"] = L["pos"].get(c["pos"], c["pos"])
-        if c.get("sg"):
+        if c.get("sg") or c.get("sit"):  # generated, or an OVERRIDES sentence (#200)
             t["sf"] = c.get("sit", "")
         elif c.get("s"):
             t["sf"] = r[1] if len(r) > 1 else ""

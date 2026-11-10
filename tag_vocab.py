@@ -129,7 +129,11 @@ IT = {"nom": "nome", "verbe": "verbo", "adjectif": "aggettivo", "adverbe": "avve
       "vêtements": "vestiti", "ville": "città", "transports": "trasporti", "nature": "natura", "temps": "tempo",
       "loisirs": "svago", "école": "scuola", "travail": "lavoro e soldi", "crime": "crimine e giustizia",
       "guerre": "guerra", "sentiments": "sentimenti", "couleurs": "colori", "nombres": "numeri",
-      "transparent": "trasparente"}
+      "transparent": "trasparente", "cris d'animaux": "versi degli animali"}
+
+# the animals' cries (#203): « cris d'animaux », and with the animals
+CRIES = {"ladrar", "maullar", "mugir", "relinchar", "rugir", "cacarear", "piar", "gruñir", "balar", "croar",
+         "aullar", "zumbar", "rebuznar", "graznar", "ronronear", "el ladrido", "el rugido"}
 
 # « transparent » (#198): Spanish endings → French / Italian ones
 ENDINGS = {
@@ -210,6 +214,8 @@ def tags_for(c):
         tags.append("couleurs")
     if core in NUMBERS:
         tags.append("nombres")
+    if c["es"].strip() in CRIES:
+        tags += [t for t in ("animaux", "cris d'animaux") if t not in tags]
     return tags
 
 

@@ -87,7 +87,10 @@ def wiki_images(words):
             if w is None:
                 continue
             bad = p.get("missing") or "disambiguation" in (p.get("pageprops") or {})
-            out[w] = None if bad else p.get("pageimage")
+            img = p.get("pageimage")
+            if img and not re.search(r"\.(jpe?g|png|gif|svg|webp|tiff?)$", img, re.I):
+                img = None  # a video (.ogv, .webm) can't go in an <img>
+            out[w] = None if bad else img
         for w in chunk:
             out.setdefault(w, None)
     return out
