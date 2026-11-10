@@ -433,6 +433,10 @@
         .b-review-bar { display: flex; gap: 8px; align-items: center; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
         .b-comment { font-size: 13px; color: var(--red); max-width: 90%; text-align: center; }
         .b-flag { font: inherit; font-size: 13px; border: 1.5px solid var(--border-2); background: var(--surface); color: var(--text); border-radius: 16px; padding: 4px 12px; cursor: pointer; }
+        .b-edited { font-size: 12px; color: var(--text-3); }
+        .ed-modal { max-width: 560px; }
+        .ed-modal .ac-row textarea { font: inherit; font-size: 15px; color: var(--text); background: var(--surface); border: 1.5px solid var(--border-2); border-radius: 10px; padding: 8px 10px; resize: vertical; }
+        .ed-modal .ac-row textarea:focus { outline: none; border-color: var(--navy); }
         .h-settings-btn { right: 108px; }
         .st-modal { max-width: 460px; padding-bottom: 18px; }
         .h-range { font-size: 11px; font-weight: 400; color: var(--text-3); margin-left: 4px; }
@@ -2131,6 +2135,19 @@
         </div>
     </div>
 
+    <!-- ── 📝 Relecture, ↑: edit the card (#187) ── -->
+    <div class="g-backdrop" id="edit-modal" hidden onclick="if (event.target === this) closeEditModal()">
+        <div class="g-modal fm-modal ed-modal" role="dialog" aria-modal="true" aria-labelledby="ed-title">
+            <div class="g-title" id="ed-title">✏️ Modifier la carte</div>
+            <div id="ed-fields"></div>
+            <div class="fm-actions">
+                <span class="fm-keys">Ctrl+Entrée : enregistrer · Échap : annuler</span>
+                <button class="fm-btn" onclick="closeEditModal()">Annuler</button>
+                <button class="fm-btn fm-ok ac-ok" onclick="confirmEdit()">✓ Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
     <div class="g-backdrop" id="guide" hidden onclick="if (event.target === this) closeGuide()">
         <div class="g-modal" role="dialog" aria-modal="true" aria-labelledby="g-title">
             <div class="g-head">
@@ -2149,7 +2166,7 @@
                     </div></div>
                     Touche la ligne : une fiche montre les nouvelles cartes, celles à repasser et à réviser, et ce qu'est le paquet (objectif, comment il a été fait) ; « Étudier maintenant » (ou Entrée) lance la révision. <b>nvx</b> = nouvelles cartes du jour, <b>dus</b> = à revoir aujourd'hui, <b>appris</b> = déjà sues.
                     <b>+20</b> : 20 nouvelles de plus. <b>✓</b> : je connais déjà ce paquet (ses cartes jamais vues passent en apprises, elles reviendront de temps en temps).
-                    <b>🔍</b> : parcourir les cartes (carrousel pour les images, liste pour les mots) ; <b>📝 Relecture</b> les montre une par une, <b>F6</b> pour commenter une carte.
+                    <b>🔍</b> : parcourir les cartes (carrousel pour les images, liste pour les mots) ; <b>📝 Relecture</b> les montre une par une, <b>F6</b> pour commenter une carte, <b>↑</b> (✏️) pour la modifier, <b>↓</b> (🗑) pour la retirer du paquet (<b>Ctrl+Z</b> la remet).
                     <b>＋</b> (sur « 📝 Vocabulaire perso ») : ajouter tes propres cartes, l'espagnol et sa traduction.
                     <br>💤 sur un paquet l'endort : il disparaît de l'accueil, sa progression est gardée ; « 💤 paquets endormis », en bas de l'accueil, les réveille.
                     Dans 🔍 d'un paquet de conjugaison, <b>📋 Tableaux</b> montre tous les tableaux des verbes.
@@ -2266,6 +2283,7 @@
                         <span class="t-key">F6</span><span>signaler la carte avec un commentaire (aussi dans 📝 Relecture)</span>
                         <span class="t-key">⛶</span><span>plein écran (en haut de l'écran de révision)</span>
                         <span class="t-key">← →</span><span>carrousel 🔍 · <b>Échap</b> : retour</span>
+                        <span class="t-key">↑ ↓</span><span>📝 Relecture : modifier la carte · la retirer du paquet (Ctrl+Z : annuler)</span>
                     </div>
                 </div>
             </div>
@@ -2274,6 +2292,7 @@
                 <div class="g-num">9</div><div class="g-h">Nouveautés</div>
                 <div class="g-body">
                     <ul class="g-news">
+                        <li><b>10 nov.</b> (nuit) 📝 Relecture : ↑ modifier la carte, ↓ la retirer du paquet.</li>
                         <li><b>10 nov.</b> (soir, fin) fiche du paquet : durée estimée de la séance en mode « nombre de cartes ».</li>
                         <li><b>10 nov.</b> (soir, suite) d'un appareil à l'autre : même ordre des cartes du jour partout, et la progression revient en rouvrant l'appli.</li>
                         <li><b>10 nov.</b> (soir) 💤 endormir un paquet : il quitte l'accueil, sa progression est gardée, et se réveille en bas de l'accueil.</li>
@@ -2446,6 +2465,7 @@
         var LS_SRS = "ankitrain_v1_s_";      // + sourceId → {cardId: srsMeta}
         var LS_NEWCOUNT = "ankitrain_v1_nc_";     // + sourceId → {day, count}
         var LS_FLAGGED = "ankitrain_v1_fl_";     // + sourceId → {cardId: questionPlainText}
+        var LS_EDITS = "ankitrain_v1_ed_";     // + sourceId → {cardId: {f: {field: value}, at}} — cards edited in 📝 Relecture (#187)
         var LS_STYLES = "ankitrain_v1_css_";    // + sourceId → [css shared by cards, see card.style]
         var LS_MODE = "ankitrain_v1_mode";     // "type" (type the answer, default) | "flip" (Anki-style: show answer, rate)
         var LS_THEME = "ankitrain_v1_theme";    // "light" | "dark" | absent (follow system)
@@ -2763,8 +2783,26 @@
             } catch (e) { }
         })();
         function loadCards(sid) {
-            if (isBundledId(sid)) return MEM_CARDS[sid] || {};
-            try { return JSON.parse(localStorage.getItem(LS_CARDS + sid) || "{}"); } catch (e) { return {}; }
+            if (isBundledId(sid)) return applyEdits(sid, MEM_CARDS[sid] || {});
+            try { return applyEdits(sid, JSON.parse(localStorage.getItem(LS_CARDS + sid) || "{}")); } catch (e) { return {}; }
+        }
+        // Cards edited in 📝 Relecture (#187): only the changed fields, laid
+        // over the deck's cards every time they're loaded — bundled decks
+        // come back from their JSON file at each start — and synced.
+        function loadEdits(sid) { try { return JSON.parse(localStorage.getItem(LS_EDITS + sid) || "{}"); } catch (e) { return {}; } }
+        function saveEdits(sid, ed) { try { localStorage.setItem(LS_EDITS + sid, JSON.stringify(ed)); } catch (e) { } scheduleSync(); }
+        function applyEdits(sid, cardsByDeck) {
+            var ed = loadEdits(sid);
+            if (!Object.keys(ed).length) return cardsByDeck;
+            Object.keys(cardsByDeck).forEach(function (did) {
+                (cardsByDeck[did] || []).forEach(function (c) { if (ed[c.id]) Object.assign(c, ed[c.id].f); });
+            });
+            return cardsByDeck;
+        }
+        function mergeEdits(localEd, cloudEd) { // the latest edit of each card wins
+            var out = Object.assign({}, cloudEd || {});
+            Object.keys(localEd || {}).forEach(function (id) { if (!out[id] || (localEd[id].at || 0) >= (out[id].at || 0)) out[id] = localEd[id]; });
+            return out;
         }
         function saveCards(sid, c) {
             if (isBundledId(sid)) { MEM_CARDS[sid] = c; return; }
@@ -3297,6 +3335,7 @@
                     srs: loadSRS(src.id),
                     newCount: loadNewCount(src.id),
                     flagged: loadFlagged(src.id),
+                    edits: loadEdits(src.id),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 }, { merge: true });
             });
@@ -3332,7 +3371,7 @@
         function backupLocalData() {
             var dump = { sources: loadSources(), perSource: {} };
             dump.sources.forEach(function (s) {
-                dump.perSource[s.id] = { cards: loadCards(s.id), srs: loadSRS(s.id), newCount: loadNewCount(s.id), flagged: loadFlagged(s.id) };
+                dump.perSource[s.id] = { cards: loadCards(s.id), srs: loadSRS(s.id), newCount: loadNewCount(s.id), flagged: loadFlagged(s.id), edits: loadEdits(s.id) };
             });
             try { localStorage.setItem("ankitrain_v1_backup_" + Date.now(), JSON.stringify(dump)); } catch (e) { }
         }
@@ -3381,6 +3420,7 @@
                             saveSRSRaw(sid, meta.srs || {});
                             saveNewCountRaw(sid, meta.newCount || { day: TODAY, count: 0 });
                             saveFlaggedRaw(sid, meta.flagged || {});
+                            saveEditsRaw(sid, meta.edits || {});
                         });
                     })).then(function () {
                         saveSourcesRaw(localSources);
@@ -3403,6 +3443,7 @@
                         if (local) {
                             saveSRSRaw(local.id, mergeSRS(loadSRS(local.id), meta.srs || {}));
                             saveFlaggedRaw(local.id, mergeFlagged(loadFlagged(local.id), meta.flagged || {}));
+                            saveEditsRaw(local.id, mergeEdits(loadEdits(local.id), meta.edits || {}));
                             // Higher of the two daily counters for today, so
                             // the limit can't be bypassed by switching devices.
                             var localNc = loadNewCount(local.id), cloudNc = meta.newCount || { day: TODAY, count: 0 };
@@ -3416,6 +3457,7 @@
                             saveSRSRaw(sid, meta.srs || {});
                             saveNewCountRaw(sid, meta.newCount || { day: TODAY, count: 0 });
                             saveFlaggedRaw(sid, meta.flagged || {});
+                            saveEditsRaw(sid, meta.edits || {});
                         }
                     });
                 });
@@ -3437,6 +3479,7 @@
         function saveSRSRaw(sid, s) { try { localStorage.setItem(LS_SRS + sid, JSON.stringify(s)); } catch (e) { } }
         function saveNewCountRaw(sid, nc) { try { localStorage.setItem(LS_NEWCOUNT + sid, JSON.stringify(nc)); } catch (e) { } }
         function saveFlaggedRaw(sid, fl) { try { localStorage.setItem(LS_FLAGGED + sid, JSON.stringify(fl)); } catch (e) { } }
+        function saveEditsRaw(sid, ed) { try { localStorage.setItem(LS_EDITS + sid, JSON.stringify(ed)); } catch (e) { } }
 
         function deleteSourceFromFirestore(sourceId) {
             if (!FIREBASE_ENABLED || !fbUser || !fbDb) return Promise.resolve();
@@ -3478,10 +3521,11 @@
             var sources = loadSources();
             var src = sources[si];
             var srs = loadSRS(src.id);
-            var flagged = loadFlagged(src.id);
-            if (!Object.keys(srs).length && !Object.keys(flagged).length) { toast("Aucune progression à exporter pour cette source."); return; }
-            // flagged: cards marked 🚩 (F6) — ankisync flags + suspends them in Anki and lists them for review.
-            var payload = { version: 1, source: src.name, exportedAt: new Date().toISOString(), cards: srs, flagged: flagged };
+            var flagged = loadFlagged(src.id), edits = loadEdits(src.id);
+            if (!Object.keys(srs).length && !Object.keys(flagged).length && !Object.keys(edits).length) { toast("Aucune progression à exporter pour cette source."); return; }
+            // flagged: cards marked 🚩 (F6) — ankisync flags + suspends them in Anki and lists them for review
+            // (dropped ones, {drop: 1}, too); edits: cards edited in 📝 Relecture (#187), listed by ankisync.
+            var payload = { version: 1, source: src.name, exportedAt: new Date().toISOString(), cards: srs, flagged: flagged, edits: edits };
             var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
             var url = URL.createObjectURL(blob);
             var a = document.createElement("a");
@@ -3963,7 +4007,7 @@
                 saveSRS(to, b);
                 saveFlagged(to, fb);
                 sources.splice(i, 1); gone++;
-                [LS_CARDS, LS_SRS, LS_NEWCOUNT, LS_FLAGGED, LS_STYLES].forEach(function (k) { try { localStorage.removeItem(k + old); } catch (e) { } });
+                [LS_CARDS, LS_SRS, LS_NEWCOUNT, LS_FLAGGED, LS_EDITS, LS_STYLES].forEach(function (k) { try { localStorage.removeItem(k + old); } catch (e) { } });
                 if (fbUser) deleteSourceFromFirestore(old);
                 dlog("paquet fusionné", { ancien: old, dans: to, cartes_reprises: moved });
             });
@@ -3981,6 +4025,7 @@
             try { localStorage.removeItem(LS_SRS + id); } catch (e2) { }
             try { localStorage.removeItem(LS_NEWCOUNT + id); } catch (e2) { }
             try { localStorage.removeItem(LS_FLAGGED + id); } catch (e2) { }
+            try { localStorage.removeItem(LS_EDITS + id); } catch (e2) { }
             try { localStorage.removeItem(LS_STYLES + id); } catch (e2) { }
             if (fbUser) deleteSourceFromFirestore(id);
             renderHome();
@@ -4327,9 +4372,10 @@
             browse.srs = loadSRS(src.id);
             browse.sort = false; browse.sorted = {};
             document.getElementById("browse").classList.remove("sorting");
-            var all = [];
+            var all = [], fl = loadFlagged(src.id);
+            browse.lastDrop = null; browse.changed = false;
             childDeckIds(src.decks, deckName).forEach(function (did) {
-                (cardsByDeck[did] || []).forEach(function (c) { all.push(c); });
+                (cardsByDeck[did] || []).forEach(function (c) { if (!(fl[c.id] && fl[c.id].drop)) all.push(c); }); // 🗑 retirées (#187)
             });
             if (!all.length) { toast("Aucune carte dans ce deck"); return; }
             browse.all = all.map(function (c) {
@@ -4410,10 +4456,114 @@
             a.click();
         }
         document.addEventListener("keydown", function (e) {
-            if (e.key !== "F6" || document.getElementById("browse").style.display !== "flex" || !browse.review || flagModalOpen()) return;
+            if (e.key !== "F6" || document.getElementById("browse").style.display !== "flex" || !browse.review || flagModalOpen() || editModalOpen()) return;
             e.preventDefault();
             browseFlag(browse.idx);
         });
+
+        // 📝 Relecture, ↑ (#187): the card's fields in a small window —
+        // saved over the deck (applyEdits), synced, listed by ankisync.
+        var QPREFIX_RE = /^(?:\s*<style[\s\S]*?<\/style>)*\s*(?:(?:🇫🇷|🇪🇸)\s*➡️\s*(?:🇫🇷|🇪🇸)\s*(?:<br\s*\/?>\s*)*)?/u;
+        function editFields(c) {
+            if (c.es != null) return [["es", "Espagnol"], ["fr", "Traduction"], ["words", "Réponse à taper"], ["s", "Phrase d'exemple"], ["sf", "Traduction de la phrase"], ["n", "Note"]];
+            var f = [["question", "Recto"]];
+            if (c.answer != null) f.push(["answer", "Verso"]);
+            f.push(["words", "Réponse à taper"]);
+            return f;
+        }
+        function editValue(c, k) {
+            if (k === "words") return (c.words || []).join(" ");
+            if (k === "question") return String(c.question || "").replace(QPREFIX_RE, "");
+            return c[k] == null ? "" : String(c[k]);
+        }
+        var editIdx = -1;
+        function editModalOpen() { return !document.getElementById("edit-modal").hidden; }
+        function browseEdit(i) {
+            var b = browse.list[i]; if (!b) return;
+            editIdx = i;
+            document.getElementById("ed-fields").innerHTML = editFields(b.card).map(function (f) {
+                var v = editValue(b.card, f[0]);
+                return '<label class="ac-row"><span>' + esc(f[1]) + '</span><textarea data-k="' + f[0] + '" rows="' + Math.min(5, Math.max(1, Math.ceil(v.length / 50))) + '">' + esc(v) + '</textarea></label>';
+            }).join("");
+            document.getElementById("edit-modal").hidden = false;
+            setTimeout(function () { var t = document.querySelector("#ed-fields textarea"); if (t) { t.focus(); t.select(); } }, 0);
+        }
+        function closeEditModal() { document.getElementById("edit-modal").hidden = true; editIdx = -1; }
+        function confirmEdit() {
+            var b = browse.list[editIdx], c = b && b.card, f = {};
+            if (!c) { closeEditModal(); return; }
+            document.querySelectorAll("#ed-fields textarea").forEach(function (t) {
+                var k = t.dataset.k, v = t.value.trim();
+                if (v === editValue(c, k).trim()) return;
+                if (k === "words") {
+                    f.words = v.split(/\s+/).filter(Boolean);
+                    if (c.notes && f.words.length !== (c.words || []).length) f.notes = null; // notes sit between the words
+                } else if (k === "question") f.question = String(c.question || "").match(QPREFIX_RE)[0] + v;
+                else f[k] = v;
+            });
+            // the vocabulary cards' plain recto / verso follow the word and its meaning
+            if (c.es != null && f.es != null) f.question = esc(f.es);
+            if (c.es != null && f.fr != null) f.answer = esc(f.fr);
+            var i = editIdx;
+            closeEditModal();
+            if (!Object.keys(f).length) return;
+            var ed = loadEdits(browse.sid);
+            ed[c.id] = { f: Object.assign({}, ed[c.id] && ed[c.id].f, f), at: Date.now() };
+            saveEdits(browse.sid, ed);
+            Object.assign(c, f);
+            b.back = c.answer != null ? c.answer : esc((c.words || []).join(" "));
+            b.text = (plainText(displayQuestion(c.question)) + " " + plainText(b.back) + " " + (c.words || []).join(" ") + " " + b.tags.join(" ")).toLowerCase();
+            dlog("carte modifiée", { source: browse.sid, id: c.id, champs: f });
+            toast("✏️ " + t9n("Carte modifiée"));
+            var sl = document.querySelector('.b-slide[data-i="' + i + '"]');
+            if (sl) { delete sl.dataset.filled; fillSlide(sl); }
+        }
+        ["keydown", "keyup"].forEach(function (type) {
+            document.addEventListener(type, function (e) {
+                if (!editModalOpen()) return;
+                e.stopImmediatePropagation();
+                if (type !== "keydown") return;
+                if (e.key === "Escape") { e.preventDefault(); closeEditModal(); }
+                else if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); confirmEdit(); }
+            }, true);
+        });
+
+        // 📝 Relecture, ↓ (#187): the card leaves the deck — marked like a 🚩
+        // card ({drop: 1}: never offered again, ankisync suspends it in Anki)
+        // and out of the review too. Ctrl/⌘+Z brings the last one back.
+        function browseDrop(i) {
+            var b = browse.list[i]; if (!b) return;
+            var fl = loadFlagged(browse.sid);
+            browse.lastDrop = { b: b, i: i, ai: browse.all.indexOf(b), prev: fl[b.card.id] };
+            fl[b.card.id] = { q: flagLabel(b.card), c: "🗑 retirée en relecture", drop: 1 };
+            saveFlagged(browse.sid, fl);
+            browse.list.splice(i, 1);
+            if (browse.list !== browse.all) browse.all.splice(browse.lastDrop.ai, 1); // often the same array
+            browse.changed = true;
+            dlog("carte retirée", { source: browse.sid, id: b.card.id });
+            toast("🗑 " + t9n("Carte retirée du paquet · Ctrl+Z pour annuler"));
+            browseRerender(Math.min(i, browse.list.length - 1));
+        }
+        function undoBrowseDrop() {
+            var d = browse.lastDrop; if (!d) return;
+            browse.lastDrop = null;
+            var fl = loadFlagged(browse.sid);
+            if (d.prev) fl[d.b.card.id] = d.prev; else delete fl[d.b.card.id];
+            saveFlagged(browse.sid, fl);
+            browse.list.splice(d.i, 0, d.b);
+            if (browse.list !== browse.all) browse.all.splice(d.ai, 0, d.b);
+            toast("↩ " + t9n("Carte remise"));
+            browseRerender(d.i);
+        }
+        function browseRerender(i) {
+            renderBrowseOverall();
+            updateBrowseCommentCount();
+            renderBrowse();
+            var track = document.getElementById("b-track"), t = track && track.children[i];
+            if (!t) return;
+            track.scrollTo({ left: t.offsetLeft + t.offsetWidth / 2 - track.clientWidth / 2, behavior: "instant" });
+            onBrowseScroll();
+        }
 
         function closeBrowse() {
             document.getElementById("audio-player").pause();
@@ -4421,7 +4571,7 @@
             document.getElementById("b-content").innerHTML = "";
             document.getElementById("browse").style.display = "none";
             document.getElementById("home").style.display = "block";
-            if (browse.sorted && Object.keys(browse.sorted).length) renderHome(); // cards sorted as known (#176)
+            if ((browse.sorted && Object.keys(browse.sorted).length) || browse.changed) renderHome(); // cards sorted as known (#176), dropped (#187)
         }
 
         function filterBrowse(q) {
@@ -4653,7 +4803,10 @@
                 + '<div class="b-front"></div><div class="b-sep">' + (browse.sort && !sl.classList.contains("peek") ? t9n("verso · touche pour le voir") : "verso") + '</div><div class="b-back"></div>'
                 + (hasAudio ? '<button class="b-slide-audio" onclick="playBrowseAudio(' + sl.dataset.i + ')" title="Écouter">🔊</button>' : '')
                 + (browse.review ? '<div class="b-review-bar"><div class="b-comment">' + (fl ? "🚩 " + esc(typeof fl === "object" ? fl.c : "marquée") : "") + '</div>'
-                    + '<button class="b-flag" onclick="browseFlag(' + sl.dataset.i + ')">🚩 ' + (fl ? "Modifier" : "Commenter") + ' <span class="t-key">F6</span></button></div>' : '');
+                    + '<button class="b-flag" onclick="browseFlag(' + sl.dataset.i + ')">🚩 ' + (fl ? "Modifier" : "Commenter") + ' <span class="t-key">F6</span></button>'
+                    + '<button class="b-flag" onclick="browseEdit(' + sl.dataset.i + ')">✏️ ' + t9n("Éditer") + ' <span class="t-key">↑</span></button>'
+                    + '<button class="b-flag" onclick="browseDrop(' + sl.dataset.i + ')">🗑 ' + t9n("Retirer") + ' <span class="t-key">↓</span></button>'
+                    + (loadEdits(browse.sid)[c.id] ? '<div class="b-edited">✏️ ' + t9n("modifiée") + '</div>' : '') + '</div>' : '');
             var css = cardStyle(browse.sid, c);
             mountCardHtml(sl.querySelector(".b-front"), displayQuestion(rc.question), css);
             // like in study: the back only adds what the recto doesn't show (#128)
@@ -4713,6 +4866,12 @@
                 if (inSearch) e.target.blur(); else closeBrowse();
             } else if (inSearch) {
                 if (e.key === "Enter") { e.preventDefault(); e.target.blur(); }
+            } else if (browse.review && !browse.sort && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
+                e.preventDefault(); // 📝 Relecture: ↑ edit, ↓ drop (#187)
+                if (e.key === "ArrowUp") browseEdit(browse.idx); else browseDrop(browse.idx);
+            } else if (browse.review && browse.lastDrop && e.key.toLowerCase() === "z" && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                undoBrowseDrop();
             } else if (e.key === "ArrowLeft") {
                 e.preventDefault();
                 stepBrowse(-1);
@@ -6531,7 +6690,12 @@
                     "(suite) la carte notée part vers un coin ; combos inversés (justes à droite, erreurs à gauche) et comptés tout de suite ; la case rougit à chaque erreur ; ⚙ délai avant la carte suivante.": "(seguito) la carta valutata vola verso un angolo; combo invertite (giuste a destra, errori a sinistra) e contate subito; la casella diventa rossa a ogni errore; ⚙ tempo prima della carta successiva.",
                     "Délai avant la carte suivante": "Tempo prima della carta successiva", "Auto": "Auto", "Toujours lent": "Sempre lento", "Toujours rapide": "Sempre veloce",
                     "Temps laissé au verso, une fois le son fini. Auto : une carte vue pour la première fois, ou ratée, garde le temps de relire (≈ 2,5 s) ; une carte déjà vue et juste (même revenue dans la séance) passe vite (≈ 0,7 s, comptées pendant le son), avec une transition plus courte.": "Tempo lasciato al retro, finito l'audio. Auto: una carta vista per la prima volta, o sbagliata, tiene il tempo per rileggere (≈ 2,5 s); una carta già vista e giusta (anche tornata nella sessione) passa in fretta (≈ 0,7 s, contati durante l'audio), con una transizione più breve.", "joue l'enregistrement de la phrase d'exemple ; s'il n'y en a pas (phrases écrites pour le Vocabulaire), la voix du navigateur la lit.": "riproduce la registrazione della frase d'esempio; se non c'è (frasi scritte per il Vocabolario), la legge la voce del browser.",
-                    "6 nov.": "6 nov.", "9 nov.": "9 nov.", "10 nov.": "10 nov.", "En mode « nombre de cartes », la fiche du paquet donne aussi la durée estimée de la séance, d'après ton temps habituel sur chaque carte.": "In modalità « numero di carte », la scheda del mazzo indica anche la durata stimata della sessione, in base al tuo tempo abituale su ogni carta.", "(soir, fin) fiche du paquet : durée estimée de la séance en mode « nombre de cartes ».": "(sera, fine) scheda del mazzo: durata stimata della sessione in modalità « numero di carte ».", "Sur plusieurs appareils : les cartes d'une journée sont tirées dans le même ordre partout, la progression part en ligne dès que tu quittes l'appli et revient quand tu la rouvres sur l'autre appareil : tu reprends où tu en étais.": "Su più dispositivi: le carte di una giornata sono estratte nello stesso ordine ovunque, i progressi vanno online appena lasci l'app e tornano quando la riapri sull'altro dispositivo: riprendi da dove eri.", "(soir, suite) d'un appareil à l'autre : même ordre des cartes du jour partout, et la progression revient en rouvrant l'appli.": "(sera, seguito) da un dispositivo all'altro: stesso ordine delle carte del giorno ovunque, e i progressi tornano riaprendo l'app.", "(soir) 💤 endormir un paquet : il quitte l'accueil, sa progression est gardée, et se réveille en bas de l'accueil.": "(sera) 💤 addormentare un mazzo: lascia la pagina iniziale, i progressi restano, e si risveglia in fondo alla pagina iniziale.",
+                    "6 nov.": "6 nov.", "9 nov.": "9 nov.", "10 nov.": "10 nov.", "En mode « nombre de cartes », la fiche du paquet donne aussi la durée estimée de la séance, d'après ton temps habituel sur chaque carte.": "In modalità « numero di carte », la scheda del mazzo indica anche la durata stimata della sessione, in base al tuo tempo abituale su ogni carta.", "(soir, fin) fiche du paquet : durée estimée de la séance en mode « nombre de cartes ».": "(sera, fine) scheda del mazzo: durata stimata della sessione in modalità « numero di carte ».", "(nuit) 📝 Relecture : ↑ modifier la carte, ↓ la retirer du paquet.": "(notte) 📝 Revisione: ↑ modifica la carta, ↓ toglila dal mazzo.",
+                    "pour commenter une carte,": "per commentare una carta,", "(✏️) pour la modifier,": "(✏️) per modificarla,", "(🗑) pour la retirer du paquet (": "(🗑) per toglierla dal mazzo (", "la remet).": "la rimette).",
+                    "📝 Relecture : modifier la carte · la retirer du paquet (Ctrl+Z : annuler)": "📝 Revisione: modifica la carta · toglila dal mazzo (Ctrl+Z: annulla)",
+                    "✏️ Modifier la carte": "✏️ Modifica la carta", "Ctrl+Entrée : enregistrer · Échap : annuler": "Ctrl+Invio: salva · Esc: annulla", "✓ Enregistrer": "✓ Salva",
+                    "Réponse à taper": "Risposta da scrivere", "Phrase d'exemple": "Frase d'esempio", "Traduction de la phrase": "Traduzione della frase", "Note": "Nota", "Recto": "Fronte", "Verso": "Retro",
+                    "Carte modifiée": "Carta modificata", "Carte retirée du paquet · Ctrl+Z pour annuler": "Carta tolta dal mazzo · Ctrl+Z per annullare", "Carte remise": "Carta rimessa", "Éditer": "Modifica", "Retirer": "Togli", "modifiée": "modificata", "Sur plusieurs appareils : les cartes d'une journée sont tirées dans le même ordre partout, la progression part en ligne dès que tu quittes l'appli et revient quand tu la rouvres sur l'autre appareil : tu reprends où tu en étais.": "Su più dispositivi: le carte di una giornata sono estratte nello stesso ordine ovunque, i progressi vanno online appena lasci l'app e tornano quando la riapri sull'altro dispositivo: riprendi da dove eri.", "(soir, suite) d'un appareil à l'autre : même ordre des cartes du jour partout, et la progression revient en rouvrant l'appli.": "(sera, seguito) da un dispositivo all'altro: stesso ordine delle carte del giorno ovunque, e i progressi tornano riaprendo l'app.", "(soir) 💤 endormir un paquet : il quitte l'accueil, sa progression est gardée, et se réveille en bas de l'accueil.": "(sera) 💤 addormentare un mazzo: lascia la pagina iniziale, i progressi restano, e si risveglia in fondo alla pagina iniziale.",
                     "💤 sur un paquet l'endort : il disparaît de l'accueil, sa progression est gardée ; « 💤 paquets endormis », en bas de l'accueil, les réveille.": "💤 su un mazzo lo addormenta: sparisce dalla pagina iniziale, i progressi restano; « 💤 mazzi addormentati », in fondo alla pagina iniziale, li risveglia.",
                     "Dans 🔍, chaque carte a une barre de progression qui se remplit de gauche à droite, du rouge (à peine commencée) au vert (bien sue), et le paquet entier a la sienne en haut. 🗂 Pré-tri montre les cartes jamais vues une par une : touche la carte pour voir le verso, puis → (ou glisser à droite) = je la connais déjà, elle est rangée comme apprise et reviendra dans 20 à 60 jours ; ← (ou glisser à gauche) = à apprendre, elle reste nouvelle.": "In 🔍, ogni carta ha una barra di progresso che si riempie da sinistra a destra, dal rosso (appena iniziata) al verde (ben saputa), e il mazzo intero ha la sua in alto. 🗂 Pre-selezione mostra le carte mai viste una per una: tocca la carta per vedere il retro, poi → (o scorri a destra) = la so già, viene messa tra le imparate e tornerà fra 20–60 giorni; ← (o scorri a sinistra) = da imparare, resta nuova.",
                     "Sur téléphone, pas de boutons : touche la moitié gauche du recto pour un indice, la moitié droite pour la réponse (en mode Normal, touche la carte pour la retourner).": "Sul telefono, niente pulsanti: tocca la metà sinistra del fronte per un suggerimento, la metà destra per la risposta (in modalità Normale, tocca la carta per girarla).",
@@ -6843,7 +7007,8 @@
             {"id": 32, "d": "2026-11-10", "k": "paquets", "fr": "Dans 🔍 : une <b>barre de progression</b> par carte, du rouge au vert, et <b>🗂 Pré-tri</b> pour ranger d'un geste les mots que tu connais déjà.", "it": "In 🔍: una <b>barra di progresso</b> per carta, dal rosso al verde, e <b>🗂 Pre-selezione</b> per mettere da parte con un gesto le parole che sai già."},
             {"id": 33, "d": "2026-11-10", "k": "accueil", "fr": "<b>💤 Endormir un paquet</b> : il disparaît de l'accueil, sa progression est gardée ; « paquets endormis » en bas pour le réveiller.", "it": "<b>💤 Addormentare un mazzo</b>: sparisce dalla pagina iniziale, i progressi restano; « mazzi addormentati » in fondo per risvegliarlo."},
             {"id": 34, "d": "2026-11-10", "k": "revision", "fr": "<b>D'un appareil à l'autre</b> : les cartes du jour viennent dans le même ordre, et ta progression revient quand tu rouvres l'appli.", "it": "<b>Da un dispositivo all'altro</b>: le carte del giorno arrivano nello stesso ordine, e i progressi tornano quando riapri l'app."},
-            {"id": 35, "d": "2026-11-10", "k": "paquets", "fr": "La fiche du paquet donne la <b>durée estimée</b> de la séance (mode « nombre de cartes »).", "it": "La scheda del mazzo indica la <b>durata stimata</b> della sessione (modalità « numero di carte »)."}
+            {"id": 35, "d": "2026-11-10", "k": "paquets", "fr": "La fiche du paquet donne la <b>durée estimée</b> de la séance (mode « nombre de cartes »).", "it": "La scheda del mazzo indica la <b>durata stimata</b> della sessione (modalità « numero di carte »)."},
+            {"id": 36, "d": "2026-11-10", "k": "cartes", "fr": "Dans <b>📝 Relecture</b> : <b>↑</b> pour <b>modifier</b> une carte (gardé sur tous tes appareils), <b>↓</b> pour la <b>retirer</b> du paquet (Ctrl+Z la remet).", "it": "In <b>📝 Revisione</b>: <b>↑</b> per <b>modificare</b> una carta (resta su tutti i tuoi dispositivi), <b>↓</b> per <b>toglierla</b> dal mazzo (Ctrl+Z la rimette)."}
         ];
         var NEWS_KINDS = { revision: ["Révision", "Ripasso"], cartes: ["Cartes", "Carte"], combos: ["Combos", "Combo"], affichage: ["Affichage", "Aspetto"],
             reglages: ["Réglages", "Impostazioni"], accueil: ["Accueil", "Home"], paquets: ["Paquets", "Mazzi"] };

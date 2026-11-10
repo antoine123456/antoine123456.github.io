@@ -190,6 +190,22 @@ def count_new_studied_today(col, dry_run):
     return changed
 
 
+def load_edits(paths):
+    """card id -> {"f": {champ: valeur}, "at": ms} des cartes modifiées dans
+    📝 Relecture (#187), d'après l'export le plus récent de chaque source."""
+    latest = {}
+    for path in paths:
+        with open(path, encoding="utf-8") as f:
+            d = json.load(f)
+        src, at = d.get("source", path), d.get("exportedAt", "")
+        if src not in latest or at >= latest[src][0]:
+            latest[src] = (at, d.get("edits") or {})
+    out = {}
+    for _, ed in latest.values():
+        out.update(ed)
+    return out
+
+
 def load_flagged(paths):
     """card id -> texte du recto des cartes marquées 🚩 (F6) dans l'appli
     (ou {"q": recto, "c": commentaire} si un commentaire a été écrit),
@@ -370,6 +386,7 @@ def main():
     paths = args.stats or sorted(glob.glob(os.path.expanduser("~/Downloads/*_stats*.json")))
     entries = load_latest_entries(paths)
     flagged = load_flagged(paths)
+    edits = load_edits(paths)
     print(f"{len(paths)} fichier(s) de stats, {len(entries)} carte(s) étudiée(s) dans Anki Trainer.")
 
     col_path = os.path.abspath(args.collection) if args.collection else find_collection(args.profile)
@@ -464,6 +481,10 @@ def main():
             v = flagged.get(str(cid))
             if isinstance(v, dict) and v.get("c"):
                 print(f"      💬 {v['c']}")
+    if edits:
+        print(f"\n✏️ {len(edits)} carte(s) modifiée(s) dans l'appli (📝 Relecture) — à reporter dans Anki si besoin :")
+        for cid, e in edits.items():
+            print(f"   cid:{cid}  " + "  ·  ".join(f"{k}: {plain(' '.join(v) if isinstance(v, list) else str(v or ''))}" for k, v in (e.get("f") or {}).items() if k != "notes"))
     for name, open_upto, counts, unlocked, locked in stages:
         detail = " · ".join(f"{s}: {d}/{t}" for s, (d, t) in sorted(counts.items()))
         print(f"  🔓 {name} : ouvert jusqu'à {open_upto} sur {max(counts)}  (cartes en révision — {detail})")
