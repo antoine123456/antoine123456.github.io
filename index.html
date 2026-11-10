@@ -2235,6 +2235,7 @@
                     </div>
                     La carte prend la couleur de la note, puis part vers un coin : À revoir ↙, Difficile ↖, Correct ↘, Facile ↗.
                     Le délai avant la carte suivante se règle dans ⚙ (Auto : lent seulement la première fois qu'on voit une carte, ou si on la rate).
+                    <br>Sur plusieurs appareils : les cartes d'une journée sont tirées dans le même ordre partout, la progression part en ligne dès que tu quittes l'appli et revient quand tu la rouvres sur l'autre appareil : tu reprends où tu en étais.
                     <br>Sur téléphone, glisse la carte pour la noter : à gauche À revoir, à droite Correct, vers le haut Facile, vers le bas Difficile (haut et bas demandent un geste plus long, pour éviter les erreurs). Les compteurs nouvelles / à repasser / à réviser sont en haut, à côté de la barre de progression.
                 </div>
             </div>
@@ -2294,6 +2295,7 @@
                 <div class="g-num">9</div><div class="g-h">Nouveautés</div>
                 <div class="g-body">
                     <ul class="g-news">
+                        <li><b>10 nov.</b> (soir, suite) d'un appareil à l'autre : même ordre des cartes du jour partout, et la progression revient en rouvrant l'appli.</li>
                         <li><b>10 nov.</b> (soir) 💤 endormir un paquet : il quitte l'accueil, sa progression est gardée, et se réveille en bas de l'accueil.</li>
                         <li><b>10 nov.</b> sur téléphone, plus de boutons en bas pendant la question : touche à gauche du recto = indice, à droite = réponse, puis glisse la carte pour la noter ; compteurs en haut à côté de la barre ; boutons de note plus plats ; plus de macaron « Maintenir appuyé ».</li>
                         <li><b>10 nov.</b> (suite) 🔍 : barre de progression de chaque carte et du paquet, du rouge au vert ; 🗂 Pré-tri des cartes jamais vues (→ je connais, ← à apprendre) ; carrousel plus fluide avec des milliers de cartes ; plus d'étiquettes (faux ami…) sur les cartes, seulement dans les filtres ; mots raccourcis sur petit écran.</li>
@@ -4227,9 +4229,12 @@
                 });
                 // New cards picked in deck / card order (earliest deck first),
                 // then shown in a random order — so an ES→FR card and its
-                // FR→ES twin don't follow each other.
-                shuffle(dueCards);
-                newCards = shuffle(newCards.slice(0, newLimit));
+                // FR→ES twin don't follow each other. One draw per day and deck
+                // (#181): the phone and the computer show the cards in the same order.
+                var seed = daySeed(srsKey + "|" + (deckName || "") + "|" + (tag || ""));
+                dueCards.sort(function (a, b) { return a.id < b.id ? -1 : a.id > b.id ? 1 : 0; });
+                shuffle(dueCards, seed);
+                newCards = shuffle(newCards.slice(0, newLimit), seed + 1);
                 // ⚙ Reviews per day (#56): learning steps always come back,
                 // day-scheduled reviews stop at the limit.
                 var st = settings();
@@ -6618,7 +6623,14 @@
         // break the handler).
         function jsArg(v) { return esc(JSON.stringify(String(v))).replace(/"/g, "&quot;"); }
         function esc(s) { return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/'/g, "&#39;"); }
-        function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+        // seed (#181): the same order for the same seed — a day's session is
+        // drawn the same way on every device (see daySeed)
+        function shuffle(a, seed) {
+            var rnd = Math.random;
+            if (seed != null) { var x = seed >>> 0; rnd = function () { x = (x + 0x6D2B79F5) >>> 0; var t = x; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+            for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(rnd() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a;
+        }
+        function daySeed(key) { var h = 2166136261; String(TODAY + "|" + key).split("").forEach(function (c) { h = Math.imul(h ^ c.charCodeAt(0), 16777619); }); return h >>> 0; }
 
         var _toastTimer;
         function toast(msg) {
@@ -6688,7 +6700,7 @@
                     "(suite) la carte notée part vers un coin ; combos inversés (justes à droite, erreurs à gauche) et comptés tout de suite ; la case rougit à chaque erreur ; ⚙ délai avant la carte suivante.": "(seguito) la carta valutata vola verso un angolo; combo invertite (giuste a destra, errori a sinistra) e contate subito; la casella diventa rossa a ogni errore; ⚙ tempo prima della carta successiva.",
                     "Délai avant la carte suivante": "Tempo prima della carta successiva", "Auto": "Auto", "Toujours lent": "Sempre lento", "Toujours rapide": "Sempre veloce",
                     "Temps laissé au verso, une fois le son fini. Auto : une carte vue pour la première fois, ou ratée, garde le temps de relire (≈ 2,5 s) ; une carte déjà vue et juste (même revenue dans la séance) passe vite (≈ 0,7 s, comptées pendant le son), avec une transition plus courte.": "Tempo lasciato al retro, finito l'audio. Auto: una carta vista per la prima volta, o sbagliata, tiene il tempo per rileggere (≈ 2,5 s); una carta già vista e giusta (anche tornata nella sessione) passa in fretta (≈ 0,7 s, contati durante l'audio), con una transizione più breve.", "joue l'enregistrement de la phrase d'exemple ; s'il n'y en a pas (phrases écrites pour le Vocabulaire), la voix du navigateur la lit.": "riproduce la registrazione della frase d'esempio; se non c'è (frasi scritte per il Vocabolario), la legge la voce del browser.",
-                    "6 nov.": "6 nov.", "9 nov.": "9 nov.", "10 nov.": "10 nov.", "(soir) 💤 endormir un paquet : il quitte l'accueil, sa progression est gardée, et se réveille en bas de l'accueil.": "(sera) 💤 addormentare un mazzo: lascia la pagina iniziale, i progressi restano, e si risveglia in fondo alla pagina iniziale.",
+                    "6 nov.": "6 nov.", "9 nov.": "9 nov.", "10 nov.": "10 nov.", "Sur plusieurs appareils : les cartes d'une journée sont tirées dans le même ordre partout, la progression part en ligne dès que tu quittes l'appli et revient quand tu la rouvres sur l'autre appareil : tu reprends où tu en étais.": "Su più dispositivi: le carte di una giornata sono estratte nello stesso ordine ovunque, i progressi vanno online appena lasci l'app e tornano quando la riapri sull'altro dispositivo: riprendi da dove eri.", "(soir, suite) d'un appareil à l'autre : même ordre des cartes du jour partout, et la progression revient en rouvrant l'appli.": "(sera, seguito) da un dispositivo all'altro: stesso ordine delle carte del giorno ovunque, e i progressi tornano riaprendo l'app.", "(soir) 💤 endormir un paquet : il quitte l'accueil, sa progression est gardée, et se réveille en bas de l'accueil.": "(sera) 💤 addormentare un mazzo: lascia la pagina iniziale, i progressi restano, e si risveglia in fondo alla pagina iniziale.",
                     "💤 sur un paquet l'endort : il disparaît de l'accueil, sa progression est gardée ; « 💤 paquets endormis », en bas de l'accueil, les réveille.": "💤 su un mazzo lo addormenta: sparisce dalla pagina iniziale, i progressi restano; « 💤 mazzi addormentati », in fondo alla pagina iniziale, li risveglia.",
                     "Dans 🔍, chaque carte a une barre de progression qui se remplit de gauche à droite, du rouge (à peine commencée) au vert (bien sue), et le paquet entier a la sienne en haut. 🗂 Pré-tri montre les cartes jamais vues une par une : touche la carte pour voir le verso, puis → (ou glisser à droite) = je la connais déjà, elle est rangée comme apprise et reviendra dans 20 à 60 jours ; ← (ou glisser à gauche) = à apprendre, elle reste nouvelle.": "In 🔍, ogni carta ha una barra di progresso che si riempie da sinistra a destra, dal rosso (appena iniziata) al verde (ben saputa), e il mazzo intero ha la sua in alto. 🗂 Pre-selezione mostra le carte mai viste una per una: tocca la carta per vedere il retro, poi → (o scorri a destra) = la so già, viene messa tra le imparate e tornerà fra 20–60 giorni; ← (o scorri a sinistra) = da imparare, resta nuova.",
                     "Sur téléphone, pas de boutons : touche la moitié gauche du recto pour un indice, la moitié droite pour la réponse (en mode Normal, touche la carte pour la retourner).": "Sul telefono, niente pulsanti: tocca la metà sinistra del fronte per un suggerimento, la metà destra per la risposta (in modalità Normale, tocca la carta per girarla).",
@@ -6998,7 +7010,8 @@
             {"id": 30, "d": "2026-11-10", "k": "revision", "fr": "Sur téléphone : touche <b>à gauche</b> du recto pour un indice, <b>à droite</b> pour la réponse, puis <b>glisse la carte</b> pour la noter (← À revoir, → Correct, ↑ Facile, ↓ Difficile).", "it": "Sul telefono: tocca <b>a sinistra</b> del fronte per un suggerimento, <b>a destra</b> per la risposta, poi <b>scorri la carta</b> per votarla (← Da rivedere, → Corretto, ↑ Facile, ↓ Difficile)."},
             {"id": 31, "d": "2026-11-10", "k": "affichage", "fr": "Sur téléphone, les <b>compteurs</b> sont en haut à côté de la barre et les boutons de note sont plus plats : plus de place pour la carte.", "it": "Sul telefono, i <b>contatori</b> sono in alto accanto alla barra e i pulsanti di voto sono più piatti: più spazio per la carta."},
             {"id": 32, "d": "2026-11-10", "k": "paquets", "fr": "Dans 🔍 : une <b>barre de progression</b> par carte, du rouge au vert, et <b>🗂 Pré-tri</b> pour ranger d'un geste les mots que tu connais déjà.", "it": "In 🔍: una <b>barra di progresso</b> per carta, dal rosso al verde, e <b>🗂 Pre-selezione</b> per mettere da parte con un gesto le parole che sai già."},
-            {"id": 33, "d": "2026-11-10", "k": "accueil", "fr": "<b>💤 Endormir un paquet</b> : il disparaît de l'accueil, sa progression est gardée ; « paquets endormis » en bas pour le réveiller.", "it": "<b>💤 Addormentare un mazzo</b>: sparisce dalla pagina iniziale, i progressi restano; « mazzi addormentati » in fondo per risvegliarlo."}
+            {"id": 33, "d": "2026-11-10", "k": "accueil", "fr": "<b>💤 Endormir un paquet</b> : il disparaît de l'accueil, sa progression est gardée ; « paquets endormis » en bas pour le réveiller.", "it": "<b>💤 Addormentare un mazzo</b>: sparisce dalla pagina iniziale, i progressi restano; « mazzi addormentati » in fondo per risvegliarlo."},
+            {"id": 34, "d": "2026-11-10", "k": "revision", "fr": "<b>D'un appareil à l'autre</b> : les cartes du jour viennent dans le même ordre, et ta progression revient quand tu rouvres l'appli.", "it": "<b>Da un dispositivo all'altro</b>: le carte del giorno arrivano nello stesso ordine, e i progressi tornano quando riapri l'app."}
         ];
         var NEWS_KINDS = { revision: ["Révision", "Ripasso"], cartes: ["Cartes", "Carte"], combos: ["Combos", "Combo"], affichage: ["Affichage", "Aspetto"],
             reglages: ["Réglages", "Impostazioni"], accueil: ["Accueil", "Home"], paquets: ["Paquets", "Mazzi"] };
