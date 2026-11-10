@@ -31,6 +31,20 @@ POS = {"nom": "nom", "verbe": "verbe", "adjectif": "adjectif", "adverbe": "adver
        "pronom": "mot-outil", "interjection": "interjection"}
 
 THEMES = {
+    # things you can hold or use (#205), also those already in another theme (lit, clé, stylo, guitare…)
+    "objet": """téléphone portable ordinateur|ordinateur portable table chaise fauteuil canapé lit matelas oreiller couette
+        couverture drap armoire commode tiroir étagère miroir lampe|lampe de poche bougie clé serrure cadenas rideau tapis
+        serviette savon poubelle baignoire berceau réfrigérateur congélateur sonnette interrupteur meubles appareil|appareil photo
+        télé téléviseur écran radio horloge montre réveil cadeau papier enveloppe carte|carte postale timbre journal magazine
+        livre cahier crayon stylo gomme ciseaux règle sac|sac à dos valise malle mallette portefeuille parapluie parasol lunettes
+        bague bijou bracelet collier couronne diamant perle masque casque guitare piano violon ballon jouet puzzle trophée
+        couteau|couteau de poche fourchette cuillère assiette tasse verre bouteille flacon cruches baguettes chinoises panier seau
+        boîte aux lettres boîte colis caisse tonneau conteneur coffre cage machine moteur batterie chargeur câble micro radar
+        scanner capteur générateur laser robot satellite outil marteau clou pelle hache levier crochet corde chaîne roue pneu
+        volant bouton aiguille plume ruban étiquette affiche panneau drapeau tableau statue cloche croix trône cercueil mouchoir
+        cigarette cigare pipe briquet allumette chewing-gum capsule tube rouleau boule bouée canne bâton batte flèche épée
+        bouclier dague pistolet revolver fusil menottes bombe instrument disque plaque planche poteau barbecue billet passeport
+        pilule médicament brancard""",
     "animaux": """abeille agneau aigle animal|animal de compagnie araignée baleine bestiole canard cerf chameau chat chaton cheval
         chien chiot chèvre coq corbeau crabe dauphin dinde dinosaure faucon femelle fourmi girafe gorille grenouille homard insecte
         lapin lion loup mouche moustique mouton mulet nid oiseau ours panda papillon patte pigeon poisson poule renard requin
@@ -129,7 +143,10 @@ IT = {"nom": "nome", "verbe": "verbo", "adjectif": "aggettivo", "adverbe": "avve
       "vêtements": "vestiti", "ville": "città", "transports": "trasporti", "nature": "natura", "temps": "tempo",
       "loisirs": "svago", "école": "scuola", "travail": "lavoro e soldi", "crime": "crimine e giustizia",
       "guerre": "guerra", "sentiments": "sentimenti", "couleurs": "colori", "nombres": "numeri",
-      "transparent": "trasparente", "cris d'animaux": "versi degli animali"}
+      "transparent": "trasparente", "objet": "oggetto", "cris d'animaux": "versi degli animali"}
+
+# the French word matches, the Spanish one means something else (livre = la libra, the money)
+NOT_THEME = {"objet": {"la libra", "la clave", "el canal", "la regla"}}
 
 # the animals' cries (#203): « cris d'animaux », and with the animals
 CRIES = {"ladrar", "maullar", "mugir", "relinchar", "rugir", "cacarear", "piar", "gruñir", "balar", "croar",
@@ -170,7 +187,8 @@ MULTI = ["animal de compagnie", "pomme de terre", "noix de coco", "petit déjeun
          "forêt tropicale", "tremblement de terre", "année dernière", "petit matin", "petit moment", "club de sport",
          "jeu vidéo", "coupe du monde", "salle de sport", "remise des diplômes", "prêt immobilier", "vente aux enchères",
          "distributeur automatique", "arme du crime", "condamnation à perpétuité", "fusil de chasse", "tireur d'élite",
-         "vin blanc", "vin rouge", "boucles d'oreilles"]
+         "vin blanc", "vin rouge", "boucles d'oreilles", "téléphone portable", "ordinateur portable", "lampe de poche",
+         "appareil photo", "carte postale", "sac à dos", "couteau de poche", "baguettes chinoises", "boîte aux lettres"]
 
 
 def themes_of(fr):
@@ -208,7 +226,7 @@ def tags_for(c):
     elif not pos and " " in c["es"].strip():
         tags.append("expression")
     if pos == "nom":
-        tags += sorted(themes_of(c["fr"]))
+        tags += sorted(t for t in themes_of(c["fr"]) if c["es"] not in NOT_THEME.get(t, ()))
     core = re.sub(r"^(el|la|los|las|un|una) ", "", c["es"].strip().lower())
     if core in COLOURS:
         tags.append("couleurs")
