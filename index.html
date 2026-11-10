@@ -2242,7 +2242,7 @@
                         </div>
                     </div></div>
                     <b>Indice</b> montre le mot <span style="color:var(--orange)">en orange</span> sous la case ; <b>Voir la réponse</b> montre tout.
-                    Après <span style="color:var(--red)">3 erreurs</span> (réglable dans ⚙), le bon mot s'écrit en rouge. Une carte où on a eu de l'aide est notée « À revoir ».
+                    Après <span style="color:var(--red)">3 erreurs</span> (réglable dans ⚙), le bon mot s'écrit en rouge ; si c'était le dernier, la carte est notée « À revoir » et passe toute seule à la suivante. Une carte où on a eu de l'aide est notée « À revoir ».
                     <br>Sur téléphone, pas de boutons : touche la moitié gauche du recto pour un indice, la moitié droite pour la réponse (en mode Normal, touche la carte pour la retourner).
                 </div>
             </div>
@@ -2325,6 +2325,7 @@
                 <div class="g-num">9</div><div class="g-h">Nouveautés</div>
                 <div class="g-body">
                     <ul class="g-news">
+                        <li><b>10 nov.</b> (nuit, correction) après 3 erreurs sur le dernier mot, la carte passe toute seule à la suivante (notée « À revoir »).</li>
                         <li><b>10 nov.</b> (nuit, fin) Vocabulaire : tags de nature (nom, verbe, adjectif…) et de thème (animaux, nourriture, corps, métiers…), à choisir dans le menu 🏷 de 🔍.</li>
                         <li><b>10 nov.</b> (nuit, suite) 🔍 liste : une ligne par carte, clic → 📝 Relecture, en-tête toujours visible, tags dans un menu au bout de la recherche.</li>
                         <li><b>10 nov.</b> (nuit) 📝 Relecture : ↑ modifier la carte, ↓ la retirer du paquet.</li>
@@ -5989,7 +5990,16 @@
                 || wordRows.find(function (e) { return !e.solved && !e.given; });
             if (next) next.inp.focus();
             else if (document.activeElement) document.activeElement.blur(); // phone: keyboard down → rating pills show
-            if (!wordRows.some(function (e) { return !e.solved && !e.revealed; })) showBackForRating();
+            if (wordRows.some(function (e) { return !e.solved && !e.revealed; })) return;
+            // Missed on errors, nothing left to type (#191): « À revoir » and on
+            // to the next card by itself, once the red word has been seen.
+            if (sess.failedByErrors) { // giveAnswer only comes from errors
+                var card = sess.queue[sess.qIdx], wait = hasRichAnswer(card) ? 400 : 1300;
+                keyLock.until = Date.now() + wait;
+                setTimeout(function () { if (sess.queue[sess.qIdx] === card && !advancing) completeCard(); }, wait);
+                return;
+            }
+            showBackForRating();
         }
 
         function focusNext(i) {
@@ -6789,6 +6799,7 @@
                     "(nuit, suite) 🔍 liste : une ligne par carte, clic → 📝 Relecture, en-tête toujours visible, tags dans un menu au bout de la recherche.": "(notte, seguito) 🔍 elenco: una riga per carta, clic → 📝 Revisione, intestazione sempre visibile, tag in un menu alla fine della ricerca.",
                     ": parcourir les cartes (carrousel pour les images, liste pour les mots : une ligne par carte, un clic l'ouvre en 📝 Relecture, au même endroit en revenant ; 🏷 au bout de la recherche pour filtrer par tag) ;": ": sfogliare le carte (carosello per le immagini, elenco per le parole: una riga per carta, un clic la apre in 📝 Revisione, allo stesso punto al ritorno; 🏷 alla fine della ricerca per filtrare per tag);",
                     "(nuit, fin) Vocabulaire : tags de nature (nom, verbe, adjectif…) et de thème (animaux, nourriture, corps, métiers…), à choisir dans le menu 🏷 de 🔍.": "(notte, fine) Vocabolario: tag di categoria (nome, verbo, aggettivo…) e di tema (animali, cibo, corpo, mestieri…), da scegliere nel menu 🏷 di 🔍.",
+                    "(nuit, correction) après 3 erreurs sur le dernier mot, la carte passe toute seule à la suivante (notée « À revoir »).": "(notte, correzione) dopo 3 errori sull'ultima parola, la carta passa da sola alla successiva (valutata « Da rivedere »).",
                     "toutes": "tutte", "Filtrer par tag": "Filtra per tag", "Chercher un tag…": "Cerca un tag…",
                     "pour commenter une carte,": "per commentare una carta,", "(✏️) pour la modifier,": "(✏️) per modificarla,", "(🗑) pour la retirer du paquet (": "(🗑) per toglierla dal mazzo (", "la remet).": "la rimette).",
                     "📝 Relecture : modifier la carte · la retirer du paquet (Ctrl+Z : annuler)": "📝 Revisione: modifica la carta · toglila dal mazzo (Ctrl+Z: annulla)",
@@ -6872,6 +6883,7 @@
                     "Besoin d'aide ?": "Serve aiuto?", "montre le mot": "mostra la parola", "en orange": "in arancione", "sous la case ;": "sotto la casella;",
                     "montre tout. Après": "mostra tutto. Dopo", "3 erreurs": "3 errori",
                     "(réglable dans ⚙), le bon mot s'écrit en rouge. Une carte où on a eu de l'aide est notée « À revoir ».": "(regolabile in ⚙), la parola giusta si scrive in rosso. Una carta in cui hai avuto aiuto viene valutata « Da rivedere ».",
+                    "(réglable dans ⚙), le bon mot s'écrit en rouge ; si c'était le dernier, la carte est notée « À revoir » et passe toute seule à la suivante. Une carte où on a eu de l'aide est notée « À revoir ».": "(regolabile in ⚙), la parola giusta si scrive in rosso; se era l'ultima, la carta viene valutata « Da rivedere » e passa da sola alla successiva. Una carta in cui hai avuto aiuto viene valutata « Da rivedere ».",
                     "La carte prend la couleur de la note.": "La carta prende il colore della valutazione.", "Tout tapé sans aide →": "Tutto scritto senza aiuto →",
                     "carte réussie": "carta riuscita",
                     "automatiquement. Après un indice ou la réponse, ces boutons apparaissent en bas ; la durée indique quand la carte reviendra.": "automaticamente. Dopo un suggerimento o la risposta, questi pulsanti compaiono in basso; la durata indica quando la carta tornerà.",
