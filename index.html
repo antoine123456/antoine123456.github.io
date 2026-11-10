@@ -435,6 +435,10 @@
         .b-flag { font: inherit; font-size: 13px; border: 1.5px solid var(--border-2); background: var(--surface); color: var(--text); border-radius: 16px; padding: 4px 12px; cursor: pointer; }
         .b-edited { font-size: 12px; color: var(--text-3); }
         .ed-modal { max-width: 560px; }
+        .ed-photo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 4px 0 12px; }
+        .ed-photo img { display: block; width: 100%; max-height: 180px; object-fit: contain; border-radius: 10px; background: var(--surface-2, transparent); }
+        .ed-photo img[hidden], .ed-photo [hidden] { display: none; }
+        .ed-photo-add { cursor: pointer; }
         .ed-modal .ac-row textarea { font: inherit; font-size: 15px; color: var(--text); background: var(--surface); border: 1.5px solid var(--border-2); border-radius: 10px; padding: 8px 10px; resize: vertical; }
         .ed-modal .ac-row textarea:focus { outline: none; border-color: var(--navy); }
         .h-settings-btn { right: 108px; }
@@ -2207,6 +2211,14 @@
         <div class="g-modal fm-modal ed-modal" role="dialog" aria-modal="true" aria-labelledby="ed-title">
             <div class="g-title" id="ed-title">✏️ Modifier la carte</div>
             <div id="ed-fields"></div>
+            <!-- 📷 a photo on the recto (#194); a picture can also be pasted (Ctrl/⌘+V) -->
+            <div class="ed-photo">
+                <img id="ed-photo-img" alt="" hidden>
+                <label class="fm-btn ed-photo-add">📷 <span id="ed-photo-lbl">Ajouter une photo</span>
+                    <input type="file" id="ed-photo-file" accept="image/*" hidden onchange="pickEditPhoto(this.files[0]); this.value = ''">
+                </label>
+                <button class="fm-btn" id="ed-photo-del" onclick="setEditPhoto(null)" hidden>Retirer la photo</button>
+            </div>
             <div class="fm-actions">
                 <span class="fm-keys">Ctrl+Entrée : enregistrer · Échap : annuler</span>
                 <button class="fm-btn" onclick="closeEditModal()">Annuler</button>
@@ -2237,7 +2249,7 @@
                     <b>＋</b> (sur « 📝 Vocabulaire perso ») : ajouter tes propres cartes, l'espagnol et sa traduction.
                     <br>💤 sur un paquet l'endort : il disparaît de l'accueil, sa progression est gardée ; « 💤 paquets endormis », en bas de l'accueil, les réveille.
                     Dans 🔍 d'un paquet de conjugaison, <b>📋 Tableaux</b> montre tous les tableaux des verbes.
-                    <br>Dans 🔍, chaque carte a une barre de progression qui se remplit de gauche à droite, du rouge (à peine commencée) au vert (bien sue), et le paquet entier a la sienne en haut. 🗂 Pré-tri montre les cartes jamais vues une par une : touche la carte pour voir le verso, puis → (ou glisser à droite) = je la connais déjà, elle est rangée comme apprise et reviendra dans 20 à 60 jours ; ← (ou glisser à gauche) = à apprendre, elle reste nouvelle. Une carte déjà triée ne revient plus au pré-tri. Pour changer d'avis, reviens dessus avec ‹ Préc. et trie-la autrement ; comme en Relecture, ↑ (✏️) modifie la carte et ↓ (🗑) la retire du paquet ; Ctrl/⌘+Z (ou ↩) annule le dernier tri ou retrait. En haut, les boutons, le nom du paquet, la progression et la recherche restent affichés quand tu fais défiler.
+                    <br>Dans 🔍, chaque carte a une barre de progression qui se remplit de gauche à droite, du rouge (à peine commencée) au vert (bien sue), et le paquet entier a la sienne en haut. 🗂 Pré-tri montre les cartes jamais vues une par une : touche la carte pour voir le verso, puis → (ou glisser à droite) = je la connais déjà, elle est rangée comme apprise et reviendra dans 20 à 60 jours ; ← (ou glisser à gauche) = à apprendre, elle reste nouvelle. Une carte déjà triée ne revient plus au pré-tri. Pour changer d'avis, reviens dessus avec ‹ Préc. et trie-la autrement ; comme en Relecture, ↑ (✏️) modifie la carte et ↓ (🗑) la retire du paquet ; Ctrl/⌘+Z (ou ↩) annule le dernier tri ou retrait. Le pré-tri suit le tag et la recherche choisis. Dans ✏️ Modifier la carte, 📷 ajoute une photo au recto (ou colle une image avec Ctrl/⌘+V) ; elle suit d'un appareil à l'autre. En haut, les boutons, le nom du paquet, la progression et la recherche restent affichés quand tu fais défiler.
                 </div>
             </div>
 
@@ -2359,6 +2371,7 @@
                 <div class="g-num">9</div><div class="g-h">Nouveautés</div>
                 <div class="g-body">
                     <ul class="g-news">
+                        <li><b>10 nov.</b> (soir) ✏️ 📷 une photo sur la carte (Modifier la carte) ; 🗂 le pré-tri suit le tag et la recherche choisis.</li>
                         <li><b>10 nov.</b> (après-midi) 🗂 Pré-tri : seulement les cartes jamais triées ; changer d'avis (‹ Préc.), ↑ modifier, ↓ retirer, Ctrl/⌘+Z pour annuler ; 🔍 tout le haut reste affiché, nom du paquet sur la ligne des boutons.</li>
                         <li><b>10 nov.</b> (nuit, fin+) 🔍 filtrer et trier par niveau de connaissance (📶 et ↕ sous la recherche).</li>
                         <li><b>10 nov.</b> (nuit, correction) après 3 erreurs sur le dernier mot, la carte passe toute seule à la suivante (notée « À revoir »).</li>
@@ -2646,6 +2659,7 @@
         var LS_NEWCOUNT = NS + "nc_";     // + sourceId → {day, count}
         var LS_FLAGGED = NS + "fl_";     // + sourceId → {cardId: questionPlainText}
         var LS_EDITS = NS + "ed_";     // + sourceId → {cardId: {f: {field: value}, at}} — cards edited in 📝 Relecture (#187)
+        var LS_PHOTOS = NS + "ph_";    // + sourceId → {cardId: {img: dataURL | null, at, up}} — photos added in ✏️ (#194)
         var LS_STYLES = NS + "css_";    // + sourceId → [css shared by cards, see card.style]
         var LS_MODE = NS + "mode";     // "type" (type the answer, default) | "flip" (Anki-style: show answer, rate)
         var LS_THEME = NS + "theme";    // "light" | "dark" | absent (follow system)
@@ -2984,6 +2998,51 @@
             Object.keys(localEd || {}).forEach(function (id) { if (!out[id] || (localEd[id].at || 0) >= (out[id].at || 0)) out[id] = localEd[id]; });
             return out;
         }
+        // 📷 Photos added in ✏️ Modifier la carte (#194). Kept apart from the
+        // edits: each one is its own Firestore doc (sources/{id}/photos/{cardId}),
+        // so the source doc (progress, edits…) stays far from the 1 MB limit.
+        // up = already sent; img null = photo removed.
+        var photoCache = {};
+        function loadPhotos(sid) {
+            if (photoCache[sid]) return photoCache[sid];
+            var o = {};
+            try { o = JSON.parse(localStorage.getItem(LS_PHOTOS + sid) || "{}") || {}; } catch (e) { }
+            return (photoCache[sid] = o);
+        }
+        function savePhotosRaw(sid, ph) {
+            photoCache[sid] = ph;
+            try { localStorage.setItem(LS_PHOTOS + sid, JSON.stringify(ph)); return true; } catch (e) { return false; }
+        }
+        function cardPhotoHtml(sid, c) {
+            var p = c && loadPhotos(sid)[c.id];
+            return p && p.img ? '<img class="card-photo" src="' + p.img + '" alt="" style="display:block;max-width:100%;max-height:220px;margin:14px auto 0;border-radius:10px;object-fit:contain">' : "";
+        }
+        // the picture made small (480 px at most, JPEG): about 30 KB
+        function shrinkPhoto(file) {
+            return new Promise(function (ok, ko) {
+                var url = URL.createObjectURL(file), img = new Image();
+                img.onload = function () {
+                    var k = Math.min(1, 480 / Math.max(img.width, img.height)), cv = document.createElement("canvas");
+                    cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k);
+                    cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+                    URL.revokeObjectURL(url);
+                    ok(cv.toDataURL("image/jpeg", .75));
+                };
+                img.onerror = function () { URL.revokeObjectURL(url); ko(new Error("image")); };
+                img.src = url;
+            });
+        }
+        function pullPhotos(srcRef, sid) {
+            return srcRef.collection("photos").get().then(function (snap) {
+                var ph = loadPhotos(sid), n = 0;
+                snap.forEach(function (d) {
+                    var c = d.data(), l = ph[d.id];
+                    if (!l || (c.at || 0) > (l.at || 0)) { ph[d.id] = { img: c.img || null, at: c.at || 0, up: 1 }; n++; }
+                });
+                if (n) savePhotosRaw(sid, ph);
+            }).catch(function (e) { console.warn("photos", e); });
+        }
+
         function saveCards(sid, c) {
             if (isBundledId(sid)) { MEM_CARDS[sid] = c; return; }
             try { localStorage.setItem(LS_CARDS + sid, JSON.stringify(c)); } catch (e) { throw new Error("Données trop volumineuses pour le stockage local"); }
@@ -3587,6 +3646,17 @@
                         cardWrites.push(chunkCol.doc(String(i)).set({ data: chunk, index: i, total: chunks.length }));
                     });
                 });
+                // 📷 the photos not sent yet, one doc each (#194)
+                sources.forEach(function (src) {
+                    var ph = loadPhotos(src.id), col = userRef.collection("sources").doc(String(src.id)).collection("photos");
+                    Object.keys(ph).forEach(function (id) {
+                        var p = ph[id]; if (p.up) return;
+                        cardWrites.push(col.doc(String(id)).set({ img: p.img || null, at: p.at || 0 }).then(function () {
+                            var cur = loadPhotos(src.id);
+                            if (cur[id] && cur[id].at === p.at) { cur[id].up = 1; savePhotosRaw(src.id, cur); }
+                        }));
+                    });
+                });
                 return Promise.all(cardWrites);
             });
         }
@@ -3682,7 +3752,7 @@
                     // Cloud has data, nothing local — pull everything down.
                     return Promise.all(cloud.sources.map(function (cs) {
                         var srcRef = userRef.collection("sources").doc(cs.id);
-                        return Promise.all([srcRef.get(), fetchSourceCards(userRef, cs.id)]).then(function (r) {
+                        return Promise.all([srcRef.get(), fetchSourceCards(userRef, cs.id), pullPhotos(srcRef, cs.isDefault ? "default" : cs.id)]).then(function (r) {
                             var meta = r[0].exists ? r[0].data() : { srs: {}, newCount: {}, flagged: {} };
                             var sid = cs.isDefault ? "default" : cs.id;
                             var cards = r[1] || (isBundledSource(sid) ? null : {});
@@ -3709,7 +3779,7 @@
                 var work = cloud.sources.map(function (cs) {
                     var local = byName[cs.name];
                     var srcRef = userRef.collection("sources").doc(cs.id);
-                    return Promise.all([srcRef.get(), local ? null : fetchSourceCards(userRef, cs.id)]).then(function (r) {
+                    return Promise.all([srcRef.get(), local ? null : fetchSourceCards(userRef, cs.id), pullPhotos(srcRef, local ? local.id : cs.isDefault ? "default" : cs.id)]).then(function (r) {
                         var meta = r[0].exists ? r[0].data() : { srs: {}, newCount: {}, flagged: {} };
                         if (local) {
                             saveSRSRaw(local.id, mergeSRS(loadSRS(local.id), meta.srs || {}));
@@ -3757,9 +3827,9 @@
             if (READONLY) return Promise.resolve();
             if (!FIREBASE_ENABLED || !fbUser || !fbDb) return Promise.resolve();
             var srcRef = fbDb.collection("users").doc(fbUser.uid).collection("sources").doc(String(sourceId));
-            return srcRef.collection("cardChunks").get().then(function (snap) {
+            return Promise.all([srcRef.collection("cardChunks").get(), srcRef.collection("photos").get()]).then(function (snaps) {
                 var batch = fbDb.batch();
-                snap.forEach(function (doc) { batch.delete(doc.ref); });
+                snaps.forEach(function (snap) { snap.forEach(function (doc) { batch.delete(doc.ref); }); }); // 📷 photos too (#194)
                 batch.delete(srcRef);
                 return batch.commit();
             }).catch(function (err) { console.error("Firestore source delete failed:", err); });
@@ -4304,6 +4374,7 @@
             try { localStorage.removeItem(LS_NEWCOUNT + id); } catch (e2) { }
             try { localStorage.removeItem(LS_FLAGGED + id); } catch (e2) { }
             try { localStorage.removeItem(LS_EDITS + id); } catch (e2) { }
+            try { localStorage.removeItem(LS_PHOTOS + id); } catch (e2) { } delete photoCache[id];
             try { localStorage.removeItem(LS_STYLES + id); } catch (e2) { }
             if (fbUser) deleteSourceFromFirestore(id);
             renderHome();
@@ -4780,10 +4851,32 @@
                 var v = editValue(b.card, f[0]);
                 return '<label class="ac-row"><span>' + esc(f[1]) + '</span><textarea data-k="' + f[0] + '" rows="' + Math.min(5, Math.max(1, Math.ceil(v.length / 50))) + '">' + esc(v) + '</textarea></label>';
             }).join("");
+            editPhoto = undefined;
+            showEditPhoto((loadPhotos(browse.sid)[b.card.id] || {}).img || null);
             document.getElementById("edit-modal").hidden = false;
             setTimeout(function () { var t = document.querySelector("#ed-fields textarea"); if (t) { t.focus(); t.select(); } }, 0);
         }
-        function closeEditModal() { document.getElementById("edit-modal").hidden = true; editIdx = -1; }
+        function closeEditModal() { document.getElementById("edit-modal").hidden = true; editIdx = -1; editPhoto = undefined; }
+        // 📷 (#194): undefined = photo unchanged, null = removed, else the new one (data URL)
+        var editPhoto;
+        function showEditPhoto(src) {
+            var img = document.getElementById("ed-photo-img");
+            img.hidden = !src; if (src) img.src = src; else img.removeAttribute("src");
+            document.getElementById("ed-photo-del").hidden = !src;
+            document.getElementById("ed-photo-lbl").textContent = t9n(src ? "Changer la photo" : "Ajouter une photo");
+        }
+        function setEditPhoto(v) { editPhoto = v; showEditPhoto(v); }
+        function pickEditPhoto(file) {
+            if (!file || !/^image\//.test(file.type)) return;
+            shrinkPhoto(file).then(setEditPhoto, function () { toast(t9n("Image illisible.")); });
+        }
+        document.addEventListener("paste", function (e) {
+            if (!editModalOpen() || !e.clipboardData) return;
+            var it = Array.prototype.find.call(e.clipboardData.items || [], function (i) { return i.kind === "file" && /^image\//.test(i.type); });
+            if (!it) return;
+            e.preventDefault();
+            pickEditPhoto(it.getAsFile());
+        });
         function confirmEdit() {
             var b = browse.list[editIdx], c = b && b.card, f = {};
             if (!c) { closeEditModal(); return; }
@@ -4799,9 +4892,20 @@
             // the vocabulary cards' plain recto / verso follow the word and its meaning
             if (c.es != null && f.es != null) f.question = esc(f.es);
             if (c.es != null && f.fr != null) f.answer = esc(f.fr);
-            var i = editIdx;
+            var i = editIdx, photo = editPhoto;
             closeEditModal();
-            if (!Object.keys(f).length) return;
+            var refill = function () { var sl = document.querySelector('.b-slide[data-i="' + i + '"]'); if (sl) { delete sl.dataset.filled; fillSlide(sl); } };
+            if (photo !== undefined) {
+                var ph = loadPhotos(browse.sid), was = ph[c.id];
+                ph[c.id] = { img: photo, at: Date.now() };
+                if (!savePhotosRaw(browse.sid, ph)) { // localStorage full: the old photo stays
+                    toast("⚠️ " + t9n("Plus de place pour les photos sur cet appareil."));
+                    if (was) ph[c.id] = was; else delete ph[c.id];
+                    savePhotosRaw(browse.sid, ph); photo = undefined;
+                }
+                else { dlog("photo", { source: browse.sid, id: c.id, retiree: !photo }); scheduleSync(); }
+            }
+            if (!Object.keys(f).length) { if (photo !== undefined) { toast("📷 " + t9n(photo ? "Photo ajoutée" : "Photo retirée")); refill(); } return; }
             var ed = loadEdits(browse.sid);
             ed[c.id] = { f: Object.assign({}, ed[c.id] && ed[c.id].f, f), at: Date.now() };
             saveEdits(browse.sid, ed);
@@ -4877,11 +4981,13 @@
             var terms = noAcc(q.toLowerCase()).split(/\s+/).filter(Boolean);
             browse.list = browse.all.filter(function (b) {
                 if (browse.tag && b.tags.indexOf(browse.tag) === -1) return false;
-                if (browse.know && knowLevel(browse.srs[b.card.id]) !== browse.know) return false;
+                // 🗂 pré-tri: only the cards never sorted before (« à apprendre » is kept on the card, presorted) (#193)
+                if (browse.sort) { var st = browse.srs[b.card.id]; if (!isNewCard(b.card) || (st && st.presorted)) return false; }
+                else if (browse.know && knowLevel(browse.srs[b.card.id]) !== browse.know) return false;
                 var t = noAcc(b.text);
                 return terms.every(function (term) { return t.indexOf(term) !== -1; });
             });
-            if (browse.order) {
+            if (browse.order && !browse.sort) {
                 var rank = function (b) { var st = browse.srs[b.card.id]; return !st || st.state === "new" ? -1 : st.state === "review" ? st.interval || 0 : -.5; };
                 var pos = new Map(browse.all.map(function (b, k) { return [b, k]; }));
                 browse.list.sort(function (a, b) { return (browse.order === "asc" ? rank(a) - rank(b) : rank(b) - rank(a)) || pos.get(a) - pos.get(b); });
@@ -4992,10 +5098,8 @@
             document.getElementById("b-sort-btn").classList.toggle("on", browse.sort);
             document.getElementById("browse").classList.toggle("sorting", browse.sort);
             browse.sorted = {}; browse.sortPrev = {}; browse.sortHist = [];
-            // only the cards never sorted before: « à apprendre » is kept on the card (presorted), synced like its progress
-            if (browse.sort) browse.list = browse.all.filter(function (b) { var st = browse.srs[b.card.id]; return isNewCard(b.card) && !(st && st.presorted); });
-            else { filterBrowse(browse.q || ""); renderBrowseOverall(); return; }
-            renderBrowse();
+            filterBrowse(browse.q || ""); // the tag and the search chosen apply to the pré-tri too (#195)
+            if (!browse.sort) renderBrowseOverall();
         }
         // A card already sorted the same way: just next. Sorted the other
         // way (back on it with ‹ Préc.): the new choice replaces the old
@@ -5038,7 +5142,7 @@
             if (h.drop) { undoBrowseDrop(); return; } // the card dropped with ↓ comes back
             // where the card is now (a drop since may have moved it)
             var at = browse.list.findIndex(function (b) { return b.card.id === h.id; });
-            if (at >= 0) h.idx = at;
+            h.idx = at; // -1: not in the list any more (tag or search changed since)
             var srs = loadSRS(browse.sid);
             if (h.was == null) { delete browse.sorted[h.id]; sortSrsBack(h.id, srs); }
             else { browse.sorted[h.id] = h.was; sortSet(h.id, srs, h.was); }
@@ -5050,7 +5154,7 @@
                 if (h.was != null) sl.classList.add(h.was ? "sorted-known" : "sorted-learn");
                 delete sl.dataset.filled; fillSlide(sl);
             }
-            jumpToSlide(h.idx);
+            if (h.idx >= 0) jumpToSlide(h.idx);
             updateSortCount();
             toast("↩ " + t9n("Tri annulé"));
         }
@@ -5198,7 +5302,7 @@
                     + '<button class="b-flag" onclick="browseDrop(' + sl.dataset.i + ')">🗑 ' + t9n("Retirer") + ' <span class="t-key">↓</span></button>'
                     + (loadEdits(browse.sid)[c.id] ? '<div class="b-edited">✏️ ' + t9n("modifiée") + '</div>' : '') + '</div>' : '');
             var css = cardStyle(browse.sid, c);
-            mountCardHtml(sl.querySelector(".b-front"), displayQuestion(rc.question), css);
+            mountCardHtml(sl.querySelector(".b-front"), displayQuestion(rc.question) + cardPhotoHtml(browse.sid, c), css);
             // like in study: the back only adds what the recto doesn't show (#128)
             var backHtml = rc.rf ? RF_CSS + rc.rf.topBack + rc.rf.bottomBack : (rc !== c && rc.answer != null ? rc.answer : b.back);
             mountCardHtml(sl.querySelector(".b-back"), backHtml, css);
@@ -5672,7 +5776,7 @@
                     : '<div class="t-words" id="t-words"></div><div class="s-verso-extra" id="s-verso-extra"></div>')
                 + '</div></div>'
                 + '</div>';
-            if (!dictee) mountCardHtml(document.querySelector("#s-content .s-card-body"), displayQuestion(card.question), cardStyle(sess.sourceId, card));
+            if (!dictee) mountCardHtml(document.querySelector("#s-content .s-card-body"), displayQuestion(card.question) + cardPhotoHtml(sess.sourceId, card), cardStyle(sess.sourceId, card));
             else document.getElementById("audio-player").defaultPlaybackRate = 1;
             if (flip && card.rf) showRefoldZones(card, false);
 
@@ -7101,14 +7205,14 @@
                     "(nuit, correction) après 3 erreurs sur le dernier mot, la carte passe toute seule à la suivante (notée « À revoir »).": "(notte, correzione) dopo 3 errori sull'ultima parola, la carta passa da sola alla successiva (valutata « Da rivedere »).",
                     "toutes": "tutte", "Tous les niveaux": "Tutti i livelli", "Nouvelles": "Nuove", "En cours": "In corso", "À consolider": "Da consolidare", "Bien connues": "Ben note",
                     "Ordre du paquet": "Ordine del mazzo", "Moins connues d'abord": "Prima le meno note", "Mieux connues d'abord": "Prima le più note",
-                    "(nuit, fin+) 🔍 filtrer et trier par niveau de connaissance (📶 et ↕ sous la recherche).": "(notte, fine+) 🔍 filtrare e ordinare per livello di conoscenza (📶 e ↕ sotto la ricerca).", "(après-midi) 🗂 Pré-tri : seulement les cartes jamais triées ; changer d'avis (‹ Préc.), ↑ modifier, ↓ retirer, Ctrl/⌘+Z pour annuler ; 🔍 tout le haut reste affiché, nom du paquet sur la ligne des boutons.": "(pomeriggio) 🗂 Pre-selezione: solo le carte mai ordinate; cambiare idea (‹ Préc.), ↑ modificare, ↓ togliere, Ctrl/⌘+Z per annullare; 🔍 tutta la parte alta resta visibile, nome del mazzo sulla riga dei pulsanti.", "Rien à annuler.": "Niente da annullare.", "Modifier la carte (↑)": "Modifica la carta (↑)", "Retirer la carte du paquet (↓)": "Togli la carta dal mazzo (↓)", "Tri annulé": "Scelta annullata", "Annuler le dernier tri (Ctrl/⌘+Z)": "Annulla l'ultima scelta (Ctrl/⌘+Z)", "↩ pour corriger, 🗂 pour sortir": "↩ per correggere, 🗂 per uscire", "Filtrer par tag": "Filtra per tag", "Chercher un tag…": "Cerca un tag…",
+                    "(nuit, fin+) 🔍 filtrer et trier par niveau de connaissance (📶 et ↕ sous la recherche).": "(notte, fine+) 🔍 filtrare e ordinare per livello di conoscenza (📶 e ↕ sotto la ricerca).", "(après-midi) 🗂 Pré-tri : seulement les cartes jamais triées ; changer d'avis (‹ Préc.), ↑ modifier, ↓ retirer, Ctrl/⌘+Z pour annuler ; 🔍 tout le haut reste affiché, nom du paquet sur la ligne des boutons.": "(pomeriggio) 🗂 Pre-selezione: solo le carte mai ordinate; cambiare idea (‹ Préc.), ↑ modificare, ↓ togliere, Ctrl/⌘+Z per annullare; 🔍 tutta la parte alta resta visibile, nome del mazzo sulla riga dei pulsanti.", "Rien à annuler.": "Niente da annullare.", "(soir) ✏️ 📷 une photo sur la carte (Modifier la carte) ; 🗂 le pré-tri suit le tag et la recherche choisis.": "(sera) ✏️ 📷 una foto sulla carta (Modifica la carta); 🗂 la pre-selezione segue il tag e la ricerca scelti.", "Ajouter une photo": "Aggiungi una foto", "Changer la photo": "Cambia la foto", "Retirer la photo": "Togli la foto", "Image illisible.": "Immagine illeggibile.", "Plus de place pour les photos sur cet appareil.": "Niente più spazio per le foto su questo dispositivo.", "Photo ajoutée": "Foto aggiunta", "Photo retirée": "Foto tolta", "Modifier la carte (↑)": "Modifica la carta (↑)", "Retirer la carte du paquet (↓)": "Togli la carta dal mazzo (↓)", "Tri annulé": "Scelta annullata", "Annuler le dernier tri (Ctrl/⌘+Z)": "Annulla l'ultima scelta (Ctrl/⌘+Z)", "↩ pour corriger, 🗂 pour sortir": "↩ per correggere, 🗂 per uscire", "Filtrer par tag": "Filtra per tag", "Chercher un tag…": "Cerca un tag…",
                     "pour commenter une carte,": "per commentare una carta,", "(✏️) pour la modifier,": "(✏️) per modificarla,", "(🗑) pour la retirer du paquet (": "(🗑) per toglierla dal mazzo (", "la remet).": "la rimette).",
                     "📝 Relecture : modifier la carte · la retirer du paquet (Ctrl+Z : annuler)": "📝 Revisione: modifica la carta · toglila dal mazzo (Ctrl+Z: annulla)",
                     "✏️ Modifier la carte": "✏️ Modifica la carta", "Ctrl+Entrée : enregistrer · Échap : annuler": "Ctrl+Invio: salva · Esc: annulla", "✓ Enregistrer": "✓ Salva",
                     "Réponse à taper": "Risposta da scrivere", "Phrase d'exemple": "Frase d'esempio", "Traduction de la phrase": "Traduzione della frase", "Note": "Nota", "Recto": "Fronte", "Verso": "Retro",
                     "Carte modifiée": "Carta modificata", "Carte retirée du paquet · Ctrl+Z pour annuler": "Carta tolta dal mazzo · Ctrl+Z per annullare", "Carte remise": "Carta rimessa", "Éditer": "Modifica", "Retirer": "Togli", "modifiée": "modificata", "Sur plusieurs appareils : les cartes d'une journée sont tirées dans le même ordre partout, la progression part en ligne dès que tu quittes l'appli et revient quand tu la rouvres sur l'autre appareil : tu reprends où tu en étais.": "Su più dispositivi: le carte di una giornata sono estratte nello stesso ordine ovunque, i progressi vanno online appena lasci l'app e tornano quando la riapri sull'altro dispositivo: riprendi da dove eri.", "(soir, suite) d'un appareil à l'autre : même ordre des cartes du jour partout, et la progression revient en rouvrant l'appli.": "(sera, seguito) da un dispositivo all'altro: stesso ordine delle carte del giorno ovunque, e i progressi tornano riaprendo l'app.", "(soir) 💤 endormir un paquet : il quitte l'accueil, sa progression est gardée, et se réveille en bas de l'accueil.": "(sera) 💤 addormentare un mazzo: lascia la pagina iniziale, i progressi restano, e si risveglia in fondo alla pagina iniziale.",
                     "💤 sur un paquet l'endort : il disparaît de l'accueil, sa progression est gardée ; « 💤 paquets endormis », en bas de l'accueil, les réveille.": "💤 su un mazzo lo addormenta: sparisce dalla pagina iniziale, i progressi restano; « 💤 mazzi addormentati », in fondo alla pagina iniziale, li risveglia.",
-                    "Dans 🔍, chaque carte a une barre de progression qui se remplit de gauche à droite, du rouge (à peine commencée) au vert (bien sue), et le paquet entier a la sienne en haut. 🗂 Pré-tri montre les cartes jamais vues une par une : touche la carte pour voir le verso, puis → (ou glisser à droite) = je la connais déjà, elle est rangée comme apprise et reviendra dans 20 à 60 jours ; ← (ou glisser à gauche) = à apprendre, elle reste nouvelle. Une carte déjà triée ne revient plus au pré-tri. Pour changer d'avis, reviens dessus avec ‹ Préc. et trie-la autrement ; comme en Relecture, ↑ (✏️) modifie la carte et ↓ (🗑) la retire du paquet ; Ctrl/⌘+Z (ou ↩) annule le dernier tri ou retrait. En haut, les boutons, le nom du paquet, la progression et la recherche restent affichés quand tu fais défiler.": "In 🔍, ogni carta ha una barra di progresso che si riempie da sinistra a destra, dal rosso (appena iniziata) al verde (ben saputa), e il mazzo intero ha la sua in alto. 🗂 Pre-selezione mostra le carte mai viste una per una: tocca la carta per vedere il retro, poi → (o scorri a destra) = la so già, viene messa tra le imparate e tornerà fra 20–60 giorni; ← (o scorri a sinistra) = da imparare, resta nuova. Una carta già ordinata non torna più nella pre-selezione. Per cambiare idea, torna indietro con ‹ Préc. e ordinala diversamente; come nella Revisione, ↑ (✏️) modifica la carta e ↓ (🗑) la toglie dal mazzo; Ctrl/⌘+Z (o ↩) annulla l'ultima scelta o rimozione. In alto, i pulsanti, il nome del mazzo, il progresso e la ricerca restano visibili quando scorri.",
+                    "Dans 🔍, chaque carte a une barre de progression qui se remplit de gauche à droite, du rouge (à peine commencée) au vert (bien sue), et le paquet entier a la sienne en haut. 🗂 Pré-tri montre les cartes jamais vues une par une : touche la carte pour voir le verso, puis → (ou glisser à droite) = je la connais déjà, elle est rangée comme apprise et reviendra dans 20 à 60 jours ; ← (ou glisser à gauche) = à apprendre, elle reste nouvelle. Une carte déjà triée ne revient plus au pré-tri. Pour changer d'avis, reviens dessus avec ‹ Préc. et trie-la autrement ; comme en Relecture, ↑ (✏️) modifie la carte et ↓ (🗑) la retire du paquet ; Ctrl/⌘+Z (ou ↩) annule le dernier tri ou retrait. Le pré-tri suit le tag et la recherche choisis. Dans ✏️ Modifier la carte, 📷 ajoute une photo au recto (ou colle une image avec Ctrl/⌘+V) ; elle suit d'un appareil à l'autre. En haut, les boutons, le nom du paquet, la progression et la recherche restent affichés quand tu fais défiler.": "In 🔍, ogni carta ha una barra di progresso che si riempie da sinistra a destra, dal rosso (appena iniziata) al verde (ben saputa), e il mazzo intero ha la sua in alto. 🗂 Pre-selezione mostra le carte mai viste una per una: tocca la carta per vedere il retro, poi → (o scorri a destra) = la so già, viene messa tra le imparate e tornerà fra 20–60 giorni; ← (o scorri a sinistra) = da imparare, resta nuova. Una carta già ordinata non torna più nella pre-selezione. Per cambiare idea, torna indietro con ‹ Préc. e ordinala diversamente; come nella Revisione, ↑ (✏️) modifica la carta e ↓ (🗑) la toglie dal mazzo; Ctrl/⌘+Z (o ↩) annulla l'ultima scelta o rimozione. La pre-selezione segue il tag e la ricerca scelti. In ✏️ Modifica la carta, 📷 aggiunge una foto al fronte (o incolla un'immagine con Ctrl/⌘+V); la foto segue da un dispositivo all'altro. In alto, i pulsanti, il nome del mazzo, il progresso e la ricerca restano visibili quando scorri.",
                     "Sur téléphone, pas de boutons : touche la moitié gauche du recto pour un indice, la moitié droite pour la réponse (en mode Normal, touche la carte pour la retourner).": "Sul telefono, niente pulsanti: tocca la metà sinistra del fronte per un suggerimento, la metà destra per la risposta (in modalità Normale, tocca la carta per girarla).",
                     "Sur téléphone, glisse la carte pour la noter : à gauche À revoir, à droite Correct, vers le haut Facile, vers le bas Difficile (haut et bas demandent un geste plus long, pour éviter les erreurs). Les compteurs nouvelles / à repasser / à réviser sont en haut, à côté de la barre de progression.": "Sul telefono, scorri la carta per votarla: a sinistra Da rivedere, a destra Corretto, in alto Facile, in basso Difficile (alto e basso chiedono un gesto più lungo, per evitare errori). I contatori nuove / da ripassare / da rivedere sono in alto, accanto alla barra di avanzamento.",
                     "sur téléphone, plus de boutons en bas pendant la question : touche à gauche du recto = indice, à droite = réponse, puis glisse la carte pour la noter ; compteurs en haut à côté de la barre ; boutons de note plus plats ; plus de macaron « Maintenir appuyé ».": "sul telefono, niente più pulsanti in basso durante la domanda: tocca a sinistra del fronte = suggerimento, a destra = risposta, poi scorri la carta per votarla; contatori in alto accanto alla barra; pulsanti di voto più piatti; niente più bollino « Tieni premuto ».",
@@ -7424,7 +7528,8 @@
             {"id": 37, "d": "2026-11-10", "k": "affichage", "fr": "Dans 🔍, la <b>liste</b> tient sur une ligne par carte ; un <b>clic</b> ouvre la carte en 📝 Relecture ; le titre et la recherche restent en haut, et les <b>tags</b> sont dans un menu 🏷 au bout de la recherche.", "it": "In 🔍, l'<b>elenco</b> sta su una riga per carta; un <b>clic</b> apre la carta in 📝 Revisione; titolo e ricerca restano in alto, e i <b>tag</b> sono in un menu 🏷 alla fine della ricerca."},
             {"id": 38, "d": "2026-11-10", "k": "paquets", "fr": "Le <b>Vocabulaire</b> a des <b>tags</b> : nature du mot (nom, verbe, adjectif…) et <b>thème</b> (animaux, nourriture, corps, métiers, ville…), à choisir dans le menu 🏷 de 🔍.", "it": "Il <b>Vocabolario</b> ha dei <b>tag</b>: categoria della parola (nome, verbo, aggettivo…) e <b>tema</b> (animali, cibo, corpo, mestieri, città…), da scegliere nel menu 🏷 di 🔍."},
             {"id": 39, "d": "2026-11-10", "k": "paquets", "fr": "Dans 🔍, <b>📶</b> ne montre que les cartes nouvelles, en cours, à consolider ou bien connues, et <b>↕</b> les trie des moins connues aux mieux connues (ou l'inverse).", "it": "In 🔍, <b>📶</b> mostra solo le carte nuove, in corso, da consolidare o ben note, e <b>↕</b> le ordina dalle meno note alle più note (o al contrario)."},
-            {"id": 40, "d": "2026-11-10", "k": "paquets", "fr": "<b>🗂 Pré-tri</b> : seulement les cartes jamais triées ; reviens sur une carte (‹ Préc.) pour changer d'avis, <b>↑</b> la modifie, <b>↓</b> la retire, <b>Ctrl/⌘+Z</b> ou ↩ annule. Dans 🔍, tout le haut reste affiché en défilant.", "it": "<b>🗂 Pre-selezione</b>: solo le carte mai ordinate; torna su una carta (‹ Préc.) per cambiare idea, <b>↑</b> la modifica, <b>↓</b> la toglie, <b>Ctrl/⌘+Z</b> o ↩ annulla. In 🔍, tutta la parte alta resta visibile mentre scorri."}
+            {"id": 40, "d": "2026-11-10", "k": "paquets", "fr": "<b>🗂 Pré-tri</b> : seulement les cartes jamais triées ; reviens sur une carte (‹ Préc.) pour changer d'avis, <b>↑</b> la modifie, <b>↓</b> la retire, <b>Ctrl/⌘+Z</b> ou ↩ annule. Dans 🔍, tout le haut reste affiché en défilant.", "it": "<b>🗂 Pre-selezione</b>: solo le carte mai ordinate; torna su una carta (‹ Préc.) per cambiare idea, <b>↑</b> la modifica, <b>↓</b> la toglie, <b>Ctrl/⌘+Z</b> o ↩ annulla. In 🔍, tutta la parte alta resta visibile mentre scorri."},
+            {"id": 41, "d": "2026-11-10", "k": "cartes", "fr": "<b>📷 Une photo sur la carte</b> : dans ✏️ Modifier la carte (↑ en Relecture ou en Pré-tri), ajoute une photo ou colle une image ; elle s'affiche au recto. Et 🗂 Pré-tri suit maintenant le tag et la recherche choisis.", "it": "<b>📷 Una foto sulla carta</b>: in ✏️ Modifica la carta (↑ nella Revisione o nella Pre-selezione), aggiungi una foto o incolla un'immagine; appare sul fronte. E 🗂 Pre-selezione ora segue il tag e la ricerca scelti."}
         ];
         var NEWS_KINDS = { revision: ["Révision", "Ripasso"], cartes: ["Cartes", "Carte"], combos: ["Combos", "Combo"], affichage: ["Affichage", "Aspetto"],
             reglages: ["Réglages", "Impostazioni"], accueil: ["Accueil", "Home"], paquets: ["Paquets", "Mazzi"] };
