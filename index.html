@@ -1736,11 +1736,13 @@
         /* title, progress and search stay on screen while the list scrolls (#188) */
         .b-head {
             position: sticky; top: 0; z-index: 20;
-            width: calc(100% + 48px); margin: -36px -24px 14px; padding: 12px 24px 10px;
+            width: calc(100% + 48px); margin: -36px -24px 14px; padding: 16px 24px 10px;
             display: flex; flex-direction: column; align-items: center;
             background: var(--bg);
         }
-        .b-head .s-deck-name { margin-bottom: 18px; }
+        .b-head .s-topbar { align-self: stretch; padding: 0 0 12px; }
+        .b-head .b-deck-name { flex: 1; min-width: 0; margin: 0; text-align: center; overflow: hidden; text-overflow: ellipsis; }
+        .b-head .b-count { flex: 0 0 auto; }
         .b-head .b-overall { margin: 0 0 12px; }
         .b-search-row { display: flex; gap: 8px; width: 100%; max-width: 720px; position: relative; }
         .b-tagdd[hidden], .b-tag-pop[hidden] { display: none; }
@@ -1831,6 +1833,7 @@
         .b-sort-bar { display: flex; gap: 10px; justify-content: center; margin: 4px 0 10px; }
         .b-sort-bar button { flex: 0 1 200px; padding: 10px 14px; border-radius: 999px; border: 1.5px solid var(--border-2); background: var(--surface); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
         .b-sort-bar .b-sort-learn { color: var(--red); border-color: var(--border-tint-red); }
+        .b-sort-bar .b-sort-undo { flex: 0 0 auto; color: var(--text-2); font-weight: 400; }
         .b-sort-bar .b-sort-known { color: var(--green); border-color: var(--border-tint-green); }
         .b-slide.sorted-known { border-color: var(--green); background: var(--tint-green); }
         .b-slide.sorted-learn { border-color: var(--red); background: var(--tint-red); }
@@ -2230,7 +2233,7 @@
                     <b>＋</b> (sur « 📝 Vocabulaire perso ») : ajouter tes propres cartes, l'espagnol et sa traduction.
                     <br>💤 sur un paquet l'endort : il disparaît de l'accueil, sa progression est gardée ; « 💤 paquets endormis », en bas de l'accueil, les réveille.
                     Dans 🔍 d'un paquet de conjugaison, <b>📋 Tableaux</b> montre tous les tableaux des verbes.
-                    <br>Dans 🔍, chaque carte a une barre de progression qui se remplit de gauche à droite, du rouge (à peine commencée) au vert (bien sue), et le paquet entier a la sienne en haut. 🗂 Pré-tri montre les cartes jamais vues une par une : touche la carte pour voir le verso, puis → (ou glisser à droite) = je la connais déjà, elle est rangée comme apprise et reviendra dans 20 à 60 jours ; ← (ou glisser à gauche) = à apprendre, elle reste nouvelle.
+                    <br>Dans 🔍, chaque carte a une barre de progression qui se remplit de gauche à droite, du rouge (à peine commencée) au vert (bien sue), et le paquet entier a la sienne en haut. 🗂 Pré-tri montre les cartes jamais vues une par une : touche la carte pour voir le verso, puis → (ou glisser à droite) = je la connais déjà, elle est rangée comme apprise et reviendra dans 20 à 60 jours ; ← (ou glisser à gauche) = à apprendre, elle reste nouvelle. Une carte déjà triée ne revient plus au pré-tri. Pour changer d'avis, reviens dessus avec ‹ Préc. (ou ↑) et trie-la autrement ; Ctrl/⌘+Z (ou ↩) annule le dernier tri. En haut, les boutons, le nom du paquet, la progression et la recherche restent affichés quand tu fais défiler.
                 </div>
             </div>
 
@@ -2352,6 +2355,7 @@
                 <div class="g-num">9</div><div class="g-h">Nouveautés</div>
                 <div class="g-body">
                     <ul class="g-news">
+                        <li><b>10 nov.</b> (après-midi) 🗂 Pré-tri : seulement les cartes jamais triées ; changer d'avis (‹ Préc. ou ↑) et Ctrl/⌘+Z pour annuler ; 🔍 tout le haut reste affiché, nom du paquet sur la ligne des boutons.</li>
                         <li><b>10 nov.</b> (nuit, fin+) 🔍 filtrer et trier par niveau de connaissance (📶 et ↕ sous la recherche).</li>
                         <li><b>10 nov.</b> (nuit, correction) après 3 erreurs sur le dernier mot, la carte passe toute seule à la suivante (notée « À revoir »).</li>
                         <li><b>10 nov.</b> (nuit, fin) Vocabulaire : tags de nature (nom, verbe, adjectif…) et de thème (animaux, nourriture, corps, métiers…), à choisir dans le menu 🏷 de 🔍.</li>
@@ -2453,18 +2457,18 @@
     <div id="toast"></div>
     <!-- ── BROWSE ── -->
     <div id="browse">
-        <div class="s-topbar">
-            <button class="s-back" onclick="closeBrowse()">← <span class="lbl-long">Retour</span></button>
-            <button class="s-mode-toggle" id="b-review-btn" onclick="toggleBrowseReview()" title="Relire le paquet carte par carte et commenter (F6)">📝 Relecture</button>
-            <button class="s-mode-toggle" id="b-conj-btn" onclick="toggleBrowseConj()" title="Tous les tableaux de conjugaison du paquet" hidden>📋 Tableaux</button>
-            <button class="s-mode-toggle" id="b-sort-btn" onclick="toggleBrowseSort()" title="Trier les cartes jamais vues : → je connais (rangée « facile »), ← à apprendre" hidden>🗂 <span class="lbl-long">Pré-tri</span><span class="lbl-short">Tri</span></button>
-            <button class="s-mode-toggle" id="b-export-btn" onclick="downloadBrowseComments()" hidden>⬇ <span class="lbl-long">Commentaires</span><span class="lbl-short">Comm.</span> <span id="b-comment-n"></span></button>
-            <div class="b-count" id="b-count">0 / 0</div>
-        </div>
         <div class="s-main">
-            <!-- stays on screen while the list scrolls (#188) -->
+            <!-- buttons, deck name, progress and search stay on screen while scrolling (#188, #192) -->
             <div class="b-head">
-                <div class="s-deck-name" id="b-deck-name"></div>
+                <div class="s-topbar">
+                    <button class="s-back" onclick="closeBrowse()">← <span class="lbl-long">Retour</span></button>
+                    <button class="s-mode-toggle" id="b-review-btn" onclick="toggleBrowseReview()" title="Relire le paquet carte par carte et commenter (F6)">📝 Relecture</button>
+                    <button class="s-mode-toggle" id="b-conj-btn" onclick="toggleBrowseConj()" title="Tous les tableaux de conjugaison du paquet" hidden>📋 Tableaux</button>
+                    <button class="s-mode-toggle" id="b-sort-btn" onclick="toggleBrowseSort()" title="Trier les cartes jamais vues : → je connais (rangée « facile »), ← à apprendre" hidden>🗂 <span class="lbl-long">Pré-tri</span><span class="lbl-short">Tri</span></button>
+                    <button class="s-mode-toggle" id="b-export-btn" onclick="downloadBrowseComments()" hidden>⬇ <span class="lbl-long">Commentaires</span><span class="lbl-short">Comm.</span> <span id="b-comment-n"></span></button>
+                    <div class="s-deck-name b-deck-name" id="b-deck-name"></div>
+                    <div class="b-count" id="b-count">0 / 0</div>
+                </div>
                 <div class="b-overall" id="b-overall"></div>
                 <div class="b-search-row">
                     <input class="b-search" id="b-search" type="search" placeholder="🔎 Rechercher…" oninput="filterBrowse(this.value)">
@@ -4983,28 +4987,59 @@
             if (browse.sort) { browse.review = false; document.getElementById("b-review-btn").classList.remove("on"); }
             document.getElementById("b-sort-btn").classList.toggle("on", browse.sort);
             document.getElementById("browse").classList.toggle("sorting", browse.sort);
-            browse.sorted = {};
-            if (browse.sort) browse.list = browse.all.filter(function (b) { return isNewCard(b.card); });
+            browse.sorted = {}; browse.sortPrev = {}; browse.sortHist = [];
+            // only the cards never sorted before: « à apprendre » is kept on the card (presorted), synced like its progress
+            if (browse.sort) browse.list = browse.all.filter(function (b) { var st = browse.srs[b.card.id]; return isNewCard(b.card) && !(st && st.presorted); });
             else { filterBrowse(browse.q || ""); renderBrowseOverall(); return; }
             renderBrowse();
         }
+        // A card already sorted the same way: just next. Sorted the other
+        // way (back on it with ‹ Préc.): the new choice replaces the old
+        // one (#193). Ctrl/⌘+Z (↩ Annuler) undoes the last sort.
+        function sortSrsBack(id, srs) {
+            // what the card was before it was sorted; stamped now, so the cloud's « known » copy doesn't win the merge
+            var prev = browse.sortPrev[id];
+            srs[id] = Object.assign({}, prev || { state: "new", step: 0, interval: 0, ease: 2.5, due: TODAY, reps: 0, lapses: 0, easyCount: 0 }, { lastReview: Date.now() });
+        }
+        function sortSet(id, srs, known) {
+            if (known) { var iv = 20 + Math.floor(Math.random() * 41); srs[id] = { state: "review", step: 0, interval: iv, ease: 2.5, due: TODAY + iv, reps: 1, lapses: 0, easyCount: 1, lastReview: Date.now(), known: true }; }
+            else { sortSrsBack(id, srs); srs[id].presorted = true; } // stays new, not offered to 🗂 again
+        }
         function sortCard(known) {
             var b = browse.list[browse.idx];
-            if (!browse.sort || !b || browse.sorted[b.card.id] != null) { if (b) stepBrowse(1); return; }
+            if (!browse.sort || !b) return;
+            var id = b.card.id, was = browse.sorted[id];
+            if (was === known) { stepBrowse(1); return; }
             var srs = loadSRS(browse.sid);
-            if (known) {
-                var iv = 20 + Math.floor(Math.random() * 41);
-                srs[b.card.id] = { state: "review", step: 0, interval: iv, ease: 2.5, due: TODAY + iv, reps: 1, lapses: 0, easyCount: 1, lastReview: Date.now(), known: true };
-                saveSRS(browse.sid, srs);
-                browse.srs = srs;
-            }
-            browse.sorted[b.card.id] = known;
+            if (!(id in browse.sortPrev)) browse.sortPrev[id] = srs[id] ? Object.assign({}, srs[id]) : null;
+            sortSet(id, srs, known);
+            saveSRS(browse.sid, srs); browse.srs = srs;
+            browse.sortHist.push({ id: id, idx: browse.idx, was: was });
+            browse.sorted[id] = known;
             dlog("pré-tri", { source: browse.sid, carte: b.card.id, connue: known });
             var sl = document.querySelector('.b-slide[data-i="' + browse.idx + '"]');
-            if (sl) { sl.classList.add(known ? "sorted-known" : "sorted-learn"); delete sl.dataset.filled; fillSlide(sl); }
+            if (sl) { sl.classList.remove("sorted-known", "sorted-learn"); sl.classList.add(known ? "sorted-known" : "sorted-learn"); delete sl.dataset.filled; fillSlide(sl); }
             updateSortCount();
             if (browse.idx >= browse.list.length - 1) { setTimeout(sortFinished, 350); return; }
             setTimeout(function () { stepBrowse(1); }, 250);
+        }
+        function undoSort() {
+            var h = browse.sort && browse.sortHist.pop();
+            if (!h) { toast(t9n("Rien à annuler.")); return; }
+            var srs = loadSRS(browse.sid);
+            if (h.was == null) { delete browse.sorted[h.id]; sortSrsBack(h.id, srs); }
+            else { browse.sorted[h.id] = h.was; sortSet(h.id, srs, h.was); }
+            saveSRS(browse.sid, srs); browse.srs = srs;
+            dlog("pré-tri annulé", { source: browse.sid, carte: h.id });
+            var sl = document.querySelector('.b-slide[data-i="' + h.idx + '"]');
+            if (sl) {
+                sl.classList.remove("sorted-known", "sorted-learn");
+                if (h.was != null) sl.classList.add(h.was ? "sorted-known" : "sorted-learn");
+                delete sl.dataset.filled; fillSlide(sl);
+            }
+            jumpToSlide(h.idx);
+            updateSortCount();
+            toast("↩ " + t9n("Tri annulé"));
         }
         function updateSortCount() {
             var ks = Object.keys(browse.sorted), k = ks.filter(function (id) { return browse.sorted[id]; }).length;
@@ -5013,13 +5048,15 @@
         }
         function sortFinished() {
             var ks = Object.keys(browse.sorted), k = ks.filter(function (id) { return browse.sorted[id]; }).length;
-            toast("🗂 " + k + " " + t9n("connues") + " · " + (ks.length - k) + " " + t9n("à apprendre"));
-            toggleBrowseSort();
+            // stays on the last card, so a mistake can still be undone (#193); 🗂 leaves
+            toast("🗂 " + k + " " + t9n("connues") + " · " + (ks.length - k) + " " + t9n("à apprendre") + " — " + t9n("↩ pour corriger, 🗂 pour sortir"));
         }
         document.addEventListener("keydown", function (e) {
             if (!browse.sort || document.getElementById("browse").style.display !== "flex" || e.target.tagName === "INPUT") return;
-            if (e.key === "ArrowRight") { e.preventDefault(); e.stopImmediatePropagation(); sortCard(true); }
+            if (e.key.toLowerCase() === "z" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); e.stopImmediatePropagation(); undoSort(); }
+            else if (e.key === "ArrowRight") { e.preventDefault(); e.stopImmediatePropagation(); sortCard(true); }
             else if (e.key === "ArrowLeft") { e.preventDefault(); e.stopImmediatePropagation(); sortCard(false); }
+            else if (e.key === "ArrowUp" || e.key === "ArrowDown") { e.preventDefault(); e.stopImmediatePropagation(); stepBrowse(e.key === "ArrowUp" ? -1 : 1); } // back to a sorted card to change it (#193)
         }, true);
         // swipe on the card: it follows the finger, far enough = sorted
         (function () {
@@ -5072,6 +5109,7 @@
                 + '<button id="b-next" onclick="stepBrowse(1)">Suiv. ›</button>'
                 + '</div>';
             if (browse.sort) el.insertAdjacentHTML("afterbegin", '<div class="b-sort-bar"><button class="b-sort-learn" onclick="sortCard(false)">← ' + t9n("À apprendre") + '</button>'
+                + '<button class="b-sort-undo" onclick="undoSort()" title="' + t9n("Annuler le dernier tri (Ctrl/⌘+Z)") + '">↩</button>'
                 + '<button class="b-sort-known" onclick="sortCard(true)">' + t9n("Je connais") + ' →</button></div>');
             var track = document.getElementById("b-track");
             browse.observer = new IntersectionObserver(function (entries) {
@@ -7048,14 +7086,14 @@
                     "(nuit, correction) après 3 erreurs sur le dernier mot, la carte passe toute seule à la suivante (notée « À revoir »).": "(notte, correzione) dopo 3 errori sull'ultima parola, la carta passa da sola alla successiva (valutata « Da rivedere »).",
                     "toutes": "tutte", "Tous les niveaux": "Tutti i livelli", "Nouvelles": "Nuove", "En cours": "In corso", "À consolider": "Da consolidare", "Bien connues": "Ben note",
                     "Ordre du paquet": "Ordine del mazzo", "Moins connues d'abord": "Prima le meno note", "Mieux connues d'abord": "Prima le più note",
-                    "(nuit, fin+) 🔍 filtrer et trier par niveau de connaissance (📶 et ↕ sous la recherche).": "(notte, fine+) 🔍 filtrare e ordinare per livello di conoscenza (📶 e ↕ sotto la ricerca).", "Filtrer par tag": "Filtra per tag", "Chercher un tag…": "Cerca un tag…",
+                    "(nuit, fin+) 🔍 filtrer et trier par niveau de connaissance (📶 et ↕ sous la recherche).": "(notte, fine+) 🔍 filtrare e ordinare per livello di conoscenza (📶 e ↕ sotto la ricerca).", "(après-midi) 🗂 Pré-tri : seulement les cartes jamais triées ; changer d'avis (‹ Préc. ou ↑) et Ctrl/⌘+Z pour annuler ; 🔍 tout le haut reste affiché, nom du paquet sur la ligne des boutons.": "(pomeriggio) 🗂 Pre-selezione: solo le carte mai ordinate; cambiare idea (‹ Préc. o ↑) e Ctrl/⌘+Z per annullare; 🔍 tutta la parte alta resta visibile, nome del mazzo sulla riga dei pulsanti.", "Rien à annuler.": "Niente da annullare.", "Tri annulé": "Scelta annullata", "Annuler le dernier tri (Ctrl/⌘+Z)": "Annulla l'ultima scelta (Ctrl/⌘+Z)", "↩ pour corriger, 🗂 pour sortir": "↩ per correggere, 🗂 per uscire", "Filtrer par tag": "Filtra per tag", "Chercher un tag…": "Cerca un tag…",
                     "pour commenter une carte,": "per commentare una carta,", "(✏️) pour la modifier,": "(✏️) per modificarla,", "(🗑) pour la retirer du paquet (": "(🗑) per toglierla dal mazzo (", "la remet).": "la rimette).",
                     "📝 Relecture : modifier la carte · la retirer du paquet (Ctrl+Z : annuler)": "📝 Revisione: modifica la carta · toglila dal mazzo (Ctrl+Z: annulla)",
                     "✏️ Modifier la carte": "✏️ Modifica la carta", "Ctrl+Entrée : enregistrer · Échap : annuler": "Ctrl+Invio: salva · Esc: annulla", "✓ Enregistrer": "✓ Salva",
                     "Réponse à taper": "Risposta da scrivere", "Phrase d'exemple": "Frase d'esempio", "Traduction de la phrase": "Traduzione della frase", "Note": "Nota", "Recto": "Fronte", "Verso": "Retro",
                     "Carte modifiée": "Carta modificata", "Carte retirée du paquet · Ctrl+Z pour annuler": "Carta tolta dal mazzo · Ctrl+Z per annullare", "Carte remise": "Carta rimessa", "Éditer": "Modifica", "Retirer": "Togli", "modifiée": "modificata", "Sur plusieurs appareils : les cartes d'une journée sont tirées dans le même ordre partout, la progression part en ligne dès que tu quittes l'appli et revient quand tu la rouvres sur l'autre appareil : tu reprends où tu en étais.": "Su più dispositivi: le carte di una giornata sono estratte nello stesso ordine ovunque, i progressi vanno online appena lasci l'app e tornano quando la riapri sull'altro dispositivo: riprendi da dove eri.", "(soir, suite) d'un appareil à l'autre : même ordre des cartes du jour partout, et la progression revient en rouvrant l'appli.": "(sera, seguito) da un dispositivo all'altro: stesso ordine delle carte del giorno ovunque, e i progressi tornano riaprendo l'app.", "(soir) 💤 endormir un paquet : il quitte l'accueil, sa progression est gardée, et se réveille en bas de l'accueil.": "(sera) 💤 addormentare un mazzo: lascia la pagina iniziale, i progressi restano, e si risveglia in fondo alla pagina iniziale.",
                     "💤 sur un paquet l'endort : il disparaît de l'accueil, sa progression est gardée ; « 💤 paquets endormis », en bas de l'accueil, les réveille.": "💤 su un mazzo lo addormenta: sparisce dalla pagina iniziale, i progressi restano; « 💤 mazzi addormentati », in fondo alla pagina iniziale, li risveglia.",
-                    "Dans 🔍, chaque carte a une barre de progression qui se remplit de gauche à droite, du rouge (à peine commencée) au vert (bien sue), et le paquet entier a la sienne en haut. 🗂 Pré-tri montre les cartes jamais vues une par une : touche la carte pour voir le verso, puis → (ou glisser à droite) = je la connais déjà, elle est rangée comme apprise et reviendra dans 20 à 60 jours ; ← (ou glisser à gauche) = à apprendre, elle reste nouvelle.": "In 🔍, ogni carta ha una barra di progresso che si riempie da sinistra a destra, dal rosso (appena iniziata) al verde (ben saputa), e il mazzo intero ha la sua in alto. 🗂 Pre-selezione mostra le carte mai viste una per una: tocca la carta per vedere il retro, poi → (o scorri a destra) = la so già, viene messa tra le imparate e tornerà fra 20–60 giorni; ← (o scorri a sinistra) = da imparare, resta nuova.",
+                    "Dans 🔍, chaque carte a une barre de progression qui se remplit de gauche à droite, du rouge (à peine commencée) au vert (bien sue), et le paquet entier a la sienne en haut. 🗂 Pré-tri montre les cartes jamais vues une par une : touche la carte pour voir le verso, puis → (ou glisser à droite) = je la connais déjà, elle est rangée comme apprise et reviendra dans 20 à 60 jours ; ← (ou glisser à gauche) = à apprendre, elle reste nouvelle. Une carte déjà triée ne revient plus au pré-tri. Pour changer d'avis, reviens dessus avec ‹ Préc. (ou ↑) et trie-la autrement ; Ctrl/⌘+Z (ou ↩) annule le dernier tri. En haut, les boutons, le nom du paquet, la progression et la recherche restent affichés quand tu fais défiler.": "In 🔍, ogni carta ha una barra di progresso che si riempie da sinistra a destra, dal rosso (appena iniziata) al verde (ben saputa), e il mazzo intero ha la sua in alto. 🗂 Pre-selezione mostra le carte mai viste una per una: tocca la carta per vedere il retro, poi → (o scorri a destra) = la so già, viene messa tra le imparate e tornerà fra 20–60 giorni; ← (o scorri a sinistra) = da imparare, resta nuova. Una carta già ordinata non torna più nella pre-selezione. Per cambiare idea, torna indietro con ‹ Préc. (o ↑) e ordinala diversamente; Ctrl/⌘+Z (o ↩) annulla l'ultima scelta. In alto, i pulsanti, il nome del mazzo, il progresso e la ricerca restano visibili quando scorri.",
                     "Sur téléphone, pas de boutons : touche la moitié gauche du recto pour un indice, la moitié droite pour la réponse (en mode Normal, touche la carte pour la retourner).": "Sul telefono, niente pulsanti: tocca la metà sinistra del fronte per un suggerimento, la metà destra per la risposta (in modalità Normale, tocca la carta per girarla).",
                     "Sur téléphone, glisse la carte pour la noter : à gauche À revoir, à droite Correct, vers le haut Facile, vers le bas Difficile (haut et bas demandent un geste plus long, pour éviter les erreurs). Les compteurs nouvelles / à repasser / à réviser sont en haut, à côté de la barre de progression.": "Sul telefono, scorri la carta per votarla: a sinistra Da rivedere, a destra Corretto, in alto Facile, in basso Difficile (alto e basso chiedono un gesto più lungo, per evitare errori). I contatori nuove / da ripassare / da rivedere sono in alto, accanto alla barra di avanzamento.",
                     "sur téléphone, plus de boutons en bas pendant la question : touche à gauche du recto = indice, à droite = réponse, puis glisse la carte pour la noter ; compteurs en haut à côté de la barre ; boutons de note plus plats ; plus de macaron « Maintenir appuyé ».": "sul telefono, niente più pulsanti in basso durante la domanda: tocca a sinistra del fronte = suggerimento, a destra = risposta, poi scorri la carta per votarla; contatori in alto accanto alla barra; pulsanti di voto più piatti; niente più bollino « Tieni premuto ».",
@@ -7370,7 +7408,8 @@
             {"id": 36, "d": "2026-11-10", "k": "cartes", "fr": "Dans <b>📝 Relecture</b> : <b>↑</b> pour <b>modifier</b> une carte (gardé sur tous tes appareils), <b>↓</b> pour la <b>retirer</b> du paquet (Ctrl+Z la remet).", "it": "In <b>📝 Revisione</b>: <b>↑</b> per <b>modificare</b> una carta (resta su tutti i tuoi dispositivi), <b>↓</b> per <b>toglierla</b> dal mazzo (Ctrl+Z la rimette)."},
             {"id": 37, "d": "2026-11-10", "k": "affichage", "fr": "Dans 🔍, la <b>liste</b> tient sur une ligne par carte ; un <b>clic</b> ouvre la carte en 📝 Relecture ; le titre et la recherche restent en haut, et les <b>tags</b> sont dans un menu 🏷 au bout de la recherche.", "it": "In 🔍, l'<b>elenco</b> sta su una riga per carta; un <b>clic</b> apre la carta in 📝 Revisione; titolo e ricerca restano in alto, e i <b>tag</b> sono in un menu 🏷 alla fine della ricerca."},
             {"id": 38, "d": "2026-11-10", "k": "paquets", "fr": "Le <b>Vocabulaire</b> a des <b>tags</b> : nature du mot (nom, verbe, adjectif…) et <b>thème</b> (animaux, nourriture, corps, métiers, ville…), à choisir dans le menu 🏷 de 🔍.", "it": "Il <b>Vocabolario</b> ha dei <b>tag</b>: categoria della parola (nome, verbo, aggettivo…) e <b>tema</b> (animali, cibo, corpo, mestieri, città…), da scegliere nel menu 🏷 di 🔍."},
-            {"id": 39, "d": "2026-11-10", "k": "paquets", "fr": "Dans 🔍, <b>📶</b> ne montre que les cartes nouvelles, en cours, à consolider ou bien connues, et <b>↕</b> les trie des moins connues aux mieux connues (ou l'inverse).", "it": "In 🔍, <b>📶</b> mostra solo le carte nuove, in corso, da consolidare o ben note, e <b>↕</b> le ordina dalle meno note alle più note (o al contrario)."}
+            {"id": 39, "d": "2026-11-10", "k": "paquets", "fr": "Dans 🔍, <b>📶</b> ne montre que les cartes nouvelles, en cours, à consolider ou bien connues, et <b>↕</b> les trie des moins connues aux mieux connues (ou l'inverse).", "it": "In 🔍, <b>📶</b> mostra solo le carte nuove, in corso, da consolidare o ben note, e <b>↕</b> le ordina dalle meno note alle più note (o al contrario)."},
+            {"id": 40, "d": "2026-11-10", "k": "paquets", "fr": "<b>🗂 Pré-tri</b> : seulement les cartes jamais triées ; reviens sur une carte (‹ Préc. ou ↑) pour changer d'avis, <b>Ctrl/⌘+Z</b> ou ↩ annule le dernier tri. Dans 🔍, tout le haut reste affiché en défilant.", "it": "<b>🗂 Pre-selezione</b>: solo le carte mai ordinate; torna su una carta (‹ Préc. o ↑) per cambiare idea, <b>Ctrl/⌘+Z</b> o ↩ annulla l'ultima scelta. In 🔍, tutta la parte alta resta visibile mentre scorri."}
         ];
         var NEWS_KINDS = { revision: ["Révision", "Ripasso"], cartes: ["Cartes", "Carte"], combos: ["Combos", "Combo"], affichage: ["Affichage", "Aspetto"],
             reglages: ["Réglages", "Impostazioni"], accueil: ["Accueil", "Home"], paquets: ["Paquets", "Mazzi"] };
