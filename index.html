@@ -2343,6 +2343,7 @@
                 <div class="g-num">9</div><div class="g-h">Nouveautés</div>
                 <div class="g-body">
                     <ul class="g-news">
+                        <li><b>10 nov.</b> (tard) 🚩 cartes corrigées (aquí está = voici, ya no = ne… plus, image de más) : leur marque s'enlève toute seule, ici et dans Anki.</li>
                         <li><b>10 nov.</b> (soir, et encore) 🖼 Vocabulaire : des images pour les animaux et les parties du corps (92 mots de plus).</li>
                         <li><b>10 nov.</b> (soir, encore) ✏️ image par lien seulement : champ « Image (lien) » dans Modifier la carte (une page Wikimedia marche aussi), plus d'envoi de photo.</li>
                         <li><b>10 nov.</b> (soir, fin) 🎉 Session terminée : temps estimé au départ et temps effectif.</li>
@@ -2932,8 +2933,31 @@
         function loadStyles(sid) { try { return JSON.parse(localStorage.getItem(LS_STYLES + sid) || "[]"); } catch (e) { return []; } }
         function cardStyle(sid, card) { return card.style != null ? (loadStyles(sid)[card.style] || "") : ""; }
         function loadFlagged(sid) {
-            try { return JSON.parse(localStorage.getItem(LS_FLAGGED + sid) || "{}"); } catch (e) { return {}; }
+            var fl = {};
+            try { fl = JSON.parse(localStorage.getItem(LS_FLAGGED + sid) || "{}") || {}; } catch (e) { }
+            return dropFixed(fl);
         }
+        // 🚩 cards fixed since (#200): fixed.json = {cards: {cardId: date}},
+        // the same list ankisync reads. A mark from before the fix goes away
+        // (here and, filtered at each load, whatever the cloud brings back);
+        // a card marked again afterwards ({at} later) keeps it.
+        var LS_FIXED = "ankitrain_v1_fixed";
+        var FIXED = (function () { try { return JSON.parse(localStorage.getItem(LS_FIXED) || "{}") || {}; } catch (e) { return {}; } })();
+        function dropFixed(fl) {
+            Object.keys(fl).forEach(function (id) {
+                var f = (FIXED || {})[id], v = fl[id]; // FIXED may not be set yet this early
+                var o = v && typeof v === "object" ? v : {}; // old marks are plain strings (and "…".at is a method)
+                if (f && !o.drop && (o.at || 0) < Date.parse(f)) delete fl[id];
+            });
+            return fl;
+        }
+        fetch("fixed.json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+            if (!d || !d.cards || JSON.stringify(d.cards) === JSON.stringify(FIXED)) return;
+            FIXED = d.cards;
+            try { localStorage.setItem(LS_FIXED, JSON.stringify(FIXED)); } catch (e) { }
+            dlog("cartes corrigées", { n: Object.keys(FIXED).length });
+            if (document.getElementById("home").style.display !== "none" && typeof renderHome === "function") renderHome();
+        }).catch(function () { });
         function saveFlagged(sid, fl) { try { localStorage.setItem(LS_FLAGGED + sid, JSON.stringify(fl)); } catch (e) { } scheduleSync(); }
         function toggleFlagCurrent() {
             if (!sess.sourceId) return;
@@ -2958,7 +2982,7 @@
             document.getElementById("fm-card").textContent = flagLabel(card);
             var t = document.getElementById("fm-text");
             var old = target ? loadFlagged(target.sid)[card.id] : null;
-            t.value = old && typeof old === "object" ? old.c : "";
+            t.value = old && typeof old === "object" ? old.c || "" : "";
             document.getElementById("flag-modal").hidden = false;
             setTimeout(function () { t.focus(); }, 0);
         }
@@ -2974,7 +2998,7 @@
                 var tg = flagTarget; flagTarget = null;
                 document.getElementById("flag-modal").hidden = true;
                 var tfl = loadFlagged(tg.sid);
-                tfl[tg.card.id] = comment ? { q: flagLabel(tg.card), c: comment } : flagLabel(tg.card);
+                tfl[tg.card.id] = comment ? { q: flagLabel(tg.card), c: comment, at: Date.now() } : { q: flagLabel(tg.card), at: Date.now() }; // at: see dropFixed
                 saveFlagged(tg.sid, tfl);
                 dlog("relecture", { source: tg.sid, id: tg.card.id, commentaire: comment });
                 if (tg.done) tg.done();
@@ -2985,7 +3009,7 @@
             if (!card || !sess.sourceId) return;
             var fl = loadFlagged(sess.sourceId);
             var q = flagLabel(card);
-            fl[card.id] = comment ? { q: q, c: comment } : q;
+            fl[card.id] = comment ? { q: q, c: comment, at: Date.now() } : { q: q, at: Date.now() };
             saveFlagged(sess.sourceId, fl);
             toast("🚩 Carte marquée : elle ne sera plus proposée");
             // Out of this session right away (later passes included), not rated (#44).
@@ -3011,7 +3035,7 @@
             if (!ids.length) { toast("Aucune carte marquée pour cette source."); return; }
             var lines = ids.map(function (id) {
                 var v = fl[id];
-                return "cid:" + id + "  —  " + (typeof v === "string" ? v : v.q + "  💬 " + v.c);
+                return "cid:" + id + "  —  " + (typeof v === "string" ? v : v.q + (v.c ? "  💬 " + v.c : ""));
             });
             var text = lines.join("\n");
             prompt(ids.length + " carte(s) à corriger dans Anki (Parcourir → coller \"cid:X or cid:Y...\" ou chercher une ligne) :",
@@ -4543,7 +4567,7 @@
             var fl = loadFlagged(browse.sid);
             return browse.all.filter(function (b) { return fl[b.card.id]; }).map(function (b) {
                 var v = fl[b.card.id];
-                return { id: b.card.id, recto: flagLabel(b.card), verso: htmlToText(b.back), commentaire: typeof v === "object" ? v.c : "" };
+                return { id: b.card.id, recto: flagLabel(b.card), verso: htmlToText(b.back), commentaire: typeof v === "object" ? v.c || "" : "" };
             });
         }
         function updateBrowseCommentCount() { document.getElementById("b-comment-n").textContent = "(" + browseComments().length + ")"; }
@@ -5028,7 +5052,7 @@
             sl.innerHTML = progBarHtml(st) + '<div class="b-prog-label">' + esc(browse.sort && browse.sorted[c.id] != null ? (browse.sorted[c.id] ? "✓ " + t9n("je connais") : "✗ " + t9n("à apprendre")) : pr.label) + '</div>'
                 + '<div class="b-front"></div><div class="b-sep">' + (browse.sort && !sl.classList.contains("peek") ? t9n("verso · touche pour le voir") : "verso") + '</div><div class="b-back"></div>'
                 + (hasAudio ? '<button class="b-slide-audio" onclick="playBrowseAudio(' + sl.dataset.i + ')" title="Écouter">🔊</button>' : '')
-                + (browse.review ? '<div class="b-review-bar"><div class="b-comment">' + (fl ? "🚩 " + esc(typeof fl === "object" ? fl.c : "marquée") : "") + '</div>'
+                + (browse.review ? '<div class="b-review-bar"><div class="b-comment">' + (fl ? "🚩 " + esc(typeof fl === "object" && fl.c ? fl.c : "marquée") : "") + '</div>'
                     + '<button class="b-flag" onclick="browseFlag(' + sl.dataset.i + ')">🚩 ' + (fl ? "Modifier" : "Commenter") + ' <span class="t-key">F6</span></button>'
                     + '<button class="b-flag" onclick="browseEdit(' + sl.dataset.i + ')">✏️ ' + t9n("Éditer") + ' <span class="t-key">↑</span></button>'
                     + '<button class="b-flag" onclick="browseDrop(' + sl.dataset.i + ')">🗑 ' + t9n("Retirer") + ' <span class="t-key">↓</span></button>'
@@ -6952,7 +6976,7 @@
                     "(nuit, correction) après 3 erreurs sur le dernier mot, la carte passe toute seule à la suivante (notée « À revoir »).": "(notte, correzione) dopo 3 errori sull'ultima parola, la carta passa da sola alla successiva (valutata « Da rivedere »).",
                     "toutes": "tutte", "Tous les niveaux": "Tutti i livelli", "Nouvelles": "Nuove", "En cours": "In corso", "À consolider": "Da consolidare", "Bien connues": "Ben note",
                     "Ordre du paquet": "Ordine del mazzo", "Moins connues d'abord": "Prima le meno note", "Mieux connues d'abord": "Prima le più note",
-                    "(nuit, fin+) 🔍 filtrer et trier par niveau de connaissance (📶 et ↕ sous la recherche).": "(notte, fine+) 🔍 filtrare e ordinare per livello di conoscenza (📶 e ↕ sotto la ricerca).", "(après-midi) 🗂 Pré-tri : seulement les cartes jamais triées ; changer d'avis (‹ Préc.), ↑ modifier, ↓ retirer, Ctrl/⌘+Z pour annuler ; 🔍 tout le haut reste affiché, nom du paquet sur la ligne des boutons.": "(pomeriggio) 🗂 Pre-selezione: solo le carte mai ordinate; cambiare idea (‹ Préc.), ↑ modificare, ↓ togliere, Ctrl/⌘+Z per annullare; 🔍 tutta la parte alta resta visibile, nome del mazzo sulla riga dei pulsanti.", "Rien à annuler.": "Niente da annullare.", "(soir, et encore) 🖼 Vocabulaire : des images pour les animaux et les parties du corps (92 mots de plus).": "(sera, e ancora) 🖼 Vocabolario: immagini per gli animali e le parti del corpo (92 parole in più).", "(soir, encore) ✏️ image par lien seulement : champ « Image (lien) » dans Modifier la carte (une page Wikimedia marche aussi), plus d'envoi de photo.": "(sera, ancora) ✏️ immagine solo tramite link: campo « Immagine (link) » in Modifica la carta (va bene anche una pagina Wikimedia), niente più invio di foto.", "Image (lien)": "Immagine (link)", "Le lien de l'image doit commencer par https://": "Il link dell'immagine deve iniziare con https://", "(soir, fin) 🎉 Session terminée : temps estimé au départ et temps effectif.": "(sera, fine) 🎉 Sessione finita: tempo stimato all'inizio e tempo effettivo.", "(soir, suite) 🏷 Vocabulaire : tag « transparent » pour les mots qui se devinent depuis le français (la capacidad = capacité), jamais un faux ami.": "(sera, seguito) 🏷 Vocabolario: tag « trasparente » per le parole che si indovinano dall'italiano (la sensación = sensazione), mai un falso amico.", "(soir) ✏️ 📷 une photo sur la carte (Modifier la carte) ; 🗂 le pré-tri suit le tag et la recherche choisis.": "(sera) ✏️ 📷 una foto sulla carta (Modifica la carta); 🗂 la pre-selezione segue il tag e la ricerca scelti.", "Ajouter une photo": "Aggiungi una foto", "Changer la photo": "Cambia la foto", "Retirer la photo": "Togli la foto", "Image illisible.": "Immagine illeggibile.", "Plus de place pour les photos sur cet appareil.": "Niente più spazio per le foto su questo dispositivo.", "Photo ajoutée": "Foto aggiunta", "Photo retirée": "Foto tolta", "Modifier la carte (↑)": "Modifica la carta (↑)", "Retirer la carte du paquet (↓)": "Togli la carta dal mazzo (↓)", "Tri annulé": "Scelta annullata", "Annuler le dernier tri (Ctrl/⌘+Z)": "Annulla l'ultima scelta (Ctrl/⌘+Z)", "↩ pour corriger, 🗂 pour sortir": "↩ per correggere, 🗂 per uscire", "Filtrer par tag": "Filtra per tag", "Chercher un tag…": "Cerca un tag…",
+                    "(nuit, fin+) 🔍 filtrer et trier par niveau de connaissance (📶 et ↕ sous la recherche).": "(notte, fine+) 🔍 filtrare e ordinare per livello di conoscenza (📶 e ↕ sotto la ricerca).", "(après-midi) 🗂 Pré-tri : seulement les cartes jamais triées ; changer d'avis (‹ Préc.), ↑ modifier, ↓ retirer, Ctrl/⌘+Z pour annuler ; 🔍 tout le haut reste affiché, nom du paquet sur la ligne des boutons.": "(pomeriggio) 🗂 Pre-selezione: solo le carte mai ordinate; cambiare idea (‹ Préc.), ↑ modificare, ↓ togliere, Ctrl/⌘+Z per annullare; 🔍 tutta la parte alta resta visibile, nome del mazzo sulla riga dei pulsanti.", "Rien à annuler.": "Niente da annullare.", "(tard) 🚩 cartes corrigées (aquí está = voici, ya no = ne… plus, image de más) : leur marque s'enlève toute seule, ici et dans Anki.": "(tardi) 🚩 carte corrette (aquí está, ya no, immagine di más): il loro segno se ne va da solo, qui e in Anki.", "(soir, et encore) 🖼 Vocabulaire : des images pour les animaux et les parties du corps (92 mots de plus).": "(sera, e ancora) 🖼 Vocabolario: immagini per gli animali e le parti del corpo (92 parole in più).", "(soir, encore) ✏️ image par lien seulement : champ « Image (lien) » dans Modifier la carte (une page Wikimedia marche aussi), plus d'envoi de photo.": "(sera, ancora) ✏️ immagine solo tramite link: campo « Immagine (link) » in Modifica la carta (va bene anche una pagina Wikimedia), niente più invio di foto.", "Image (lien)": "Immagine (link)", "Le lien de l'image doit commencer par https://": "Il link dell'immagine deve iniziare con https://", "(soir, fin) 🎉 Session terminée : temps estimé au départ et temps effectif.": "(sera, fine) 🎉 Sessione finita: tempo stimato all'inizio e tempo effettivo.", "(soir, suite) 🏷 Vocabulaire : tag « transparent » pour les mots qui se devinent depuis le français (la capacidad = capacité), jamais un faux ami.": "(sera, seguito) 🏷 Vocabolario: tag « trasparente » per le parole che si indovinano dall'italiano (la sensación = sensazione), mai un falso amico.", "(soir) ✏️ 📷 une photo sur la carte (Modifier la carte) ; 🗂 le pré-tri suit le tag et la recherche choisis.": "(sera) ✏️ 📷 una foto sulla carta (Modifica la carta); 🗂 la pre-selezione segue il tag e la ricerca scelti.", "Ajouter une photo": "Aggiungi una foto", "Changer la photo": "Cambia la foto", "Retirer la photo": "Togli la foto", "Image illisible.": "Immagine illeggibile.", "Plus de place pour les photos sur cet appareil.": "Niente più spazio per le foto su questo dispositivo.", "Photo ajoutée": "Foto aggiunta", "Photo retirée": "Foto tolta", "Modifier la carte (↑)": "Modifica la carta (↑)", "Retirer la carte du paquet (↓)": "Togli la carta dal mazzo (↓)", "Tri annulé": "Scelta annullata", "Annuler le dernier tri (Ctrl/⌘+Z)": "Annulla l'ultima scelta (Ctrl/⌘+Z)", "↩ pour corriger, 🗂 pour sortir": "↩ per correggere, 🗂 per uscire", "Filtrer par tag": "Filtra per tag", "Chercher un tag…": "Cerca un tag…",
                     "pour commenter une carte,": "per commentare una carta,", "(✏️) pour la modifier,": "(✏️) per modificarla,", "(🗑) pour la retirer du paquet (": "(🗑) per toglierla dal mazzo (", "la remet).": "la rimette).",
                     "📝 Relecture : modifier la carte · la retirer du paquet (Ctrl+Z : annuler)": "📝 Revisione: modifica la carta · toglila dal mazzo (Ctrl+Z: annulla)",
                     "✏️ Modifier la carte": "✏️ Modifica la carta", "Ctrl+Entrée : enregistrer · Échap : annuler": "Ctrl+Invio: salva · Esc: annulla", "✓ Enregistrer": "✓ Salva",
@@ -7280,7 +7304,8 @@
             {"id": 42, "d": "2026-11-10", "k": "paquets", "fr": "Nouveau tag <b>transparent</b> dans le Vocabulaire (menu 🏷 de 🔍) : les mots qui se devinent depuis le français, comme <i>la capacidad</i> = capacité.", "it": "Nuovo tag <b>trasparente</b> nel Vocabolario (menu 🏷 di 🔍): le parole che si indovinano dall'italiano, come <i>la sensación</i> = sensazione."},
             {"id": 43, "d": "2026-11-10", "k": "cartes", "fr": "À la fin d'une séance, <b>🎉 Session terminée</b> montre le <b>temps estimé</b> au départ et le <b>temps effectif</b>.", "it": "Alla fine di una sessione, <b>🎉 Sessione finita</b> mostra il <b>tempo stimato</b> all'inizio e il <b>tempo effettivo</b>."},
             {"id": 44, "d": "2026-11-10", "k": "cartes", "fr": "Dans ✏️ Modifier la carte, l'image se donne maintenant par son <b>lien</b> (champ « Image (lien) ») ; pour le Vocabulaire, elle remplace l'image du verso.", "it": "In ✏️ Modifica la carta, l'immagine ora si dà con il suo <b>link</b> (campo « Immagine (link) »); per il Vocabolario sostituisce l'immagine del retro."},
-            {"id": 45, "d": "2026-11-10", "k": "paquets", "fr": "Le <b>Vocabulaire</b> a maintenant une <b>image</b> pour presque tous les <b>animaux</b> et les <b>parties du corps</b> (au verso).", "it": "Il <b>Vocabolario</b> ha ora un'<b>immagine</b> per quasi tutti gli <b>animali</b> e le <b>parti del corpo</b> (sul retro)."}
+            {"id": 45, "d": "2026-11-10", "k": "paquets", "fr": "Le <b>Vocabulaire</b> a maintenant une <b>image</b> pour presque tous les <b>animaux</b> et les <b>parties du corps</b> (au verso).", "it": "Il <b>Vocabolario</b> ha ora un'<b>immagine</b> per quasi tutti gli <b>animali</b> e le <b>parti del corpo</b> (sul retro)."},
+            {"id": 46, "d": "2026-11-10", "k": "cartes", "fr": "Les cartes 🚩 que tu as signalées sont <b>corrigées</b> (<i>aquí está</i> = voici, <i>ya no</i> = ne… plus, image de <i>más</i>) et reviennent dans tes révisions.", "it": "Le carte 🚩 che hai segnalato sono <b>corrette</b> (<i>aquí está</i>, <i>ya no</i>, immagine di <i>más</i>) e tornano nei tuoi ripassi."}
         ];
         var NEWS_KINDS = { revision: ["Révision", "Ripasso"], cartes: ["Cartes", "Carte"], combos: ["Combos", "Combo"], affichage: ["Affichage", "Aspetto"],
             reglages: ["Réglages", "Impostazioni"], accueil: ["Accueil", "Home"], paquets: ["Paquets", "Mazzi"] };

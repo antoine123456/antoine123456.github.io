@@ -79,9 +79,13 @@ LANGS = {
 # fr = meaning (« ; » between meanings), n / nit = a note on the back (fr / it).
 OVERRIDES = {
     "bien": {"fr": "bien; super !"},
-    "ya no": {"fr": "plus maintenant; ne… plus",
-              "n": "ya no = ce qui était vrai ne l'est plus : ya no vivo aquí = je n'habite plus ici.",
-              "nit": "ya no = ciò che era vero non lo è più: ya no vivo aquí = non abito più qui."},
+    # 🚩 cards reviewed after ankisync (#200): « ne… plus » first, a simpler sentence
+    "ya no": {"fr": "ne… plus; plus maintenant",
+              "n": "ya no = ce qui était vrai ne l'est plus.",
+              "nit": "ya no = ciò che era vero non lo è più.",
+              "s": "<b>ya no</b> vivo aquí", "sf": "je n'habite plus ici", "sit": "non abito più qui"},
+    "aquí está": {"fr": "voici"},  # « c'est ici » was too literal (#200)
+    "más": {"img": "https://commons.wikimedia.org/wiki/Special:FilePath/%22wow%22_price_tag.jpg?width=500"},  # a price tag, for « más barato » (#200)
     "algún (alguna)": {"fr": "quelque",
                        "n": "algún devant un nom masculin (algún día = un jour), alguna au féminin ; au pluriel algunos / algunas = quelques. Dans une question : un (¿tienes algún libro? = tu as un livre ?).",
                        "nit": "algún davanti a un nome maschile (algún día = un giorno), alguna al femminile; al plurale algunos / algunas = alcuni / alcune. In una domanda: un (¿tienes algún libro? = hai un libro?)."},
@@ -380,8 +384,12 @@ def main():
         elif i in gen:
             card["s"], card["sf"], card["sg"] = bold_word(gen[i][0], w["es"]), gen[i][1], True
             card["sit"] = gen[i][2] if len(gen[i]) > 2 else ""
+        if fix.get("s"):  # a sentence of our own: no recording of it, the browser's voice reads it
+            card["s"], card["sf"], card["sit"] = fix["s"], fix["sf"], fix.get("sit", "")
+            card.pop("sg", None)
         if w["audio"]: card["audioQuestion"] = [w["audio"]]
-        if e.get("sa"): card["sa"] = e["sa"]
+        if e.get("sa") and not fix.get("s"): card["sa"] = e["sa"]
+        if fix.get("img"): img = {"url": fix["img"]}
         if img: card["img"] = img["url"]
         if w["es"] in FAUX_AMIS: card["tags"].append("faux ami")
         if w["es"] in LIAISON: card["tags"].append("mot de liaison")
