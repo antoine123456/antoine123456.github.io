@@ -1,0 +1,815 @@
+{
+ "version": 1,
+ "source": "🌊 Helmholtz",
+ "decks": [
+  {
+   "id": "helmholtz-a",
+   "name": "🌊 Helmholtz::A · Régime harmonique",
+   "cards": [
+    {
+     "id": "1106000001011",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Équation d’onde</div><div class=\"rf-sent\">Quelles variables ses dérivées secondes relient-elles ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">temps et espace</div><div class=\"rf-form\">∂²p/∂t² = c² ∇²p</div><div class=\"rf-pos\">forme générale</div><div class=\"rf-tr\">La dérivée seconde en temps vaut c² fois le laplacien. C’est le point de départ, ici pour une pression p.</div>",
+     "words": [
+      "temps",
+      "et",
+      "espace"
+     ],
+     "tags": [
+      "forme générale"
+     ]
+    },
+    {
+     "id": "1106000001021",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Régime harmonique</div><div class=\"rf-sent\">Que suppose-t-on sur la dépendance en temps ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">une seule pulsation</div><div class=\"rf-form\">p(x, t) = Re[ u(x) e<sup>−iωt</sup> ]</div><div class=\"rf-pos\">régime harmonique</div><div class=\"rf-tr\">Tout le champ oscille à la même pulsation ω. Le temps se factorise et il ne reste que l’amplitude complexe u(x).</div><div class=\"rf-img\"><img src=\"helmholtz_media/onde_progressive.webp\" alt=\"\"></div>",
+     "words": [
+      "une",
+      "seule",
+      "pulsation"
+     ],
+     "tags": [
+      "régime harmonique"
+     ]
+    },
+    {
+     "id": "1106000001031",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Équation de Helmholtz</div><div class=\"rf-sent\">Quel opérateur porte-t-elle, et quel est son seul paramètre ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">laplacien et nombre d&#x27;onde</div><div class=\"rf-form\">∇²u + k²u = 0</div><div class=\"rf-pos\">forme générale</div><div class=\"rf-tr\">Forme homogène, sans source. On l’obtient en injectant le régime harmonique dans l’équation d’onde.</div><div class=\"rf-img\"><img src=\"helmholtz_media/onde_plane.webp\" alt=\"\"></div>",
+     "words": [
+      "laplacien",
+      "et",
+      "nombre",
+      "d'onde"
+     ],
+     "tags": [
+      "forme générale"
+     ]
+    },
+    {
+     "id": "1106000001041",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Du temps à la fréquence</div><div class=\"rf-sent\">Par quoi remplace-t-on ∂²/∂t² en régime harmonique ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">moins oméga carré</div><div class=\"rf-form\">∂²/∂t² → −ω²</div><div class=\"rf-pos\">régime harmonique</div><div class=\"rf-tr\">Dériver deux fois e<sup>−iωt</sup> donne (−iω)² = −ω². D’où −ω²u = c²∇²u, soit ∇²u + (ω/c)²u = 0.</div>",
+     "words": [
+      "moins",
+      "oméga",
+      "carré"
+     ],
+     "tags": [
+      "régime harmonique"
+     ]
+    },
+    {
+     "id": "1106000001051",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Nombre d’onde k</div><div class=\"rf-sent\">Comment s’écrit-il avec ω et c ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">oméga sur c</div><div class=\"rf-form\">k = ω/c = 2π/λ</div><div class=\"rf-pos\">constantes</div><div class=\"rf-tr\">En rad/m. C’est la pulsation spatiale : la phase tourne de k radians par mètre parcouru.</div><div class=\"rf-img\"><img src=\"helmholtz_media/onde_progressive.webp\" alt=\"\"></div>",
+     "words": [
+      "oméga",
+      "sur",
+      "c"
+     ],
+     "tags": [
+      "constantes"
+     ]
+    },
+    {
+     "id": "1106000001061",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Longueur d’onde λ</div><div class=\"rf-sent\">Comment se déduit-elle de c et de f ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">c sur f</div><div class=\"rf-form\">λ = c/f = 2π/k</div><div class=\"rf-pos\">constantes</div><div class=\"rf-tr\">En mètres. Dans l’air, 430 Hz donne λ ≈ 0,80 m.</div><div class=\"rf-img\"><img src=\"helmholtz_media/onde_progressive.webp\" alt=\"\"></div>",
+     "words": [
+      "c",
+      "sur",
+      "f"
+     ],
+     "tags": [
+      "constantes"
+     ]
+    },
+    {
+     "id": "1106000001071",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Pulsation ω</div><div class=\"rf-sent\">Quel est son lien avec la fréquence f ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">deux pi f</div><div class=\"rf-form\">ω = 2πf = ck</div><div class=\"rf-pos\">constantes</div><div class=\"rf-tr\">En rad/s. La période vaut T = 1/f = 2π/ω.</div>",
+     "words": [
+      "deux",
+      "pi",
+      "f"
+     ],
+     "tags": [
+      "constantes"
+     ]
+    },
+    {
+     "id": "1106000001081",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Célérité c</div><div class=\"rf-sent\">Que vaut-elle pour le son dans l’air, en m/s ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">343</div><div class=\"rf-form\">c ≈ 343 m/s (air, 20 °C)</div><div class=\"rf-pos\">constantes</div><div class=\"rf-tr\">Elle relie pulsation et nombre d’onde : ω = ck. Dans l’eau, environ 1 480 m/s.</div>",
+     "words": [
+      "343"
+     ],
+     "tags": [
+      "constantes"
+     ]
+    },
+    {
+     "id": "1106000001091",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Amplitude complexe u</div><div class=\"rf-sent\">Que donnent son module et son argument ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">amplitude et phase</div><div class=\"rf-form\">u = |u| e<sup>iφ</sup></div><div class=\"rf-pos\">parties complexes</div><div class=\"rf-tr\">|u| est l’amplitude de l’oscillation au point x, φ = arg u son déphasage.</div><div class=\"rf-img\"><img src=\"helmholtz_media/onde_stationnaire.webp\" alt=\"\"></div>",
+     "words": [
+      "amplitude",
+      "et",
+      "phase"
+     ],
+     "tags": [
+      "parties complexes"
+     ]
+    },
+    {
+     "id": "1106000001101",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Retour au champ physique</div><div class=\"rf-sent\">Quelle partie du produit u e<sup>−iωt</sup> garde-t-on ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">la partie réelle</div><div class=\"rf-form\">p = Re[ u e<sup>−iωt</sup> ] = |u| cos(ωt − φ)</div><div class=\"rf-pos\">parties complexes</div><div class=\"rf-tr\">Le calcul se fait en complexe, la grandeur mesurée est la partie réelle.</div>",
+     "words": [
+      "la",
+      "partie",
+      "réelle"
+     ],
+     "tags": [
+      "parties complexes"
+     ]
+    },
+    {
+     "id": "1106000001111",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Re u et Im u</div><div class=\"rf-sent\">Re u est le champ à t = 0. Quand le champ vaut-il Im u ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">un quart de période plus tard</div><div class=\"rf-form\">Im u = p à ωt = π/2</div><div class=\"rf-pos\">parties complexes</div><div class=\"rf-tr\">Car Re[ u e<sup>−iπ/2</sup> ] = Re[ −iu ] = Im u. Les deux parties sont deux instantanés du même champ.</div>",
+     "words": [
+      "un",
+      "quart",
+      "de",
+      "période",
+      "plus",
+      "tard"
+     ],
+     "tags": [
+      "parties complexes"
+     ]
+    },
+    {
+     "id": "1106000001121",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Convention e<sup>−iωt</sup></div><div class=\"rf-sent\">Avec elle, vers où se propage e<sup>ikx</sup> ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">vers les x croissants</div><div class=\"rf-form\">Re[ e<sup>i(kx − ωt)</sup> ] = cos(kx − ωt)</div><div class=\"rf-pos\">parties complexes</div><div class=\"rf-tr\">Avec la convention opposée e<sup>+iωt</sup>, tous les signes s’inversent : l’onde sortante devient e<sup>−ikr</sup>.</div><div class=\"rf-img\"><img src=\"helmholtz_media/onde_progressive.webp\" alt=\"\"></div>",
+     "words": [
+      "vers",
+      "les",
+      "x",
+      "croissants"
+     ],
+     "tags": [
+      "parties complexes"
+     ]
+    },
+    {
+     "id": "1106000001131",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Onde progressive</div><div class=\"rf-sent\">Comment est son enveloppe |u| ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">constante</div><div class=\"rf-form\">u = e<sup>ikx</sup>, |u| = 1</div><div class=\"rf-pos\">régime harmonique</div><div class=\"rf-tr\">La crête avance, l’amplitude est la même partout : seule la phase kx change d’un point à l’autre.</div><div class=\"rf-img\"><img src=\"helmholtz_media/onde_progressive.webp\" alt=\"\"></div>",
+     "words": [
+      "constante"
+     ],
+     "tags": [
+      "régime harmonique"
+     ]
+    },
+    {
+     "id": "1106000001141",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Onde stationnaire</div><div class=\"rf-sent\">Que font ses nœuds au cours du temps ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">ils restent fixes</div><div class=\"rf-form\">u = cos kx = ½ (e<sup>ikx</sup> + e<sup>−ikx</sup>)</div><div class=\"rf-pos\">régime harmonique</div><div class=\"rf-tr\">Somme de deux ondes progressives de sens opposés. Les nœuds sont espacés de λ/2.</div><div class=\"rf-img\"><img src=\"helmholtz_media/onde_stationnaire.webp\" alt=\"\"></div>",
+     "words": [
+      "ils",
+      "restent",
+      "fixes"
+     ],
+     "tags": [
+      "régime harmonique"
+     ]
+    },
+    {
+     "id": "1106000001151",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Linéarité</div><div class=\"rf-sent\">Qu’est la somme de deux solutions ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">encore une solution</div><div class=\"rf-form\">∇²(u₁ + u₂) + k²(u₁ + u₂) = 0</div><div class=\"rf-pos\">forme générale</div><div class=\"rf-tr\">C’est le principe de superposition : il explique les interférences et permet de sommer des sources.</div><div class=\"rf-img\"><img src=\"helmholtz_media/deux_ondes_planes.webp\" alt=\"\"></div>",
+     "words": [
+      "encore",
+      "une",
+      "solution"
+     ],
+     "tags": [
+      "forme générale"
+     ]
+    },
+    {
+     "id": "1106000001161",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Équation avec source</div><div class=\"rf-sent\">Que devient le second membre pour une source s ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">moins s</div><div class=\"rf-form\">∇²u + k²u = −s</div><div class=\"rf-pos\">forme générale</div><div class=\"rf-tr\">Forme inhomogène. Le signe moins est une convention : il rend la fonction de Green positive près de la source.</div><div class=\"rf-img\"><img src=\"helmholtz_media/monopole.webp\" alt=\"\"></div>",
+     "words": [
+      "moins",
+      "s"
+     ],
+     "tags": [
+      "forme générale"
+     ]
+    },
+    {
+     "id": "1106000001171",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Problème bien posé</div><div class=\"rf-sent\">Que faut-il ajouter à l’équation pour avoir une solution unique ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">des conditions aux limites</div><div class=\"rf-pos\">conditions aux limites</div><div class=\"rf-tr\">Au bord : Dirichlet, Neumann ou Robin. En domaine infini : la condition de rayonnement de Sommerfeld.</div>",
+     "words": [
+      "des",
+      "conditions",
+      "aux",
+      "limites"
+     ],
+     "tags": [
+      "conditions aux limites"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "helmholtz-b",
+   "name": "🌊 Helmholtz::B · Onde plane",
+   "cards": [
+    {
+     "id": "1106000002011",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Onde plane</div><div class=\"rf-sent\">Comment sont ses surfaces de phase constante ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">des plans parallèles</div><div class=\"rf-form\">u(x) = A e<sup>i k·x</sup></div><div class=\"rf-pos\">onde plane</div><div class=\"rf-tr\">Solution élémentaire en espace libre. Les plans sont perpendiculaires au vecteur d’onde k.</div><div class=\"rf-img\"><img src=\"helmholtz_media/onde_plane.webp\" alt=\"\"></div>",
+     "words": [
+      "des",
+      "plans",
+      "parallèles"
+     ],
+     "tags": [
+      "onde plane"
+     ]
+    },
+    {
+     "id": "1106000002021",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Vecteur d’onde k</div><div class=\"rf-sent\">Que fixent sa direction et sa norme ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">sens et longueur d&#x27;onde</div><div class=\"rf-form\">‖k‖ = k = 2π/λ</div><div class=\"rf-pos\">onde plane</div><div class=\"rf-tr\">Sa direction est celle de la propagation ; sa norme est le nombre d’onde.</div><div class=\"rf-img\"><img src=\"helmholtz_media/onde_plane.webp\" alt=\"\"></div>",
+     "words": [
+      "sens",
+      "et",
+      "longueur",
+      "d'onde"
+     ],
+     "tags": [
+      "onde plane"
+     ]
+    },
+    {
+     "id": "1106000002031",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Relation de dispersion</div><div class=\"rf-sent\">Que doit valoir k<sub>x</sub>² + k<sub>y</sub>² + k<sub>z</sub>² ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">k carré</div><div class=\"rf-form\">k<sub>x</sub>² + k<sub>y</sub>² + k<sub>z</sub>² = ω²/c²</div><div class=\"rf-pos\">onde plane</div><div class=\"rf-tr\">C’est la condition pour que A e<sup>i k·x</sup> vérifie l’équation de Helmholtz.</div>",
+     "words": [
+      "k",
+      "carré"
+     ],
+     "tags": [
+      "onde plane"
+     ]
+    },
+    {
+     "id": "1106000002041",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Fronts d’onde</div><div class=\"rf-sent\">Quelle distance sépare deux crêtes successives ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">une longueur d&#x27;onde</div><div class=\"rf-form\">k·x = constante</div><div class=\"rf-pos\">onde plane</div><div class=\"rf-tr\">Mesurée le long de k. Perpendiculairement à k, le champ ne varie pas.</div><div class=\"rf-img\"><img src=\"helmholtz_media/onde_plane.webp\" alt=\"\"></div>",
+     "words": [
+      "une",
+      "longueur",
+      "d'onde"
+     ],
+     "tags": [
+      "onde plane"
+     ]
+    },
+    {
+     "id": "1106000002051",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Vitesse de phase</div><div class=\"rf-sent\">À quelle vitesse avancent les crêtes ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">oméga sur k</div><div class=\"rf-form\">v = ω/k = c</div><div class=\"rf-pos\">onde plane</div><div class=\"rf-tr\">Le milieu est non dispersif : toutes les fréquences avancent à la même célérité c.</div><div class=\"rf-img\"><img src=\"helmholtz_media/onde_plane.webp\" alt=\"\"></div>",
+     "words": [
+      "oméga",
+      "sur",
+      "k"
+     ],
+     "tags": [
+      "onde plane"
+     ]
+    },
+    {
+     "id": "1106000002061",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Deux ondes planes croisées</div><div class=\"rf-sent\">Que dessine leur superposition ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">des franges</div><div class=\"rf-form\">interfrange = λ / (2 sin(θ/2))</div><div class=\"rf-pos\">onde plane</div><div class=\"rf-tr\">θ est l’angle entre les deux directions. Les franges sont parallèles à la bissectrice des deux vecteurs d’onde.</div><div class=\"rf-img\"><img src=\"helmholtz_media/deux_ondes_planes.webp\" alt=\"\"></div>",
+     "words": [
+      "des",
+      "franges"
+     ],
+     "tags": [
+      "onde plane"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "helmholtz-c",
+   "name": "🌊 Helmholtz::C · Sources et rayonnement",
+   "cards": [
+    {
+     "id": "1106000003011",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Source ponctuelle</div><div class=\"rf-sent\">Par quelle distribution la modélise-t-on ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">un Dirac</div><div class=\"rf-form\">s(x) = δ(x − x₀)</div><div class=\"rf-pos\">source ponctuelle</div><div class=\"rf-tr\">Toute la source est concentrée au point x₀. C’est la brique de base de n’importe quelle source étendue.</div><div class=\"rf-img\"><img src=\"helmholtz_media/monopole.webp\" alt=\"\"></div>",
+     "words": [
+      "un",
+      "Dirac"
+     ],
+     "tags": [
+      "source ponctuelle"
+     ]
+    },
+    {
+     "id": "1106000003021",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Fonction de Green G</div><div class=\"rf-sent\">De quoi est-elle la réponse ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">une source ponctuelle</div><div class=\"rf-form\">∇²G + k²G = −δ(x − x₀)</div><div class=\"rf-pos\">fonction de Green</div><div class=\"rf-tr\">C’est le champ créé en x par une source unité placée en x₀, avec la condition de rayonnement à l’infini.</div><div class=\"rf-img\"><img src=\"helmholtz_media/monopole.webp\" alt=\"\"></div>",
+     "words": [
+      "une",
+      "source",
+      "ponctuelle"
+     ],
+     "tags": [
+      "fonction de Green"
+     ]
+    },
+    {
+     "id": "1106000003031",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Fonction de Green en 3D</div><div class=\"rf-sent\">Comment décroît son amplitude ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">en un sur r</div><div class=\"rf-form\">G = e<sup>ikr</sup> / (4πr)</div><div class=\"rf-pos\">fonction de Green</div><div class=\"rf-tr\">Onde sphérique sortante. r = ‖x − x₀‖ est la distance à la source.</div>",
+     "words": [
+      "en",
+      "un",
+      "sur",
+      "r"
+     ],
+     "tags": [
+      "fonction de Green"
+     ]
+    },
+    {
+     "id": "1106000003041",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Fonction de Green en 2D</div><div class=\"rf-sent\">Quelle fonction spéciale y apparaît ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">Hankel</div><div class=\"rf-form\">G = (i/4) H₀<sup>(1)</sup>(kr)</div><div class=\"rf-pos\">fonction de Green</div><div class=\"rf-tr\">Onde cylindrique sortante : la source est une ligne infinie vue en coupe.</div><div class=\"rf-img\"><img src=\"helmholtz_media/monopole.webp\" alt=\"\"></div>",
+     "words": [
+      "Hankel"
+     ],
+     "tags": [
+      "fonction de Green"
+     ]
+    },
+    {
+     "id": "1106000003051",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Fonction de Green en 1D</div><div class=\"rf-sent\">Comment varie son amplitude avec la distance ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">elle reste constante</div><div class=\"rf-form\">G = (i/2k) e<sup>ik|x − x₀|</sup></div><div class=\"rf-pos\">fonction de Green</div><div class=\"rf-tr\">Deux ondes planes qui partent de part et d’autre de la source, sans s’étaler.</div>",
+     "words": [
+      "elle",
+      "reste",
+      "constante"
+     ],
+     "tags": [
+      "fonction de Green"
+     ]
+    },
+    {
+     "id": "1106000003061",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Source étendue</div><div class=\"rf-sent\">Par quelle opération obtient-on son champ à partir de G ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">une convolution</div><div class=\"rf-form\">u(x) = ∫ G(x, x′) s(x′) dx′</div><div class=\"rf-pos\">fonction de Green</div><div class=\"rf-tr\">Par linéarité, on somme les contributions de tous les points de la source.</div><div class=\"rf-img\"><img src=\"helmholtz_media/deux_sources_en_phase.webp\" alt=\"\"></div>",
+     "words": [
+      "une",
+      "convolution"
+     ],
+     "tags": [
+      "fonction de Green"
+     ]
+    },
+    {
+     "id": "1106000003071",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Fonction de Hankel H₀<sup>(1)</sup></div><div class=\"rf-sent\">De quelles fonctions de Bessel est-elle faite ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">J0 et Y0</div><div class=\"rf-form\">H₀<sup>(1)</sup> = J₀ + i Y₀</div><div class=\"rf-pos\">fonction de Green</div><div class=\"rf-tr\">Onde cylindrique sortante avec la convention e<sup>−iωt</sup>. H₀<sup>(2)</sup> = J₀ − i Y₀ est l’onde entrante.</div><div class=\"rf-img\"><img src=\"helmholtz_media/monopole.webp\" alt=\"\"></div>",
+     "words": [
+      "J0",
+      "et",
+      "Y0"
+     ],
+     "tags": [
+      "fonction de Green"
+     ]
+    },
+    {
+     "id": "1106000003081",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Champ lointain</div><div class=\"rf-sent\">Quelle condition porte sur kr ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">kr grand devant un</div><div class=\"rf-form\">kr ≫ 1</div><div class=\"rf-pos\">champ lointain</div><div class=\"rf-tr\">À plusieurs longueurs d’onde de la source. L’onde y ressemble localement à une onde plane.</div><div class=\"rf-img\"><img src=\"helmholtz_media/monopole.webp\" alt=\"\"></div>",
+     "words": [
+      "kr",
+      "grand",
+      "devant",
+      "un"
+     ],
+     "tags": [
+      "champ lointain"
+     ]
+    },
+    {
+     "id": "1106000003091",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Hankel en champ lointain</div><div class=\"rf-sent\">Comment décroît l’amplitude en 2D ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">un sur racine de r</div><div class=\"rf-form\">H₀<sup>(1)</sup>(kr) ≈ √(2/(πkr)) e<sup>i(kr − π/4)</sup></div><div class=\"rf-pos\">champ lointain</div><div class=\"rf-tr\">Une phase qui avance comme kr, une amplitude qui s’étale sur un cercle de plus en plus grand.</div><div class=\"rf-img\"><img src=\"helmholtz_media/monopole.webp\" alt=\"\"></div>",
+     "words": [
+      "un",
+      "sur",
+      "racine",
+      "de",
+      "r"
+     ],
+     "tags": [
+      "champ lointain"
+     ]
+    },
+    {
+     "id": "1106000003101",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Décroissance géométrique</div><div class=\"rf-sent\">Pourquoi 1/√r en 2D et 1/r en 3D ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">conservation de l&#x27;énergie</div><div class=\"rf-form\">|u|² × 2πr = cste (2D), |u|² × 4πr² = cste (3D)</div><div class=\"rf-pos\">champ lointain</div><div class=\"rf-tr\">La même puissance traverse un cercle ou une sphère de plus en plus grands.</div>",
+     "words": [
+      "conservation",
+      "de",
+      "l'énergie"
+     ],
+     "tags": [
+      "champ lointain"
+     ]
+    },
+    {
+     "id": "1106000003111",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Condition de Sommerfeld</div><div class=\"rf-sent\">Quelle onde garde-t-elle à l’infini ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">l&#x27;onde sortante</div><div class=\"rf-form\">lim<sub>r→∞</sub> r<sup>(d−1)/2</sup> (∂u/∂r − iku) = 0</div><div class=\"rf-pos\">Sommerfeld</div><div class=\"rf-tr\">Condition de rayonnement, d étant la dimension. Elle rend unique la solution en domaine infini.</div><div class=\"rf-img\"><img src=\"helmholtz_media/monopole.webp\" alt=\"\"></div>",
+     "words": [
+      "l'onde",
+      "sortante"
+     ],
+     "tags": [
+      "Sommerfeld"
+     ]
+    },
+    {
+     "id": "1106000003121",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Sommerfeld en 2D et en 3D</div><div class=\"rf-sent\">Quel facteur multiplie (∂u/∂r − iku) dans chaque cas ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">racine de r puis r</div><div class=\"rf-form\">2D : √r (∂u/∂r − iku) → 0 · 3D : r (∂u/∂r − iku) → 0</div><div class=\"rf-pos\">Sommerfeld</div><div class=\"rf-tr\">Le facteur compense exactement la décroissance géométrique de l’onde.</div>",
+     "words": [
+      "racine",
+      "de",
+      "r",
+      "puis",
+      "r"
+     ],
+     "tags": [
+      "Sommerfeld"
+     ]
+    },
+    {
+     "id": "1106000003131",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Onde entrante</div><div class=\"rf-sent\">Pourquoi l’écarte-t-on ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">elle vient de l&#x27;infini</div><div class=\"rf-form\">e<sup>−ikr</sup> / r</div><div class=\"rf-pos\">Sommerfeld</div><div class=\"rf-tr\">Elle vérifie l’équation, mais son énergie convergerait de l’infini vers la source.</div>",
+     "words": [
+      "elle",
+      "vient",
+      "de",
+      "l'infini"
+     ],
+     "tags": [
+      "Sommerfeld"
+     ]
+    },
+    {
+     "id": "1106000003141",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Monopôle</div><div class=\"rf-sent\">Vers où rayonne une source ponctuelle seule ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">dans toutes les directions</div><div class=\"rf-form\">u = G(x, x₀)</div><div class=\"rf-pos\">source ponctuelle</div><div class=\"rf-tr\">Rayonnement isotrope : des fronts d’onde circulaires (2D) ou sphériques (3D).</div><div class=\"rf-img\"><img src=\"helmholtz_media/monopole.webp\" alt=\"\"></div>",
+     "words": [
+      "dans",
+      "toutes",
+      "les",
+      "directions"
+     ],
+     "tags": [
+      "source ponctuelle"
+     ]
+    },
+    {
+     "id": "1106000003151",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Dipôle</div><div class=\"rf-sent\">De quoi est-il fait ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">deux sources en opposition</div><div class=\"rf-form\">u = G(x, x₊) − G(x, x₋)</div><div class=\"rf-pos\">dipôle</div><div class=\"rf-tr\">Deux sources ponctuelles proches, déphasées de 180°. Ici elles sont écartées de λ/2.</div><div class=\"rf-img\"><img src=\"helmholtz_media/dipole.webp\" alt=\"\"></div>",
+     "words": [
+      "deux",
+      "sources",
+      "en",
+      "opposition"
+     ],
+     "tags": [
+      "dipôle"
+     ]
+    },
+    {
+     "id": "1106000003161",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Directivité du dipôle</div><div class=\"rf-sent\">Sur quelle droite ne rayonne-t-il pas ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">la médiatrice</div><div class=\"rf-form\">champ lointain ∝ cos θ (pour kd ≪ 1)</div><div class=\"rf-pos\">dipôle</div><div class=\"rf-tr\">θ est l’angle avec l’axe du dipôle. Sur la médiatrice les deux contributions arrivent en opposition et s’annulent.</div><div class=\"rf-img\"><img src=\"helmholtz_media/dipole.webp\" alt=\"\"></div>",
+     "words": [
+      "la",
+      "médiatrice"
+     ],
+     "tags": [
+      "dipôle"
+     ]
+    },
+    {
+     "id": "1106000003171",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Deux sources en phase</div><div class=\"rf-sent\">Sur quelle droite le champ est-il toujours renforcé ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">la médiatrice</div><div class=\"rf-form\">r₂ − r₁ = 0</div><div class=\"rf-pos\">source ponctuelle</div><div class=\"rf-tr\">Les deux ondes y parcourent la même distance et arrivent en phase. Ici les sources sont écartées de 2λ.</div><div class=\"rf-img\"><img src=\"helmholtz_media/deux_sources_en_phase.webp\" alt=\"\"></div>",
+     "words": [
+      "la",
+      "médiatrice"
+     ],
+     "tags": [
+      "source ponctuelle"
+     ]
+    },
+    {
+     "id": "1106000003181",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Différence de marche</div><div class=\"rf-sent\">Pour deux sources en phase, quel écart donne une interférence destructive ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">une demi longueur d&#x27;onde</div><div class=\"rf-form\">r₂ − r₁ = (n + ½) λ</div><div class=\"rf-pos\">source ponctuelle</div><div class=\"rf-tr\">À un nombre entier de longueurs d’onde près. Avec r₂ − r₁ = nλ, l’interférence est constructive.</div><div class=\"rf-img\"><img src=\"helmholtz_media/deux_sources_en_phase.webp\" alt=\"\"></div>",
+     "words": [
+      "une",
+      "demi",
+      "longueur",
+      "d'onde"
+     ],
+     "tags": [
+      "source ponctuelle"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "helmholtz-d",
+   "name": "🌊 Helmholtz::D · Cavités et modes propres",
+   "cards": [
+    {
+     "id": "1106000004011",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Cavité</div><div class=\"rf-sent\">Que deviennent les fréquences possibles dans un domaine fermé ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">elles sont discrètes</div><div class=\"rf-form\">k ∈ { k₁, k₂, k₃, … }</div><div class=\"rf-pos\">cavités</div><div class=\"rf-tr\">Sans source, seule une suite de valeurs de k admet une solution non nulle.</div><div class=\"rf-img\"><img src=\"helmholtz_media/mode_3_2.webp\" alt=\"\"></div>",
+     "words": [
+      "elles",
+      "sont",
+      "discrètes"
+     ],
+     "tags": [
+      "cavités"
+     ]
+    },
+    {
+     "id": "1106000004021",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Problème aux valeurs propres</div><div class=\"rf-sent\">Quel opérateur, et quelle valeur propre ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">moins laplacien et k carré</div><div class=\"rf-form\">−∇²u = k²u</div><div class=\"rf-pos\">modes propres</div><div class=\"rf-tr\">La même équation de Helmholtz, lue autrement : k² est l’inconnue, avec u.</div>",
+     "words": [
+      "moins",
+      "laplacien",
+      "et",
+      "k",
+      "carré"
+     ],
+     "tags": [
+      "modes propres"
+     ]
+    },
+    {
+     "id": "1106000004031",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Mode propre</div><div class=\"rf-sent\">Que décrit u<sub>mn</sub> ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">une forme de vibration</div><div class=\"rf-form\">p = u<sub>mn</sub>(x) cos(ω<sub>mn</sub>t)</div><div class=\"rf-pos\">modes propres</div><div class=\"rf-tr\">Une onde stationnaire de la cavité : tous les points vibrent en phase ou en opposition.</div><div class=\"rf-img\"><img src=\"helmholtz_media/mode_3_2.webp\" alt=\"\"></div>",
+     "words": [
+      "une",
+      "forme",
+      "de",
+      "vibration"
+     ],
+     "tags": [
+      "modes propres"
+     ]
+    },
+    {
+     "id": "1106000004041",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Fréquence propre</div><div class=\"rf-sent\">Comment se déduit-elle de k<sub>mn</sub> ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">c k sur deux pi</div><div class=\"rf-form\">f<sub>mn</sub> = c k<sub>mn</sub> / 2π</div><div class=\"rf-pos\">modes propres</div><div class=\"rf-tr\">Pour 1,5 m × 1 m dans l’air, le mode (3, 2) est à 485 Hz.</div><div class=\"rf-img\"><img src=\"helmholtz_media/mode_3_2.webp\" alt=\"\"></div>",
+     "words": [
+      "c",
+      "k",
+      "sur",
+      "deux",
+      "pi"
+     ],
+     "tags": [
+      "modes propres"
+     ]
+    },
+    {
+     "id": "1106000004051",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Condition de Dirichlet</div><div class=\"rf-sent\">Qu’impose-t-elle sur le bord ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">u nul</div><div class=\"rf-form\">u = 0 sur ∂Ω</div><div class=\"rf-pos\">conditions aux limites</div><div class=\"rf-tr\">Membrane fixée sur son cadre, ou paroi qui impose une pression nulle.</div><div class=\"rf-img\"><img src=\"helmholtz_media/mode_3_2.webp\" alt=\"\"></div>",
+     "words": [
+      "u",
+      "nul"
+     ],
+     "tags": [
+      "conditions aux limites"
+     ]
+    },
+    {
+     "id": "1106000004061",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Condition de Neumann</div><div class=\"rf-sent\">Qu’impose-t-elle sur le bord ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">dérivée normale nulle</div><div class=\"rf-form\">∂u/∂n = 0 sur ∂Ω</div><div class=\"rf-pos\">conditions aux limites</div><div class=\"rf-tr\">Paroi rigide d’une salle : la vitesse normale est nulle, la pression est maximale contre le mur.</div><div class=\"rf-img\"><img src=\"helmholtz_media/mode_neumann_3_2.webp\" alt=\"\"></div>",
+     "words": [
+      "dérivée",
+      "normale",
+      "nulle"
+     ],
+     "tags": [
+      "conditions aux limites"
+     ]
+    },
+    {
+     "id": "1106000004071",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Condition de Robin</div><div class=\"rf-sent\">Que relie-t-elle sur le bord ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">u et sa dérivée normale</div><div class=\"rf-form\">∂u/∂n + αu = 0 sur ∂Ω</div><div class=\"rf-pos\">conditions aux limites</div><div class=\"rf-tr\">Condition d’impédance : une paroi qui absorbe une partie de l’onde. α = 0 redonne Neumann, α → ∞ Dirichlet.</div>",
+     "words": [
+      "u",
+      "et",
+      "sa",
+      "dérivée",
+      "normale"
+     ],
+     "tags": [
+      "conditions aux limites"
+     ]
+    },
+    {
+     "id": "1106000004081",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Modes du rectangle, bord u = 0</div><div class=\"rf-sent\">Quelle forme ont-ils ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">produit de deux sinus</div><div class=\"rf-form\">u<sub>mn</sub> = sin(mπx/a) sin(nπy/b)</div><div class=\"rf-pos\">modes propres</div><div class=\"rf-tr\">Rectangle a × b avec Dirichlet. Les sinus s’annulent sur les quatre bords.</div><div class=\"rf-img\"><img src=\"helmholtz_media/mode_3_2.webp\" alt=\"\"></div>",
+     "words": [
+      "produit",
+      "de",
+      "deux",
+      "sinus"
+     ],
+     "tags": [
+      "modes propres"
+     ]
+    },
+    {
+     "id": "1106000004091",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Modes du rectangle, bord rigide</div><div class=\"rf-sent\">Quelle forme ont-ils ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">produit de deux cosinus</div><div class=\"rf-form\">u<sub>mn</sub> = cos(mπx/a) cos(nπy/b)</div><div class=\"rf-pos\">modes propres</div><div class=\"rf-tr\">Rectangle a × b avec Neumann. Les cosinus ont une pente nulle sur les quatre bords.</div><div class=\"rf-img\"><img src=\"helmholtz_media/mode_neumann_3_2.webp\" alt=\"\"></div>",
+     "words": [
+      "produit",
+      "de",
+      "deux",
+      "cosinus"
+     ],
+     "tags": [
+      "modes propres"
+     ]
+    },
+    {
+     "id": "1106000004101",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Nombre d’onde propre k<sub>mn</sub></div><div class=\"rf-sent\">Comment combine-t-on les deux directions ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">somme des carrés</div><div class=\"rf-form\">k<sub>mn</sub>² = π² (m²/a² + n²/b²)</div><div class=\"rf-pos\">modes propres</div><div class=\"rf-tr\">k<sub>x</sub> = mπ/a et k<sub>y</sub> = nπ/b. La formule est la même en Dirichlet et en Neumann.</div><div class=\"rf-img\"><img src=\"helmholtz_media/mode_3_2.webp\" alt=\"\"></div>",
+     "words": [
+      "somme",
+      "des",
+      "carrés"
+     ],
+     "tags": [
+      "modes propres"
+     ]
+    },
+    {
+     "id": "1106000004111",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Indices m et n</div><div class=\"rf-sent\">Que comptent-ils ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">les demi longueurs d&#x27;onde</div><div class=\"rf-form\">a = m λ<sub>x</sub>/2, b = n λ<sub>y</sub>/2</div><div class=\"rf-pos\">indices m et n</div><div class=\"rf-tr\">m selon x, n selon y. Entiers à partir de 1 en Dirichlet, à partir de 0 en Neumann.</div><div class=\"rf-img\"><img src=\"helmholtz_media/mode_3_2.webp\" alt=\"\"></div>",
+     "words": [
+      "les",
+      "demi",
+      "longueurs",
+      "d'onde"
+     ],
+     "tags": [
+      "indices m et n"
+     ]
+    },
+    {
+     "id": "1106000004121",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Lignes nodales</div><div class=\"rf-sent\">Combien de lignes nodales intérieures a le mode (3, 2) en Dirichlet ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">3</div><div class=\"rf-form\">(m − 1) + (n − 1)</div><div class=\"rf-pos\">indices m et n</div><div class=\"rf-tr\">2 verticales et 1 horizontale. Le champ y reste nul et change de signe en les traversant.</div><div class=\"rf-img\"><img src=\"helmholtz_media/mode_3_2.webp\" alt=\"\"></div>",
+     "words": [
+      "3"
+     ],
+     "tags": [
+      "indices m et n"
+     ]
+    },
+    {
+     "id": "1106000004131",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Mode fondamental</div><div class=\"rf-sent\">Quels sont ses indices en Dirichlet ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">1 et 1</div><div class=\"rf-form\">k₁₁ = π √(1/a² + 1/b²)</div><div class=\"rf-pos\">indices m et n</div><div class=\"rf-tr\">La fréquence propre la plus basse : une seule bosse. Pour 1,5 m × 1 m dans l’air, 206 Hz.</div><div class=\"rf-img\"><img src=\"helmholtz_media/mode_1_1.webp\" alt=\"\"></div>",
+     "words": [
+      "1",
+      "et",
+      "1"
+     ],
+     "tags": [
+      "indices m et n"
+     ]
+    },
+    {
+     "id": "1106000004141",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Mode (0, 0) en Neumann</div><div class=\"rf-sent\">Que vaut-il ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">une constante</div><div class=\"rf-form\">u₀₀ = 1, k₀₀ = 0</div><div class=\"rf-pos\">indices m et n</div><div class=\"rf-tr\">Pression uniforme, fréquence nulle. Il n’existe pas en Dirichlet, où le champ serait nul partout.</div>",
+     "words": [
+      "une",
+      "constante"
+     ],
+     "tags": [
+      "indices m et n"
+     ]
+    },
+    {
+     "id": "1106000004151",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Modes dégénérés</div><div class=\"rf-sent\">Dans quelle cavité (1, 2) et (2, 1) ont-ils la même fréquence ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">une cavité carrée</div><div class=\"rf-form\">a = b ⟹ k₁₂ = k₂₁</div><div class=\"rf-pos\">modes propres</div><div class=\"rf-tr\">Deux formes différentes pour une même valeur propre ; toute combinaison des deux est encore un mode.</div><div class=\"rf-img\"><img src=\"helmholtz_media/mode_1_2.webp\" alt=\"\"></div>",
+     "words": [
+      "une",
+      "cavité",
+      "carrée"
+     ],
+     "tags": [
+      "modes propres"
+     ]
+    },
+    {
+     "id": "1106000004161",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Orthogonalité des modes</div><div class=\"rf-sent\">Que vaut ∫ u<sub>mn</sub> u<sub>pq</sub> pour deux modes différents ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">zéro</div><div class=\"rf-form\">∫<sub>Ω</sub> u<sub>mn</sub> u<sub>pq</sub> dx = 0</div><div class=\"rf-pos\">modes propres</div><div class=\"rf-tr\">Les modes forment une base : tout champ de la cavité se décompose sur eux.</div>",
+     "words": [
+      "zéro"
+     ],
+     "tags": [
+      "modes propres"
+     ]
+    },
+    {
+     "id": "1106000004171",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Résonance</div><div class=\"rf-sent\">Sans amortissement, que fait l’amplitude si on excite la cavité à k = k<sub>mn</sub> ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">elle diverge</div><div class=\"rf-form\">u = Σ s<sub>mn</sub> u<sub>mn</sub> / (k<sub>mn</sub>² − k²)</div><div class=\"rf-pos\">cavités</div><div class=\"rf-tr\">Décomposition modale de la réponse à une source s. Le dénominateur s’annule à chaque fréquence propre.</div>",
+     "words": [
+      "elle",
+      "diverge"
+     ],
+     "tags": [
+      "cavités"
+     ]
+    },
+    {
+     "id": "1106000004181",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Cavité 3D</div><div class=\"rf-sent\">Combien d’indices pour les modes d’une salle ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">trois</div><div class=\"rf-form\">k<sub>lmn</sub>² = π² (l²/L<sub>x</sub>² + m²/L<sub>y</sub>² + n²/L<sub>z</sub>²)</div><div class=\"rf-pos\">cavités</div><div class=\"rf-tr\">Un indice par direction. Avec des murs rigides, les modes sont des produits de trois cosinus.</div>",
+     "words": [
+      "trois"
+     ],
+     "tags": [
+      "cavités"
+     ]
+    },
+    {
+     "id": "1106000004191",
+     "question": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-word\">Cavité 1D</div><div class=\"rf-sent\">Quelles longueurs d’onde tiennent dans une longueur L ?</div>",
+     "answer": "<style>\n.rf-word{font-size:36px;font-weight:600;margin:4px 0 10px;line-height:1.15}\n.rf-sent{font-size:19px;line-height:1.5;opacity:.9}\n.rf-mean{font-size:24px;font-weight:600;margin:2px 0}\n.rf-form{font-family:\"STIX Two Math\",\"Cambria Math\",\"Times New Roman\",serif;font-size:22px;margin:10px 0 4px}\n.rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}\n.rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}\n.rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}\n</style><div class=\"rf-mean\">deux L sur n</div><div class=\"rf-form\">λ<sub>n</sub> = 2L/n, f<sub>n</sub> = n c / 2L</div><div class=\"rf-pos\">cavités</div><div class=\"rf-tr\">Corde fixée ou tuyau : un nombre entier de demi-longueurs d’onde entre les deux extrémités.</div><div class=\"rf-img\"><img src=\"helmholtz_media/onde_stationnaire.webp\" alt=\"\"></div>",
+     "words": [
+      "deux",
+      "L",
+      "sur",
+      "n"
+     ],
+     "tags": [
+      "cavités"
+     ]
+    }
+   ]
+  }
+ ]
+}

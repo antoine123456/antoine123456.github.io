@@ -9,6 +9,7 @@ __pycache__/
 *_extrait.json
 *_media/
 !default_media/
+!helmholtz_media/
 *.apkg
 .cache/
 kanban.html
