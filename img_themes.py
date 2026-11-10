@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-img_themes.py — images pour les animaux et les parties du corps du
+img_themes.py — images pour les animaux, les parties du corps et les objets (#205) du
 Vocabulaire (#199), là où build_vocab.py n'en a pas trouvé (Wikidata veut un
 libellé espagnol identique au mot : « gato » ≠ « Felis catus »).
 
 L'image est celle de l'article Wikipédia en français du premier sens
 (le chat → « Chat »), sauf page d'homonymie. Les choix faits à la main sont
 dans FIX (un nom de fichier Wikimedia, ou None = pas d'image). Seulement
-pour les cartes taguées « animaux » ou « corps » (tag_vocab.py) sans image ;
+pour les cartes taguées « animaux », « corps » ou « objet » (tag_vocab.py) sans image ;
 le Vocabolario italien reçoit les mêmes (même mot espagnol).
 
 Appelé par build_vocab.py après tag_vocab.py ; se lance aussi seul :
@@ -25,7 +25,7 @@ import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CACHE = os.path.join(HERE, ".cache", "theme_images.json")
-THEMES = ("animaux", "corps")
+THEMES = ("animaux", "corps", "objet")  # objet: #205
 UA = {"User-Agent": "espanol-trainer/1.0 (https://github.com/antoine123456/antoine123456.github.io; vocabulary images)"}
 FR_ART = re.compile(r"^(le |la |les |l'|un |une |des )", re.I)
 
@@ -39,7 +39,12 @@ FIX = {
     # the article's image shows something else (or nothing that speaks)
     "el cerebro": "Skull_and_brain_normal_human.svg",
     "el cuervo": "Corvus_corax_(Common_Raven),_Yosemite_NP,_CA,_US_-_Diliff.jpg",
-    "el aliento": None, "la mejilla": None, "la mandíbula": None,
+    "el aliento": None, "la mandíbula": None,
+    # from the English Wikipedia (#201): « Tête » is a disambiguation page, « Tête humaine » an MRI
+    # objects (#205): the article shows the material, a symbol or another thing
+    "la copa": None, "el cristal": None, "la cruz": None, "el cubo": None, "el sensor": None, "la pipa": None,
+    "el maletero": None, "el poste": None,
+    "la cabeza": "Proportions_of_the_Head.jpg", "la mejilla": "Cheek.jpg", "el puño": "Choque_de_puños.jpg",
 }
 
 
@@ -85,7 +90,10 @@ def wiki_images(words):
             if w is None:
                 continue
             bad = p.get("missing") or "disambiguation" in (p.get("pageprops") or {})
-            out[w] = None if bad else p.get("pageimage")
+            img = p.get("pageimage")
+            if img and not re.search(r"\.(jpe?g|png|gif|svg|webp|tiff?)$", img, re.I):
+                img = None  # a video (.ogv, .webm) can't go in an <img>
+            out[w] = None if bad else img
         for w in chunk:
             out.setdefault(w, None)
     return out
@@ -124,7 +132,7 @@ def main(review=False):
                     c["img"] = added[c["es"]]
         with open(path_it, "w", encoding="utf-8") as f:
             json.dump(it, f, ensure_ascii=False, separators=(",", ":"))
-    print(f"images animaux / corps : {len(added)} ajoutée(s), {len(todo) - len(added)} sans image")
+    print(f"images animaux / corps / objets : {len(added)} ajoutée(s), {len(todo) - len(added)} sans image")
     if review:
         cells = "".join(f'<figure><img src="{url_of(f).replace("width=500", "width=160")}" loading="lazy"><figcaption><b>{es}</b><br>{fr}</figcaption></figure>'
                         if f else f'<figure class="none"><div>—</div><figcaption><b>{es}</b><br>{fr}</figcaption></figure>' for es, fr, f in rows)

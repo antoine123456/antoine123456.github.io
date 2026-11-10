@@ -221,6 +221,21 @@ def load_flagged(paths):
     out = {}
     for _, fl in latest.values():
         out.update(fl)
+    # fixed.json (#200): cards fixed since they were marked — the mark is
+    # dropped if it is older than the fix (an export made before it still
+    # lists them); marked again afterwards ({"at": ms} later), it stays.
+    fixed_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixed.json")
+    if os.path.exists(fixed_path):
+        from datetime import datetime
+        with open(fixed_path, encoding="utf-8") as f:
+            fixed = json.load(f).get("cards", {})
+        for cid, when in fixed.items():
+            v = out.get(cid)
+            if v is None or (isinstance(v, dict) and v.get("drop")):
+                continue
+            at = (v.get("at") or 0) / 1000 if isinstance(v, dict) else 0
+            if at < datetime.fromisoformat(when.replace("Z", "+00:00")).timestamp():
+                del out[cid]
     return out
 
 
