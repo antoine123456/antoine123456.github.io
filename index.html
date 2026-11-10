@@ -2348,6 +2348,7 @@
                         <span class="t-key">Entrée</span><span>case suivante</span>
                         <span class="t-key">Espace</span><span>mode normal : retourner, puis Correct</span>
                         <span class="t-key">F6</span><span>signaler la carte avec un commentaire (aussi dans 📝 Relecture)</span>
+                        <span class="t-key">F9</span><span>ajouter un mot au 📝 Vocabulaire perso (celui de la carte, ou les mots sélectionnés)</span>
                         <span class="t-key">⛶</span><span>plein écran (en haut de l'écran de révision)</span>
                         <span class="t-key">← →</span><span>carrousel 🔍 · <b>Échap</b> : retour</span>
                         <span class="t-key">↑ ↓</span><span>📝 Relecture : modifier la carte · la retirer du paquet (Ctrl+Z : annuler)</span>
@@ -2359,6 +2360,7 @@
                 <div class="g-num">9</div><div class="g-h">Nouveautés</div>
                 <div class="g-body">
                     <ul class="g-news">
+                        <li><b>10 nov.</b> (tard, raccourci) ➕ pendant la révision, F9 (ou ＋ en haut) ajoute un mot au Vocabulaire perso : celui de la carte, ou les mots sélectionnés.</li>
                         <li><b>10 nov.</b> (tard, correction) ⌨️ Maintenir Espace garde bien le verso : aussi sur une carte ratée, une carte sans verso enrichi, et quand Espace est enfoncé juste avant.</li>
                         <li><b>10 nov.</b> (tard, accueil) 📅 accueil : une heatmap des révisions en bas (un carré par jour sur un an, moyenne, record, série actuelle), à la place du combo des jours.</li>
                         <li><b>10 nov.</b> (tard, fin) 🏷 Vocabulaire : tag « objet » (192 mots : téléphone, couteau, parapluie…), avec une image pour la plupart.</li>
@@ -2420,6 +2422,7 @@
             <button class="s-mode-toggle" id="s-lyrics-opts" onclick="toggleLyricsMenu(event)" title="Options des chansons" style="display:none">🎵</button>
             <button class="s-mode-toggle" id="s-fs-btn" onclick="toggleFullscreen()" title="Plein écran">⛶</button>
             <button class="s-mode-toggle" id="s-mute-btn" onclick="toggleMute()" title="Son automatique (mode muet)">🔊</button>
+            <button class="s-mode-toggle" id="s-add-btn" onclick="addFromStudy()" title="Ajouter au vocabulaire perso (F9)">＋</button>
             <div class="ly-menu" id="ly-menu" hidden>
                 <label>Indice
                     <select name="hint" onchange="onLyricsHintChange(this.value)">
@@ -3902,10 +3905,40 @@
             document.getElementById("add-modal").hidden = false;
             setTimeout(function () { document.getElementById("ac-es").focus(); }, 0);
         }
-        function closeAddCard() { document.getElementById("add-modal").hidden = true; renderHome(); }
+        function closeAddCard() {
+            document.getElementById("add-modal").hidden = true;
+            if (addFromStudyOn) { // back to the card, the cursor in the word being typed
+                addFromStudyOn = false; setHold(false);
+                var row = (typeof wordRows !== "undefined" ? wordRows : []).find(function (r) { return !r.solved && !r.given; });
+                if (row) row.inp.focus(); else keepKeyboard();
+                return;
+            }
+            renderHome();
+        }
+        // ➕ During a review (#208): F9 (or ＋ in the bar) opens this window with
+        // the card's word and meaning — or the words selected on the card (a
+        // word of the example sentence) — to change and add. The card waits.
+        var addFromStudyOn = false;
+        function addFromStudy() {
+            var card = sess.queue[sess.qIdx];
+            if (!card || document.getElementById("study").style.display !== "flex") return;
+            var sel = "";
+            try { sel = String(window.getSelection() || "").trim(); } catch (e) { }
+            var es = sel || (card.es != null ? card.es : htmlToText(displayQuestion(card.question)).trim());
+            var fr = sel ? "" : (card.fr != null ? card.fr : (card.words || []).join(" "));
+            if (sess.sourceId === PERSO_ID && !sel) { es = ""; fr = ""; } // already there: a new one
+            ensurePersoSource();
+            addFromStudyOn = true;
+            if (pendingNext) setHold(true); // the back stays while the window is open
+            openAddCard();
+            document.getElementById("ac-es").value = es.slice(0, 120);
+            document.getElementById("ac-fr").value = fr.slice(0, 200);
+            setTimeout(function () { var t = document.getElementById(es && !fr ? "ac-fr" : "ac-es"); t.focus(); t.select(); }, 0);
+            dlog("ajout perso depuis la révision", { carte: card.id, selection: !!sel });
+        }
         function confirmAddCard() {
             var es = document.getElementById("ac-es").value.trim(), fr = document.getElementById("ac-fr").value.trim();
-            if (!es || !fr) { document.getElementById(es ? "ac-fr" : "ac-es").focus(); return; }
+            if (!es || !fr) { document.getElementById(es ? "ac-fr" : "ac-es").focus(); return false; }
             var cards = loadCards(PERSO_ID), did = PERSO_ID + "-1";
             var meaning = fr.replace(/\s*;\s*/g, ", ");
             var words = typeableWords(meaning.split(/\s*,\s*/)[0].split(/\s+/));
@@ -3917,15 +3950,22 @@
             toast("✓ « " + es + " » ajoutée");
             document.getElementById("ac-es").value = ""; document.getElementById("ac-fr").value = "";
             document.getElementById("ac-es").focus();
+            return true;
         }
-        document.addEventListener("keydown", function (e) {
-            if (document.getElementById("add-modal").hidden) return;
-            if (e.key === "Escape") { e.preventDefault(); closeAddCard(); }
-            else if (e.key === "Enter" && (e.target.id === "ac-es" || e.target.id === "ac-fr")) {
-                e.preventDefault();
-                if (e.target.id === "ac-es" && !document.getElementById("ac-fr").value.trim()) document.getElementById("ac-fr").focus();
-                else confirmAddCard();
-            }
+        // on window, capture: open over a review, no key reaches the card underneath (#208)
+        ["keydown", "keyup"].forEach(function (type) {
+            window.addEventListener(type, function (e) {
+                if (document.getElementById("add-modal").hidden) return;
+                e.stopImmediatePropagation();
+                if (type !== "keydown") return;
+                if (e.key === "Escape") { e.preventDefault(); closeAddCard(); }
+                else if (e.key === "Enter" && (e.target.id === "ac-es" || e.target.id === "ac-fr")) {
+                    e.preventDefault();
+                    if (e.target.id === "ac-es" && !document.getElementById("ac-fr").value.trim()) document.getElementById("ac-fr").focus();
+                    else if (addFromStudyOn) { if (confirmAddCard()) closeAddCard(); } // one word, then back to the card
+                    else confirmAddCard();
+                }
+            }, true);
         });
 
         function isChildOf(child, parent) {
@@ -6369,7 +6409,8 @@
         window.addEventListener("keydown", function (e) {
             if (!keyLock.on && Date.now() >= keyLock.until) return;
             if (document.getElementById("study").style.display !== "flex") { keyLock.on = false; return; }
-            if (["Escape", "Shift", "Control", "Alt", "Meta", "CapsLock"].indexOf(e.key) !== -1) return;
+            if (!document.getElementById("add-modal").hidden) return; // typing in ＋ (#208)
+            if (["Escape", "Shift", "Control", "Alt", "Meta", "CapsLock", "F9"].indexOf(e.key) !== -1) return;
             if (e.key === " " && settings().spaceMode !== "next") { e.preventDefault(); return; } // holding Space keeps the missed card's back (#207)
             e.preventDefault();
             e.stopImmediatePropagation();
@@ -6830,6 +6871,9 @@
                 e.preventDefault();
                 keyFlash(".s-pill:not(.s-pill-hint)");
                 showFullAnswer();
+            } else if (e.key === "F9") {
+                e.preventDefault();
+                addFromStudy();
             } else if (e.key === "F6") {
                 keyFlash(".s-flag");
                 e.preventDefault();
@@ -7057,7 +7101,7 @@
                     "(nuit, correction) après 3 erreurs sur le dernier mot, la carte passe toute seule à la suivante (notée « À revoir »).": "(notte, correzione) dopo 3 errori sull'ultima parola, la carta passa da sola alla successiva (valutata « Da rivedere »).",
                     "toutes": "tutte", "Tous les niveaux": "Tutti i livelli", "Nouvelles": "Nuove", "En cours": "In corso", "À consolider": "Da consolidare", "Bien connues": "Ben note",
                     "Ordre du paquet": "Ordine del mazzo", "Moins connues d'abord": "Prima le meno note", "Mieux connues d'abord": "Prima le più note",
-                    "(nuit, fin+) 🔍 filtrer et trier par niveau de connaissance (📶 et ↕ sous la recherche).": "(notte, fine+) 🔍 filtrare e ordinare per livello di conoscenza (📶 e ↕ sotto la ricerca).", "(après-midi) 🗂 Pré-tri : seulement les cartes jamais triées ; changer d'avis (‹ Préc.), ↑ modifier, ↓ retirer, Ctrl/⌘+Z pour annuler ; 🔍 tout le haut reste affiché, nom du paquet sur la ligne des boutons.": "(pomeriggio) 🗂 Pre-selezione: solo le carte mai ordinate; cambiare idea (‹ Préc.), ↑ modificare, ↓ togliere, Ctrl/⌘+Z per annullare; 🔍 tutta la parte alta resta visibile, nome del mazzo sulla riga dei pulsanti.", "Rien à annuler.": "Niente da annullare.", "(tard, correction) ⌨️ Maintenir Espace garde bien le verso : aussi sur une carte ratée, une carte sans verso enrichi, et quand Espace est enfoncé juste avant.": "(tardi, correzione) ⌨️ Tenere premuto Spazio tiene davvero il retro: anche su una carta sbagliata, una carta senza retro arricchito, e quando Spazio è premuto appena prima.", "(tard, accueil) 📅 accueil : une heatmap des révisions en bas (un carré par jour sur un an, moyenne, record, série actuelle), à la place du combo des jours.": "(tardi, pagina iniziale) 📅 pagina iniziale: una heatmap dei ripassi in fondo (un quadrato per giorno su un anno, media, record, serie attuale), al posto della combo dei giorni.", "Moyenne": "Media", "cartes / jour": "carte / giorno", "Jours étudiés": "Giorni di studio", "Record": "Record", "jours d'affilée": "giorni di fila", "Série actuelle": "Serie attuale", "jours": "giorni", "jour": "giorno", "cartes": "carte", "carte": "carta", "(tard, fin) 🏷 Vocabulaire : tag « objet » (192 mots : téléphone, couteau, parapluie…), avec une image pour la plupart.": "(tardi, fine) 🏷 Vocabolario: tag « oggetto » (192 parole: telefono, coltello, ombrello…), con un'immagine per la maggior parte.", "(tard, suite) 🐶 Vocabulaire : les cris des animaux (maullar, mugir, relinchar, rugir…), tag « cris d'animaux ».": "(tardi, seguito) 🐶 Vocabolario: i versi degli animali (maullar, mugir, relinchar, rugir…), tag « versi degli animali ».", "(tard) 🚩 cartes corrigées (aquí está = voici, ya no = ne… plus, image de más) : leur marque s'enlève toute seule, ici et dans Anki.": "(tardi) 🚩 carte corrette (aquí está, ya no, immagine di más): il loro segno se ne va da solo, qui e in Anki.", "(soir, et encore) 🖼 Vocabulaire : des images pour les animaux et les parties du corps (92 mots de plus).": "(sera, e ancora) 🖼 Vocabolario: immagini per gli animali e le parti del corpo (92 parole in più).", "(soir, encore) ✏️ image par lien seulement : champ « Image (lien) » dans Modifier la carte (une page Wikimedia marche aussi), plus d'envoi de photo.": "(sera, ancora) ✏️ immagine solo tramite link: campo « Immagine (link) » in Modifica la carta (va bene anche una pagina Wikimedia), niente più invio di foto.", "Image (lien)": "Immagine (link)", "Le lien de l'image doit commencer par https://": "Il link dell'immagine deve iniziare con https://", "(soir, fin) 🎉 Session terminée : temps estimé au départ et temps effectif.": "(sera, fine) 🎉 Sessione finita: tempo stimato all'inizio e tempo effettivo.", "(soir, suite) 🏷 Vocabulaire : tag « transparent » pour les mots qui se devinent depuis le français (la capacidad = capacité), jamais un faux ami.": "(sera, seguito) 🏷 Vocabolario: tag « trasparente » per le parole che si indovinano dall'italiano (la sensación = sensazione), mai un falso amico.", "(soir) ✏️ 📷 une photo sur la carte (Modifier la carte) ; 🗂 le pré-tri suit le tag et la recherche choisis.": "(sera) ✏️ 📷 una foto sulla carta (Modifica la carta); 🗂 la pre-selezione segue il tag e la ricerca scelti.", "Ajouter une photo": "Aggiungi una foto", "Changer la photo": "Cambia la foto", "Retirer la photo": "Togli la foto", "Image illisible.": "Immagine illeggibile.", "Plus de place pour les photos sur cet appareil.": "Niente più spazio per le foto su questo dispositivo.", "Photo ajoutée": "Foto aggiunta", "Photo retirée": "Foto tolta", "Modifier la carte (↑)": "Modifica la carta (↑)", "Retirer la carte du paquet (↓)": "Togli la carta dal mazzo (↓)", "Tri annulé": "Scelta annullata", "Annuler le dernier tri (Ctrl/⌘+Z)": "Annulla l'ultima scelta (Ctrl/⌘+Z)", "↩ pour corriger, 🗂 pour sortir": "↩ per correggere, 🗂 per uscire", "Filtrer par tag": "Filtra per tag", "Chercher un tag…": "Cerca un tag…",
+                    "(nuit, fin+) 🔍 filtrer et trier par niveau de connaissance (📶 et ↕ sous la recherche).": "(notte, fine+) 🔍 filtrare e ordinare per livello di conoscenza (📶 e ↕ sotto la ricerca).", "(après-midi) 🗂 Pré-tri : seulement les cartes jamais triées ; changer d'avis (‹ Préc.), ↑ modifier, ↓ retirer, Ctrl/⌘+Z pour annuler ; 🔍 tout le haut reste affiché, nom du paquet sur la ligne des boutons.": "(pomeriggio) 🗂 Pre-selezione: solo le carte mai ordinate; cambiare idea (‹ Préc.), ↑ modificare, ↓ togliere, Ctrl/⌘+Z per annullare; 🔍 tutta la parte alta resta visibile, nome del mazzo sulla riga dei pulsanti.", "Rien à annuler.": "Niente da annullare.", "(tard, raccourci) ➕ pendant la révision, F9 (ou ＋ en haut) ajoute un mot au Vocabulaire perso : celui de la carte, ou les mots sélectionnés.": "(tardi, scorciatoia) ➕ durante il ripasso, F9 (o ＋ in alto) aggiunge una parola al Vocabolario personale: quella della carta, o le parole selezionate.", "ajouter un mot au 📝 Vocabulaire perso (celui de la carte, ou les mots sélectionnés)": "aggiungere una parola al 📝 Vocabolario personale (quella della carta, o le parole selezionate)", "Ajouter au vocabulaire perso (F9)": "Aggiungi al vocabolario personale (F9)", "(tard, correction) ⌨️ Maintenir Espace garde bien le verso : aussi sur une carte ratée, une carte sans verso enrichi, et quand Espace est enfoncé juste avant.": "(tardi, correzione) ⌨️ Tenere premuto Spazio tiene davvero il retro: anche su una carta sbagliata, una carta senza retro arricchito, e quando Spazio è premuto appena prima.", "(tard, accueil) 📅 accueil : une heatmap des révisions en bas (un carré par jour sur un an, moyenne, record, série actuelle), à la place du combo des jours.": "(tardi, pagina iniziale) 📅 pagina iniziale: una heatmap dei ripassi in fondo (un quadrato per giorno su un anno, media, record, serie attuale), al posto della combo dei giorni.", "Moyenne": "Media", "cartes / jour": "carte / giorno", "Jours étudiés": "Giorni di studio", "Record": "Record", "jours d'affilée": "giorni di fila", "Série actuelle": "Serie attuale", "jours": "giorni", "jour": "giorno", "cartes": "carte", "carte": "carta", "(tard, fin) 🏷 Vocabulaire : tag « objet » (192 mots : téléphone, couteau, parapluie…), avec une image pour la plupart.": "(tardi, fine) 🏷 Vocabolario: tag « oggetto » (192 parole: telefono, coltello, ombrello…), con un'immagine per la maggior parte.", "(tard, suite) 🐶 Vocabulaire : les cris des animaux (maullar, mugir, relinchar, rugir…), tag « cris d'animaux ».": "(tardi, seguito) 🐶 Vocabolario: i versi degli animali (maullar, mugir, relinchar, rugir…), tag « versi degli animali ».", "(tard) 🚩 cartes corrigées (aquí está = voici, ya no = ne… plus, image de más) : leur marque s'enlève toute seule, ici et dans Anki.": "(tardi) 🚩 carte corrette (aquí está, ya no, immagine di más): il loro segno se ne va da solo, qui e in Anki.", "(soir, et encore) 🖼 Vocabulaire : des images pour les animaux et les parties du corps (92 mots de plus).": "(sera, e ancora) 🖼 Vocabolario: immagini per gli animali e le parti del corpo (92 parole in più).", "(soir, encore) ✏️ image par lien seulement : champ « Image (lien) » dans Modifier la carte (une page Wikimedia marche aussi), plus d'envoi de photo.": "(sera, ancora) ✏️ immagine solo tramite link: campo « Immagine (link) » in Modifica la carta (va bene anche una pagina Wikimedia), niente più invio di foto.", "Image (lien)": "Immagine (link)", "Le lien de l'image doit commencer par https://": "Il link dell'immagine deve iniziare con https://", "(soir, fin) 🎉 Session terminée : temps estimé au départ et temps effectif.": "(sera, fine) 🎉 Sessione finita: tempo stimato all'inizio e tempo effettivo.", "(soir, suite) 🏷 Vocabulaire : tag « transparent » pour les mots qui se devinent depuis le français (la capacidad = capacité), jamais un faux ami.": "(sera, seguito) 🏷 Vocabolario: tag « trasparente » per le parole che si indovinano dall'italiano (la sensación = sensazione), mai un falso amico.", "(soir) ✏️ 📷 une photo sur la carte (Modifier la carte) ; 🗂 le pré-tri suit le tag et la recherche choisis.": "(sera) ✏️ 📷 una foto sulla carta (Modifica la carta); 🗂 la pre-selezione segue il tag e la ricerca scelti.", "Ajouter une photo": "Aggiungi una foto", "Changer la photo": "Cambia la foto", "Retirer la photo": "Togli la foto", "Image illisible.": "Immagine illeggibile.", "Plus de place pour les photos sur cet appareil.": "Niente più spazio per le foto su questo dispositivo.", "Photo ajoutée": "Foto aggiunta", "Photo retirée": "Foto tolta", "Modifier la carte (↑)": "Modifica la carta (↑)", "Retirer la carte du paquet (↓)": "Togli la carta dal mazzo (↓)", "Tri annulé": "Scelta annullata", "Annuler le dernier tri (Ctrl/⌘+Z)": "Annulla l'ultima scelta (Ctrl/⌘+Z)", "↩ pour corriger, 🗂 pour sortir": "↩ per correggere, 🗂 per uscire", "Filtrer par tag": "Filtra per tag", "Chercher un tag…": "Cerca un tag…",
                     "pour commenter une carte,": "per commentare una carta,", "(✏️) pour la modifier,": "(✏️) per modificarla,", "(🗑) pour la retirer du paquet (": "(🗑) per toglierla dal mazzo (", "la remet).": "la rimette).",
                     "📝 Relecture : modifier la carte · la retirer du paquet (Ctrl+Z : annuler)": "📝 Revisione: modifica la carta · toglila dal mazzo (Ctrl+Z: annulla)",
                     "✏️ Modifier la carte": "✏️ Modifica la carta", "Ctrl+Entrée : enregistrer · Échap : annuler": "Ctrl+Invio: salva · Esc: annulla", "✓ Enregistrer": "✓ Salva",
@@ -7390,7 +7434,8 @@
             {"id": 47, "d": "2026-11-10", "k": "paquets", "fr": "Le <b>Vocabulaire</b> a les <b>cris des animaux</b> : <i>maullar</i> = miauler, <i>mugir</i> = meugler, <i>relinchar</i> = hennir… (tag « cris d'animaux » dans 🔍).", "it": "Il <b>Vocabolario</b> ha i <b>versi degli animali</b>: <i>maullar</i> = miagolare, <i>mugir</i> = muggire, <i>relinchar</i> = nitrire… (tag « versi degli animali » in 🔍)."},
             {"id": 48, "d": "2026-11-10", "k": "paquets", "fr": "Nouveau tag <b>objet</b> dans le Vocabulaire : 192 objets (téléphone, couteau, parapluie, marteau…), la plupart avec une <b>image</b>.", "it": "Nuovo tag <b>oggetto</b> nel Vocabolario: 192 oggetti (telefono, coltello, ombrello, martello…), quasi tutti con un'<b>immagine</b>."},
             {"id": 49, "d": "2026-11-10", "k": "affichage", "fr": "En bas de l'accueil, une <b>heatmap</b> : un carré par jour sur un an, plus vert quand tu as révisé plus de cartes, avec ta <b>série</b> de jours d'affilée.", "it": "In fondo alla pagina iniziale, una <b>heatmap</b>: un quadrato per giorno su un anno, più verde quando hai ripassato più carte, con la tua <b>serie</b> di giorni di fila."},
-            {"id": 50, "d": "2026-11-10", "k": "cartes", "fr": "<b>Maintenir Espace</b> garde maintenant le verso affiché dans tous les cas : carte ratée, carte simple, ou Espace enfoncé juste avant la réponse.", "it": "<b>Tenere premuto Spazio</b> ora tiene il retro in ogni caso: carta sbagliata, carta semplice, o Spazio premuto appena prima della risposta."}
+            {"id": 50, "d": "2026-11-10", "k": "cartes", "fr": "<b>Maintenir Espace</b> garde maintenant le verso affiché dans tous les cas : carte ratée, carte simple, ou Espace enfoncé juste avant la réponse.", "it": "<b>Tenere premuto Spazio</b> ora tiene il retro in ogni caso: carta sbagliata, carta semplice, o Spazio premuto appena prima della risposta."},
+            {"id": 51, "d": "2026-11-10", "k": "cartes", "fr": "Pendant la révision, <b>F9</b> (ou <b>＋</b> en haut) ajoute un mot à ton <b>Vocabulaire perso</b> : celui de la carte, ou un mot que tu as sélectionné dans la phrase.", "it": "Durante il ripasso, <b>F9</b> (o <b>＋</b> in alto) aggiunge una parola al tuo <b>Vocabolario personale</b>: quella della carta, o una parola selezionata nella frase."}
         ];
         var NEWS_KINDS = { revision: ["Révision", "Ripasso"], cartes: ["Cartes", "Carte"], combos: ["Combos", "Combo"], affichage: ["Affichage", "Aspetto"],
             reglages: ["Réglages", "Impostazioni"], accueil: ["Accueil", "Home"], paquets: ["Paquets", "Mazzi"] };
