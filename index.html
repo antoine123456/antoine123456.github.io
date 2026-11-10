@@ -449,6 +449,14 @@
         .b-flag { font: inherit; font-size: 13px; border: 1.5px solid var(--border-2); background: var(--surface); color: var(--text); border-radius: 16px; padding: 4px 12px; cursor: pointer; }
         .b-edited { font-size: 12px; color: var(--text-3); }
         .ed-modal { max-width: 560px; }
+        /* ✏️ equation mode (#212) */
+        .eq-col { width: 100%; max-width: 560px; }
+        .eq-col .wc-box { width: 100%; }
+        .eq-inp { width: 100% !important; font-family: "STIX Two Math", "Cambria Math", "Times New Roman", serif; }
+        .eq-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 8px; }
+        .eq-bar button { font: 18px "STIX Two Math", "Cambria Math", serif; min-width: 38px; padding: 4px 8px; border-radius: 9px;
+            border: 1.5px solid var(--border-2); background: var(--surface); color: var(--text); cursor: pointer; }
+        .eq-bar button:hover { background: var(--surface-hover); }
         .ed-photo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 4px 0 12px; }
         .ed-photo img { display: block; width: 100%; max-height: 180px; object-fit: contain; border-radius: 10px; background: var(--surface-2, transparent); }
         .ed-photo img[hidden], .ed-photo [hidden] { display: none; }
@@ -2320,7 +2328,7 @@
                     </div>
                     La carte prend la couleur de la note, puis part vers un coin : À revoir ↙, Difficile ↖, Correct ↘, Facile ↗.
                     Le délai avant la carte suivante se règle dans ⚙ (Auto : lent seulement la première fois qu'on voit une carte, ou si on la rate).
-                    <br>En mode « nombre de cartes », la fiche du paquet donne aussi la durée estimée de la séance, d'après ton temps habituel sur chaque carte. À la fin, 🎉 Session terminée montre le temps estimé au départ et le temps effectif (sans le temps passé hors de l'appli).
+                    <br>En mode « nombre de cartes », la fiche du paquet donne aussi la durée estimée de la séance, d'après ton temps habituel sur chaque carte. À la fin, 🎉 Session terminée montre le temps estimé au départ et le temps effectif (sans le temps passé hors de l'appli). Pour une formule (paquet 🌊 Helmholtz), une seule case : écris-la comme tu veux (lambda = c/f, w pour ω, ^2, sqrt…) ou avec la barre de symboles ; une formule trop longue se retourne et tu te notes. Une carte qui s'appuie sur d'autres attend qu'elles soient vues.
                     <br>Sur plusieurs appareils : les cartes d'une journée sont tirées dans le même ordre partout, la progression part en ligne dès que tu quittes l'appli et revient quand tu la rouvres sur l'autre appareil : tu reprends où tu en étais.
                     <br>Sur téléphone, glisse la carte pour la noter : à gauche À revoir, à droite Correct, vers le haut Facile, vers le bas Difficile (haut et bas demandent un geste plus long, pour éviter les erreurs). Les compteurs nouvelles / à repasser / à réviser sont en haut, à côté de la barre de progression.
                 </div>
@@ -2383,6 +2391,7 @@
                 <div class="g-num">9</div><div class="g-h">Nouveautés</div>
                 <div class="g-body">
                     <ul class="g-news">
+                        <li><b>10 nov.</b> (nuit) 🌊 Helmholtz : on tape la formule (mode équation, barre de symboles), les nombres en chiffres, une équation par ligne, et chaque carte attend ses prérequis.</li>
                         <li><b>10 nov.</b> (tard, raccourci) ➕ pendant la révision, F9 (ou ＋ en haut) ajoute un mot au Vocabulaire perso : celui de la carte, ou les mots sélectionnés.</li>
                         <li><b>10 nov.</b> (tard, correction) ⌨️ Maintenir Espace garde bien le verso : aussi sur une carte ratée, une carte sans verso enrichi, et quand Espace est enfoncé juste avant.</li>
                         <li><b>10 nov.</b> (tard, accueil) 📅 accueil : une heatmap des révisions en bas (un carré par jour sur un an, moyenne, record, série actuelle), à la place du combo des jours.</li>
@@ -4518,8 +4527,11 @@
                 // Split new vs due (learning/relearning cards are always "due" —
                 // they're mid-way through short-term steps, not day-scheduled yet)
                 var newCards = [], dueCards = [];
+                // 🌊 a card with prerequisites (card.pre, #213) waits until they've all been seen
+                var seenCard = function (id) { var x = srs[id]; return !!x && x.state !== "new"; };
                 allCards.forEach(function (c) {
                     var s = srs[c.id];
+                    if ((!s || s.state === "new") && c.pre && !c.pre.every(seenCard)) return;
                     if (!s || s.state === "new") newCards.push(c);
                     else if (s.state === "learning" || s.state === "relearning" || s.due <= TODAY) dueCards.push(c);
                 });
@@ -5846,7 +5858,7 @@
             if (flip && card.rf) showRefoldZones(card, false);
 
             setBarState("question");
-            if (!flip) { buildRows(card.words, card.sep, card.notes); syncAnswerFont(); }
+            if (!flip) { if (card.eq) buildEqRow(card.eq); else buildRows(card.words, card.sep, card.notes); syncAnswerFont(); }
             updateCompact();
             if (!flip) fitAnswerRow();
             fitCardHeight(card, flip);
@@ -6304,14 +6316,71 @@
             setTimeout(function () { if (wordRows.length && document.activeElement !== wordRows[0].inp) wordRows[0].inp.focus({ preventScroll: true }); }, 60);
         }
 
+        // ✏️ Equation mode (#212): one box for a whole formula or expression
+        // (« lambda = c/f »). Written as one likes: lambda / omega / pi / sqrt
+        // or the symbols, ^2 or ², spaces, ×, brackets, the two sides swapped
+        // all count the same; the symbol bar helps on a phone. Checked as it
+        // is typed (right = solved) and on Entrée (wrong = an error).
+        var EQ_SYMBOLS = ["λ", "ω", "π", "∇", "²", "√", "∂", "α", "≫", "∞"];
+        var EQ_ALIASES = [[/\\?lambda/gi, "λ"], [/\\?omega/gi, "ω"], [/\\?alpha/gi, "α"], [/\\?theta/gi, "θ"], [/\\?phi/gi, "φ"],
+            [/\\?delta/gi, "δ"], [/\\?nabla/gi, "∇"], [/\\?partial/gi, "∂"], [/\\?infty|\\?infini/gi, "∞"], [/\\?pi/gi, "π"], [/sqrt|racine/gi, "√"],
+            [/Δ/g, "∇²"], [/>>/g, "≫"], [/<</g, "≪"], [/->/g, "→"], [/~=|≃|~/g, "≈"], [/[−–—]/g, "-"], [/‖/g, "|"], [/\^\(?2\)?|\*\*2/g, "²"],
+            [/\^\(?3\)?|\*\*3/g, "³"], [/½/g, "1/2"], [/₀/g, "0"], [/₁/g, "1"], [/₂/g, "2"], [/₃/g, "3"], [/[ₘ]/g, "m"], [/[ₙ]/g, "n"]];
+        function eqNorm(x, expected) {
+            x = String(x || "");
+            EQ_ALIASES.forEach(function (a) { x = x.replace(a[0], a[1]); });
+            if (expected != null && /ω/.test(expected) && !/w/.test(expected)) x = x.replace(/w/g, "ω"); // w for ω
+            return x.replace(/[\s*·×()\[\]{}]/g, "").replace(/\^/g, "").toLowerCase();
+        }
+        function isEqMatch(input, expected) {
+            var e = eqNorm(expected), i = eqNorm(input, e);
+            if (!i) return false;
+            if (i === e) return true;
+            var a = i.split("="), b = e.split("=");
+            return a.length === 2 && b.length === 2 && a[0] === b[1] && a[1] === b[0]; // sides swapped
+        }
+        function buildEqRow(eqs) {
+            advancing = false;
+            var section = document.getElementById("t-words"); if (!section) return;
+            section.innerHTML = ""; wordRows = [];
+            var col = document.createElement("div"); col.className = "word-col eq-col";
+            var box = document.createElement("div"); box.className = "wc-box";
+            var inp = document.createElement("input"); inp.className = "wc-inp eq-inp";
+            inp.type = "text"; inp.placeholder = t9n("la formule…");
+            inp.autocomplete = "off"; inp.autocorrect = "off"; inp.autocapitalize = "off"; inp.spellcheck = false;
+            var hint = document.createElement("div"); hint.className = "wc-hint";
+            var attempts = document.createElement("div"); attempts.className = "wc-attempts";
+            box.append(inp, attempts);
+            var bar = document.createElement("div"); bar.className = "eq-bar";
+            EQ_SYMBOLS.forEach(function (sym) {
+                var bt = document.createElement("button"); bt.type = "button"; bt.textContent = sym;
+                bt.addEventListener("mousedown", function (e) { e.preventDefault(); }); // the box keeps the focus
+                bt.addEventListener("click", function () {
+                    var a = inp.selectionStart || inp.value.length, z = inp.selectionEnd || a;
+                    inp.value = inp.value.slice(0, a) + sym + inp.value.slice(z);
+                    inp.setSelectionRange(a + sym.length, a + sym.length); inp.focus();
+                    inp.dispatchEvent(new Event("input"));
+                });
+                bar.appendChild(bt);
+            });
+            col.append(box, hint, bar);
+            section.appendChild(col);
+            var entry = { word: eqs[0], expected: eqs, eq: true, inp: inp, box: box, hint: hint, attempts: attempts, solved: false, revealed: false, errors: 0, _errTimer: null };
+            wordRows.push(entry);
+            inp.addEventListener("input", makeCheck(entry, 0));
+            inp.addEventListener("keydown", makeKey(0));
+            document.getElementById("kb-keeper").value = "";
+            inp.focus({ preventScroll: true });
+            setTimeout(function () { if (document.activeElement !== inp) inp.focus({ preventScroll: true }); }, 60);
+        }
         function makeCheck(entry, i) { return function () { liveCheck(entry, i); }; }
         function makeKey(i) {
             return function (e) {
                 if (e.key !== "Enter") return;
                 e.preventDefault();
                 var entry = wordRows[i];
-                // « Entrée pour valider » (#100): Entrée checks the word.
-                if (settings().validate === "enter" && entry && !entry.solved && !entry.given && entry.inp.value.trim()) {
+                // « Entrée pour valider » (#100): Entrée checks the word — always for a formula (#212)
+                if ((settings().validate === "enter" || (entry && entry.eq)) && entry && !entry.solved && !entry.given && entry.inp.value.trim()) {
                     validateEntry(entry, i);
                     return;
                 }
@@ -6345,10 +6414,17 @@
         }
         function check(entry) {
             if (!entry.inp.value.trim()) return null;
+            if (entry.eq) return entry.expected.some(function (t) { return isEqMatch(entry.inp.value, t); });
             return entry.expected.some(function (t) { return isMatch(entry.inp.value, t); });
         }
 
         function liveCheck(entry, i) {
+            if (entry.eq) { // a formula is wrong until it's whole: solved when right, an error only on Entrée (#212)
+                if (entry.given || entry.solved) return;
+                entry.inp.className = "wc-inp eq-inp";
+                if (check(entry)) { markSolved(entry); focusNext(i); }
+                return;
+            }
             if (/^\s/.test(entry.inp.value)) entry.inp.value = entry.inp.value.replace(/^\s+/, ""); // space typed between words
             if (settings().validate === "enter") {
                 // checked on Entrée (#100); a space after the word = Entrée too
@@ -6844,6 +6920,9 @@
             var m = "type";
             try { m = localStorage.getItem(LS_MODE) || "type"; } catch (e) { }
             if (m === "dictee" && !sess.canDictee) return "type";
+            // a card too long to type (a whole formula, card.flip — #209): turned over and rated, whatever the mode
+            var cur = typeof sess !== "undefined" && sess.queue && sess.queue[sess.qIdx];
+            if (cur && cur.flip && m !== "dictee") return "flip";
             return m === "flip" || m === "dictee" ? m : "type";
         }
         function storedStudyMode() {
@@ -7298,14 +7377,14 @@
                     "(suite) la carte notée part vers un coin ; combos inversés (justes à droite, erreurs à gauche) et comptés tout de suite ; la case rougit à chaque erreur ; ⚙ délai avant la carte suivante.": "(seguito) la carta valutata vola verso un angolo; combo invertite (giuste a destra, errori a sinistra) e contate subito; la casella diventa rossa a ogni errore; ⚙ tempo prima della carta successiva.",
                     "Délai avant la carte suivante": "Tempo prima della carta successiva", "Auto": "Auto", "Toujours lent": "Sempre lento", "Toujours rapide": "Sempre veloce",
                     "Temps laissé au verso, une fois le son fini. Auto : une carte vue pour la première fois, ou ratée, garde le temps de relire (≈ 2,5 s) ; une carte déjà vue et juste (même revenue dans la séance) passe vite (≈ 0,7 s, comptées pendant le son), avec une transition plus courte.": "Tempo lasciato al retro, finito l'audio. Auto: una carta vista per la prima volta, o sbagliata, tiene il tempo per rileggere (≈ 2,5 s); una carta già vista e giusta (anche tornata nella sessione) passa in fretta (≈ 0,7 s, contati durante l'audio), con una transizione più breve.", "joue l'enregistrement de la phrase d'exemple ; s'il n'y en a pas (phrases écrites pour le Vocabulaire), la voix du navigateur la lit.": "riproduce la registrazione della frase d'esempio; se non c'è (frasi scritte per il Vocabolario), la legge la voce del browser.",
-                    "6 nov.": "6 nov.", "9 nov.": "9 nov.", "10 nov.": "10 nov.", "En mode « nombre de cartes », la fiche du paquet donne aussi la durée estimée de la séance, d'après ton temps habituel sur chaque carte. À la fin, 🎉 Session terminée montre le temps estimé au départ et le temps effectif (sans le temps passé hors de l'appli).": "In modalità « numero di carte », la scheda del mazzo indica anche la durata stimata della sessione, in base al tuo tempo abituale su ogni carta. Alla fine, 🎉 Sessione finita mostra il tempo stimato all'inizio e il tempo effettivo (senza il tempo passato fuori dall'app).", "(soir, fin) fiche du paquet : durée estimée de la séance en mode « nombre de cartes ».": "(sera, fine) scheda del mazzo: durata stimata della sessione in modalità « numero di carte ».", "(nuit) 📝 Relecture : ↑ modifier la carte, ↓ la retirer du paquet.": "(notte) 📝 Revisione: ↑ modifica la carta, ↓ toglila dal mazzo.",
+                    "6 nov.": "6 nov.", "9 nov.": "9 nov.", "10 nov.": "10 nov.", "En mode « nombre de cartes », la fiche du paquet donne aussi la durée estimée de la séance, d'après ton temps habituel sur chaque carte. À la fin, 🎉 Session terminée montre le temps estimé au départ et le temps effectif (sans le temps passé hors de l'appli). Pour une formule (paquet 🌊 Helmholtz), une seule case : écris-la comme tu veux (lambda = c/f, w pour ω, ^2, sqrt…) ou avec la barre de symboles ; une formule trop longue se retourne et tu te notes. Une carte qui s'appuie sur d'autres attend qu'elles soient vues.": "In modalità « numero di carte », la scheda del mazzo indica anche la durata stimata della sessione, in base al tuo tempo abituale su ogni carta. Alla fine, 🎉 Sessione finita mostra il tempo stimato all'inizio e il tempo effettivo (senza il tempo passato fuori dall'app). Per una formula (mazzo 🌊 Helmholtz), una sola casella: scrivila come vuoi (lambda = c/f, w per ω, ^2, sqrt…) o con la barra dei simboli; una formula troppo lunga si gira e ti valuti. Una carta che si basa su altre aspetta che siano viste.", "(soir, fin) fiche du paquet : durée estimée de la séance en mode « nombre de cartes ».": "(sera, fine) scheda del mazzo: durata stimata della sessione in modalità « numero di carte ».", "(nuit) 📝 Relecture : ↑ modifier la carte, ↓ la retirer du paquet.": "(notte) 📝 Revisione: ↑ modifica la carta, ↓ toglila dal mazzo.",
                     "(nuit, suite) 🔍 liste : une ligne par carte, clic → 📝 Relecture, en-tête toujours visible, tags dans un menu au bout de la recherche.": "(notte, seguito) 🔍 elenco: una riga per carta, clic → 📝 Revisione, intestazione sempre visibile, tag in un menu alla fine della ricerca.",
                     ": parcourir les cartes (carrousel pour les images, liste pour les mots : une ligne par carte, un clic l'ouvre en 📝 Relecture, au même endroit en revenant ; 🏷 au bout de la recherche pour filtrer par tag ; 📶 et ↕ sous la recherche : filtrer et trier par niveau de connaissance) ;": ": sfogliare le carte (carosello per le immagini, elenco per le parole: una riga per carta, un clic la apre in 📝 Revisione, allo stesso punto al ritorno; 🏷 alla fine della ricerca per filtrare per tag; 📶 e ↕ sotto la ricerca: filtrare e ordinare per livello di conoscenza);",
                     "(nuit, fin) Vocabulaire : tags de nature (nom, verbe, adjectif…) et de thème (animaux, nourriture, corps, métiers…), à choisir dans le menu 🏷 de 🔍.": "(notte, fine) Vocabolario: tag di categoria (nome, verbo, aggettivo…) e di tema (animali, cibo, corpo, mestieri…), da scegliere nel menu 🏷 di 🔍.",
                     "(nuit, correction) après 3 erreurs sur le dernier mot, la carte passe toute seule à la suivante (notée « À revoir »).": "(notte, correzione) dopo 3 errori sull'ultima parola, la carta passa da sola alla successiva (valutata « Da rivedere »).",
                     "toutes": "tutte", "Tous les niveaux": "Tutti i livelli", "Nouvelles": "Nuove", "En cours": "In corso", "À consolider": "Da consolidare", "Bien connues": "Ben note",
                     "Ordre du paquet": "Ordine del mazzo", "Moins connues d'abord": "Prima le meno note", "Mieux connues d'abord": "Prima le più note",
-                    "(nuit, fin+) 🔍 filtrer et trier par niveau de connaissance (📶 et ↕ sous la recherche).": "(notte, fine+) 🔍 filtrare e ordinare per livello di conoscenza (📶 e ↕ sotto la ricerca).", "(après-midi) 🗂 Pré-tri : seulement les cartes jamais triées ; changer d'avis (‹ Préc.), ↑ modifier, ↓ retirer, Ctrl/⌘+Z pour annuler ; 🔍 tout le haut reste affiché, nom du paquet sur la ligne des boutons.": "(pomeriggio) 🗂 Pre-selezione: solo le carte mai ordinate; cambiare idea (‹ Préc.), ↑ modificare, ↓ togliere, Ctrl/⌘+Z per annullare; 🔍 tutta la parte alta resta visibile, nome del mazzo sulla riga dei pulsanti.", "Rien à annuler.": "Niente da annullare.", "(tard, raccourci) ➕ pendant la révision, F9 (ou ＋ en haut) ajoute un mot au Vocabulaire perso : celui de la carte, ou les mots sélectionnés.": "(tardi, scorciatoia) ➕ durante il ripasso, F9 (o ＋ in alto) aggiunge una parola al Vocabolario personale: quella della carta, o le parole selezionate.", "ajouter un mot au 📝 Vocabulaire perso (celui de la carte, ou les mots sélectionnés)": "aggiungere una parola al 📝 Vocabolario personale (quella della carta, o le parole selezionate)", "Ajouter au vocabulaire perso (F9)": "Aggiungi al vocabolario personale (F9)", "(tard, correction) ⌨️ Maintenir Espace garde bien le verso : aussi sur une carte ratée, une carte sans verso enrichi, et quand Espace est enfoncé juste avant.": "(tardi, correzione) ⌨️ Tenere premuto Spazio tiene davvero il retro: anche su una carta sbagliata, una carta senza retro arricchito, e quando Spazio è premuto appena prima.", "(tard, accueil) 📅 accueil : une heatmap des révisions en bas (un carré par jour sur un an, moyenne, record, série actuelle), à la place du combo des jours.": "(tardi, pagina iniziale) 📅 pagina iniziale: una heatmap dei ripassi in fondo (un quadrato per giorno su un anno, media, record, serie attuale), al posto della combo dei giorni.", "Moyenne": "Media", "cartes / jour": "carte / giorno", "Jours étudiés": "Giorni di studio", "Record": "Record", "jours d'affilée": "giorni di fila", "Série actuelle": "Serie attuale", "jours": "giorni", "jour": "giorno", "cartes": "carte", "carte": "carta", "(tard, fin) 🏷 Vocabulaire : tag « objet » (192 mots : téléphone, couteau, parapluie…), avec une image pour la plupart.": "(tardi, fine) 🏷 Vocabolario: tag « oggetto » (192 parole: telefono, coltello, ombrello…), con un'immagine per la maggior parte.", "(tard, suite) 🐶 Vocabulaire : les cris des animaux (maullar, mugir, relinchar, rugir…), tag « cris d'animaux ».": "(tardi, seguito) 🐶 Vocabolario: i versi degli animali (maullar, mugir, relinchar, rugir…), tag « versi degli animali ».", "(tard) 🚩 cartes corrigées (aquí está = voici, ya no = ne… plus, image de más) : leur marque s'enlève toute seule, ici et dans Anki.": "(tardi) 🚩 carte corrette (aquí está, ya no, immagine di más): il loro segno se ne va da solo, qui e in Anki.", "(soir, et encore) 🖼 Vocabulaire : des images pour les animaux et les parties du corps (92 mots de plus).": "(sera, e ancora) 🖼 Vocabolario: immagini per gli animali e le parti del corpo (92 parole in più).", "(soir, encore) ✏️ image par lien seulement : champ « Image (lien) » dans Modifier la carte (une page Wikimedia marche aussi), plus d'envoi de photo.": "(sera, ancora) ✏️ immagine solo tramite link: campo « Immagine (link) » in Modifica la carta (va bene anche una pagina Wikimedia), niente più invio di foto.", "Image (lien)": "Immagine (link)", "Le lien de l'image doit commencer par https://": "Il link dell'immagine deve iniziare con https://", "(soir, fin) 🎉 Session terminée : temps estimé au départ et temps effectif.": "(sera, fine) 🎉 Sessione finita: tempo stimato all'inizio e tempo effettivo.", "(soir, suite) 🏷 Vocabulaire : tag « transparent » pour les mots qui se devinent depuis le français (la capacidad = capacité), jamais un faux ami.": "(sera, seguito) 🏷 Vocabolario: tag « trasparente » per le parole che si indovinano dall'italiano (la sensación = sensazione), mai un falso amico.", "(soir) ✏️ 📷 une photo sur la carte (Modifier la carte) ; 🗂 le pré-tri suit le tag et la recherche choisis.": "(sera) ✏️ 📷 una foto sulla carta (Modifica la carta); 🗂 la pre-selezione segue il tag e la ricerca scelti.", "Ajouter une photo": "Aggiungi una foto", "Changer la photo": "Cambia la foto", "Retirer la photo": "Togli la foto", "Image illisible.": "Immagine illeggibile.", "Plus de place pour les photos sur cet appareil.": "Niente più spazio per le foto su questo dispositivo.", "Photo ajoutée": "Foto aggiunta", "Photo retirée": "Foto tolta", "Modifier la carte (↑)": "Modifica la carta (↑)", "Retirer la carte du paquet (↓)": "Togli la carta dal mazzo (↓)", "Tri annulé": "Scelta annullata", "Annuler le dernier tri (Ctrl/⌘+Z)": "Annulla l'ultima scelta (Ctrl/⌘+Z)", "↩ pour corriger, 🗂 pour sortir": "↩ per correggere, 🗂 per uscire", "Filtrer par tag": "Filtra per tag", "Chercher un tag…": "Cerca un tag…",
+                    "(nuit, fin+) 🔍 filtrer et trier par niveau de connaissance (📶 et ↕ sous la recherche).": "(notte, fine+) 🔍 filtrare e ordinare per livello di conoscenza (📶 e ↕ sotto la ricerca).", "(après-midi) 🗂 Pré-tri : seulement les cartes jamais triées ; changer d'avis (‹ Préc.), ↑ modifier, ↓ retirer, Ctrl/⌘+Z pour annuler ; 🔍 tout le haut reste affiché, nom du paquet sur la ligne des boutons.": "(pomeriggio) 🗂 Pre-selezione: solo le carte mai ordinate; cambiare idea (‹ Préc.), ↑ modificare, ↓ togliere, Ctrl/⌘+Z per annullare; 🔍 tutta la parte alta resta visibile, nome del mazzo sulla riga dei pulsanti.", "Rien à annuler.": "Niente da annullare.", "(nuit) 🌊 Helmholtz : on tape la formule (mode équation, barre de symboles), les nombres en chiffres, une équation par ligne, et chaque carte attend ses prérequis.": "(notte) 🌊 Helmholtz: si scrive la formula (modalità equazione, barra dei simboli), i numeri in cifre, un'equazione per riga, e ogni carta aspetta i suoi prerequisiti.", "la formule…": "la formula…", "(tard, raccourci) ➕ pendant la révision, F9 (ou ＋ en haut) ajoute un mot au Vocabulaire perso : celui de la carte, ou les mots sélectionnés.": "(tardi, scorciatoia) ➕ durante il ripasso, F9 (o ＋ in alto) aggiunge una parola al Vocabolario personale: quella della carta, o le parole selezionate.", "ajouter un mot au 📝 Vocabulaire perso (celui de la carte, ou les mots sélectionnés)": "aggiungere una parola al 📝 Vocabolario personale (quella della carta, o le parole selezionate)", "Ajouter au vocabulaire perso (F9)": "Aggiungi al vocabolario personale (F9)", "(tard, correction) ⌨️ Maintenir Espace garde bien le verso : aussi sur une carte ratée, une carte sans verso enrichi, et quand Espace est enfoncé juste avant.": "(tardi, correzione) ⌨️ Tenere premuto Spazio tiene davvero il retro: anche su una carta sbagliata, una carta senza retro arricchito, e quando Spazio è premuto appena prima.", "(tard, accueil) 📅 accueil : une heatmap des révisions en bas (un carré par jour sur un an, moyenne, record, série actuelle), à la place du combo des jours.": "(tardi, pagina iniziale) 📅 pagina iniziale: una heatmap dei ripassi in fondo (un quadrato per giorno su un anno, media, record, serie attuale), al posto della combo dei giorni.", "Moyenne": "Media", "cartes / jour": "carte / giorno", "Jours étudiés": "Giorni di studio", "Record": "Record", "jours d'affilée": "giorni di fila", "Série actuelle": "Serie attuale", "jours": "giorni", "jour": "giorno", "cartes": "carte", "carte": "carta", "(tard, fin) 🏷 Vocabulaire : tag « objet » (192 mots : téléphone, couteau, parapluie…), avec une image pour la plupart.": "(tardi, fine) 🏷 Vocabolario: tag « oggetto » (192 parole: telefono, coltello, ombrello…), con un'immagine per la maggior parte.", "(tard, suite) 🐶 Vocabulaire : les cris des animaux (maullar, mugir, relinchar, rugir…), tag « cris d'animaux ».": "(tardi, seguito) 🐶 Vocabolario: i versi degli animali (maullar, mugir, relinchar, rugir…), tag « versi degli animali ».", "(tard) 🚩 cartes corrigées (aquí está = voici, ya no = ne… plus, image de más) : leur marque s'enlève toute seule, ici et dans Anki.": "(tardi) 🚩 carte corrette (aquí está, ya no, immagine di más): il loro segno se ne va da solo, qui e in Anki.", "(soir, et encore) 🖼 Vocabulaire : des images pour les animaux et les parties du corps (92 mots de plus).": "(sera, e ancora) 🖼 Vocabolario: immagini per gli animali e le parti del corpo (92 parole in più).", "(soir, encore) ✏️ image par lien seulement : champ « Image (lien) » dans Modifier la carte (une page Wikimedia marche aussi), plus d'envoi de photo.": "(sera, ancora) ✏️ immagine solo tramite link: campo « Immagine (link) » in Modifica la carta (va bene anche una pagina Wikimedia), niente più invio di foto.", "Image (lien)": "Immagine (link)", "Le lien de l'image doit commencer par https://": "Il link dell'immagine deve iniziare con https://", "(soir, fin) 🎉 Session terminée : temps estimé au départ et temps effectif.": "(sera, fine) 🎉 Sessione finita: tempo stimato all'inizio e tempo effettivo.", "(soir, suite) 🏷 Vocabulaire : tag « transparent » pour les mots qui se devinent depuis le français (la capacidad = capacité), jamais un faux ami.": "(sera, seguito) 🏷 Vocabolario: tag « trasparente » per le parole che si indovinano dall'italiano (la sensación = sensazione), mai un falso amico.", "(soir) ✏️ 📷 une photo sur la carte (Modifier la carte) ; 🗂 le pré-tri suit le tag et la recherche choisis.": "(sera) ✏️ 📷 una foto sulla carta (Modifica la carta); 🗂 la pre-selezione segue il tag e la ricerca scelti.", "Ajouter une photo": "Aggiungi una foto", "Changer la photo": "Cambia la foto", "Retirer la photo": "Togli la foto", "Image illisible.": "Immagine illeggibile.", "Plus de place pour les photos sur cet appareil.": "Niente più spazio per le foto su questo dispositivo.", "Photo ajoutée": "Foto aggiunta", "Photo retirée": "Foto tolta", "Modifier la carte (↑)": "Modifica la carta (↑)", "Retirer la carte du paquet (↓)": "Togli la carta dal mazzo (↓)", "Tri annulé": "Scelta annullata", "Annuler le dernier tri (Ctrl/⌘+Z)": "Annulla l'ultima scelta (Ctrl/⌘+Z)", "↩ pour corriger, 🗂 pour sortir": "↩ per correggere, 🗂 per uscire", "Filtrer par tag": "Filtra per tag", "Chercher un tag…": "Cerca un tag…",
                     "pour commenter une carte,": "per commentare una carta,", "(✏️) pour la modifier,": "(✏️) per modificarla,", "(🗑) pour la retirer du paquet (": "(🗑) per toglierla dal mazzo (", "la remet).": "la rimette).",
                     "📝 Relecture : modifier la carte · la retirer du paquet (Ctrl+Z : annuler)": "📝 Revisione: modifica la carta · toglila dal mazzo (Ctrl+Z: annulla)",
                     "✏️ Modifier la carte": "✏️ Modifica la carta", "Ctrl+Entrée : enregistrer · Échap : annuler": "Ctrl+Invio: salva · Esc: annulla", "✓ Enregistrer": "✓ Salva",
@@ -7639,7 +7718,8 @@
             {"id": 48, "d": "2026-11-10", "k": "paquets", "fr": "Nouveau tag <b>objet</b> dans le Vocabulaire : 192 objets (téléphone, couteau, parapluie, marteau…), la plupart avec une <b>image</b>.", "it": "Nuovo tag <b>oggetto</b> nel Vocabolario: 192 oggetti (telefono, coltello, ombrello, martello…), quasi tutti con un'<b>immagine</b>."},
             {"id": 49, "d": "2026-11-10", "k": "affichage", "fr": "En bas de l'accueil, une <b>heatmap</b> : un carré par jour sur un an, plus vert quand tu as révisé plus de cartes, avec ta <b>série</b> de jours d'affilée.", "it": "In fondo alla pagina iniziale, una <b>heatmap</b>: un quadrato per giorno su un anno, più verde quando hai ripassato più carte, con la tua <b>serie</b> di giorni di fila."},
             {"id": 50, "d": "2026-11-10", "k": "cartes", "fr": "<b>Maintenir Espace</b> garde maintenant le verso affiché dans tous les cas : carte ratée, carte simple, ou Espace enfoncé juste avant la réponse.", "it": "<b>Tenere premuto Spazio</b> ora tiene il retro in ogni caso: carta sbagliata, carta semplice, o Spazio premuto appena prima della risposta."},
-            {"id": 51, "d": "2026-11-10", "k": "cartes", "fr": "Pendant la révision, <b>F9</b> (ou <b>＋</b> en haut) ajoute un mot à ton <b>Vocabulaire perso</b> : celui de la carte, ou un mot que tu as sélectionné dans la phrase.", "it": "Durante il ripasso, <b>F9</b> (o <b>＋</b> in alto) aggiunge una parola al tuo <b>Vocabolario personale</b>: quella della carta, o una parola selezionata nella frase."}
+            {"id": 51, "d": "2026-11-10", "k": "cartes", "fr": "Pendant la révision, <b>F9</b> (ou <b>＋</b> en haut) ajoute un mot à ton <b>Vocabulaire perso</b> : celui de la carte, ou un mot que tu as sélectionné dans la phrase.", "it": "Durante il ripasso, <b>F9</b> (o <b>＋</b> in alto) aggiunge una parola al tuo <b>Vocabolario personale</b>: quella della carta, o una parola selezionata nella frase."},
+            {"id": 52, "d": "2026-11-10", "k": "cartes", "fr": "<b>🌊 Helmholtz</b>, comme un paquet Anki de physique : tu <b>tapes la formule</b> (λ = c/f, avec une barre de symboles), une équation par ligne au verso, et une carte n'arrive qu'après celles sur lesquelles elle <b>s'appuie</b>.", "it": "<b>🌊 Helmholtz</b>, come un mazzo Anki di fisica: <b>scrivi la formula</b> (λ = c/f, con una barra di simboli), un'equazione per riga sul retro, e una carta arriva solo dopo quelle su cui si <b>basa</b>."}
         ];
         var NEWS_KINDS = { revision: ["Révision", "Ripasso"], cartes: ["Cartes", "Carte"], combos: ["Combos", "Combo"], affichage: ["Affichage", "Aspetto"],
             reglages: ["Réglages", "Impostazioni"], accueil: ["Accueil", "Home"], paquets: ["Paquets", "Mazzi"] };

@@ -174,7 +174,7 @@ CARDS = [
      "k ∈ { k₁, k₂, k₃, … }", "cavités",
      "Sans source, seule une suite de valeurs de k admet une solution non nulle.", "mode_3_2"),
     ("D", 402, "Problème aux valeurs propres", "Quel opérateur, et quelle valeur propre ?", "moins laplacien et k carré",
-     "−∇²u = k²u", "modes propres",
+     "−∇²u = k²u dans Ω · u = 0 sur ∂Ω", "modes propres",
      "La même équation de Helmholtz, lue autrement : k² est l’inconnue, avec u.", None),
     ("D", 403, "Mode propre", "Que décrit u<sub>mn</sub> ?", "une forme de vibration",
      "p = u<sub>mn</sub>(x) cos(ω<sub>mn</sub>t)", "modes propres",
@@ -228,6 +228,100 @@ CARDS = [
      "λ<sub>n</sub> = 2L/n, f<sub>n</sub> = n c / 2L", "cavités",
      "Corde fixée ou tuyau : un nombre entier de demi-longueurs d’onde entre les deux extrémités.", "onde_stationnaire"),
 ]
+
+
+# ── Comment chaque carte est demandée (#209 à #213) ─────────────────────────
+# Comme un paquet Anki de physique : la notion au recto, et l'on donne
+#   eq    : la formule, tapée en mode équation (#212) — « lambda = c/f »,
+#           les variantes acceptées ; l'appli ignore espaces, ×, parenthèses,
+#           accepte lambda / omega / pi / sqrt / ^2 et les deux côtés inversés ;
+#   flip  : une formule trop longue à taper : la carte se retourne et on se note ;
+#   sinon : la réponse courte, les nombres en chiffres (#210 : « 2 », pas « deux »).
+# ask remplace la question ; pre = les cartes à avoir vues avant (#213) : la
+# carte attend qu'elles soient connues, et son verso dit sur quoi elle s'appuie.
+ASK = {
+    101: {"ask": "Écris-la pour une pression p.", "flip": True},
+    102: {"ask": "Comment s’écrit p(x, t) ?", "flip": True},
+    103: {"ask": "Écris-la, sans source.", "eq": ["∇²u + k²u = 0", "Δu + k²u = 0", "∇²u = −k²u", "Δu = −k²u"], "pre": [101, 102]},
+    104: {"ask": "Par quoi remplace-t-on ∂²/∂t² ?", "eq": ["−ω²"], "pre": [102]},
+    105: {"ask": "Écris k en fonction de ω et c.", "eq": ["k = ω/c"], "pre": [107]},
+    106: {"ask": "Écris λ en fonction de c et f.", "eq": ["λ = c/f"]},
+    107: {"ask": "Écris ω en fonction de f.", "eq": ["ω = 2πf", "ω = 2fπ"]},
+    108: {"short": "343"},
+    111: {"short": "1/4 de période plus tard", "pre": [110]},
+    110: {"pre": [109]},
+    112: {"pre": [102]},
+    113: {"pre": [112]},
+    114: {"pre": [113, 115]},
+    115: {"pre": [103]},
+    116: {"ask": "Écris-la avec une source s.", "eq": ["∇²u + k²u = −s", "Δu + k²u = −s"], "pre": [103]},
+    117: {"pre": [103]},
+    201: {"ask": "Écris-la avec son amplitude A et son vecteur d’onde k.", "flip": True, "pre": [103]},
+    202: {"ask": "Que vaut sa norme ?", "eq": ["‖k‖ = 2π/λ", "k = 2π/λ", "‖k‖ = ω/c", "k = ω/c"], "pre": [201, 105]},
+    203: {"ask": "Que vaut k<sub>x</sub>² + k<sub>y</sub>² + k<sub>z</sub>² ?", "eq": ["ω²/c²", "k²", "(ω/c)²"], "pre": [202]},
+    204: {"ask": "Quelle distance sépare deux crêtes successives ?", "eq": ["λ"], "pre": [201, 106]},
+    205: {"ask": "Écris v en fonction de ω et k.", "eq": ["v = ω/k"], "pre": [201, 105]},
+    206: {"pre": [201, 115]},
+    301: {"pre": [116]},
+    302: {"pre": [301]},
+    303: {"ask": "Écris G en 3D.", "eq": ["G = e^(ikr)/(4πr)", "G = e^(ikr)/(4rπ)"], "pre": [302]},
+    304: {"pre": [302]},
+    305: {"pre": [302]},
+    306: {"pre": [302, 115]},
+    307: {"ask": "Écris H₀<sup>(1)</sup> avec J₀ et Y₀.", "eq": ["H0 = J0 + iY0", "H0(1) = J0 + iY0"], "pre": [304]},
+    308: {"ask": "Quelle condition porte sur kr ?", "eq": ["kr ≫ 1", "kr >> 1"], "pre": [105]},
+    309: {"ask": "Comment décroît l’amplitude en 2D ?", "eq": ["1/√r", "1/√(r)", "r^(−1/2)"], "pre": [307, 308]},
+    310: {"pre": [303, 309]},
+    311: {"pre": [303]},
+    312: {"ask": "Quel facteur multiplie (∂u/∂r − iku) en 2D, puis en 3D ?", "eq": ["√r, r", "√r puis r", "√r et r"], "pre": [311, 310]},
+    313: {"pre": [311]},
+    314: {"pre": [301]},
+    315: {"short": "2 sources en opposition", "pre": [314]},
+    316: {"pre": [315]},
+    317: {"short": "la médiatrice", "pre": [314, 115]},
+    318: {"ask": "Pour 2 sources en phase, quelle différence de marche r₂ − r₁ donne une interférence destructive ?",
+          "eq": ["λ/2", "(n + 1/2)λ", "(n + ½)λ"], "pre": [317, 106]},
+    401: {"pre": [117]},
+    402: {"ask": "Écris l’équation : quel opérateur, quelle valeur propre ?",
+          "eq": ["−∇²u = k²u", "−Δu = k²u", "∇²u = −k²u", "Δu = −k²u"], "pre": [103, 401]},
+    403: {"pre": [402]},
+    404: {"ask": "Écris f<sub>mn</sub> avec k<sub>mn</sub>.", "eq": ["f = ck/2π", "f = kc/2π", "fmn = c kmn/2π", "fmn = kmn c/2π"], "pre": [403, 107]},
+    405: {"ask": "Qu’impose-t-elle sur le bord ?", "eq": ["u = 0"], "pre": [117]},
+    406: {"ask": "Qu’impose-t-elle sur le bord ?", "eq": ["∂u/∂n = 0", "du/dn = 0"], "pre": [117]},
+    407: {"ask": "Écris-la, avec un coefficient α.", "eq": ["∂u/∂n + αu = 0", "du/dn + αu = 0", "∂u/∂n = −αu", "du/dn = −αu"], "pre": [405, 406]},
+    408: {"short": "produit de 2 sinus", "pre": [405, 402]},
+    409: {"short": "produit de 2 cosinus", "pre": [406, 408]},
+    410: {"ask": "Écris k<sub>mn</sub>² pour un rectangle a × b.", "eq": ["kmn² = π²(m²/a² + n²/b²)", "k² = π²(m²/a² + n²/b²)",
+          "kmn² = (mπ/a)² + (nπ/b)²", "k² = (mπ/a)² + (nπ/b)²"], "pre": [408, 409]},
+    411: {"pre": [410]},
+    412: {"pre": [411]},
+    413: {"short": "1 et 1", "pre": [411]},
+    414: {"pre": [411, 406]},
+    415: {"pre": [410]},
+    416: {"ask": "Que vaut ∫ u<sub>mn</sub> u<sub>pq</sub> pour 2 modes différents ?", "eq": ["0"], "pre": [403]},
+    417: {"pre": [416]},
+    418: {"short": "3", "pre": [410]},
+    419: {"ask": "Écris λ<sub>n</sub> pour une longueur L.", "eq": ["λn = 2L/n", "λ = 2L/n"], "pre": [114, 401]},
+}
+# formules : une équation par ligne (#214) — séparées par « , » ou « · » quand
+# chaque morceau est une équation (k ∈ { k₁, k₂, … } reste sur une ligne)
+EQ_SIGN = re.compile(r"[=≈→∝<>≫≪]")
+
+
+def formula_lines(f):
+    if not f:
+        return []
+    parts, depth, cur = [], 0, ""
+    for i, ch in enumerate(f):
+        depth += 1 if ch in "([{" else -1 if ch in ")]}" else 0
+        if depth == 0 and (f[i:i + 2] == ", " or f[i:i + 3] == " · "):
+            parts.append(cur)
+            cur = ""
+            continue
+        cur += ch
+    parts.append(cur)
+    parts = [p.strip(" ·,") for p in parts if p.strip(" ·,")]
+    return parts if len(parts) > 1 and all(EQ_SIGN.search(re.sub(r"<[^>]+>", "", p)) for p in parts) else [f]
 
 
 # ── Animations (WebP animés, une période en boucle) ──────────────────────────
@@ -385,6 +479,7 @@ STYLE = """<style>
 .rf-pos{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px}
 .rf-tr{font-size:15px;opacity:.75;line-height:1.45;max-width:34em;margin:0 auto}
 .rf-img img{max-width:100%;max-height:280px;border-radius:10px;margin-top:12px}
+.rf-pre{font-size:13px;opacity:.6;margin:8px auto 0;max-width:34em}
 </style>"""
 FRONT = """<div class="rf-word">{{Notion}}</div>
 <div class="rf-sent">{{Question}}</div>"""
@@ -411,29 +506,58 @@ def cards():
         if anim and not os.path.exists(os.path.join(MEDIA, anim + ".webp")):
             print(f"  animation manquante : {anim}.webp (carte {key})")
             anim = None
-        out.append({"sub": sub, "key": key, "id": str(ID_BASE + key * 10 + 1), "notion": notion, "question": question,
-                    "short": short, "formule": formule or "", "nature": nature, "expl": expl, "anim": anim})
-    return out
+        a = ASK.get(key, {})
+        out.append({"sub": sub, "key": key, "id": str(ID_BASE + key * 10 + 1), "notion": notion,
+                    "question": a.get("ask", question), "short": a.get("short", short), "eq": a.get("eq"),
+                    "flip": a.get("flip", False), "pre": a.get("pre", []),
+                    "formule": formule or "", "nature": nature, "expl": expl, "anim": anim})
+    by_key = {c["key"]: c for c in out}
+    for c in out:
+        assert all(k in by_key for k in c["pre"]), f"carte {c['key']} : prérequis inconnu"
+    # the order of the cards: a prerequisite always before (#213), else the order of CARDS
+    order, seen = [], set()
+    def visit(c, path=()):
+        assert c["key"] not in path, f"prérequis en boucle : {path + (c['key'],)}"
+        if c["key"] in seen:
+            return
+        for k in c["pre"]:
+            visit(by_key[k], path + (c["key"],))
+        seen.add(c["key"])
+        order.append(c)
+    for c in out:
+        visit(c)
+    return order
 
 
 def build_json(cs):
+    by_key = {c["key"]: c for c in cs}
     decks = []
     for sub, name in SUBS.items():
         deck = {"id": f"helmholtz-{sub.lower()}", "name": f"{DECK}::{name}", "cards": []}
         for c in (c for c in cs if c["sub"] == sub):
-            back = f'<div class="rf-mean">{html.escape(c["short"])}</div>'
-            if c["formule"]:
-                back += f'<div class="rf-form">{c["formule"]}</div>'
+            # the answer asked: the formula itself for an equation or a turned card
+            back = "" if (c["eq"] or c["flip"]) else f'<div class="rf-mean">{html.escape(c["short"])}</div>'
+            for line in formula_lines(c["formule"]):
+                back += f'<div class="rf-form">{line}</div>'
+            if c["eq"] and not c["formule"]:
+                back += f'<div class="rf-form">{html.escape(c["eq"][0])}</div>'
             back += f'<div class="rf-pos">{c["nature"]}</div><div class="rf-tr">{c["expl"]}</div>'
+            if c["pre"]:
+                names = " · ".join(by_key[k]["notion"] for k in c["pre"])
+                back += f'<div class="rf-pre">s’appuie sur : {names}</div>'
             if c["anim"]:
                 back += f'<div class="rf-img"><img src="{MEDIA_DIR}/{c["anim"]}.webp" alt=""></div>'
-            deck["cards"].append({
+            card = {
                 "id": c["id"],
                 "question": STYLE + f'<div class="rf-word">{c["notion"]}</div><div class="rf-sent">{c["question"]}</div>',
                 "answer": STYLE + back,
-                "words": words_of(c["short"]),
+                "words": [c["eq"][0]] if c["eq"] else words_of(c["short"]),
                 "tags": [c["nature"]],
-            })
+            }
+            if c["eq"]: card["eq"] = c["eq"]
+            if c["flip"]: card["flip"] = True
+            if c["pre"]: card["pre"] = [by_key[k]["id"] for k in c["pre"]]
+            deck["cards"].append(card)
         decks.append(deck)
     path = os.path.join(HERE, "helmholtz.json")
     with open(path, "w", encoding="utf-8") as f:
@@ -472,8 +596,8 @@ def build_apkg(cs):
                 n["Clé"] = str(c["key"])
                 n["Notion"] = c["notion"]
                 n["Question"] = c["question"]
-                n["Réponse"] = html.escape(c["short"])
-                n["Formule"] = c["formule"]
+                n["Réponse"] = html.escape(c["eq"][0] if c["eq"] else "" if c["flip"] else c["short"])
+                n["Formule"] = "<br>".join(formula_lines(c["formule"]))
                 n["Nature"] = c["nature"]
                 n["Explication"] = c["expl"]
                 if c["anim"]:
