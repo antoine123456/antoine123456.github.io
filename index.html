@@ -3431,6 +3431,7 @@
             batch.set(userRef, {
                 sources: sources.map(function (s) { return { id: String(s.id), name: s.name, decks: s.decks, isDefault: !!s.isDefault }; }),
                 theme: (function () { try { return localStorage.getItem(LS_THEME); } catch (e) { return null; } })(),
+                asleep: asleepState(), // 💤 (#178)
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
 
@@ -3514,7 +3515,28 @@
                         dlog("remise à zéro", { utilisateur: USER, effacees: drop.length });
                     }
                 }
+                // 💤 asleep decks (#178): the most recent list wins
+                if (cloud && cloud.asleep && (cloud.asleep.at || 0) > (asleepState().at || 0)) {
+                    try { localStorage.setItem(LS_ASLEEP, JSON.stringify({ ids: cloud.asleep.ids || [], at: cloud.asleep.at })); } catch (e) { }
+                }
+                // One deck reset from afar (#177): resetSources = {sourceId: time}; a time
+                // newer than the last one seen here drops this deck's local progress first,
+                // so the old reviews aren't merged back (the cloud copy was emptied too).
+                var resetWrites = [];
+                if (cloud && cloud.resetSources && !READONLY) Object.keys(cloud.resetSources).forEach(function (sid) {
+                    var key = NS + "reset_src_" + sid, seen = 0;
+                    try { seen = +localStorage.getItem(key) || 0; } catch (e) { }
+                    if (cloud.resetSources[sid] <= seen) return;
+                    [LS_SRS, LS_NEWCOUNT].forEach(function (k) { try { localStorage.removeItem(k + sid); } catch (e) { } });
+                    try { localStorage.setItem(key, String(cloud.resetSources[sid])); } catch (e) { }
+                    // and the cloud copy again, in case an old tab sent its reviews back meanwhile
+                    resetWrites.push(userRef.collection("sources").doc(sid).set({ srs: {}, newCount: { day: TODAY, count: 0 } }, { mergeFields: ["srs", "newCount"] }).catch(function () { }));
+                    dlog("paquet remis à zéro", { utilisateur: USER, source: sid });
+                });
                 var localSources = loadSources();
+                if (resetWrites.length) return Promise.all(resetWrites).then(function () { return afterResets(); });
+                return afterResets();
+                function afterResets() {
 
                 if (!cloud || !cloud.sources || !cloud.sources.length) {
                     // Nothing in the cloud yet — upload whatever's local, if any.
@@ -3580,6 +3602,7 @@
                     if (cloud.theme) { try { localStorage.setItem(LS_THEME, cloud.theme); } catch (e) { } applyTheme(); updateThemeToggleIcon(); }
                     return pushAllToFirestore(); // write the merged result back
                 });
+                }
             });
         }
 
