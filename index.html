@@ -1735,6 +1735,10 @@
         .b-tag-opt:hover, .b-tag-opt.hl { background: var(--surface-hover); }
         .b-tag-opt.on { color: var(--green); font-weight: 600; }
         .b-tag-opt[hidden] { display: none; }
+        .b-know-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; width: 100%; max-width: 720px; margin-top: 8px; font-size: 12px; color: var(--text-3); }
+        #browse.sorting .b-know-row { display: none; }
+        .b-know-row select { font: inherit; font-size: 12px; color: var(--text-2); background: var(--surface); border: 1.5px solid var(--border-2); border-radius: 9px; padding: 3px 6px; cursor: pointer; }
+        .b-know-row select.on { border-color: var(--green); color: var(--green); background: var(--tint-green); }
 
         .b-search {
             flex: 1;
@@ -2199,7 +2203,7 @@
                     </div></div>
                     Touche la ligne : une fiche montre les nouvelles cartes, celles à repasser et à réviser, et ce qu'est le paquet (objectif, comment il a été fait) ; « Étudier maintenant » (ou Entrée) lance la révision. <b>nvx</b> = nouvelles cartes du jour, <b>dus</b> = à revoir aujourd'hui, <b>appris</b> = déjà sues.
                     <b>+20</b> : 20 nouvelles de plus. <b>✓</b> : je connais déjà ce paquet (ses cartes jamais vues passent en apprises, elles reviendront de temps en temps).
-                    <b>🔍</b> : parcourir les cartes (carrousel pour les images, liste pour les mots : une ligne par carte, un clic l'ouvre en 📝 Relecture, au même endroit en revenant ; 🏷 au bout de la recherche pour filtrer par tag) ; <b>📝 Relecture</b> les montre une par une, <b>F6</b> pour commenter une carte, <b>↑</b> (✏️) pour la modifier, <b>↓</b> (🗑) pour la retirer du paquet (<b>Ctrl+Z</b> la remet).
+                    <b>🔍</b> : parcourir les cartes (carrousel pour les images, liste pour les mots : une ligne par carte, un clic l'ouvre en 📝 Relecture, au même endroit en revenant ; 🏷 au bout de la recherche pour filtrer par tag ; 📶 et ↕ sous la recherche : filtrer et trier par niveau de connaissance) ; <b>📝 Relecture</b> les montre une par une, <b>F6</b> pour commenter une carte, <b>↑</b> (✏️) pour la modifier, <b>↓</b> (🗑) pour la retirer du paquet (<b>Ctrl+Z</b> la remet).
                     <b>＋</b> (sur « 📝 Vocabulaire perso ») : ajouter tes propres cartes, l'espagnol et sa traduction.
                     <br>💤 sur un paquet l'endort : il disparaît de l'accueil, sa progression est gardée ; « 💤 paquets endormis », en bas de l'accueil, les réveille.
                     Dans 🔍 d'un paquet de conjugaison, <b>📋 Tableaux</b> montre tous les tableaux des verbes.
@@ -2325,6 +2329,7 @@
                 <div class="g-num">9</div><div class="g-h">Nouveautés</div>
                 <div class="g-body">
                     <ul class="g-news">
+                        <li><b>10 nov.</b> (nuit, fin+) 🔍 filtrer et trier par niveau de connaissance (📶 et ↕ sous la recherche).</li>
                         <li><b>10 nov.</b> (nuit, correction) après 3 erreurs sur le dernier mot, la carte passe toute seule à la suivante (notée « À revoir »).</li>
                         <li><b>10 nov.</b> (nuit, fin) Vocabulaire : tags de nature (nom, verbe, adjectif…) et de thème (animaux, nourriture, corps, métiers…), à choisir dans le menu 🏷 de 🔍.</li>
                         <li><b>10 nov.</b> (nuit, suite) 🔍 liste : une ligne par carte, clic → 📝 Relecture, en-tête toujours visible, tags dans un menu au bout de la recherche.</li>
@@ -2447,6 +2452,21 @@
                             <div class="b-tags" id="b-tags"></div>
                         </div>
                     </div>
+                </div>
+                <!-- by how well the cards are known (#190) -->
+                <div class="b-know-row">
+                    <label>📶 <select id="b-know" onchange="setBrowseKnow(this.value)">
+                        <option value="">Tous les niveaux</option>
+                        <option value="new">Nouvelles</option>
+                        <option value="learning">En cours</option>
+                        <option value="weak">À consolider</option>
+                        <option value="known">Bien connues</option>
+                    </select></label>
+                    <label>↕ <select id="b-order" onchange="setBrowseOrder(this.value)">
+                        <option value="">Ordre du paquet</option>
+                        <option value="asc">Moins connues d'abord</option>
+                        <option value="desc">Mieux connues d'abord</option>
+                    </select></label>
                 </div>
             </div>
             <div id="b-content" style="width:100%"></div>
@@ -4431,6 +4451,8 @@
             });
             browse.q = "";
             browse.tag = null;
+            browse.know = browse.order = null;
+            ["b-know", "b-order"].forEach(function (id) { var el = document.getElementById(id); el.value = ""; el.classList.remove("on"); });
             renderBrowseTags();
             browse.list = browse.all;
             // Pictures need room → carousel; words/sentences read better as
@@ -4644,10 +4666,31 @@
             var terms = noAcc(q.toLowerCase()).split(/\s+/).filter(Boolean);
             browse.list = browse.all.filter(function (b) {
                 if (browse.tag && b.tags.indexOf(browse.tag) === -1) return false;
+                if (browse.know && knowLevel(browse.srs[b.card.id]) !== browse.know) return false;
                 var t = noAcc(b.text);
                 return terms.every(function (term) { return t.indexOf(term) !== -1; });
             });
+            if (browse.order) {
+                var rank = function (b) { var st = browse.srs[b.card.id]; return !st || st.state === "new" ? -1 : st.state === "review" ? st.interval || 0 : -.5; };
+                var pos = new Map(browse.all.map(function (b, k) { return [b, k]; }));
+                browse.list.sort(function (a, b) { return (browse.order === "asc" ? rank(a) - rank(b) : rank(b) - rank(a)) || pos.get(a) - pos.get(b); });
+            }
             renderBrowse();
+        }
+        // How well a card is known, in four (#190): like the progress bars.
+        function knowLevel(st) {
+            var p = cardProgress(st);
+            return !p.f ? "new" : st.state !== "review" ? "learning" : p.f < .5 ? "weak" : "known";
+        }
+        function setBrowseKnow(v) {
+            browse.know = v || null;
+            document.getElementById("b-know").classList.toggle("on", !!browse.know);
+            filterBrowse(browse.q || "");
+        }
+        function setBrowseOrder(v) {
+            browse.order = v || null;
+            document.getElementById("b-order").classList.toggle("on", !!browse.order);
+            filterBrowse(browse.q || "");
         }
 
         // Tag chips above the browser (#41): one tag at a time, combined
@@ -6797,10 +6840,12 @@
                     "Temps laissé au verso, une fois le son fini. Auto : une carte vue pour la première fois, ou ratée, garde le temps de relire (≈ 2,5 s) ; une carte déjà vue et juste (même revenue dans la séance) passe vite (≈ 0,7 s, comptées pendant le son), avec une transition plus courte.": "Tempo lasciato al retro, finito l'audio. Auto: una carta vista per la prima volta, o sbagliata, tiene il tempo per rileggere (≈ 2,5 s); una carta già vista e giusta (anche tornata nella sessione) passa in fretta (≈ 0,7 s, contati durante l'audio), con una transizione più breve.", "joue l'enregistrement de la phrase d'exemple ; s'il n'y en a pas (phrases écrites pour le Vocabulaire), la voix du navigateur la lit.": "riproduce la registrazione della frase d'esempio; se non c'è (frasi scritte per il Vocabolario), la legge la voce del browser.",
                     "6 nov.": "6 nov.", "9 nov.": "9 nov.", "10 nov.": "10 nov.", "En mode « nombre de cartes », la fiche du paquet donne aussi la durée estimée de la séance, d'après ton temps habituel sur chaque carte.": "In modalità « numero di carte », la scheda del mazzo indica anche la durata stimata della sessione, in base al tuo tempo abituale su ogni carta.", "(soir, fin) fiche du paquet : durée estimée de la séance en mode « nombre de cartes ».": "(sera, fine) scheda del mazzo: durata stimata della sessione in modalità « numero di carte ».", "(nuit) 📝 Relecture : ↑ modifier la carte, ↓ la retirer du paquet.": "(notte) 📝 Revisione: ↑ modifica la carta, ↓ toglila dal mazzo.",
                     "(nuit, suite) 🔍 liste : une ligne par carte, clic → 📝 Relecture, en-tête toujours visible, tags dans un menu au bout de la recherche.": "(notte, seguito) 🔍 elenco: una riga per carta, clic → 📝 Revisione, intestazione sempre visibile, tag in un menu alla fine della ricerca.",
-                    ": parcourir les cartes (carrousel pour les images, liste pour les mots : une ligne par carte, un clic l'ouvre en 📝 Relecture, au même endroit en revenant ; 🏷 au bout de la recherche pour filtrer par tag) ;": ": sfogliare le carte (carosello per le immagini, elenco per le parole: una riga per carta, un clic la apre in 📝 Revisione, allo stesso punto al ritorno; 🏷 alla fine della ricerca per filtrare per tag);",
+                    ": parcourir les cartes (carrousel pour les images, liste pour les mots : une ligne par carte, un clic l'ouvre en 📝 Relecture, au même endroit en revenant ; 🏷 au bout de la recherche pour filtrer par tag ; 📶 et ↕ sous la recherche : filtrer et trier par niveau de connaissance) ;": ": sfogliare le carte (carosello per le immagini, elenco per le parole: una riga per carta, un clic la apre in 📝 Revisione, allo stesso punto al ritorno; 🏷 alla fine della ricerca per filtrare per tag; 📶 e ↕ sotto la ricerca: filtrare e ordinare per livello di conoscenza);",
                     "(nuit, fin) Vocabulaire : tags de nature (nom, verbe, adjectif…) et de thème (animaux, nourriture, corps, métiers…), à choisir dans le menu 🏷 de 🔍.": "(notte, fine) Vocabolario: tag di categoria (nome, verbo, aggettivo…) e di tema (animali, cibo, corpo, mestieri…), da scegliere nel menu 🏷 di 🔍.",
                     "(nuit, correction) après 3 erreurs sur le dernier mot, la carte passe toute seule à la suivante (notée « À revoir »).": "(notte, correzione) dopo 3 errori sull'ultima parola, la carta passa da sola alla successiva (valutata « Da rivedere »).",
-                    "toutes": "tutte", "Filtrer par tag": "Filtra per tag", "Chercher un tag…": "Cerca un tag…",
+                    "toutes": "tutte", "Tous les niveaux": "Tutti i livelli", "Nouvelles": "Nuove", "En cours": "In corso", "À consolider": "Da consolidare", "Bien connues": "Ben note",
+                    "Ordre du paquet": "Ordine del mazzo", "Moins connues d'abord": "Prima le meno note", "Mieux connues d'abord": "Prima le più note",
+                    "(nuit, fin+) 🔍 filtrer et trier par niveau de connaissance (📶 et ↕ sous la recherche).": "(notte, fine+) 🔍 filtrare e ordinare per livello di conoscenza (📶 e ↕ sotto la ricerca).", "Filtrer par tag": "Filtra per tag", "Chercher un tag…": "Cerca un tag…",
                     "pour commenter une carte,": "per commentare una carta,", "(✏️) pour la modifier,": "(✏️) per modificarla,", "(🗑) pour la retirer du paquet (": "(🗑) per toglierla dal mazzo (", "la remet).": "la rimette).",
                     "📝 Relecture : modifier la carte · la retirer du paquet (Ctrl+Z : annuler)": "📝 Revisione: modifica la carta · toglila dal mazzo (Ctrl+Z: annulla)",
                     "✏️ Modifier la carte": "✏️ Modifica la carta", "Ctrl+Entrée : enregistrer · Échap : annuler": "Ctrl+Invio: salva · Esc: annulla", "✓ Enregistrer": "✓ Salva",
@@ -7121,7 +7166,8 @@
             {"id": 35, "d": "2026-11-10", "k": "paquets", "fr": "La fiche du paquet donne la <b>durée estimée</b> de la séance (mode « nombre de cartes »).", "it": "La scheda del mazzo indica la <b>durata stimata</b> della sessione (modalità « numero di carte »)."},
             {"id": 36, "d": "2026-11-10", "k": "cartes", "fr": "Dans <b>📝 Relecture</b> : <b>↑</b> pour <b>modifier</b> une carte (gardé sur tous tes appareils), <b>↓</b> pour la <b>retirer</b> du paquet (Ctrl+Z la remet).", "it": "In <b>📝 Revisione</b>: <b>↑</b> per <b>modificare</b> una carta (resta su tutti i tuoi dispositivi), <b>↓</b> per <b>toglierla</b> dal mazzo (Ctrl+Z la rimette)."},
             {"id": 37, "d": "2026-11-10", "k": "affichage", "fr": "Dans 🔍, la <b>liste</b> tient sur une ligne par carte ; un <b>clic</b> ouvre la carte en 📝 Relecture ; le titre et la recherche restent en haut, et les <b>tags</b> sont dans un menu 🏷 au bout de la recherche.", "it": "In 🔍, l'<b>elenco</b> sta su una riga per carta; un <b>clic</b> apre la carta in 📝 Revisione; titolo e ricerca restano in alto, e i <b>tag</b> sono in un menu 🏷 alla fine della ricerca."},
-            {"id": 38, "d": "2026-11-10", "k": "paquets", "fr": "Le <b>Vocabulaire</b> a des <b>tags</b> : nature du mot (nom, verbe, adjectif…) et <b>thème</b> (animaux, nourriture, corps, métiers, ville…), à choisir dans le menu 🏷 de 🔍.", "it": "Il <b>Vocabolario</b> ha dei <b>tag</b>: categoria della parola (nome, verbo, aggettivo…) e <b>tema</b> (animali, cibo, corpo, mestieri, città…), da scegliere nel menu 🏷 di 🔍."}
+            {"id": 38, "d": "2026-11-10", "k": "paquets", "fr": "Le <b>Vocabulaire</b> a des <b>tags</b> : nature du mot (nom, verbe, adjectif…) et <b>thème</b> (animaux, nourriture, corps, métiers, ville…), à choisir dans le menu 🏷 de 🔍.", "it": "Il <b>Vocabolario</b> ha dei <b>tag</b>: categoria della parola (nome, verbo, aggettivo…) e <b>tema</b> (animali, cibo, corpo, mestieri, città…), da scegliere nel menu 🏷 di 🔍."},
+            {"id": 39, "d": "2026-11-10", "k": "paquets", "fr": "Dans 🔍, <b>📶</b> ne montre que les cartes nouvelles, en cours, à consolider ou bien connues, et <b>↕</b> les trie des moins connues aux mieux connues (ou l'inverse).", "it": "In 🔍, <b>📶</b> mostra solo le carte nuove, in corso, da consolidare o ben note, e <b>↕</b> le ordina dalle meno note alle più note (o al contrario)."}
         ];
         var NEWS_KINDS = { revision: ["Révision", "Ripasso"], cartes: ["Cartes", "Carte"], combos: ["Combos", "Combo"], affichage: ["Affichage", "Aspetto"],
             reglages: ["Réglages", "Impostazioni"], accueil: ["Accueil", "Home"], paquets: ["Paquets", "Mazzi"] };
