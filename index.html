@@ -418,6 +418,11 @@
         .ac-row input { font: inherit; font-size: 16px; color: var(--text); background: var(--surface); border: 1.5px solid var(--border-2); border-radius: 10px; padding: 8px 10px; }
         .ac-row input:focus { outline: none; border-color: var(--navy); }
         .fm-btn.ac-ok { border-color: var(--navy); color: var(--navy); }
+        /* 💤 asleep decks (#178): hidden from the home, progress kept */
+        .h-asleep { margin: 18px 0 6px; font-size: 13px; color: var(--text-3); text-align: center; }
+        .h-asleep button { font: inherit; font-size: 13px; color: var(--navy); background: none; border: none; cursor: pointer; text-decoration: underline; }
+        .h-asleep-list { display: flex; flex-direction: column; gap: 6px; max-width: 420px; margin: 8px auto 0; }
+        .h-asleep-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 14px; border: 1.5px dashed var(--border-2); border-radius: 12px; color: var(--text-2); }
         .h-source-export.h-add-btn { font-size: 18px; font-weight: 700; color: var(--navy); opacity: 1; }
         #b-export-btn[hidden] { display: none; }
         #b-review-btn.on, #b-conj-btn.on { background: var(--navy); color: var(--bg); border-color: var(--navy); }
@@ -2168,6 +2173,7 @@
                     <b>+20</b> : 20 nouvelles de plus. <b>✓</b> : je connais déjà ce paquet (ses cartes jamais vues passent en apprises, elles reviendront de temps en temps).
                     <b>🔍</b> : parcourir les cartes (carrousel pour les images, liste pour les mots) ; <b>📝 Relecture</b> les montre une par une, <b>F6</b> pour commenter une carte.
                     <b>＋</b> (sur « 📝 Vocabulaire perso ») : ajouter tes propres cartes, l'espagnol et sa traduction.
+                    <br>💤 sur un paquet l'endort : il disparaît de l'accueil, sa progression est gardée ; « 💤 paquets endormis », en bas de l'accueil, les réveille.
                     Dans 🔍 d'un paquet de conjugaison, <b>📋 Tableaux</b> montre tous les tableaux des verbes.
                     <br>Dans 🔍, chaque carte a une barre de progression qui se remplit de gauche à droite, du rouge (à peine commencée) au vert (bien sue), et le paquet entier a la sienne en haut. 🗂 Pré-tri montre les cartes jamais vues une par une : touche la carte pour voir le verso, puis → (ou glisser à droite) = je la connais déjà, elle est rangée comme apprise et reviendra dans 20 à 60 jours ; ← (ou glisser à gauche) = à apprendre, elle reste nouvelle.
                 </div>
@@ -2288,6 +2294,7 @@
                 <div class="g-num">9</div><div class="g-h">Nouveautés</div>
                 <div class="g-body">
                     <ul class="g-news">
+                        <li><b>10 nov.</b> (soir) 💤 endormir un paquet : il quitte l'accueil, sa progression est gardée, et se réveille en bas de l'accueil.</li>
                         <li><b>10 nov.</b> sur téléphone, plus de boutons en bas pendant la question : touche à gauche du recto = indice, à droite = réponse, puis glisse la carte pour la noter ; compteurs en haut à côté de la barre ; boutons de note plus plats ; plus de macaron « Maintenir appuyé ».</li>
                         <li><b>10 nov.</b> (suite) 🔍 : barre de progression de chaque carte et du paquet, du rouge au vert ; 🗂 Pré-tri des cartes jamais vues (→ je connais, ← à apprendre) ; carrousel plus fluide avec des milliers de cartes ; plus d'étiquettes (faux ami…) sur les cartes, seulement dans les filtres ; mots raccourcis sur petit écran.</li>
                         <li><b>9 nov.</b> les cases ne rapetissent plus au retour d'une carte, et la carte s'agrandit quand le verso arrive au lieu de défiler ; plusieurs sens séparés par un « / » (« encore / toujours ») ; Vocabulaire : ya no, algún et bien expliqués, debería et este / estos rangés dans Grammaire (deber au conditionnel).</li>
@@ -3993,7 +4000,9 @@
                 return;
             }
 
+            var sleeping = asleepIds();
             el.innerHTML = sources.map(function (src, si) {
+                if (sleeping.indexOf(String(src.id)) !== -1) return "";
                 var srs = loadSRS(src.id);
                 var cardsByDeck = loadCards(src.id);
                 var total = src.decks.reduce(function (n, d) { return n + d.cardCount; }, 0);
@@ -4008,13 +4017,50 @@
                     + '<div class="h-source-meta">' + total + ' cartes · ' + src.decks.length + ' deck(s)</div>'
                     + '<button class="h-source-export" onclick="showFlaggedList(event,' + si + ')" title="Cartes marquées à corriger">🚩</button>'
                     + '<button class="h-source-export" onclick="exportStats(event,' + si + ')" title="Exporter les stats">📤</button>'
+                    + '<button class="h-source-export" onclick="sleepSource(event,' + si + ')" title="Endormir ce paquet : caché de l\'accueil, progression gardée">💤</button>'
                     + (src.id === PERSO_ID ? '<button class="h-source-export h-add-btn" onclick="openAddCard(event)" title="Ajouter une carte">＋</button>' : '')
                     + '<button class="h-source-del" onclick="deleteSource(event,' + si + ')">✕</button>'
                     + '<span class="h-source-arrow open">›</span>'
                     + '</div>'
                     + '<div class="h-decktree open">' + rows + '</div>'
                     + '</div>';
-            }).join("");
+            }).join("") + asleepHtml(sources, sleeping);
+        }
+
+        // 💤 Asleep decks (#178): off the home page, their progress kept; the
+        // list at the bottom wakes them up. Synced with the user's other devices.
+        var LS_ASLEEP = LS_SOURCES.replace(/sources$/, "asleep"), asleepOpen = false; // same prefix as the user's other keys
+        function asleepState() { try { return JSON.parse(localStorage.getItem(LS_ASLEEP) || "null") || { ids: [], at: 0 }; } catch (e) { return { ids: [], at: 0 }; } }
+        function asleepIds() { return (asleepState().ids || []).map(String); }
+        function saveAsleep(ids) {
+            try { localStorage.setItem(LS_ASLEEP, JSON.stringify({ ids: ids, at: Date.now() })); } catch (e) { }
+            scheduleSync();
+        }
+        function sleepSource(e, si) {
+            if (e) e.stopPropagation();
+            var src = loadSources()[si]; if (!src) return;
+            var ids = asleepIds(); if (ids.indexOf(String(src.id)) === -1) ids.push(String(src.id));
+            saveAsleep(ids);
+            dlog("paquet endormi", { source: src.id });
+            toast("💤 « " + src.name + " » " + t9n("endormi"));
+            renderHome();
+        }
+        function wakeSource(si) {
+            var src = loadSources()[si]; if (!src) return;
+            saveAsleep(asleepIds().filter(function (id) { return id !== String(src.id); }));
+            dlog("paquet réveillé", { source: src.id });
+            renderHome();
+        }
+        function asleepHtml(sources, sleeping) {
+            var list = sources.map(function (src, si) { return { src: src, si: si }; })
+                .filter(function (x) { return sleeping.indexOf(String(x.src.id)) !== -1; });
+            if (!list.length) return "";
+            return '<div class="h-asleep">💤 ' + list.length + " " + t9n(list.length > 1 ? "paquets endormis" : "paquet endormi")
+                + ' · <button onclick="asleepOpen = !asleepOpen; renderHome()">' + t9n(asleepOpen ? "cacher" : "afficher") + '</button>'
+                + (asleepOpen ? '<div class="h-asleep-list">' + list.map(function (x) {
+                    return '<div class="h-asleep-row"><span>' + esc(x.src.name) + '</span><button onclick="wakeSource(' + x.si + ')">' + t9n("réveiller") + '</button></div>';
+                }).join("") + '</div>' : '')
+                + '</div>';
         }
 
         // Tag chips under a source whose cards carry info sheets (#7):
@@ -6619,7 +6665,8 @@
                     "(suite) la carte notée part vers un coin ; combos inversés (justes à droite, erreurs à gauche) et comptés tout de suite ; la case rougit à chaque erreur ; ⚙ délai avant la carte suivante.": "(seguito) la carta valutata vola verso un angolo; combo invertite (giuste a destra, errori a sinistra) e contate subito; la casella diventa rossa a ogni errore; ⚙ tempo prima della carta successiva.",
                     "Délai avant la carte suivante": "Tempo prima della carta successiva", "Auto": "Auto", "Toujours lent": "Sempre lento", "Toujours rapide": "Sempre veloce",
                     "Temps laissé au verso, une fois le son fini. Auto : une carte vue pour la première fois, ou ratée, garde le temps de relire (≈ 2,5 s) ; une carte déjà vue et juste (même revenue dans la séance) passe vite (≈ 0,7 s, comptées pendant le son), avec une transition plus courte.": "Tempo lasciato al retro, finito l'audio. Auto: una carta vista per la prima volta, o sbagliata, tiene il tempo per rileggere (≈ 2,5 s); una carta già vista e giusta (anche tornata nella sessione) passa in fretta (≈ 0,7 s, contati durante l'audio), con una transizione più breve.", "joue l'enregistrement de la phrase d'exemple ; s'il n'y en a pas (phrases écrites pour le Vocabulaire), la voix du navigateur la lit.": "riproduce la registrazione della frase d'esempio; se non c'è (frasi scritte per il Vocabolario), la legge la voce del browser.",
-                    "6 nov.": "6 nov.", "9 nov.": "9 nov.", "10 nov.": "10 nov.",
+                    "6 nov.": "6 nov.", "9 nov.": "9 nov.", "10 nov.": "10 nov.", "(soir) 💤 endormir un paquet : il quitte l'accueil, sa progression est gardée, et se réveille en bas de l'accueil.": "(sera) 💤 addormentare un mazzo: lascia la pagina iniziale, i progressi restano, e si risveglia in fondo alla pagina iniziale.",
+                    "💤 sur un paquet l'endort : il disparaît de l'accueil, sa progression est gardée ; « 💤 paquets endormis », en bas de l'accueil, les réveille.": "💤 su un mazzo lo addormenta: sparisce dalla pagina iniziale, i progressi restano; « 💤 mazzi addormentati », in fondo alla pagina iniziale, li risveglia.",
                     "Dans 🔍, chaque carte a une barre de progression qui se remplit de gauche à droite, du rouge (à peine commencée) au vert (bien sue), et le paquet entier a la sienne en haut. 🗂 Pré-tri montre les cartes jamais vues une par une : touche la carte pour voir le verso, puis → (ou glisser à droite) = je la connais déjà, elle est rangée comme apprise et reviendra dans 20 à 60 jours ; ← (ou glisser à gauche) = à apprendre, elle reste nouvelle.": "In 🔍, ogni carta ha una barra di progresso che si riempie da sinistra a destra, dal rosso (appena iniziata) al verde (ben saputa), e il mazzo intero ha la sua in alto. 🗂 Pre-selezione mostra le carte mai viste una per una: tocca la carta per vedere il retro, poi → (o scorri a destra) = la so già, viene messa tra le imparate e tornerà fra 20–60 giorni; ← (o scorri a sinistra) = da imparare, resta nuova.",
                     "Sur téléphone, pas de boutons : touche la moitié gauche du recto pour un indice, la moitié droite pour la réponse (en mode Normal, touche la carte pour la retourner).": "Sul telefono, niente pulsanti: tocca la metà sinistra del fronte per un suggerimento, la metà destra per la risposta (in modalità Normale, tocca la carta per girarla).",
                     "Sur téléphone, glisse la carte pour la noter : à gauche À revoir, à droite Correct, vers le haut Facile, vers le bas Difficile (haut et bas demandent un geste plus long, pour éviter les erreurs). Les compteurs nouvelles / à repasser / à réviser sont en haut, à côté de la barre de progression.": "Sul telefono, scorri la carta per votarla: a sinistra Da rivedere, a destra Corretto, in alto Facile, in basso Difficile (alto e basso chiedono un gesto più lungo, per evitare errori). I contatori nuove / da ripassare / da rivedere sono in alto, accanto alla barra di avanzamento.",
@@ -6652,7 +6699,7 @@
                     "Saisie": "Scrittura", "Normal": "Normale", "Dictée": "Dettato", "Mode d'étude": "Modalità di studio",
                     "Taper la réponse": "Scrivi la risposta", "Noter la carte": "Valuta la carta",
                     "✨ Complet": "✨ Completo", "Rendu complet : phrase d'exemple, nature / genre (réglage de cet appareil)": "Visualizzazione completa: frase d'esempio, categoria / genere (impostazione di questo dispositivo)",
-                    "verso": "retro", "verso · touche pour le voir": "retro · tocca per vederlo", "nouvelle": "nuova", "en cours": "in corso", "Progression": "Progresso", "vues": "viste", "bien connues": "ben note", "connues": "note", "à apprendre": "da imparare", "À apprendre": "Da imparare", "Je connais": "La so", "je connais": "la so", "Plus aucune carte jamais vue à trier.": "Nessuna carta mai vista da ordinare.", "Pré-tri": "Pre-selezione", "Tri": "Selez.", "Trier les cartes jamais vues : → je connais (rangée « facile »), ← à apprendre": "Ordina le carte mai viste: → la so (messa tra le « facili »), ← da imparare", "touche pour voir la réponse": "tocca per vedere la risposta", "‹ 💡 indice · réponse ›": "‹ 💡 suggerimento · risposta ›", "💡 Indice": "💡 Suggerimento", "Indice": "Suggerimento", "Voir la réponse": "Vedi la risposta",
+                    "verso": "retro", "endormi": "addormentato", "paquets endormis": "mazzi addormentati", "paquet endormi": "mazzo addormentato", "cacher": "nascondi", "afficher": "mostra", "réveiller": "sveglia", "Endormir ce paquet : caché de l'accueil, progression gardée": "Addormenta questo mazzo: nascosto dalla pagina iniziale, progressi conservati", "verso · touche pour le voir": "retro · tocca per vederlo", "nouvelle": "nuova", "en cours": "in corso", "Progression": "Progresso", "vues": "viste", "bien connues": "ben note", "connues": "note", "à apprendre": "da imparare", "À apprendre": "Da imparare", "Je connais": "La so", "je connais": "la so", "Plus aucune carte jamais vue à trier.": "Nessuna carta mai vista da ordinare.", "Pré-tri": "Pre-selezione", "Tri": "Selez.", "Trier les cartes jamais vues : → je connais (rangée « facile »), ← à apprendre": "Ordina le carte mai viste: → la so (messa tra le « facili »), ← da imparare", "touche pour voir la réponse": "tocca per vedere la risposta", "‹ 💡 indice · réponse ›": "‹ 💡 suggerimento · risposta ›", "💡 Indice": "💡 Suggerimento", "Indice": "Suggerimento", "Voir la réponse": "Vedi la risposta",
                     "Afficher la réponse": "Mostra la risposta", "📋 Tableau": "📋 Tabella", "Maintenir pour voir le tableau": "Tieni premuto per vedere la tabella",
                     "À revoir": "Da rivedere", "Difficile": "Difficile", "Correct": "Giusto", "Facile": "Facile",
                     "Maintenir Espace": "Tieni premuto Spazio", "Maintenir appuyé": "Tieni premuto", "Suivant": "Avanti", "Espace": "Spazio", "Entrée": "Invio", "Échap": "Esc",
@@ -6927,7 +6974,8 @@
             {"id": 29, "d": "2026-11-09", "k": "paquets", "fr": "Le <b>Vocabulaire</b> va jusqu'au <b>rang 10 000</b> : 271 mots de plus.", "it": "Il <b>Vocabolario</b> arriva al <b>rango 10 000</b>: 271 parole in più."},
             {"id": 30, "d": "2026-11-10", "k": "revision", "fr": "Sur téléphone : touche <b>à gauche</b> du recto pour un indice, <b>à droite</b> pour la réponse, puis <b>glisse la carte</b> pour la noter (← À revoir, → Correct, ↑ Facile, ↓ Difficile).", "it": "Sul telefono: tocca <b>a sinistra</b> del fronte per un suggerimento, <b>a destra</b> per la risposta, poi <b>scorri la carta</b> per votarla (← Da rivedere, → Corretto, ↑ Facile, ↓ Difficile)."},
             {"id": 31, "d": "2026-11-10", "k": "affichage", "fr": "Sur téléphone, les <b>compteurs</b> sont en haut à côté de la barre et les boutons de note sont plus plats : plus de place pour la carte.", "it": "Sul telefono, i <b>contatori</b> sono in alto accanto alla barra e i pulsanti di voto sono più piatti: più spazio per la carta."},
-            {"id": 32, "d": "2026-11-10", "k": "paquets", "fr": "Dans 🔍 : une <b>barre de progression</b> par carte, du rouge au vert, et <b>🗂 Pré-tri</b> pour ranger d'un geste les mots que tu connais déjà.", "it": "In 🔍: una <b>barra di progresso</b> per carta, dal rosso al verde, e <b>🗂 Pre-selezione</b> per mettere da parte con un gesto le parole che sai già."}
+            {"id": 32, "d": "2026-11-10", "k": "paquets", "fr": "Dans 🔍 : une <b>barre de progression</b> par carte, du rouge au vert, et <b>🗂 Pré-tri</b> pour ranger d'un geste les mots que tu connais déjà.", "it": "In 🔍: una <b>barra di progresso</b> per carta, dal rosso al verde, e <b>🗂 Pre-selezione</b> per mettere da parte con un gesto le parole che sai già."},
+            {"id": 33, "d": "2026-11-10", "k": "accueil", "fr": "<b>💤 Endormir un paquet</b> : il disparaît de l'accueil, sa progression est gardée ; « paquets endormis » en bas pour le réveiller.", "it": "<b>💤 Addormentare un mazzo</b>: sparisce dalla pagina iniziale, i progressi restano; « mazzi addormentati » in fondo per risvegliarlo."}
         ];
         var NEWS_KINDS = { revision: ["Révision", "Ripasso"], cartes: ["Cartes", "Carte"], combos: ["Combos", "Combo"], affichage: ["Affichage", "Aspetto"],
             reglages: ["Réglages", "Impostazioni"], accueil: ["Accueil", "Home"], paquets: ["Paquets", "Mazzi"] };
