@@ -418,6 +418,8 @@ def main():
     print(f"{len(cards_it)} mots en italien → {LANGS['it']['json']}")
     import tag_vocab  # nature and theme tags, both languages (#189)
     tag_vocab.main()
+    import img_themes  # pictures for the animals and the body parts (#199)
+    img_themes.main()
 
     write_review(review)
 

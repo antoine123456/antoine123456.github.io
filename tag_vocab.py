@@ -8,12 +8,20 @@ Le thème vient du premier sens français du nom, comparé à des listes faites
 à la main ci-dessous ; les couleurs et les nombres viennent du mot espagnol.
 Le Vocabolario italien reçoit les mêmes tags, traduits.
 
+« transparent » (#198) : le mot espagnol se devine depuis le français
+(la capacidad = capacité, reservado = réservé) — après les terminaisons
+régulières (-ción → -tion, -dad → -té, -ar → -er…), au moins 80 % de
+ressemblance ; jamais un faux ami. Le Vocabolario le compare à l'italien
+(« trasparente »).
+
 Appelé à la fin de build_vocab.py ; se lance aussi seul :
     python3 tag_vocab.py
 """
+import difflib
 import json
 import os
 import re
+import unicodedata
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -120,7 +128,36 @@ IT = {"nom": "nome", "verbe": "verbo", "adjectif": "aggettivo", "adverbe": "avve
       "corps": "corpo", "santé": "salute", "famille": "famiglia", "métiers": "mestieri", "maison": "casa",
       "vêtements": "vestiti", "ville": "città", "transports": "trasporti", "nature": "natura", "temps": "tempo",
       "loisirs": "svago", "école": "scuola", "travail": "lavoro e soldi", "crime": "crimine e giustizia",
-      "guerre": "guerra", "sentiments": "sentimenti", "couleurs": "colori", "nombres": "numeri"}
+      "guerre": "guerra", "sentiments": "sentimenti", "couleurs": "colori", "nombres": "numeri",
+      "transparent": "trasparente"}
+
+# « transparent » (#198): Spanish endings → French / Italian ones
+ENDINGS = {
+    "fr": [("ciones", "tions"), ("cion", "tion"), ("dad", "te"), ("tad", "te"), ("osa", "euse"), ("oso", "eux"),
+           ("mente", "ment"), ("ista", "iste"), ("ismo", "isme"), ("ica", "ique"), ("ico", "ique"), ("ia", "ie"),
+           ("ario", "aire"), ("aria", "aire"), ("ivo", "if"), ("iva", "ive"), ("encia", "ence"), ("ancia", "ance"),
+           ("ante", "ant"), ("ente", "ent"), ("ar", "er"), ("er", "re"), ("o", ""), ("a", "e"), ("e", "")],
+    "it": [("ciones", "zioni"), ("cion", "zione"), ("dad", "ta"), ("tad", "ta"), ("mente", "mente"), ("encia", "enza"),
+           ("ancia", "anza"), ("ar", "are"), ("er", "ere"), ("ir", "ire"), ("o", "o"), ("e", "e")],
+}
+ART = {"es": re.compile(r"^(el|la|los|las|un|una|unos|unas|lo) "),
+       "fr": re.compile(r"^(le |la |les |l'|un |une |des |du |de la |se |s')"),
+       "it": re.compile(r"^(il |lo |la |i |gli |le |l'|un |uno |una |un')")}
+
+
+def _bare(s, lang):
+    s = s.split(",")[0].split(";")[0].lower().strip()
+    s = "".join(ch for ch in unicodedata.normalize("NFD", s) if unicodedata.category(ch) != "Mn")
+    s = re.sub(r"\(.*?\)", "", s).strip()
+    return ART[lang].sub("", s).strip()
+
+
+def transparent(es, meaning, lang="fr"):
+    e, m = _bare(es, "es"), _bare(meaning, lang)
+    if len(e) < 3 or not m or " " in e or " " in m:
+        return False
+    forms = {e} | {e[:-len(a)] + b for a, b in ENDINGS[lang] if e.endswith(a)}
+    return max(difflib.SequenceMatcher(None, f, m).ratio() for f in forms) >= .8
 
 
 MULTI = ["animal de compagnie", "pomme de terre", "noix de coco", "petit déjeuner", "plat principal", "bloc opératoire",
@@ -184,8 +221,10 @@ def main():
         for c in deck["cards"]:
             keep = [t for t in c.get("tags", []) if t not in IT]  # « vocabulaire », « faux ami »… stay
             new = tags_for(c)
+            by_key[(c.get("key"), c["es"])] = list(new)
+            if "faux ami" not in keep and transparent(c["es"], c["fr"]):
+                new.append("transparent")
             c["tags"] = keep + new
-            by_key[(c.get("key"), c["es"])] = new
             for t in new:
                 counts[t] = counts.get(t, 0) + 1
     with open(path, "w", encoding="utf-8") as f:
@@ -197,6 +236,9 @@ def main():
             for c in deck["cards"]:
                 keep = [t for t in c.get("tags", []) if t not in IT.values()]
                 c["tags"] = keep + [IT[t] for t in by_key.get((c.get("key"), c["es"]), [])]
+                if not {"faux ami", "falso amico"} & set(keep) and transparent(c["es"], c["fr"], "it"):
+                    c["tags"].append("trasparente")  # compared with the Italian meaning
+                    counts["trasparente (it)"] = counts.get("trasparente (it)", 0) + 1
         with open(path_it, "w", encoding="utf-8") as f:
             json.dump(it, f, ensure_ascii=False, separators=(",", ":"))
     print("tags du Vocabulaire : " + ", ".join(f"{t} {n}" for t, n in sorted(counts.items(), key=lambda x: -x[1])))
