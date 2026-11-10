@@ -464,6 +464,8 @@
         .s-time-label[hidden] { display: none; }
         .s-time-fill { height: 100%; width: 0; background: var(--blue); transition: width 1s linear; }
         .s-time-fill.full { background: var(--green); }
+        .s-done-time { font-size: 14px; color: var(--text-2); margin: -8px 0 22px; }
+        .s-done-time b { color: var(--text); font-weight: 600; }
         .fm-card { margin: 10px 0 12px; font-size: 14px; color: var(--text-2); }
         #fm-text { width: 100%; box-sizing: border-box; font: inherit; font-size: 15px; color: var(--text); background: var(--surface);
             border: 1.5px solid var(--border-2); border-radius: 12px; padding: 10px 12px; resize: vertical; }
@@ -2286,7 +2288,7 @@
                     </div>
                     La carte prend la couleur de la note, puis part vers un coin : À revoir ↙, Difficile ↖, Correct ↘, Facile ↗.
                     Le délai avant la carte suivante se règle dans ⚙ (Auto : lent seulement la première fois qu'on voit une carte, ou si on la rate).
-                    <br>En mode « nombre de cartes », la fiche du paquet donne aussi la durée estimée de la séance, d'après ton temps habituel sur chaque carte.
+                    <br>En mode « nombre de cartes », la fiche du paquet donne aussi la durée estimée de la séance, d'après ton temps habituel sur chaque carte. À la fin, 🎉 Session terminée montre le temps estimé au départ et le temps effectif (sans le temps passé hors de l'appli).
                     <br>Sur plusieurs appareils : les cartes d'une journée sont tirées dans le même ordre partout, la progression part en ligne dès que tu quittes l'appli et revient quand tu la rouvres sur l'autre appareil : tu reprends où tu en étais.
                     <br>Sur téléphone, glisse la carte pour la noter : à gauche À revoir, à droite Correct, vers le haut Facile, vers le bas Difficile (haut et bas demandent un geste plus long, pour éviter les erreurs). Les compteurs nouvelles / à repasser / à réviser sont en haut, à côté de la barre de progression.
                 </div>
@@ -2348,6 +2350,7 @@
                 <div class="g-num">9</div><div class="g-h">Nouveautés</div>
                 <div class="g-body">
                     <ul class="g-news">
+                        <li><b>10 nov.</b> (soir, fin) 🎉 Session terminée : temps estimé au départ et temps effectif.</li>
                         <li><b>10 nov.</b> (soir, suite) 🏷 Vocabulaire : tag « transparent » pour les mots qui se devinent depuis le français (la capacidad = capacité), jamais un faux ami.</li>
                         <li><b>10 nov.</b> (soir) ✏️ 📷 une photo sur la carte (Modifier la carte) ; 🗂 le pré-tri suit le tag et la recherche choisis.</li>
                         <li><b>10 nov.</b> (après-midi) 🗂 Pré-tri : seulement les cartes jamais triées ; changer d'avis (‹ Préc.), ↑ modifier, ↓ retirer, Ctrl/⌘+Z pour annuler ; 🔍 tout le haut reste affiché, nom du paquet sur la ligne des boutons.</li>
@@ -4308,6 +4311,9 @@
             sess.queue = queue;
             sess.qIdx = 0;
             sess.cardErrCount = 0;
+            // for « Session terminée » (#196): the time foreseen, and today's time when it starts
+            sess.estMs = queue.reduce(function (n, c) { return n + estimateMs(c, srs, gapFactor()); }, 0);
+            sess.dayMs0 = dayStats().ms;
             setTimeout(function () { renderCombo(); renderErrCombo(""); }, 0);
             dlog("séance", {
                 source: src.id, paquet: deckName, tag: tag || null, piste: track || "principale",
@@ -6897,6 +6903,20 @@
             setTimeout(cb, sess.quick ? 150 : 400); // shorter for a card already known (#138)
         }
 
+        // Time foreseen at the start vs time taken (#196): the cards' own time,
+        // as for the ⏱ bar (time away from the app not counted).
+        function fmtDur(ms) {
+            var sec = Math.round(ms / 1000);
+            return sec < 60 ? sec + " s" : Math.floor(sec / 60) + " min" + (sec % 60 ? " " + String(sec % 60).padStart(2, "0") + " s" : "");
+        }
+        function doneTimeHtml() {
+            if (sess.dayMs0 == null) return "";
+            var real = Math.max(0, dayStats().ms - sess.dayMs0), est = sess.estMs || 0;
+            dlog("fin de séance", { estimation_ms: Math.round(est), reel_ms: real });
+            if (!real) return "";
+            return '<div class="s-done-time">⏱ ' + t9n("estimé") + ' <b>' + (est ? "≈ " + fmtDur(Math.round(est / 60000) * 60000 || est) : "—") + '</b> · '
+                + t9n("effectif") + ' <b>' + fmtDur(real) + '</b></div>';
+        }
         function showDone() {
             setBarState("");
             saveSRS(sess.srsKey, sess.srs);
@@ -6905,6 +6925,7 @@
                 + '<div class="s-done-icon">🎉</div>'
                 + '<div class="s-done-title">Session terminée !</div>'
                 + '<div class="s-done-sub">' + sess.done + ' cartes révisées aujourd\'hui</div>'
+                + doneTimeHtml()
                 + '<button class="btn-home" onclick="goHome()">← Retour</button>'
                 + '</div>';
             document.getElementById("prog-fill").style.width = "100%";
@@ -6996,14 +7017,14 @@
                     "(suite) la carte notée part vers un coin ; combos inversés (justes à droite, erreurs à gauche) et comptés tout de suite ; la case rougit à chaque erreur ; ⚙ délai avant la carte suivante.": "(seguito) la carta valutata vola verso un angolo; combo invertite (giuste a destra, errori a sinistra) e contate subito; la casella diventa rossa a ogni errore; ⚙ tempo prima della carta successiva.",
                     "Délai avant la carte suivante": "Tempo prima della carta successiva", "Auto": "Auto", "Toujours lent": "Sempre lento", "Toujours rapide": "Sempre veloce",
                     "Temps laissé au verso, une fois le son fini. Auto : une carte vue pour la première fois, ou ratée, garde le temps de relire (≈ 2,5 s) ; une carte déjà vue et juste (même revenue dans la séance) passe vite (≈ 0,7 s, comptées pendant le son), avec une transition plus courte.": "Tempo lasciato al retro, finito l'audio. Auto: una carta vista per la prima volta, o sbagliata, tiene il tempo per rileggere (≈ 2,5 s); una carta già vista e giusta (anche tornata nella sessione) passa in fretta (≈ 0,7 s, contati durante l'audio), con una transizione più breve.", "joue l'enregistrement de la phrase d'exemple ; s'il n'y en a pas (phrases écrites pour le Vocabulaire), la voix du navigateur la lit.": "riproduce la registrazione della frase d'esempio; se non c'è (frasi scritte per il Vocabolario), la legge la voce del browser.",
-                    "6 nov.": "6 nov.", "9 nov.": "9 nov.", "10 nov.": "10 nov.", "En mode « nombre de cartes », la fiche du paquet donne aussi la durée estimée de la séance, d'après ton temps habituel sur chaque carte.": "In modalità « numero di carte », la scheda del mazzo indica anche la durata stimata della sessione, in base al tuo tempo abituale su ogni carta.", "(soir, fin) fiche du paquet : durée estimée de la séance en mode « nombre de cartes ».": "(sera, fine) scheda del mazzo: durata stimata della sessione in modalità « numero di carte ».", "(nuit) 📝 Relecture : ↑ modifier la carte, ↓ la retirer du paquet.": "(notte) 📝 Revisione: ↑ modifica la carta, ↓ toglila dal mazzo.",
+                    "6 nov.": "6 nov.", "9 nov.": "9 nov.", "10 nov.": "10 nov.", "En mode « nombre de cartes », la fiche du paquet donne aussi la durée estimée de la séance, d'après ton temps habituel sur chaque carte. À la fin, 🎉 Session terminée montre le temps estimé au départ et le temps effectif (sans le temps passé hors de l'appli).": "In modalità « numero di carte », la scheda del mazzo indica anche la durata stimata della sessione, in base al tuo tempo abituale su ogni carta. Alla fine, 🎉 Sessione finita mostra il tempo stimato all'inizio e il tempo effettivo (senza il tempo passato fuori dall'app).", "(soir, fin) fiche du paquet : durée estimée de la séance en mode « nombre de cartes ».": "(sera, fine) scheda del mazzo: durata stimata della sessione in modalità « numero di carte ».", "(nuit) 📝 Relecture : ↑ modifier la carte, ↓ la retirer du paquet.": "(notte) 📝 Revisione: ↑ modifica la carta, ↓ toglila dal mazzo.",
                     "(nuit, suite) 🔍 liste : une ligne par carte, clic → 📝 Relecture, en-tête toujours visible, tags dans un menu au bout de la recherche.": "(notte, seguito) 🔍 elenco: una riga per carta, clic → 📝 Revisione, intestazione sempre visibile, tag in un menu alla fine della ricerca.",
                     ": parcourir les cartes (carrousel pour les images, liste pour les mots : une ligne par carte, un clic l'ouvre en 📝 Relecture, au même endroit en revenant ; 🏷 au bout de la recherche pour filtrer par tag ; 📶 et ↕ sous la recherche : filtrer et trier par niveau de connaissance) ;": ": sfogliare le carte (carosello per le immagini, elenco per le parole: una riga per carta, un clic la apre in 📝 Revisione, allo stesso punto al ritorno; 🏷 alla fine della ricerca per filtrare per tag; 📶 e ↕ sotto la ricerca: filtrare e ordinare per livello di conoscenza);",
                     "(nuit, fin) Vocabulaire : tags de nature (nom, verbe, adjectif…) et de thème (animaux, nourriture, corps, métiers…), à choisir dans le menu 🏷 de 🔍.": "(notte, fine) Vocabolario: tag di categoria (nome, verbo, aggettivo…) e di tema (animali, cibo, corpo, mestieri…), da scegliere nel menu 🏷 di 🔍.",
                     "(nuit, correction) après 3 erreurs sur le dernier mot, la carte passe toute seule à la suivante (notée « À revoir »).": "(notte, correzione) dopo 3 errori sull'ultima parola, la carta passa da sola alla successiva (valutata « Da rivedere »).",
                     "toutes": "tutte", "Tous les niveaux": "Tutti i livelli", "Nouvelles": "Nuove", "En cours": "In corso", "À consolider": "Da consolidare", "Bien connues": "Ben note",
                     "Ordre du paquet": "Ordine del mazzo", "Moins connues d'abord": "Prima le meno note", "Mieux connues d'abord": "Prima le più note",
-                    "(nuit, fin+) 🔍 filtrer et trier par niveau de connaissance (📶 et ↕ sous la recherche).": "(notte, fine+) 🔍 filtrare e ordinare per livello di conoscenza (📶 e ↕ sotto la ricerca).", "(après-midi) 🗂 Pré-tri : seulement les cartes jamais triées ; changer d'avis (‹ Préc.), ↑ modifier, ↓ retirer, Ctrl/⌘+Z pour annuler ; 🔍 tout le haut reste affiché, nom du paquet sur la ligne des boutons.": "(pomeriggio) 🗂 Pre-selezione: solo le carte mai ordinate; cambiare idea (‹ Préc.), ↑ modificare, ↓ togliere, Ctrl/⌘+Z per annullare; 🔍 tutta la parte alta resta visibile, nome del mazzo sulla riga dei pulsanti.", "Rien à annuler.": "Niente da annullare.", "(soir, suite) 🏷 Vocabulaire : tag « transparent » pour les mots qui se devinent depuis le français (la capacidad = capacité), jamais un faux ami.": "(sera, seguito) 🏷 Vocabolario: tag « trasparente » per le parole che si indovinano dall'italiano (la sensación = sensazione), mai un falso amico.", "(soir) ✏️ 📷 une photo sur la carte (Modifier la carte) ; 🗂 le pré-tri suit le tag et la recherche choisis.": "(sera) ✏️ 📷 una foto sulla carta (Modifica la carta); 🗂 la pre-selezione segue il tag e la ricerca scelti.", "Ajouter une photo": "Aggiungi una foto", "Changer la photo": "Cambia la foto", "Retirer la photo": "Togli la foto", "Image illisible.": "Immagine illeggibile.", "Plus de place pour les photos sur cet appareil.": "Niente più spazio per le foto su questo dispositivo.", "Photo ajoutée": "Foto aggiunta", "Photo retirée": "Foto tolta", "Modifier la carte (↑)": "Modifica la carta (↑)", "Retirer la carte du paquet (↓)": "Togli la carta dal mazzo (↓)", "Tri annulé": "Scelta annullata", "Annuler le dernier tri (Ctrl/⌘+Z)": "Annulla l'ultima scelta (Ctrl/⌘+Z)", "↩ pour corriger, 🗂 pour sortir": "↩ per correggere, 🗂 per uscire", "Filtrer par tag": "Filtra per tag", "Chercher un tag…": "Cerca un tag…",
+                    "(nuit, fin+) 🔍 filtrer et trier par niveau de connaissance (📶 et ↕ sous la recherche).": "(notte, fine+) 🔍 filtrare e ordinare per livello di conoscenza (📶 e ↕ sotto la ricerca).", "(après-midi) 🗂 Pré-tri : seulement les cartes jamais triées ; changer d'avis (‹ Préc.), ↑ modifier, ↓ retirer, Ctrl/⌘+Z pour annuler ; 🔍 tout le haut reste affiché, nom du paquet sur la ligne des boutons.": "(pomeriggio) 🗂 Pre-selezione: solo le carte mai ordinate; cambiare idea (‹ Préc.), ↑ modificare, ↓ togliere, Ctrl/⌘+Z per annullare; 🔍 tutta la parte alta resta visibile, nome del mazzo sulla riga dei pulsanti.", "Rien à annuler.": "Niente da annullare.", "(soir, fin) 🎉 Session terminée : temps estimé au départ et temps effectif.": "(sera, fine) 🎉 Sessione finita: tempo stimato all'inizio e tempo effettivo.", "(soir, suite) 🏷 Vocabulaire : tag « transparent » pour les mots qui se devinent depuis le français (la capacidad = capacité), jamais un faux ami.": "(sera, seguito) 🏷 Vocabolario: tag « trasparente » per le parole che si indovinano dall'italiano (la sensación = sensazione), mai un falso amico.", "(soir) ✏️ 📷 une photo sur la carte (Modifier la carte) ; 🗂 le pré-tri suit le tag et la recherche choisis.": "(sera) ✏️ 📷 una foto sulla carta (Modifica la carta); 🗂 la pre-selezione segue il tag e la ricerca scelti.", "Ajouter une photo": "Aggiungi una foto", "Changer la photo": "Cambia la foto", "Retirer la photo": "Togli la foto", "Image illisible.": "Immagine illeggibile.", "Plus de place pour les photos sur cet appareil.": "Niente più spazio per le foto su questo dispositivo.", "Photo ajoutée": "Foto aggiunta", "Photo retirée": "Foto tolta", "Modifier la carte (↑)": "Modifica la carta (↑)", "Retirer la carte du paquet (↓)": "Togli la carta dal mazzo (↓)", "Tri annulé": "Scelta annullata", "Annuler le dernier tri (Ctrl/⌘+Z)": "Annulla l'ultima scelta (Ctrl/⌘+Z)", "↩ pour corriger, 🗂 pour sortir": "↩ per correggere, 🗂 per uscire", "Filtrer par tag": "Filtra per tag", "Chercher un tag…": "Cerca un tag…",
                     "pour commenter une carte,": "per commentare una carta,", "(✏️) pour la modifier,": "(✏️) per modificarla,", "(🗑) pour la retirer du paquet (": "(🗑) per toglierla dal mazzo (", "la remet).": "la rimette).",
                     "📝 Relecture : modifier la carte · la retirer du paquet (Ctrl+Z : annuler)": "📝 Revisione: modifica la carta · toglila dal mazzo (Ctrl+Z: annulla)",
                     "✏️ Modifier la carte": "✏️ Modifica la carta", "Ctrl+Entrée : enregistrer · Échap : annuler": "Ctrl+Invio: salva · Esc: annulla", "✓ Enregistrer": "✓ Salva",
@@ -7048,7 +7069,7 @@
                     "Maintenir Espace": "Tieni premuto Spazio", "Maintenir appuyé": "Tieni premuto", "Suivant": "Avanti", "Espace": "Spazio", "Entrée": "Invio", "Échap": "Esc",
                     "🔊 Écouter": "🔊 Ascolta", "Écouter": "Ascolta", "🔊 la phrase": "🔊 la frase", "Réécouter": "Riascolta", "Lentement": "Lentamente",
                     "Écoute et écris ce que tu entends": "Ascolta e scrivi quello che senti",
-                    "Session terminée !": "Sessione finita!", "← Retour": "← Indietro", "Temps de révision du jour": "Tempo di studio di oggi",
+                    "Session terminée !": "Sessione finita!", "estimé": "stimato", "effectif": "effettivo", "← Retour": "← Indietro", "Temps de révision du jour": "Tempo di studio di oggi",
                     "🚩 Marquer la carte": "🚩 Segnala la carta", "Ce qui ne va pas, la bonne réponse… (facultatif)": "Cosa non va, la risposta giusta… (facoltativo)",
                     "Entrée : marquer · Maj+Entrée : à la ligne · Échap : annuler": "Invio: segnala · Maiusc+Invio: a capo · Esc: annulla",
                     "Annuler": "Annulla", "🚩 Marquer": "🚩 Segnala", "🚩 Commenter": "🚩 Commenta", "🚩 Modifier": "🚩 Modifica",
@@ -7328,7 +7349,8 @@
             {"id": 39, "d": "2026-11-10", "k": "paquets", "fr": "Dans 🔍, <b>📶</b> ne montre que les cartes nouvelles, en cours, à consolider ou bien connues, et <b>↕</b> les trie des moins connues aux mieux connues (ou l'inverse).", "it": "In 🔍, <b>📶</b> mostra solo le carte nuove, in corso, da consolidare o ben note, e <b>↕</b> le ordina dalle meno note alle più note (o al contrario)."},
             {"id": 40, "d": "2026-11-10", "k": "paquets", "fr": "<b>🗂 Pré-tri</b> : seulement les cartes jamais triées ; reviens sur une carte (‹ Préc.) pour changer d'avis, <b>↑</b> la modifie, <b>↓</b> la retire, <b>Ctrl/⌘+Z</b> ou ↩ annule. Dans 🔍, tout le haut reste affiché en défilant.", "it": "<b>🗂 Pre-selezione</b>: solo le carte mai ordinate; torna su una carta (‹ Préc.) per cambiare idea, <b>↑</b> la modifica, <b>↓</b> la toglie, <b>Ctrl/⌘+Z</b> o ↩ annulla. In 🔍, tutta la parte alta resta visibile mentre scorri."},
             {"id": 41, "d": "2026-11-10", "k": "cartes", "fr": "<b>📷 Une photo sur la carte</b> : dans ✏️ Modifier la carte (↑ en Relecture ou en Pré-tri), ajoute une photo ou colle une image ; elle s'affiche au recto. Et 🗂 Pré-tri suit maintenant le tag et la recherche choisis.", "it": "<b>📷 Una foto sulla carta</b>: in ✏️ Modifica la carta (↑ nella Revisione o nella Pre-selezione), aggiungi una foto o incolla un'immagine; appare sul fronte. E 🗂 Pre-selezione ora segue il tag e la ricerca scelti."},
-            {"id": 42, "d": "2026-11-10", "k": "paquets", "fr": "Nouveau tag <b>transparent</b> dans le Vocabulaire (menu 🏷 de 🔍) : les mots qui se devinent depuis le français, comme <i>la capacidad</i> = capacité.", "it": "Nuovo tag <b>trasparente</b> nel Vocabolario (menu 🏷 di 🔍): le parole che si indovinano dall'italiano, come <i>la sensación</i> = sensazione."}
+            {"id": 42, "d": "2026-11-10", "k": "paquets", "fr": "Nouveau tag <b>transparent</b> dans le Vocabulaire (menu 🏷 de 🔍) : les mots qui se devinent depuis le français, comme <i>la capacidad</i> = capacité.", "it": "Nuovo tag <b>trasparente</b> nel Vocabolario (menu 🏷 di 🔍): le parole che si indovinano dall'italiano, come <i>la sensación</i> = sensazione."},
+            {"id": 43, "d": "2026-11-10", "k": "cartes", "fr": "À la fin d'une séance, <b>🎉 Session terminée</b> montre le <b>temps estimé</b> au départ et le <b>temps effectif</b>.", "it": "Alla fine di una sessione, <b>🎉 Sessione finita</b> mostra il <b>tempo stimato</b> all'inizio e il <b>tempo effettivo</b>."}
         ];
         var NEWS_KINDS = { revision: ["Révision", "Ripasso"], cartes: ["Cartes", "Carte"], combos: ["Combos", "Combo"], affichage: ["Affichage", "Aspetto"],
             reglages: ["Réglages", "Impostazioni"], accueil: ["Accueil", "Home"], paquets: ["Paquets", "Mazzi"] };
