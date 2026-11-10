@@ -416,6 +416,8 @@ def main():
     with open(os.path.join(HERE, LANGS["it"]["json"]), "w", encoding="utf-8") as f:
         json.dump(deck_json(cards_it, "it"), f, ensure_ascii=False, separators=(",", ":"))
     print(f"{len(cards_it)} mots en italien → {LANGS['it']['json']}")
+    import tag_vocab  # nature and theme tags, both languages (#189)
+    tag_vocab.main()
 
     write_review(review)
 

@@ -433,6 +433,10 @@
         .b-review-bar { display: flex; gap: 8px; align-items: center; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
         .b-comment { font-size: 13px; color: var(--red); max-width: 90%; text-align: center; }
         .b-flag { font: inherit; font-size: 13px; border: 1.5px solid var(--border-2); background: var(--surface); color: var(--text); border-radius: 16px; padding: 4px 12px; cursor: pointer; }
+        .b-edited { font-size: 12px; color: var(--text-3); }
+        .ed-modal { max-width: 560px; }
+        .ed-modal .ac-row textarea { font: inherit; font-size: 15px; color: var(--text); background: var(--surface); border: 1.5px solid var(--border-2); border-radius: 10px; padding: 8px 10px; resize: vertical; }
+        .ed-modal .ac-row textarea:focus { outline: none; border-color: var(--navy); }
         .h-settings-btn { right: 108px; }
         .st-modal { max-width: 460px; padding-bottom: 18px; }
         .h-range { font-size: 11px; font-weight: 400; color: var(--text-3); margin-left: 4px; }
@@ -1729,10 +1733,40 @@
             #browse .s-topbar { gap: 8px; }
         }
 
+        /* title, progress and search stay on screen while the list scrolls (#188) */
+        .b-head {
+            position: sticky; top: 0; z-index: 20;
+            width: calc(100% + 48px); margin: -36px -24px 14px; padding: 12px 24px 10px;
+            display: flex; flex-direction: column; align-items: center;
+            background: var(--bg);
+        }
+        .b-head .s-deck-name { margin-bottom: 18px; }
+        .b-head .b-overall { margin: 0 0 12px; }
+        .b-search-row { display: flex; gap: 8px; width: 100%; max-width: 720px; position: relative; }
+        .b-tagdd[hidden], .b-tag-pop[hidden] { display: none; }
+        .b-tag-btn { font: inherit; font-size: 13px; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            border: 1.5px solid var(--border-2); border-radius: 12px; background: var(--surface); color: var(--text-2); padding: 0 12px; cursor: pointer; height: 100%; }
+        .b-tag-btn.on { border-color: var(--green); color: var(--green); background: var(--tint-green); }
+        .b-tag-pop { position: absolute; right: 0; top: calc(100% + 6px); width: 280px; max-width: calc(100vw - 32px); z-index: 30;
+            background: var(--surface); border: 1.5px solid var(--border-2); border-radius: 12px; box-shadow: 0 8px 28px rgba(0,0,0,.15); padding: 8px; }
+        .b-tag-q { width: 100%; box-sizing: border-box; font: inherit; font-size: 14px; color: var(--text); background: var(--surface);
+            border: 1.5px solid var(--border-2); border-radius: 9px; padding: 6px 10px; outline: none; margin-bottom: 6px; }
+        .b-tag-q:focus { border-color: #93aed6; }
+        .b-tag-pop .b-tags { display: flex; flex-direction: column; align-items: stretch; gap: 0; max-height: 50vh; overflow-y: auto; margin: 0; max-width: none; }
+        .b-tag-opt { display: flex; justify-content: space-between; gap: 10px; text-align: left; font: inherit; font-size: 14px; color: var(--text);
+            background: none; border: 0; border-radius: 7px; padding: 6px 8px; cursor: pointer; }
+        .b-tag-opt span { color: var(--text-3); font-size: 12px; }
+        .b-tag-opt:hover, .b-tag-opt.hl { background: var(--surface-hover); }
+        .b-tag-opt.on { color: var(--green); font-weight: 600; }
+        .b-tag-opt[hidden] { display: none; }
+        .b-know-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; width: 100%; max-width: 720px; margin-top: 8px; font-size: 12px; color: var(--text-3); }
+        #browse.sorting .b-know-row { display: none; }
+        .b-know-row select { font: inherit; font-size: 12px; color: var(--text-2); background: var(--surface); border: 1.5px solid var(--border-2); border-radius: 9px; padding: 3px 6px; cursor: pointer; }
+        .b-know-row select.on { border-color: var(--green); color: var(--green); background: var(--tint-green); }
+
         .b-search {
-            width: 100%;
-            max-width: 720px;
-            margin-bottom: 20px;
+            flex: 1;
+            min-width: 0;
             padding: 9px 14px;
             border: 1.5px solid var(--border-2);
             border-radius: 12px;
@@ -1786,7 +1820,7 @@
         .b-prog { height: 4px; border-radius: 4px; background: var(--border); overflow: hidden; margin: -6px 0 4px; }
         .b-prog > i { display: block; height: 100%; border-radius: 4px; }
         .b-prog-label { font-size: 11px; color: var(--text-3); text-align: right; margin-bottom: 8px; font-variant-numeric: tabular-nums; }
-        .b-row .b-prog { grid-column: 1 / -1; margin: 2px 0 0; height: 3px; }
+        .b-row .b-prog { position: absolute; left: 14px; right: 14px; bottom: 1px; margin: 0; height: 2px; }
         .b-overall { width: 100%; max-width: 720px; margin: -14px 0 18px; font-size: 11px; color: var(--text-3); }
         .b-overall:empty { display: none; }
         .b-overall .b-prog { margin: 4px 0 0; height: 6px; display: flex; }
@@ -1845,30 +1879,37 @@
             overflow: hidden;
         }
 
+        /* one line per card, cut with … when too long (#188); a click opens it in 📝 Relecture */
         .b-row {
+            position: relative;
+            cursor: pointer;
             display: grid;
-            grid-template-columns: 1fr 1fr auto;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
             gap: 14px;
             align-items: baseline;
-            padding: 7px 14px;
+            padding: 7px 14px 8px;
             font-size: 14px;
             line-height: 1.4;
             border-top: 1px solid var(--border);
         }
 
         .b-list.with-tags .b-row {
-            grid-template-columns: 1fr 1fr minmax(0, 160px) 16px;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 160px) 16px;
         }
 
         @media (max-width: 600px) {
             .b-list.with-tags .b-row {
-                grid-template-columns: 1fr 1fr minmax(0, 80px) 16px;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 16px;
             }
+            .b-list .b-row-tags { display: none; } /* the words get the room (#188) */
         }
 
+        .b-row-front, .b-row-back { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .b-row:hover .b-row-front { color: var(--navy); }
         .b-row-tags {
             display: flex;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+            overflow: hidden;
             gap: 4px;
             justify-content: flex-end;
         }
@@ -2154,6 +2195,19 @@
         </div>
     </div>
 
+    <!-- ── 📝 Relecture, ↑: edit the card (#187) ── -->
+    <div class="g-backdrop" id="edit-modal" hidden onclick="if (event.target === this) closeEditModal()">
+        <div class="g-modal fm-modal ed-modal" role="dialog" aria-modal="true" aria-labelledby="ed-title">
+            <div class="g-title" id="ed-title">✏️ Modifier la carte</div>
+            <div id="ed-fields"></div>
+            <div class="fm-actions">
+                <span class="fm-keys">Ctrl+Entrée : enregistrer · Échap : annuler</span>
+                <button class="fm-btn" onclick="closeEditModal()">Annuler</button>
+                <button class="fm-btn fm-ok ac-ok" onclick="confirmEdit()">✓ Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
     <div class="g-backdrop" id="guide" hidden onclick="if (event.target === this) closeGuide()">
         <div class="g-modal" role="dialog" aria-modal="true" aria-labelledby="g-title">
             <div class="g-head">
@@ -2172,7 +2226,7 @@
                     </div></div>
                     Touche la ligne : une fiche montre les nouvelles cartes, celles à repasser et à réviser, et ce qu'est le paquet (objectif, comment il a été fait) ; « Étudier maintenant » (ou Entrée) lance la révision. <b>nvx</b> = nouvelles cartes du jour, <b>dus</b> = à revoir aujourd'hui, <b>appris</b> = déjà sues.
                     <b>+20</b> : 20 nouvelles de plus. <b>✓</b> : je connais déjà ce paquet (ses cartes jamais vues passent en apprises, elles reviendront de temps en temps).
-                    <b>🔍</b> : parcourir les cartes (carrousel pour les images, liste pour les mots) ; <b>📝 Relecture</b> les montre une par une, <b>F6</b> pour commenter une carte.
+                    <b>🔍</b> : parcourir les cartes (carrousel pour les images, liste pour les mots : une ligne par carte, un clic l'ouvre en 📝 Relecture, au même endroit en revenant ; 🏷 au bout de la recherche pour filtrer par tag ; 📶 et ↕ sous la recherche : filtrer et trier par niveau de connaissance) ; <b>📝 Relecture</b> les montre une par une, <b>F6</b> pour commenter une carte, <b>↑</b> (✏️) pour la modifier, <b>↓</b> (🗑) pour la retirer du paquet (<b>Ctrl+Z</b> la remet).
                     <b>＋</b> (sur « 📝 Vocabulaire perso ») : ajouter tes propres cartes, l'espagnol et sa traduction.
                     <br>💤 sur un paquet l'endort : il disparaît de l'accueil, sa progression est gardée ; « 💤 paquets endormis », en bas de l'accueil, les réveille.
                     Dans 🔍 d'un paquet de conjugaison, <b>📋 Tableaux</b> montre tous les tableaux des verbes.
@@ -2215,7 +2269,7 @@
                         </div>
                     </div></div>
                     <b>Indice</b> montre le mot <span style="color:var(--orange)">en orange</span> sous la case ; <b>Voir la réponse</b> montre tout.
-                    Après <span style="color:var(--red)">3 erreurs</span> (réglable dans ⚙), le bon mot s'écrit en rouge. Une carte où on a eu de l'aide est notée « À revoir ».
+                    Après <span style="color:var(--red)">3 erreurs</span> (réglable dans ⚙), le bon mot s'écrit en rouge ; si c'était le dernier, la carte est notée « À revoir » et passe toute seule à la suivante. Une carte où on a eu de l'aide est notée « À revoir ».
                     <br>Sur téléphone, pas de boutons : touche la moitié gauche du recto pour un indice, la moitié droite pour la réponse (en mode Normal, touche la carte pour la retourner).
                 </div>
             </div>
@@ -2289,6 +2343,7 @@
                         <span class="t-key">F6</span><span>signaler la carte avec un commentaire (aussi dans 📝 Relecture)</span>
                         <span class="t-key">⛶</span><span>plein écran (en haut de l'écran de révision)</span>
                         <span class="t-key">← →</span><span>carrousel 🔍 · <b>Échap</b> : retour</span>
+                        <span class="t-key">↑ ↓</span><span>📝 Relecture : modifier la carte · la retirer du paquet (Ctrl+Z : annuler)</span>
                     </div>
                 </div>
             </div>
@@ -2297,6 +2352,11 @@
                 <div class="g-num">9</div><div class="g-h">Nouveautés</div>
                 <div class="g-body">
                     <ul class="g-news">
+                        <li><b>10 nov.</b> (nuit, fin+) 🔍 filtrer et trier par niveau de connaissance (📶 et ↕ sous la recherche).</li>
+                        <li><b>10 nov.</b> (nuit, correction) après 3 erreurs sur le dernier mot, la carte passe toute seule à la suivante (notée « À revoir »).</li>
+                        <li><b>10 nov.</b> (nuit, fin) Vocabulaire : tags de nature (nom, verbe, adjectif…) et de thème (animaux, nourriture, corps, métiers…), à choisir dans le menu 🏷 de 🔍.</li>
+                        <li><b>10 nov.</b> (nuit, suite) 🔍 liste : une ligne par carte, clic → 📝 Relecture, en-tête toujours visible, tags dans un menu au bout de la recherche.</li>
+                        <li><b>10 nov.</b> (nuit) 📝 Relecture : ↑ modifier la carte, ↓ la retirer du paquet.</li>
                         <li><b>10 nov.</b> (soir, fin) fiche du paquet : durée estimée de la séance en mode « nombre de cartes ».</li>
                         <li><b>10 nov.</b> (soir, suite) d'un appareil à l'autre : même ordre des cartes du jour partout, et la progression revient en rouvrant l'appli.</li>
                         <li><b>10 nov.</b> (soir) 💤 endormir un paquet : il quitte l'accueil, sa progression est gardée, et se réveille en bas de l'accueil.</li>
@@ -2402,10 +2462,36 @@
             <div class="b-count" id="b-count">0 / 0</div>
         </div>
         <div class="s-main">
-            <div class="s-deck-name" id="b-deck-name"></div>
-            <div class="b-overall" id="b-overall"></div>
-            <input class="b-search" id="b-search" type="search" placeholder="🔎 Rechercher…" oninput="filterBrowse(this.value)">
-            <div class="b-tags" id="b-tags"></div>
+            <!-- stays on screen while the list scrolls (#188) -->
+            <div class="b-head">
+                <div class="s-deck-name" id="b-deck-name"></div>
+                <div class="b-overall" id="b-overall"></div>
+                <div class="b-search-row">
+                    <input class="b-search" id="b-search" type="search" placeholder="🔎 Rechercher…" oninput="filterBrowse(this.value)">
+                    <div class="b-tagdd" id="b-tagdd" hidden>
+                        <button class="b-tag-btn" id="b-tag-btn" onclick="toggleTagMenu()" title="Filtrer par tag">🏷 <span id="b-tag-cur">toutes</span> ▾</button>
+                        <div class="b-tag-pop" id="b-tag-pop" hidden>
+                            <input class="b-tag-q" id="b-tag-q" type="search" placeholder="Chercher un tag…" autocomplete="off" oninput="filterTagMenu(this.value)">
+                            <div class="b-tags" id="b-tags"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- by how well the cards are known (#190) -->
+                <div class="b-know-row">
+                    <label>📶 <select id="b-know" onchange="setBrowseKnow(this.value)">
+                        <option value="">Tous les niveaux</option>
+                        <option value="new">Nouvelles</option>
+                        <option value="learning">En cours</option>
+                        <option value="weak">À consolider</option>
+                        <option value="known">Bien connues</option>
+                    </select></label>
+                    <label>↕ <select id="b-order" onchange="setBrowseOrder(this.value)">
+                        <option value="">Ordre du paquet</option>
+                        <option value="asc">Moins connues d'abord</option>
+                        <option value="desc">Mieux connues d'abord</option>
+                    </select></label>
+                </div>
+            </div>
             <div id="b-content" style="width:100%"></div>
         </div>
     </div>
@@ -2551,6 +2637,7 @@
         var LS_SRS = NS + "s_";      // + sourceId → {cardId: srsMeta}
         var LS_NEWCOUNT = NS + "nc_";     // + sourceId → {day, count}
         var LS_FLAGGED = NS + "fl_";     // + sourceId → {cardId: questionPlainText}
+        var LS_EDITS = NS + "ed_";     // + sourceId → {cardId: {f: {field: value}, at}} — cards edited in 📝 Relecture (#187)
         var LS_STYLES = NS + "css_";    // + sourceId → [css shared by cards, see card.style]
         var LS_MODE = NS + "mode";     // "type" (type the answer, default) | "flip" (Anki-style: show answer, rate)
         var LS_THEME = NS + "theme";    // "light" | "dark" | absent (follow system)
@@ -2868,8 +2955,26 @@
             } catch (e) { }
         })();
         function loadCards(sid) {
-            if (isBundledId(sid)) return MEM_CARDS[sid] || {};
-            try { return JSON.parse(localStorage.getItem(LS_CARDS + sid) || "{}"); } catch (e) { return {}; }
+            if (isBundledId(sid)) return applyEdits(sid, MEM_CARDS[sid] || {});
+            try { return applyEdits(sid, JSON.parse(localStorage.getItem(LS_CARDS + sid) || "{}")); } catch (e) { return {}; }
+        }
+        // Cards edited in 📝 Relecture (#187): only the changed fields, laid
+        // over the deck's cards every time they're loaded — bundled decks
+        // come back from their JSON file at each start — and synced.
+        function loadEdits(sid) { try { return JSON.parse(localStorage.getItem(LS_EDITS + sid) || "{}"); } catch (e) { return {}; } }
+        function saveEdits(sid, ed) { try { localStorage.setItem(LS_EDITS + sid, JSON.stringify(ed)); } catch (e) { } scheduleSync(); }
+        function applyEdits(sid, cardsByDeck) {
+            var ed = loadEdits(sid);
+            if (!Object.keys(ed).length) return cardsByDeck;
+            Object.keys(cardsByDeck).forEach(function (did) {
+                (cardsByDeck[did] || []).forEach(function (c) { if (ed[c.id]) Object.assign(c, ed[c.id].f); });
+            });
+            return cardsByDeck;
+        }
+        function mergeEdits(localEd, cloudEd) { // the latest edit of each card wins
+            var out = Object.assign({}, cloudEd || {});
+            Object.keys(localEd || {}).forEach(function (id) { if (!out[id] || (localEd[id].at || 0) >= (out[id].at || 0)) out[id] = localEd[id]; });
+            return out;
         }
         function saveCards(sid, c) {
             if (isBundledId(sid)) { MEM_CARDS[sid] = c; return; }
@@ -3455,6 +3560,7 @@
                     srs: loadSRS(src.id),
                     newCount: loadNewCount(src.id),
                     flagged: loadFlagged(src.id),
+                    edits: loadEdits(src.id),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 }, { merge: true });
             });
@@ -3490,7 +3596,7 @@
         function backupLocalData() {
             var dump = { sources: loadSources(), perSource: {} };
             dump.sources.forEach(function (s) {
-                dump.perSource[s.id] = { cards: loadCards(s.id), srs: loadSRS(s.id), newCount: loadNewCount(s.id), flagged: loadFlagged(s.id) };
+                dump.perSource[s.id] = { cards: loadCards(s.id), srs: loadSRS(s.id), newCount: loadNewCount(s.id), flagged: loadFlagged(s.id), edits: loadEdits(s.id) };
             });
             // only the last two are kept: one per pull used to pile up until storage was full (#181)
             try {
@@ -3577,6 +3683,7 @@
                             saveSRSRaw(sid, meta.srs || {});
                             saveNewCountRaw(sid, meta.newCount || { day: TODAY, count: 0 });
                             saveFlaggedRaw(sid, meta.flagged || {});
+                            saveEditsRaw(sid, meta.edits || {});
                         });
                     })).then(function () {
                         saveSourcesRaw(localSources);
@@ -3599,6 +3706,7 @@
                         if (local) {
                             saveSRSRaw(local.id, mergeSRS(loadSRS(local.id), meta.srs || {}));
                             saveFlaggedRaw(local.id, mergeFlagged(loadFlagged(local.id), meta.flagged || {}));
+                            saveEditsRaw(local.id, mergeEdits(loadEdits(local.id), meta.edits || {}));
                             // Higher of the two daily counters for today, so
                             // the limit can't be bypassed by switching devices.
                             var localNc = loadNewCount(local.id), cloudNc = meta.newCount || { day: TODAY, count: 0 };
@@ -3612,6 +3720,7 @@
                             saveSRSRaw(sid, meta.srs || {});
                             saveNewCountRaw(sid, meta.newCount || { day: TODAY, count: 0 });
                             saveFlaggedRaw(sid, meta.flagged || {});
+                            saveEditsRaw(sid, meta.edits || {});
                         }
                     });
                 });
@@ -3634,6 +3743,7 @@
         function saveSRSRaw(sid, s) { try { localStorage.setItem(LS_SRS + sid, JSON.stringify(s)); } catch (e) { } }
         function saveNewCountRaw(sid, nc) { try { localStorage.setItem(LS_NEWCOUNT + sid, JSON.stringify(nc)); } catch (e) { } }
         function saveFlaggedRaw(sid, fl) { try { localStorage.setItem(LS_FLAGGED + sid, JSON.stringify(fl)); } catch (e) { } }
+        function saveEditsRaw(sid, ed) { try { localStorage.setItem(LS_EDITS + sid, JSON.stringify(ed)); } catch (e) { } }
 
         function deleteSourceFromFirestore(sourceId) {
             if (READONLY) return Promise.resolve();
@@ -3677,10 +3787,11 @@
             var sources = loadSources();
             var src = sources[si];
             var srs = loadSRS(src.id);
-            var flagged = loadFlagged(src.id);
-            if (!Object.keys(srs).length && !Object.keys(flagged).length) { toast("Aucune progression à exporter pour cette source."); return; }
-            // flagged: cards marked 🚩 (F6) — ankisync flags + suspends them in Anki and lists them for review.
-            var payload = { version: 1, source: src.name, exportedAt: new Date().toISOString(), cards: srs, flagged: flagged };
+            var flagged = loadFlagged(src.id), edits = loadEdits(src.id);
+            if (!Object.keys(srs).length && !Object.keys(flagged).length && !Object.keys(edits).length) { toast("Aucune progression à exporter pour cette source."); return; }
+            // flagged: cards marked 🚩 (F6) — ankisync flags + suspends them in Anki and lists them for review
+            // (dropped ones, {drop: 1}, too); edits: cards edited in 📝 Relecture (#187), listed by ankisync.
+            var payload = { version: 1, source: src.name, exportedAt: new Date().toISOString(), cards: srs, flagged: flagged, edits: edits };
             var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
             var url = URL.createObjectURL(blob);
             var a = document.createElement("a");
@@ -4166,7 +4277,7 @@
                 saveSRS(to, b);
                 saveFlagged(to, fb);
                 sources.splice(i, 1); gone++;
-                [LS_CARDS, LS_SRS, LS_NEWCOUNT, LS_FLAGGED, LS_STYLES].forEach(function (k) { try { localStorage.removeItem(k + old); } catch (e) { } });
+                [LS_CARDS, LS_SRS, LS_NEWCOUNT, LS_FLAGGED, LS_EDITS, LS_STYLES].forEach(function (k) { try { localStorage.removeItem(k + old); } catch (e) { } });
                 if (fbUser) deleteSourceFromFirestore(old);
                 dlog("paquet fusionné", { ancien: old, dans: to, cartes_reprises: moved });
             });
@@ -4184,6 +4295,7 @@
             try { localStorage.removeItem(LS_SRS + id); } catch (e2) { }
             try { localStorage.removeItem(LS_NEWCOUNT + id); } catch (e2) { }
             try { localStorage.removeItem(LS_FLAGGED + id); } catch (e2) { }
+            try { localStorage.removeItem(LS_EDITS + id); } catch (e2) { }
             try { localStorage.removeItem(LS_STYLES + id); } catch (e2) { }
             if (fbUser) deleteSourceFromFirestore(id);
             renderHome();
@@ -4530,9 +4642,10 @@
             browse.srs = loadSRS(src.id);
             browse.sort = false; browse.sorted = {};
             document.getElementById("browse").classList.remove("sorting");
-            var all = [];
+            var all = [], fl = loadFlagged(src.id);
+            browse.lastDrop = null; browse.changed = false;
             childDeckIds(src.decks, deckName).forEach(function (did) {
-                (cardsByDeck[did] || []).forEach(function (c) { all.push(c); });
+                (cardsByDeck[did] || []).forEach(function (c) { if (!(fl[c.id] && fl[c.id].drop)) all.push(c); }); // 🗑 retirées (#187)
             });
             if (!all.length) { toast("Aucune carte dans ce deck"); return; }
             browse.all = all.map(function (c) {
@@ -4541,6 +4654,8 @@
             });
             browse.q = "";
             browse.tag = null;
+            browse.know = browse.order = null;
+            ["b-know", "b-order"].forEach(function (id) { var el = document.getElementById(id); el.value = ""; el.classList.remove("on"); });
             renderBrowseTags();
             browse.list = browse.all;
             // Pictures need room → carousel; words/sentences read better as
@@ -4581,13 +4696,28 @@
             document.getElementById("b-content").innerHTML = '<div class="b-conj-grid">' + html.join("") + '</div>';
             document.getElementById("b-count").textContent = html.length + " tableaux";
         }
-        function toggleBrowseReview() {
+        // List ↔ 📝 Relecture keep their place (#188): a row clicked (at) or
+        // the first one on screen opens there in the carousel; back in the
+        // list, the card last seen is where it was (same scroll if unmoved).
+        function toggleBrowseReview(at) {
             if (browse.sort) toggleBrowseSort();
+            var fromList = !browse.carousel && !browse.review;
+            var i = at != null ? at : fromList ? firstRowOnScreen() : browse.idx;
+            if (fromList) browse.listPos = { i: i, y: window.scrollY };
             browse.review = !browse.review;
             document.getElementById("b-review-btn").classList.toggle("on", browse.review);
             document.getElementById("b-export-btn").hidden = !browse.review;
             updateBrowseCommentCount();
             renderBrowse();
+            if (browse.review || browse.carousel) { window.scrollTo({ top: 0, behavior: "instant" }); jumpToSlide(i); return; }
+            var lp = browse.listPos, row = document.querySelector('.b-row[data-i="' + i + '"]');
+            if (lp && lp.i === i) window.scrollTo({ top: lp.y, behavior: "instant" });
+            else if (row) window.scrollTo({ top: row.getBoundingClientRect().top + window.scrollY - document.querySelector(".b-head").offsetHeight - 60, behavior: "instant" });
+        }
+        function firstRowOnScreen() {
+            var top = document.querySelector(".b-head").getBoundingClientRect().bottom, rows = document.querySelectorAll(".b-row");
+            for (var k = 0; k < rows.length; k++) if (rows[k].getBoundingClientRect().bottom > top) return +rows[k].dataset.i;
+            return 0;
         }
         function browseComments() {
             var fl = loadFlagged(browse.sid);
@@ -4613,10 +4743,117 @@
             a.click();
         }
         document.addEventListener("keydown", function (e) {
-            if (e.key !== "F6" || document.getElementById("browse").style.display !== "flex" || !browse.review || flagModalOpen()) return;
+            if (e.key !== "F6" || document.getElementById("browse").style.display !== "flex" || !browse.review || flagModalOpen() || editModalOpen()) return;
             e.preventDefault();
             browseFlag(browse.idx);
         });
+
+        // 📝 Relecture, ↑ (#187): the card's fields in a small window —
+        // saved over the deck (applyEdits), synced, listed by ankisync.
+        var QPREFIX_RE = /^(?:\s*<style[\s\S]*?<\/style>)*\s*(?:(?:🇫🇷|🇪🇸)\s*➡️\s*(?:🇫🇷|🇪🇸)\s*(?:<br\s*\/?>\s*)*)?/u;
+        function editFields(c) {
+            if (c.es != null) return [["es", "Espagnol"], ["fr", "Traduction"], ["words", "Réponse à taper"], ["s", "Phrase d'exemple"], ["sf", "Traduction de la phrase"], ["n", "Note"]];
+            var f = [["question", "Recto"]];
+            if (c.answer != null) f.push(["answer", "Verso"]);
+            f.push(["words", "Réponse à taper"]);
+            return f;
+        }
+        function editValue(c, k) {
+            if (k === "words") return (c.words || []).join(" ");
+            if (k === "question") return String(c.question || "").replace(QPREFIX_RE, "");
+            return c[k] == null ? "" : String(c[k]);
+        }
+        var editIdx = -1;
+        function editModalOpen() { return !document.getElementById("edit-modal").hidden; }
+        function browseEdit(i) {
+            var b = browse.list[i]; if (!b) return;
+            editIdx = i;
+            document.getElementById("ed-fields").innerHTML = editFields(b.card).map(function (f) {
+                var v = editValue(b.card, f[0]);
+                return '<label class="ac-row"><span>' + esc(f[1]) + '</span><textarea data-k="' + f[0] + '" rows="' + Math.min(5, Math.max(1, Math.ceil(v.length / 50))) + '">' + esc(v) + '</textarea></label>';
+            }).join("");
+            document.getElementById("edit-modal").hidden = false;
+            setTimeout(function () { var t = document.querySelector("#ed-fields textarea"); if (t) { t.focus(); t.select(); } }, 0);
+        }
+        function closeEditModal() { document.getElementById("edit-modal").hidden = true; editIdx = -1; }
+        function confirmEdit() {
+            var b = browse.list[editIdx], c = b && b.card, f = {};
+            if (!c) { closeEditModal(); return; }
+            document.querySelectorAll("#ed-fields textarea").forEach(function (t) {
+                var k = t.dataset.k, v = t.value.trim();
+                if (v === editValue(c, k).trim()) return;
+                if (k === "words") {
+                    f.words = v.split(/\s+/).filter(Boolean);
+                    if (c.notes && f.words.length !== (c.words || []).length) f.notes = null; // notes sit between the words
+                } else if (k === "question") f.question = String(c.question || "").match(QPREFIX_RE)[0] + v;
+                else f[k] = v;
+            });
+            // the vocabulary cards' plain recto / verso follow the word and its meaning
+            if (c.es != null && f.es != null) f.question = esc(f.es);
+            if (c.es != null && f.fr != null) f.answer = esc(f.fr);
+            var i = editIdx;
+            closeEditModal();
+            if (!Object.keys(f).length) return;
+            var ed = loadEdits(browse.sid);
+            ed[c.id] = { f: Object.assign({}, ed[c.id] && ed[c.id].f, f), at: Date.now() };
+            saveEdits(browse.sid, ed);
+            Object.assign(c, f);
+            b.back = c.answer != null ? c.answer : esc((c.words || []).join(" "));
+            b.text = (plainText(displayQuestion(c.question)) + " " + plainText(b.back) + " " + (c.words || []).join(" ") + " " + b.tags.join(" ")).toLowerCase();
+            dlog("carte modifiée", { source: browse.sid, id: c.id, champs: f });
+            toast("✏️ " + t9n("Carte modifiée"));
+            var sl = document.querySelector('.b-slide[data-i="' + i + '"]');
+            if (sl) { delete sl.dataset.filled; fillSlide(sl); }
+        }
+        ["keydown", "keyup"].forEach(function (type) {
+            document.addEventListener(type, function (e) {
+                if (!editModalOpen()) return;
+                e.stopImmediatePropagation();
+                if (type !== "keydown") return;
+                if (e.key === "Escape") { e.preventDefault(); closeEditModal(); }
+                else if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); confirmEdit(); }
+            }, true);
+        });
+
+        // 📝 Relecture, ↓ (#187): the card leaves the deck — marked like a 🚩
+        // card ({drop: 1}: never offered again, ankisync suspends it in Anki)
+        // and out of the review too. Ctrl/⌘+Z brings the last one back.
+        function browseDrop(i) {
+            var b = browse.list[i]; if (!b) return;
+            var fl = loadFlagged(browse.sid);
+            browse.lastDrop = { b: b, i: i, ai: browse.all.indexOf(b), prev: fl[b.card.id] };
+            fl[b.card.id] = { q: flagLabel(b.card), c: "🗑 retirée en relecture", drop: 1 };
+            saveFlagged(browse.sid, fl);
+            browse.list.splice(i, 1);
+            if (browse.list !== browse.all) browse.all.splice(browse.lastDrop.ai, 1); // often the same array
+            browse.changed = true;
+            dlog("carte retirée", { source: browse.sid, id: b.card.id });
+            toast("🗑 " + t9n("Carte retirée du paquet · Ctrl+Z pour annuler"));
+            browseRerender(Math.min(i, browse.list.length - 1));
+        }
+        function undoBrowseDrop() {
+            var d = browse.lastDrop; if (!d) return;
+            browse.lastDrop = null;
+            var fl = loadFlagged(browse.sid);
+            if (d.prev) fl[d.b.card.id] = d.prev; else delete fl[d.b.card.id];
+            saveFlagged(browse.sid, fl);
+            browse.list.splice(d.i, 0, d.b);
+            if (browse.list !== browse.all) browse.all.splice(d.ai, 0, d.b);
+            toast("↩ " + t9n("Carte remise"));
+            browseRerender(d.i);
+        }
+        function browseRerender(i) {
+            renderBrowseOverall();
+            updateBrowseCommentCount();
+            renderBrowse();
+            jumpToSlide(i);
+        }
+        function jumpToSlide(i) {
+            var track = document.getElementById("b-track"), t = track && track.children[i];
+            if (!t) return;
+            track.scrollTo({ left: t.offsetLeft + t.offsetWidth / 2 - track.clientWidth / 2, behavior: "instant" });
+            onBrowseScroll();
+        }
 
         function closeBrowse() {
             document.getElementById("audio-player").pause();
@@ -4624,7 +4861,7 @@
             document.getElementById("b-content").innerHTML = "";
             document.getElementById("browse").style.display = "none";
             document.getElementById("home").style.display = "block";
-            if (browse.sorted && Object.keys(browse.sorted).length) renderHome(); // cards sorted as known (#176)
+            if ((browse.sorted && Object.keys(browse.sorted).length) || browse.changed) renderHome(); // cards sorted as known (#176), dropped (#187)
         }
 
         function filterBrowse(q) {
@@ -4632,10 +4869,31 @@
             var terms = noAcc(q.toLowerCase()).split(/\s+/).filter(Boolean);
             browse.list = browse.all.filter(function (b) {
                 if (browse.tag && b.tags.indexOf(browse.tag) === -1) return false;
+                if (browse.know && knowLevel(browse.srs[b.card.id]) !== browse.know) return false;
                 var t = noAcc(b.text);
                 return terms.every(function (term) { return t.indexOf(term) !== -1; });
             });
+            if (browse.order) {
+                var rank = function (b) { var st = browse.srs[b.card.id]; return !st || st.state === "new" ? -1 : st.state === "review" ? st.interval || 0 : -.5; };
+                var pos = new Map(browse.all.map(function (b, k) { return [b, k]; }));
+                browse.list.sort(function (a, b) { return (browse.order === "asc" ? rank(a) - rank(b) : rank(b) - rank(a)) || pos.get(a) - pos.get(b); });
+            }
             renderBrowse();
+        }
+        // How well a card is known, in four (#190): like the progress bars.
+        function knowLevel(st) {
+            var p = cardProgress(st);
+            return !p.f ? "new" : st.state !== "review" ? "learning" : p.f < .5 ? "weak" : "known";
+        }
+        function setBrowseKnow(v) {
+            browse.know = v || null;
+            document.getElementById("b-know").classList.toggle("on", !!browse.know);
+            filterBrowse(browse.q || "");
+        }
+        function setBrowseOrder(v) {
+            browse.order = v || null;
+            document.getElementById("b-order").classList.toggle("on", !!browse.order);
+            filterBrowse(browse.q || "");
         }
 
         // Tag chips above the browser (#41): one tag at a time, combined
@@ -4645,17 +4903,43 @@
             browse.all.forEach(function (b) { b.tags.forEach(function (t) { counts[t] = (counts[t] || 0) + 1; }); });
             var tags = Object.keys(counts).sort(naturalCompare);
             browse.hasTags = tags.length > 0;
-            var el = document.getElementById("b-tags");
-            el.innerHTML = !tags.length ? "" : '🏷 <button class="h-tag' + (browse.tag ? '' : ' on') + '" onclick="setBrowseTag(\'\')">toutes</button>'
+            // a menu at the end of the search box, with its own search (#188)
+            document.getElementById("b-tagdd").hidden = !tags.length;
+            document.getElementById("b-tag-cur").textContent = browse.tag || t9n("toutes");
+            document.getElementById("b-tag-btn").classList.toggle("on", !!browse.tag);
+            document.getElementById("b-tags").innerHTML = !tags.length ? "" : '<button class="b-tag-opt' + (browse.tag ? '' : ' on') + '" data-t="" onclick="setBrowseTag(\'\')">' + t9n("toutes") + ' <span>' + browse.all.length + '</span></button>'
                 + tags.map(function (t) {
-                    return '<button class="h-tag' + (browse.tag === t ? ' on' : '') + '" onclick="setBrowseTag(\'' + encodeURIComponent(t) + '\')">' + esc(t) + ' <span>' + counts[t] + '</span></button>';
+                    return '<button class="b-tag-opt' + (browse.tag === t ? ' on' : '') + '" data-t="' + esc(noAcc(t.toLowerCase())) + '" onclick="setBrowseTag(\'' + encodeURIComponent(t) + '\')">' + esc(t) + ' <span>' + counts[t] + '</span></button>';
                 }).join("");
         }
         function setBrowseTag(enc) {
             browse.tag = enc ? decodeURIComponent(enc) : null;
+            closeTagMenu();
             renderBrowseTags();
             filterBrowse(browse.q || "");
         }
+        function tagMenuOpen() { return !document.getElementById("b-tag-pop").hidden; }
+        function toggleTagMenu() {
+            if (tagMenuOpen()) { closeTagMenu(); return; }
+            document.getElementById("b-tag-pop").hidden = false;
+            var q = document.getElementById("b-tag-q");
+            q.value = ""; filterTagMenu("");
+            setTimeout(function () { q.focus(); }, 0);
+        }
+        function closeTagMenu() { document.getElementById("b-tag-pop").hidden = true; }
+        function filterTagMenu(q) {
+            q = noAcc(q.toLowerCase().trim());
+            var first = true;
+            document.querySelectorAll("#b-tags .b-tag-opt").forEach(function (o) {
+                var show = !q || (o.dataset.t && o.dataset.t.indexOf(q) !== -1);
+                o.hidden = !show;
+                o.classList.toggle("hl", show && !!q && first); // Entrée picks it
+                if (show && q) first = false;
+            });
+        }
+        document.addEventListener("click", function (e) {
+            if (tagMenuOpen() && !e.target.closest("#b-tagdd")) closeTagMenu();
+        });
 
         // How well a card is known (#175): 0 new … 1 (a month or more between
         // reviews), its colour from red to green, and a few words.
@@ -4832,11 +5116,11 @@
             el.innerHTML = '<div class="b-list' + (browse.hasTags ? ' with-tags' : '') + '">' + browse.list.map(function (b, i) {
                 var c = b.card;
                 var hasAudio = (c.audioQuestion && c.audioQuestion.length) || (c.audioAnswer && c.audioAnswer.length);
-                return '<div class="b-row">'
+                return '<div class="b-row" data-i="' + i + '" onclick="toggleBrowseReview(' + i + ')">'
                     + '<div class="b-row-front">' + esc(htmlToText(displayQuestion(c.question))) + '</div>'
                     + '<div class="b-row-back">' + esc(htmlToText(b.back)) + '</div>'
                     + (browse.hasTags ? '<div class="b-row-tags">' + b.tags.map(function (t) { return '<span class="c-tag">' + esc(t) + '</span>'; }).join("") + '</div>' : '')
-                    + (hasAudio ? '<button class="b-row-audio" onclick="playBrowseAudio(' + i + ')" title="Écouter">🔊</button>' : '<span></span>')
+                    + (hasAudio ? '<button class="b-row-audio" onclick="event.stopPropagation(); playBrowseAudio(' + i + ')" title="Écouter">🔊</button>' : '<span></span>')
                     + progBarHtml(browse.srs[c.id])
                     + '</div>';
             }).join("") + '</div>';
@@ -4856,7 +5140,10 @@
                 + '<div class="b-front"></div><div class="b-sep">' + (browse.sort && !sl.classList.contains("peek") ? t9n("verso · touche pour le voir") : "verso") + '</div><div class="b-back"></div>'
                 + (hasAudio ? '<button class="b-slide-audio" onclick="playBrowseAudio(' + sl.dataset.i + ')" title="Écouter">🔊</button>' : '')
                 + (browse.review ? '<div class="b-review-bar"><div class="b-comment">' + (fl ? "🚩 " + esc(typeof fl === "object" ? fl.c : "marquée") : "") + '</div>'
-                    + '<button class="b-flag" onclick="browseFlag(' + sl.dataset.i + ')">🚩 ' + (fl ? "Modifier" : "Commenter") + ' <span class="t-key">F6</span></button></div>' : '');
+                    + '<button class="b-flag" onclick="browseFlag(' + sl.dataset.i + ')">🚩 ' + (fl ? "Modifier" : "Commenter") + ' <span class="t-key">F6</span></button>'
+                    + '<button class="b-flag" onclick="browseEdit(' + sl.dataset.i + ')">✏️ ' + t9n("Éditer") + ' <span class="t-key">↑</span></button>'
+                    + '<button class="b-flag" onclick="browseDrop(' + sl.dataset.i + ')">🗑 ' + t9n("Retirer") + ' <span class="t-key">↓</span></button>'
+                    + (loadEdits(browse.sid)[c.id] ? '<div class="b-edited">✏️ ' + t9n("modifiée") + '</div>' : '') + '</div>' : '');
             var css = cardStyle(browse.sid, c);
             mountCardHtml(sl.querySelector(".b-front"), displayQuestion(rc.question), css);
             // like in study: the back only adds what the recto doesn't show (#128)
@@ -4909,13 +5196,24 @@
 
         document.addEventListener("keydown", function (e) {
             if (document.getElementById("browse").style.display !== "flex") return;
-            var inSearch = e.target && e.target.id === "b-search";
+            var inSearch = e.target && (e.target.id === "b-search" || e.target.id === "b-tag-q");
             if (!browse.carousel && !browse.review && !inSearch && e.key !== "Escape") return;
             if (e.key === "Escape") {
                 e.preventDefault();
-                if (inSearch) e.target.blur(); else closeBrowse();
+                if (tagMenuOpen()) closeTagMenu();
+                else if (inSearch) e.target.blur(); else closeBrowse();
             } else if (inSearch) {
-                if (e.key === "Enter") { e.preventDefault(); e.target.blur(); }
+                if (e.key === "Enter" && e.target.id === "b-tag-q") {
+                    e.preventDefault();
+                    var pick = document.querySelector("#b-tags .b-tag-opt.hl") || document.querySelector("#b-tags .b-tag-opt:not([hidden])");
+                    if (pick) pick.click();
+                } else if (e.key === "Enter") { e.preventDefault(); e.target.blur(); }
+            } else if (browse.review && !browse.sort && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
+                e.preventDefault(); // 📝 Relecture: ↑ edit, ↓ drop (#187)
+                if (e.key === "ArrowUp") browseEdit(browse.idx); else browseDrop(browse.idx);
+            } else if (browse.review && browse.lastDrop && e.key.toLowerCase() === "z" && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                undoBrowseDrop();
             } else if (e.key === "ArrowLeft") {
                 e.preventDefault();
                 stepBrowse(-1);
@@ -5938,7 +6236,16 @@
                 || wordRows.find(function (e) { return !e.solved && !e.given; });
             if (next) next.inp.focus();
             else if (document.activeElement) document.activeElement.blur(); // phone: keyboard down → rating pills show
-            if (!wordRows.some(function (e) { return !e.solved && !e.revealed; })) showBackForRating();
+            if (wordRows.some(function (e) { return !e.solved && !e.revealed; })) return;
+            // Missed on errors, nothing left to type (#191): « À revoir » and on
+            // to the next card by itself, once the red word has been seen.
+            if (sess.failedByErrors) { // giveAnswer only comes from errors
+                var card = sess.queue[sess.qIdx], wait = hasRichAnswer(card) ? 400 : 1300;
+                keyLock.until = Date.now() + wait;
+                setTimeout(function () { if (sess.queue[sess.qIdx] === card && !advancing) completeCard(); }, wait);
+                return;
+            }
+            showBackForRating();
         }
 
         function focusNext(i) {
@@ -6734,7 +7041,19 @@
                     "(suite) la carte notée part vers un coin ; combos inversés (justes à droite, erreurs à gauche) et comptés tout de suite ; la case rougit à chaque erreur ; ⚙ délai avant la carte suivante.": "(seguito) la carta valutata vola verso un angolo; combo invertite (giuste a destra, errori a sinistra) e contate subito; la casella diventa rossa a ogni errore; ⚙ tempo prima della carta successiva.",
                     "Délai avant la carte suivante": "Tempo prima della carta successiva", "Auto": "Auto", "Toujours lent": "Sempre lento", "Toujours rapide": "Sempre veloce",
                     "Temps laissé au verso, une fois le son fini. Auto : une carte vue pour la première fois, ou ratée, garde le temps de relire (≈ 2,5 s) ; une carte déjà vue et juste (même revenue dans la séance) passe vite (≈ 0,7 s, comptées pendant le son), avec une transition plus courte.": "Tempo lasciato al retro, finito l'audio. Auto: una carta vista per la prima volta, o sbagliata, tiene il tempo per rileggere (≈ 2,5 s); una carta già vista e giusta (anche tornata nella sessione) passa in fretta (≈ 0,7 s, contati durante l'audio), con una transizione più breve.", "joue l'enregistrement de la phrase d'exemple ; s'il n'y en a pas (phrases écrites pour le Vocabulaire), la voix du navigateur la lit.": "riproduce la registrazione della frase d'esempio; se non c'è (frasi scritte per il Vocabolario), la legge la voce del browser.",
-                    "6 nov.": "6 nov.", "9 nov.": "9 nov.", "10 nov.": "10 nov.", "En mode « nombre de cartes », la fiche du paquet donne aussi la durée estimée de la séance, d'après ton temps habituel sur chaque carte.": "In modalità « numero di carte », la scheda del mazzo indica anche la durata stimata della sessione, in base al tuo tempo abituale su ogni carta.", "(soir, fin) fiche du paquet : durée estimée de la séance en mode « nombre de cartes ».": "(sera, fine) scheda del mazzo: durata stimata della sessione in modalità « numero di carte ».", "Sur plusieurs appareils : les cartes d'une journée sont tirées dans le même ordre partout, la progression part en ligne dès que tu quittes l'appli et revient quand tu la rouvres sur l'autre appareil : tu reprends où tu en étais.": "Su più dispositivi: le carte di una giornata sono estratte nello stesso ordine ovunque, i progressi vanno online appena lasci l'app e tornano quando la riapri sull'altro dispositivo: riprendi da dove eri.", "(soir, suite) d'un appareil à l'autre : même ordre des cartes du jour partout, et la progression revient en rouvrant l'appli.": "(sera, seguito) da un dispositivo all'altro: stesso ordine delle carte del giorno ovunque, e i progressi tornano riaprendo l'app.", "(soir) 💤 endormir un paquet : il quitte l'accueil, sa progression est gardée, et se réveille en bas de l'accueil.": "(sera) 💤 addormentare un mazzo: lascia la pagina iniziale, i progressi restano, e si risveglia in fondo alla pagina iniziale.",
+                    "6 nov.": "6 nov.", "9 nov.": "9 nov.", "10 nov.": "10 nov.", "En mode « nombre de cartes », la fiche du paquet donne aussi la durée estimée de la séance, d'après ton temps habituel sur chaque carte.": "In modalità « numero di carte », la scheda del mazzo indica anche la durata stimata della sessione, in base al tuo tempo abituale su ogni carta.", "(soir, fin) fiche du paquet : durée estimée de la séance en mode « nombre de cartes ».": "(sera, fine) scheda del mazzo: durata stimata della sessione in modalità « numero di carte ».", "(nuit) 📝 Relecture : ↑ modifier la carte, ↓ la retirer du paquet.": "(notte) 📝 Revisione: ↑ modifica la carta, ↓ toglila dal mazzo.",
+                    "(nuit, suite) 🔍 liste : une ligne par carte, clic → 📝 Relecture, en-tête toujours visible, tags dans un menu au bout de la recherche.": "(notte, seguito) 🔍 elenco: una riga per carta, clic → 📝 Revisione, intestazione sempre visibile, tag in un menu alla fine della ricerca.",
+                    ": parcourir les cartes (carrousel pour les images, liste pour les mots : une ligne par carte, un clic l'ouvre en 📝 Relecture, au même endroit en revenant ; 🏷 au bout de la recherche pour filtrer par tag ; 📶 et ↕ sous la recherche : filtrer et trier par niveau de connaissance) ;": ": sfogliare le carte (carosello per le immagini, elenco per le parole: una riga per carta, un clic la apre in 📝 Revisione, allo stesso punto al ritorno; 🏷 alla fine della ricerca per filtrare per tag; 📶 e ↕ sotto la ricerca: filtrare e ordinare per livello di conoscenza);",
+                    "(nuit, fin) Vocabulaire : tags de nature (nom, verbe, adjectif…) et de thème (animaux, nourriture, corps, métiers…), à choisir dans le menu 🏷 de 🔍.": "(notte, fine) Vocabolario: tag di categoria (nome, verbo, aggettivo…) e di tema (animali, cibo, corpo, mestieri…), da scegliere nel menu 🏷 di 🔍.",
+                    "(nuit, correction) après 3 erreurs sur le dernier mot, la carte passe toute seule à la suivante (notée « À revoir »).": "(notte, correzione) dopo 3 errori sull'ultima parola, la carta passa da sola alla successiva (valutata « Da rivedere »).",
+                    "toutes": "tutte", "Tous les niveaux": "Tutti i livelli", "Nouvelles": "Nuove", "En cours": "In corso", "À consolider": "Da consolidare", "Bien connues": "Ben note",
+                    "Ordre du paquet": "Ordine del mazzo", "Moins connues d'abord": "Prima le meno note", "Mieux connues d'abord": "Prima le più note",
+                    "(nuit, fin+) 🔍 filtrer et trier par niveau de connaissance (📶 et ↕ sous la recherche).": "(notte, fine+) 🔍 filtrare e ordinare per livello di conoscenza (📶 e ↕ sotto la ricerca).", "Filtrer par tag": "Filtra per tag", "Chercher un tag…": "Cerca un tag…",
+                    "pour commenter une carte,": "per commentare una carta,", "(✏️) pour la modifier,": "(✏️) per modificarla,", "(🗑) pour la retirer du paquet (": "(🗑) per toglierla dal mazzo (", "la remet).": "la rimette).",
+                    "📝 Relecture : modifier la carte · la retirer du paquet (Ctrl+Z : annuler)": "📝 Revisione: modifica la carta · toglila dal mazzo (Ctrl+Z: annulla)",
+                    "✏️ Modifier la carte": "✏️ Modifica la carta", "Ctrl+Entrée : enregistrer · Échap : annuler": "Ctrl+Invio: salva · Esc: annulla", "✓ Enregistrer": "✓ Salva",
+                    "Réponse à taper": "Risposta da scrivere", "Phrase d'exemple": "Frase d'esempio", "Traduction de la phrase": "Traduzione della frase", "Note": "Nota", "Recto": "Fronte", "Verso": "Retro",
+                    "Carte modifiée": "Carta modificata", "Carte retirée du paquet · Ctrl+Z pour annuler": "Carta tolta dal mazzo · Ctrl+Z per annullare", "Carte remise": "Carta rimessa", "Éditer": "Modifica", "Retirer": "Togli", "modifiée": "modificata", "Sur plusieurs appareils : les cartes d'une journée sont tirées dans le même ordre partout, la progression part en ligne dès que tu quittes l'appli et revient quand tu la rouvres sur l'autre appareil : tu reprends où tu en étais.": "Su più dispositivi: le carte di una giornata sono estratte nello stesso ordine ovunque, i progressi vanno online appena lasci l'app e tornano quando la riapri sull'altro dispositivo: riprendi da dove eri.", "(soir, suite) d'un appareil à l'autre : même ordre des cartes du jour partout, et la progression revient en rouvrant l'appli.": "(sera, seguito) da un dispositivo all'altro: stesso ordine delle carte del giorno ovunque, e i progressi tornano riaprendo l'app.", "(soir) 💤 endormir un paquet : il quitte l'accueil, sa progression est gardée, et se réveille en bas de l'accueil.": "(sera) 💤 addormentare un mazzo: lascia la pagina iniziale, i progressi restano, e si risveglia in fondo alla pagina iniziale.",
                     "💤 sur un paquet l'endort : il disparaît de l'accueil, sa progression est gardée ; « 💤 paquets endormis », en bas de l'accueil, les réveille.": "💤 su un mazzo lo addormenta: sparisce dalla pagina iniziale, i progressi restano; « 💤 mazzi addormentati », in fondo alla pagina iniziale, li risveglia.",
                     "Dans 🔍, chaque carte a une barre de progression qui se remplit de gauche à droite, du rouge (à peine commencée) au vert (bien sue), et le paquet entier a la sienne en haut. 🗂 Pré-tri montre les cartes jamais vues une par une : touche la carte pour voir le verso, puis → (ou glisser à droite) = je la connais déjà, elle est rangée comme apprise et reviendra dans 20 à 60 jours ; ← (ou glisser à gauche) = à apprendre, elle reste nouvelle.": "In 🔍, ogni carta ha una barra di progresso che si riempie da sinistra a destra, dal rosso (appena iniziata) al verde (ben saputa), e il mazzo intero ha la sua in alto. 🗂 Pre-selezione mostra le carte mai viste una per una: tocca la carta per vedere il retro, poi → (o scorri a destra) = la so già, viene messa tra le imparate e tornerà fra 20–60 giorni; ← (o scorri a sinistra) = da imparare, resta nuova.",
                     "Sur téléphone, pas de boutons : touche la moitié gauche du recto pour un indice, la moitié droite pour la réponse (en mode Normal, touche la carte pour la retourner).": "Sul telefono, niente pulsanti: tocca la metà sinistra del fronte per un suggerimento, la metà destra per la risposta (in modalità Normale, tocca la carta per girarla).",
@@ -6812,6 +7131,7 @@
                     "Besoin d'aide ?": "Serve aiuto?", "montre le mot": "mostra la parola", "en orange": "in arancione", "sous la case ;": "sotto la casella;",
                     "montre tout. Après": "mostra tutto. Dopo", "3 erreurs": "3 errori",
                     "(réglable dans ⚙), le bon mot s'écrit en rouge. Une carte où on a eu de l'aide est notée « À revoir ».": "(regolabile in ⚙), la parola giusta si scrive in rosso. Una carta in cui hai avuto aiuto viene valutata « Da rivedere ».",
+                    "(réglable dans ⚙), le bon mot s'écrit en rouge ; si c'était le dernier, la carte est notée « À revoir » et passe toute seule à la suivante. Une carte où on a eu de l'aide est notée « À revoir ».": "(regolabile in ⚙), la parola giusta si scrive in rosso; se era l'ultima, la carta viene valutata « Da rivedere » e passa da sola alla successiva. Una carta in cui hai avuto aiuto viene valutata « Da rivedere ».",
                     "La carte prend la couleur de la note.": "La carta prende il colore della valutazione.", "Tout tapé sans aide →": "Tutto scritto senza aiuto →",
                     "carte réussie": "carta riuscita",
                     "automatiquement. Après un indice ou la réponse, ces boutons apparaissent en bas ; la durée indique quand la carte reviendra.": "automaticamente. Dopo un suggerimento o la risposta, questi pulsanti compaiono in basso; la durata indica quando la carta tornerà.",
@@ -7046,7 +7366,11 @@
             {"id": 32, "d": "2026-11-10", "k": "paquets", "fr": "Dans 🔍 : une <b>barre de progression</b> par carte, du rouge au vert, et <b>🗂 Pré-tri</b> pour ranger d'un geste les mots que tu connais déjà.", "it": "In 🔍: una <b>barra di progresso</b> per carta, dal rosso al verde, e <b>🗂 Pre-selezione</b> per mettere da parte con un gesto le parole che sai già."},
             {"id": 33, "d": "2026-11-10", "k": "accueil", "fr": "<b>💤 Endormir un paquet</b> : il disparaît de l'accueil, sa progression est gardée ; « paquets endormis » en bas pour le réveiller.", "it": "<b>💤 Addormentare un mazzo</b>: sparisce dalla pagina iniziale, i progressi restano; « mazzi addormentati » in fondo per risvegliarlo."},
             {"id": 34, "d": "2026-11-10", "k": "revision", "fr": "<b>D'un appareil à l'autre</b> : les cartes du jour viennent dans le même ordre, et ta progression revient quand tu rouvres l'appli.", "it": "<b>Da un dispositivo all'altro</b>: le carte del giorno arrivano nello stesso ordine, e i progressi tornano quando riapri l'app."},
-            {"id": 35, "d": "2026-11-10", "k": "paquets", "fr": "La fiche du paquet donne la <b>durée estimée</b> de la séance (mode « nombre de cartes »).", "it": "La scheda del mazzo indica la <b>durata stimata</b> della sessione (modalità « numero di carte »)."}
+            {"id": 35, "d": "2026-11-10", "k": "paquets", "fr": "La fiche du paquet donne la <b>durée estimée</b> de la séance (mode « nombre de cartes »).", "it": "La scheda del mazzo indica la <b>durata stimata</b> della sessione (modalità « numero di carte »)."},
+            {"id": 36, "d": "2026-11-10", "k": "cartes", "fr": "Dans <b>📝 Relecture</b> : <b>↑</b> pour <b>modifier</b> une carte (gardé sur tous tes appareils), <b>↓</b> pour la <b>retirer</b> du paquet (Ctrl+Z la remet).", "it": "In <b>📝 Revisione</b>: <b>↑</b> per <b>modificare</b> una carta (resta su tutti i tuoi dispositivi), <b>↓</b> per <b>toglierla</b> dal mazzo (Ctrl+Z la rimette)."},
+            {"id": 37, "d": "2026-11-10", "k": "affichage", "fr": "Dans 🔍, la <b>liste</b> tient sur une ligne par carte ; un <b>clic</b> ouvre la carte en 📝 Relecture ; le titre et la recherche restent en haut, et les <b>tags</b> sont dans un menu 🏷 au bout de la recherche.", "it": "In 🔍, l'<b>elenco</b> sta su una riga per carta; un <b>clic</b> apre la carta in 📝 Revisione; titolo e ricerca restano in alto, e i <b>tag</b> sono in un menu 🏷 alla fine della ricerca."},
+            {"id": 38, "d": "2026-11-10", "k": "paquets", "fr": "Le <b>Vocabulaire</b> a des <b>tags</b> : nature du mot (nom, verbe, adjectif…) et <b>thème</b> (animaux, nourriture, corps, métiers, ville…), à choisir dans le menu 🏷 de 🔍.", "it": "Il <b>Vocabolario</b> ha dei <b>tag</b>: categoria della parola (nome, verbo, aggettivo…) e <b>tema</b> (animali, cibo, corpo, mestieri, città…), da scegliere nel menu 🏷 di 🔍."},
+            {"id": 39, "d": "2026-11-10", "k": "paquets", "fr": "Dans 🔍, <b>📶</b> ne montre que les cartes nouvelles, en cours, à consolider ou bien connues, et <b>↕</b> les trie des moins connues aux mieux connues (ou l'inverse).", "it": "In 🔍, <b>📶</b> mostra solo le carte nuove, in corso, da consolidare o ben note, e <b>↕</b> le ordina dalle meno note alle più note (o al contrario)."}
         ];
         var NEWS_KINDS = { revision: ["Révision", "Ripasso"], cartes: ["Cartes", "Carte"], combos: ["Combos", "Combo"], affichage: ["Affichage", "Aspetto"],
             reglages: ["Réglages", "Impostazioni"], accueil: ["Accueil", "Home"], paquets: ["Paquets", "Mazzi"] };
