@@ -1018,9 +1018,10 @@
 
         .s-hold-touch { display: none; }
 
+        /* touch screens: no « Maintenir appuyé » pill, a finger anywhere on
+           the screen already holds the back (#67, #184) */
         @media (hover: none) {
-            .s-hold-kb { display: none; }
-            .s-hold-touch { display: inline; }
+            .s-hold { display: none; }
         }
 
         .s-counts {
@@ -1369,6 +1370,28 @@
             }
         }
 
+        /* ── Phones (#182): counters up beside the progress bar, thin bar
+           with its text on top, flat rating pills; no hint / answer pills —
+           a tap on the recto's left half = hint, right half = answer (#180:
+           in Normal mode, a tap anywhere shows the answer), then a swipe
+           rates the card. The bottom bar only shows the rating pills. ── */
+        @media (max-width: 600px) and (hover: none) {
+            #study .s-prog { display: grid; grid-template-columns: auto 1fr; column-gap: 8px; row-gap: 3px; align-items: center; }
+            #study .s-prog > .s-counts { grid-column: 1; grid-row: 1; gap: 9px; }
+            #study .s-prog > .s-counts .s-count { font-size: 12px; line-height: 1; }
+            #study .s-prog-label { grid-column: 2; grid-row: 1; margin: 0; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            #study .s-prog-track { grid-column: 1 / -1; grid-row: 2; }
+            #study .s-time { grid-column: 1 / -1; grid-row: 3; margin-top: 0; }
+            #study .s-time-label { grid-column: 1 / -1; grid-row: 4; margin-top: 0; line-height: 1; }
+            #study .s-bottom[data-state="question"], #study .s-bottom[data-state="next"], #study .s-bottom[data-state=""] { display: none; }
+            #study .s-actions { height: 38px; margin-bottom: 0; }
+            #study .t-rate { flex-direction: row; gap: 5px; padding: 0 6px; border-radius: 999px; }
+            #study .t-rate-label { font-size: 13px; }
+            #study .t-rate-time { font-size: 11px; }
+            #s-content .s-question.swiping { transition: none; }
+            #s-content .b-sep.tap-hint { color: var(--text-3); font-size: 11px; }
+        }
+
         /* Card highlighted in the rating's color (automatic or keyboard
            rating; a click/tap only lights up the button pressed). */
         .s-question.err-tint { background: rgba(220, 38, 38, var(--err-a, 0)); border-color: rgba(220, 38, 38, .5); } /* #119, before the rating colours */
@@ -1688,6 +1711,16 @@
             font-size: 11px;
             color: var(--text-3);
             text-align: right;
+            white-space: nowrap;
+        }
+
+        /* short labels when the top bar runs out of room (#183) */
+        .lbl-short { display: none; }
+        #browse .s-topbar > * { white-space: nowrap; }
+        @media (max-width: 600px) {
+            .lbl-long { display: none; }
+            .lbl-short { display: inline; }
+            #browse .s-topbar { gap: 8px; }
         }
 
         .b-search {
@@ -1738,6 +1771,33 @@
         .b-slide.active {
             opacity: 1;
         }
+
+        /* far from the screen, a slide costs no layout (#179) */
+        .b-slide:not(.active) { content-visibility: auto; contain-intrinsic-size: auto 320px; }
+
+        /* Progress of each card (#175): a bar that fills left to right and
+           goes from red (just started) to green (well known); grey = new. */
+        .b-prog { height: 4px; border-radius: 4px; background: var(--border); overflow: hidden; margin: -6px 0 4px; }
+        .b-prog > i { display: block; height: 100%; border-radius: 4px; }
+        .b-prog-label { font-size: 11px; color: var(--text-3); text-align: right; margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+        .b-row .b-prog { grid-column: 1 / -1; margin: 2px 0 0; height: 3px; }
+        .b-overall { width: 100%; max-width: 720px; margin: -14px 0 18px; font-size: 11px; color: var(--text-3); }
+        .b-overall:empty { display: none; }
+        .b-overall .b-prog { margin: 4px 0 0; height: 6px; display: flex; }
+        .b-overall .b-prog > i { border-radius: 0; }
+
+        /* 🗂 Pré-tri (#176): one never-seen card at a time, → known, ← to learn */
+        #browse.sorting .b-track { overflow-x: hidden; scroll-snap-type: none; touch-action: pan-y; }
+        .b-sort-bar { display: flex; gap: 10px; justify-content: center; margin: 4px 0 10px; }
+        .b-sort-bar button { flex: 0 1 200px; padding: 10px 14px; border-radius: 999px; border: 1.5px solid var(--border-2); background: var(--surface); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+        .b-sort-bar .b-sort-learn { color: var(--red); border-color: var(--border-tint-red); }
+        .b-sort-bar .b-sort-known { color: var(--green); border-color: var(--border-tint-green); }
+        .b-slide.sorted-known { border-color: var(--green); background: var(--tint-green); }
+        .b-slide.sorted-learn { border-color: var(--red); background: var(--tint-red); }
+        .b-slide.swiping { transition: none; }
+        /* the back stays blurred until the card is touched: guess first */
+        #browse.sorting .b-slide:not(.peek) .b-back { filter: blur(7px); }
+        .b-sort-done { text-align: center; padding: 40px 0; color: var(--text-2); }
 
         .b-slide-audio {
             display: block;
@@ -2109,6 +2169,7 @@
                     <b>🔍</b> : parcourir les cartes (carrousel pour les images, liste pour les mots) ; <b>📝 Relecture</b> les montre une par une, <b>F6</b> pour commenter une carte.
                     <b>＋</b> (sur « 📝 Vocabulaire perso ») : ajouter tes propres cartes, l'espagnol et sa traduction.
                     Dans 🔍 d'un paquet de conjugaison, <b>📋 Tableaux</b> montre tous les tableaux des verbes.
+                    <br>Dans 🔍, chaque carte a une barre de progression qui se remplit de gauche à droite, du rouge (à peine commencée) au vert (bien sue), et le paquet entier a la sienne en haut. 🗂 Pré-tri montre les cartes jamais vues une par une : touche la carte pour voir le verso, puis → (ou glisser à droite) = je la connais déjà, elle est rangée comme apprise et reviendra dans 20 à 60 jours ; ← (ou glisser à gauche) = à apprendre, elle reste nouvelle.
                 </div>
             </div>
 
@@ -2148,6 +2209,7 @@
                     </div></div>
                     <b>Indice</b> montre le mot <span style="color:var(--orange)">en orange</span> sous la case ; <b>Voir la réponse</b> montre tout.
                     Après <span style="color:var(--red)">3 erreurs</span> (réglable dans ⚙), le bon mot s'écrit en rouge. Une carte où on a eu de l'aide est notée « À revoir ».
+                    <br>Sur téléphone, pas de boutons : touche la moitié gauche du recto pour un indice, la moitié droite pour la réponse (en mode Normal, touche la carte pour la retourner).
                 </div>
             </div>
 
@@ -2167,6 +2229,7 @@
                     </div>
                     La carte prend la couleur de la note, puis part vers un coin : À revoir ↙, Difficile ↖, Correct ↘, Facile ↗.
                     Le délai avant la carte suivante se règle dans ⚙ (Auto : lent seulement la première fois qu'on voit une carte, ou si on la rate).
+                    <br>Sur téléphone, glisse la carte pour la noter : à gauche À revoir, à droite Correct, vers le haut Facile, vers le bas Difficile (haut et bas demandent un geste plus long, pour éviter les erreurs). Les compteurs nouvelles / à repasser / à réviser sont en haut, à côté de la barre de progression.
                 </div>
             </div>
 
@@ -2225,6 +2288,8 @@
                 <div class="g-num">9</div><div class="g-h">Nouveautés</div>
                 <div class="g-body">
                     <ul class="g-news">
+                        <li><b>10 nov.</b> sur téléphone, plus de boutons en bas pendant la question : touche à gauche du recto = indice, à droite = réponse, puis glisse la carte pour la noter ; compteurs en haut à côté de la barre ; boutons de note plus plats ; plus de macaron « Maintenir appuyé ».</li>
+                        <li><b>10 nov.</b> (suite) 🔍 : barre de progression de chaque carte et du paquet, du rouge au vert ; 🗂 Pré-tri des cartes jamais vues (→ je connais, ← à apprendre) ; carrousel plus fluide avec des milliers de cartes ; plus d'étiquettes (faux ami…) sur les cartes, seulement dans les filtres ; mots raccourcis sur petit écran.</li>
                         <li><b>9 nov.</b> les cases ne rapetissent plus au retour d'une carte, et la carte s'agrandit quand le verso arrive au lieu de défiler ; plusieurs sens séparés par un « / » (« encore / toujours ») ; Vocabulaire : ya no, algún et bien expliqués, debería et este / estos rangés dans Grammaire (deber au conditionnel).</li>
                         <li><b>9 nov.</b> (suite) carte ratée sur erreurs : le clavier ne fait rien pendant la transition (pas de note ni de lettres dans la carte suivante) ; le chrono s'arrête quand l'onglet ou la fenêtre n'est plus devant ; Grammaire : même écriture pour les verbes et les phrases à trous.</li>
                         <li><b>9 nov.</b> (fin) mode « nombre de cartes » : temps restant estimé à côté de la progression ; une carte juste mais lente (Difficile) part à droite comme les autres bonnes réponses ; le combo grandit, change de couleur et de forme à chaque palier.</li>
@@ -2317,14 +2382,16 @@
     <!-- ── BROWSE ── -->
     <div id="browse">
         <div class="s-topbar">
-            <button class="s-back" onclick="closeBrowse()">← Retour</button>
+            <button class="s-back" onclick="closeBrowse()">← <span class="lbl-long">Retour</span></button>
             <button class="s-mode-toggle" id="b-review-btn" onclick="toggleBrowseReview()" title="Relire le paquet carte par carte et commenter (F6)">📝 Relecture</button>
             <button class="s-mode-toggle" id="b-conj-btn" onclick="toggleBrowseConj()" title="Tous les tableaux de conjugaison du paquet" hidden>📋 Tableaux</button>
-            <button class="s-mode-toggle" id="b-export-btn" onclick="downloadBrowseComments()" hidden>⬇ Commentaires <span id="b-comment-n"></span></button>
+            <button class="s-mode-toggle" id="b-sort-btn" onclick="toggleBrowseSort()" title="Trier les cartes jamais vues : → je connais (rangée « facile »), ← à apprendre" hidden>🗂 <span class="lbl-long">Pré-tri</span><span class="lbl-short">Tri</span></button>
+            <button class="s-mode-toggle" id="b-export-btn" onclick="downloadBrowseComments()" hidden>⬇ <span class="lbl-long">Commentaires</span><span class="lbl-short">Comm.</span> <span id="b-comment-n"></span></button>
             <div class="b-count" id="b-count">0 / 0</div>
         </div>
         <div class="s-main">
             <div class="s-deck-name" id="b-deck-name"></div>
+            <div class="b-overall" id="b-overall"></div>
             <input class="b-search" id="b-search" type="search" placeholder="🔎 Rechercher…" oninput="filterBrowse(this.value)">
             <div class="b-tags" id="b-tags"></div>
             <div id="b-content" style="width:100%"></div>
@@ -4222,14 +4289,17 @@
         // Card info sheet (#7): shown under the answer once the card is done.
         // Per-source switches (#61). Defaults come from what the cards hold;
         // this map overrides them — the base of a future « réglages par
-        // paquet ». Grammaire: tags after the answer paused.
-        var SOURCE_FEATURES = { grammaire: { tagsAfterAnswer: false }, grammatica: { tagsAfterAnswer: false } };
+        // paquet ». Tags after the answer: only on the trees (feuillu,
+        // conifère… are what the card teaches); elsewhere they stay in the
+        // explorer's filter row, not on the card (#61, #174).
+        var SOURCE_FEATURES = { arbres: { tagsAfterAnswer: true } };
+        var FEATURE_DEFAULTS = { tagsAfterAnswer: false };
         function feature(name, sid) {
-            var f = SOURCE_FEATURES[sid == null ? sess.sourceId : sid];
-            return !f || f[name] !== false;
+            var f = SOURCE_FEATURES[sid == null ? sess.sourceId : sid] || {};
+            return name in f ? f[name] !== false : FEATURE_DEFAULTS[name] !== false;
         }
-        function infoHtml(card) {
-            var tags = feature("tagsAfterAnswer") ? shownTags(card) : [];
+        function infoHtml(card, sid) {
+            var tags = feature("tagsAfterAnswer", sid) ? shownTags(card) : [];
             if (!card.info && !tags.length) return "";
             return '<div class="c-info">' + (card.info || "")
                 + (tags.length ? '<div class="c-tags">' + tags.map(function (t) { return '<span class="c-tag">' + esc(t) + '</span>'; }).join("") + '</div>' : '')
@@ -4349,6 +4419,9 @@
             var src = loadSources()[si];
             var cardsByDeck = loadCards(src.id);
             browse.sid = src.id;
+            browse.srs = loadSRS(src.id);
+            browse.sort = false; browse.sorted = {};
+            document.getElementById("browse").classList.remove("sorting");
             var all = [];
             childDeckIds(src.decks, deckName).forEach(function (did) {
                 (cardsByDeck[did] || []).forEach(function (c) { all.push(c); });
@@ -4371,6 +4444,9 @@
             document.getElementById("b-conj-btn").classList.remove("on");
             document.getElementById("b-conj-btn").hidden = !all.some(function (c) { return conjKey(c); });
             document.getElementById("b-export-btn").hidden = !browse.review;
+            document.getElementById("b-sort-btn").hidden = !all.some(isNewCard);
+            document.getElementById("b-sort-btn").classList.remove("on");
+            renderBrowseOverall();
             if (browse.review) setTimeout(updateBrowseCommentCount, 0);
             document.getElementById("b-deck-name").textContent = deckName.split("::").join(" › ");
             document.getElementById("home").style.display = "none";
@@ -4398,6 +4474,7 @@
             document.getElementById("b-count").textContent = html.length + " tableaux";
         }
         function toggleBrowseReview() {
+            if (browse.sort) toggleBrowseSort();
             browse.review = !browse.review;
             document.getElementById("b-review-btn").classList.toggle("on", browse.review);
             document.getElementById("b-export-btn").hidden = !browse.review;
@@ -4439,6 +4516,7 @@
             document.getElementById("b-content").innerHTML = "";
             document.getElementById("browse").style.display = "none";
             document.getElementById("home").style.display = "block";
+            if (browse.sorted && Object.keys(browse.sorted).length) renderHome(); // cards sorted as known (#176)
         }
 
         function filterBrowse(q) {
@@ -4471,6 +4549,113 @@
             filterBrowse(browse.q || "");
         }
 
+        // How well a card is known (#175): 0 new … 1 (a month or more between
+        // reviews), its colour from red to green, and a few words.
+        function cardProgress(st) {
+            if (!st || st.state === "new") return { f: 0, color: "transparent", label: t9n("nouvelle") };
+            if (st.state === "learning" || st.state === "relearning") return { f: .12, color: "hsl(0, 70%, 52%)", label: t9n("en cours") };
+            var f = Math.max(.25, Math.min(1, Math.log(1 + st.interval) / Math.log(31)));
+            return { f: f, color: "hsl(" + Math.round(f * 125) + ", 65%, 44%)", label: st.interval + " j" };
+        }
+        function progBarHtml(st) {
+            var p = cardProgress(st);
+            return '<div class="b-prog" title="' + esc(p.label) + '"><i style="width:' + Math.round(p.f * 100) + '%;background:' + p.color + '"></i></div>';
+        }
+        // The whole deck: one bar, the cards from best known (left) to new.
+        function renderBrowseOverall() {
+            var el = document.getElementById("b-overall"), n = browse.all.length;
+            if (!n) { el.innerHTML = ""; return; }
+            var buckets = {}, known = 0;
+            browse.all.forEach(function (b) {
+                var p = cardProgress(browse.srs[b.card.id]);
+                if (!p.f) return;
+                var k = Math.round(p.f * 4); buckets[k] = (buckets[k] || 0) + 1;
+                if (p.f >= .5) known++;
+            });
+            var segs = [4, 3, 2, 1, 0].map(function (k) {
+                if (!buckets[k]) return "";
+                var f = Math.max(.12, k / 4), color = k ? "hsl(" + Math.round(f * 125) + ", 65%, 44%)" : "hsl(0, 70%, 52%)";
+                return '<i style="width:' + (100 * buckets[k] / n) + '%;background:' + color + '"></i>';
+            }).join("");
+            var seen = Object.keys(buckets).reduce(function (a, k) { return a + buckets[k]; }, 0);
+            el.innerHTML = t9n("Progression") + " : " + seen + " / " + n + " " + t9n("vues") + " · " + known + " " + t9n("bien connues")
+                + '<div class="b-prog">' + segs + '</div>';
+        }
+
+        // 🗂 Pré-tri (#176): the never-seen cards one by one; → / swipe right
+        // = « je connais » (a learnt review, back in 20–60 days, like « je
+        // connais ce niveau »), ← / swipe left = to learn (stays new).
+        function isNewCard(c) { var st = browse.srs[c.id]; return !st || st.state === "new"; }
+        function toggleBrowseSort() {
+            browse.sort = !browse.sort;
+            if (browse.sort) { browse.review = false; document.getElementById("b-review-btn").classList.remove("on"); }
+            document.getElementById("b-sort-btn").classList.toggle("on", browse.sort);
+            document.getElementById("browse").classList.toggle("sorting", browse.sort);
+            browse.sorted = {};
+            if (browse.sort) browse.list = browse.all.filter(function (b) { return isNewCard(b.card); });
+            else { filterBrowse(browse.q || ""); renderBrowseOverall(); return; }
+            renderBrowse();
+        }
+        function sortCard(known) {
+            var b = browse.list[browse.idx];
+            if (!browse.sort || !b || browse.sorted[b.card.id] != null) { if (b) stepBrowse(1); return; }
+            var srs = loadSRS(browse.sid);
+            if (known) {
+                var iv = 20 + Math.floor(Math.random() * 41);
+                srs[b.card.id] = { state: "review", step: 0, interval: iv, ease: 2.5, due: TODAY + iv, reps: 1, lapses: 0, easyCount: 1, lastReview: Date.now(), known: true };
+                saveSRS(browse.sid, srs);
+                browse.srs = srs;
+            }
+            browse.sorted[b.card.id] = known;
+            dlog("pré-tri", { source: browse.sid, carte: b.card.id, connue: known });
+            var sl = document.querySelector('.b-slide[data-i="' + browse.idx + '"]');
+            if (sl) { sl.classList.add(known ? "sorted-known" : "sorted-learn"); delete sl.dataset.filled; fillSlide(sl); }
+            updateSortCount();
+            if (browse.idx >= browse.list.length - 1) { setTimeout(sortFinished, 350); return; }
+            setTimeout(function () { stepBrowse(1); }, 250);
+        }
+        function updateSortCount() {
+            var ks = Object.keys(browse.sorted), k = ks.filter(function (id) { return browse.sorted[id]; }).length;
+            var el = document.getElementById("b-sort-count");
+            if (el) el.textContent = k + " " + t9n("connues") + " · " + (ks.length - k) + " " + t9n("à apprendre");
+        }
+        function sortFinished() {
+            var ks = Object.keys(browse.sorted), k = ks.filter(function (id) { return browse.sorted[id]; }).length;
+            toast("🗂 " + k + " " + t9n("connues") + " · " + (ks.length - k) + " " + t9n("à apprendre"));
+            toggleBrowseSort();
+        }
+        document.addEventListener("keydown", function (e) {
+            if (!browse.sort || document.getElementById("browse").style.display !== "flex" || e.target.tagName === "INPUT") return;
+            if (e.key === "ArrowRight") { e.preventDefault(); e.stopImmediatePropagation(); sortCard(true); }
+            else if (e.key === "ArrowLeft") { e.preventDefault(); e.stopImmediatePropagation(); sortCard(false); }
+        }, true);
+        // swipe on the card: it follows the finger, far enough = sorted
+        (function () {
+            var sw = null;
+            document.addEventListener("touchstart", function (e) {
+                sw = null;
+                if (!browse.sort || e.touches.length !== 1) return;
+                var sl = e.target.closest("#b-track .b-slide.active");
+                if (!sl || e.target.closest("button, a")) return;
+                sw = { sl: sl, x: e.touches[0].clientX, y: e.touches[0].clientY, dx: 0 };
+            }, { passive: true });
+            document.addEventListener("touchmove", function (e) {
+                if (!sw) return;
+                sw.dx = e.touches[0].clientX - sw.x;
+                if (Math.abs(sw.dx) < Math.abs(e.touches[0].clientY - sw.y)) return;
+                if (e.cancelable) e.preventDefault();
+                sw.sl.classList.add("swiping");
+                sw.sl.style.transform = "translateX(" + sw.dx + "px) rotate(" + (sw.dx / 25) + "deg)";
+                sw.sl.classList.toggle("sorted-known", sw.dx > 70); sw.sl.classList.toggle("sorted-learn", sw.dx < -70);
+            }, { passive: false });
+            document.addEventListener("touchend", function () {
+                if (!sw) return;
+                var s = sw; sw = null;
+                s.sl.classList.remove("swiping", "sorted-known", "sorted-learn"); s.sl.style.transform = "";
+                if (Math.abs(s.dx) >= 70) sortCard(s.dx > 0);
+            });
+        })();
+
         // Builds empty slide shells for the whole list; each one is filled
         // (front + back, via the Shadow DOM renderer) only when it gets
         // near the viewport, so 1000+ card decks stay light.
@@ -4480,28 +4665,36 @@
             if (browse.observer) browse.observer.disconnect();
             browse.idx = 0;
             if (!n) {
-                el.innerHTML = '<div class="h-empty">Aucune carte ne correspond.</div>';
+                el.innerHTML = browse.sort ? '<div class="b-sort-done">' + t9n("Plus aucune carte jamais vue à trier.") + '</div>' : '<div class="h-empty">Aucune carte ne correspond.</div>';
                 updateBrowseCount();
                 return;
             }
-            if (!browse.carousel && !browse.review) { renderBrowseList(el); return; }
+            if (!browse.carousel && !browse.review && !browse.sort) { renderBrowseList(el); return; }
             var slides = browse.list.map(function (b, i) {
                 return '<div class="s-question b-slide' + (i === 0 ? ' active' : '') + '" data-i="' + i + '"></div>';
             }).join("");
             el.innerHTML = '<div class="b-track" id="b-track">' + slides + '</div>'
                 + '<div class="b-nav">'
                 + '<button id="b-prev" onclick="stepBrowse(-1)">‹ Préc.</button>'
-                + '<span class="b-hint">← → pour défiler</span>'
+                + '<span class="b-hint">' + (browse.sort ? '<span id="b-sort-count"></span>' : '← → pour défiler') + '</span>'
                 + '<button id="b-next" onclick="stepBrowse(1)">Suiv. ›</button>'
                 + '</div>';
+            if (browse.sort) el.insertAdjacentHTML("afterbegin", '<div class="b-sort-bar"><button class="b-sort-learn" onclick="sortCard(false)">← ' + t9n("À apprendre") + '</button>'
+                + '<button class="b-sort-known" onclick="sortCard(true)">' + t9n("Je connais") + ' →</button></div>');
             var track = document.getElementById("b-track");
             browse.observer = new IntersectionObserver(function (entries) {
                 entries.forEach(function (en) {
                     if (en.isIntersecting) fillSlide(en.target);
+                    // far away again: emptied, so a long scroll doesn't pile up hundreds of rendered cards (#179)
+                    else if (en.target.dataset.filled && Math.abs(+en.target.dataset.i - browse.idx) > 6) { en.target.innerHTML = ""; delete en.target.dataset.filled; }
                 });
             }, { root: track, rootMargin: "0px 150%" });
             track.querySelectorAll(".b-slide").forEach(function (sl) { browse.observer.observe(sl); });
-            track.addEventListener("scroll", onBrowseScroll, { passive: true });
+            track.addEventListener("scroll", function () { if (!browseScrollRaf) browseScrollRaf = requestAnimationFrame(onBrowseScroll); }, { passive: true });
+            if (browse.sort) {
+                updateSortCount();
+                track.addEventListener("click", function (e) { var sl = e.target.closest(".b-slide"); if (sl && !e.target.closest("button") && !sl.classList.contains("peek")) { sl.classList.add("peek"); var sep = sl.querySelector(".b-sep"); if (sep) sep.textContent = t9n("verso"); } });
+            }
             track.addEventListener("wheel", onBrowseWheel, { passive: false });
             updateBrowseCount();
         }
@@ -4536,6 +4729,7 @@
                     + '<div class="b-row-back">' + esc(htmlToText(b.back)) + '</div>'
                     + (browse.hasTags ? '<div class="b-row-tags">' + b.tags.map(function (t) { return '<span class="c-tag">' + esc(t) + '</span>'; }).join("") + '</div>' : '')
                     + (hasAudio ? '<button class="b-row-audio" onclick="playBrowseAudio(' + i + ')" title="Écouter">🔊</button>' : '<span></span>')
+                    + progBarHtml(browse.srs[c.id])
                     + '</div>';
             }).join("") + '</div>';
             document.getElementById("b-count").textContent = browse.list.length + " cartes";
@@ -4549,7 +4743,9 @@
             // Review mode (#108): the card as studied (full rendering) + its comment.
             var rc = browse.review && fullRender() ? enrichedCard(c) : c;
             var fl = browse.review ? loadFlagged(browse.sid)[c.id] : null;
-            sl.innerHTML = '<div class="b-front"></div><div class="b-sep">verso</div><div class="b-back"></div>'
+            var st = browse.srs[c.id], pr = cardProgress(st);
+            sl.innerHTML = progBarHtml(st) + '<div class="b-prog-label">' + esc(browse.sort && browse.sorted[c.id] != null ? (browse.sorted[c.id] ? "✓ " + t9n("je connais") : "✗ " + t9n("à apprendre")) : pr.label) + '</div>'
+                + '<div class="b-front"></div><div class="b-sep">' + (browse.sort && !sl.classList.contains("peek") ? t9n("verso · touche pour le voir") : "verso") + '</div><div class="b-back"></div>'
                 + (hasAudio ? '<button class="b-slide-audio" onclick="playBrowseAudio(' + sl.dataset.i + ')" title="Écouter">🔊</button>' : '')
                 + (browse.review ? '<div class="b-review-bar"><div class="b-comment">' + (fl ? "🚩 " + esc(typeof fl === "object" ? fl.c : "marquée") : "") + '</div>'
                     + '<button class="b-flag" onclick="browseFlag(' + sl.dataset.i + ')">🚩 ' + (fl ? "Modifier" : "Commenter") + ' <span class="t-key">F6</span></button></div>' : '');
@@ -4558,20 +4754,23 @@
             // like in study: the back only adds what the recto doesn't show (#128)
             var backHtml = rc.rf ? RF_CSS + rc.rf.topBack + rc.rf.bottomBack : (rc !== c && rc.answer != null ? rc.answer : b.back);
             mountCardHtml(sl.querySelector(".b-back"), backHtml, css);
-            sl.querySelector(".b-back").insertAdjacentHTML("afterend", infoHtml(c));
+            sl.querySelector(".b-back").insertAdjacentHTML("afterend", infoHtml(c, browse.sid));
         }
 
         // Current slide = the one whose centre is closest to the track's.
+        // Slides all have the same width: the index comes from the scroll
+        // position, without measuring every slide before it (#179 — that
+        // loop made the carousel lag on phones in a 3 000-card deck).
+        var browseScrollRaf = 0;
         function onBrowseScroll() {
+            browseScrollRaf = 0;
             var track = document.getElementById("b-track");
             if (!track) return;
-            var mid = track.scrollLeft + track.clientWidth / 2, best = 0, bestD = Infinity;
             var slides = track.children;
-            for (var i = 0; i < slides.length; i++) {
-                var d = Math.abs(slides[i].offsetLeft + slides[i].offsetWidth / 2 - mid);
-                if (d < bestD) { bestD = d; best = i; }
-                else if (d > bestD) break;
-            }
+            if (!slides.length) return;
+            var mid = track.scrollLeft + track.clientWidth / 2;
+            var first = slides[0], pitch = slides.length > 1 ? slides[1].offsetLeft - first.offsetLeft : first.offsetWidth;
+            var best = Math.max(0, Math.min(slides.length - 1, Math.round((mid - first.offsetLeft - first.offsetWidth / 2) / (pitch || 1))));
             if (best === browse.idx) return;
             slides[browse.idx] && slides[browse.idx].classList.remove("active");
             slides[best].classList.add("active");
@@ -5107,6 +5306,7 @@
             barState = state;
             var bottom = document.querySelector("#study .s-bottom");
             if (bottom) bottom.dataset.state = state;
+            tapHint(state);
             var el = document.getElementById("s-actions");
             if (!el) return;
             var card = sess.queue[sess.qIdx];
@@ -5833,6 +6033,72 @@
             document.addEventListener(t, function (e) { if (e.pointerType !== "mouse") setHold(false); });
         });
 
+        // ── Phones (#180, #182): taps and swipes instead of the pills ──
+        var PHONE_MQ = window.matchMedia("(max-width: 600px) and (hover: none)");
+        function phoneTouch() { return PHONE_MQ.matches; }
+        // the counters go up beside the progress bar, and back down on a large screen
+        function placeCounts() {
+            var cnt = document.querySelector("#study .s-counts");
+            var host = phoneTouch() ? document.querySelector("#study .s-prog") : document.querySelector("#study .s-bottom");
+            if (cnt && host && cnt.parentNode !== host) host.appendChild(cnt);
+        }
+        placeCounts();
+        if (PHONE_MQ.addEventListener) PHONE_MQ.addEventListener("change", function () { placeCounts(); setBarState(barState); });
+        // what a tap does, written on the « verso » line while the recto is up
+        function tapHint(state) {
+            var sep = document.querySelector("#s-content .s-question > .b-sep");
+            if (!sep) return;
+            var on = phoneTouch() && state === "question" && !sess.lyrics;
+            if (on) { sep.textContent = studyMode() === "flip" ? t9n("touche pour voir la réponse") : t9n("‹ 💡 indice · réponse ›"); sep.classList.add("tap-hint"); }
+            else if (sep.classList.contains("tap-hint")) { sep.textContent = t9n("verso"); sep.classList.remove("tap-hint"); }
+        }
+        document.addEventListener("click", function (e) {
+            if (!phoneTouch() || barState !== "question" || advancing || sess.lyrics) return;
+            var q = e.target.closest("#s-content .s-question");
+            if (!q || e.target.closest("button, input, select, a, .t-words, details")) return;
+            if (studyMode() === "flip") { flipCard(); return; }
+            if (!e.target.closest(".s-zone-recto")) return;
+            var r = q.getBoundingClientRect();
+            if (e.clientX < r.left + r.width / 2) hintFromPill(); else showFullAnswer();
+        });
+        // Swipe to rate: ← À revoir, → Correct, ↑ Facile, ↓ Difficile. Up and
+        // down resist (the card follows the finger at half speed and needs a
+        // longer move), so a slightly slanted swipe isn't a wrong rating.
+        var SWIPE_X = 70, SWIPE_Y = 120, swipe = null;
+        function scrollsInside(el) {
+            for (; el && el.id !== "s-content"; el = el.parentElement)
+                if (el.scrollHeight > el.clientHeight + 2 && /auto|scroll/.test(getComputedStyle(el).overflowY)) return true;
+            return false;
+        }
+        document.addEventListener("touchstart", function (e) {
+            swipe = null;
+            if (!phoneTouch() || barState !== "rating" || advancing || e.touches.length !== 1) return;
+            var q = e.target.closest("#s-content .s-question");
+            if (!q || e.target.closest("button, input, a, details")) return;
+            var t = e.touches[0];
+            swipe = { q: q, x: t.clientX, y: t.clientY, dx: 0, dy: 0, vOk: !scrollsInside(e.target) };
+        }, { passive: true });
+        document.addEventListener("touchmove", function (e) {
+            if (!swipe) return;
+            var t = e.touches[0];
+            swipe.dx = t.clientX - swipe.x; swipe.dy = t.clientY - swipe.y;
+            var horiz = Math.abs(swipe.dx) >= Math.abs(swipe.dy);
+            if (!horiz && !swipe.vOk) return; // a long back scrolls up and down
+            if (e.cancelable) e.preventDefault();
+            swipe.q.classList.add("swiping");
+            swipe.q.style.transform = horiz ? "translateX(" + swipe.dx + "px) rotate(" + (swipe.dx / 25) + "deg)" : "translateY(" + (swipe.dy / 2) + "px)";
+        }, { passive: false });
+        document.addEventListener("touchend", function () {
+            if (!swipe) return;
+            var s = swipe; swipe = null;
+            s.q.classList.remove("swiping"); s.q.style.transform = "";
+            var horiz = Math.abs(s.dx) >= Math.abs(s.dy), q = 0;
+            if (horiz && Math.abs(s.dx) >= SWIPE_X) q = s.dx < 0 ? 1 : 3;
+            else if (!horiz && s.vOk && Math.abs(s.dy) >= SWIPE_Y && Math.abs(s.dy) > 2 * Math.abs(s.dx)) q = s.dy < 0 ? 4 : 2;
+            if (q && barState === "rating") { dlog("glissement", { note: q }); rate(q); }
+        });
+        document.addEventListener("touchcancel", function () { if (swipe) { swipe.q.classList.remove("swiping"); swipe.q.style.transform = ""; swipe = null; } });
+
         // ── Conjugation table after a miss (#51) ──
         // Conjugation cards (tag "conjugaison", front "<b>verb</b> … <i>person</i>")
         // of the same verb and tense make up the table; the stem shared by
@@ -6353,7 +6619,12 @@
                     "(suite) la carte notée part vers un coin ; combos inversés (justes à droite, erreurs à gauche) et comptés tout de suite ; la case rougit à chaque erreur ; ⚙ délai avant la carte suivante.": "(seguito) la carta valutata vola verso un angolo; combo invertite (giuste a destra, errori a sinistra) e contate subito; la casella diventa rossa a ogni errore; ⚙ tempo prima della carta successiva.",
                     "Délai avant la carte suivante": "Tempo prima della carta successiva", "Auto": "Auto", "Toujours lent": "Sempre lento", "Toujours rapide": "Sempre veloce",
                     "Temps laissé au verso, une fois le son fini. Auto : une carte vue pour la première fois, ou ratée, garde le temps de relire (≈ 2,5 s) ; une carte déjà vue et juste (même revenue dans la séance) passe vite (≈ 0,7 s, comptées pendant le son), avec une transition plus courte.": "Tempo lasciato al retro, finito l'audio. Auto: una carta vista per la prima volta, o sbagliata, tiene il tempo per rileggere (≈ 2,5 s); una carta già vista e giusta (anche tornata nella sessione) passa in fretta (≈ 0,7 s, contati durante l'audio), con una transizione più breve.", "joue l'enregistrement de la phrase d'exemple ; s'il n'y en a pas (phrases écrites pour le Vocabulaire), la voix du navigateur la lit.": "riproduce la registrazione della frase d'esempio; se non c'è (frasi scritte per il Vocabolario), la legge la voce del browser.",
-                    "6 nov.": "6 nov.", "9 nov.": "9 nov.",
+                    "6 nov.": "6 nov.", "9 nov.": "9 nov.", "10 nov.": "10 nov.",
+                    "Dans 🔍, chaque carte a une barre de progression qui se remplit de gauche à droite, du rouge (à peine commencée) au vert (bien sue), et le paquet entier a la sienne en haut. 🗂 Pré-tri montre les cartes jamais vues une par une : touche la carte pour voir le verso, puis → (ou glisser à droite) = je la connais déjà, elle est rangée comme apprise et reviendra dans 20 à 60 jours ; ← (ou glisser à gauche) = à apprendre, elle reste nouvelle.": "In 🔍, ogni carta ha una barra di progresso che si riempie da sinistra a destra, dal rosso (appena iniziata) al verde (ben saputa), e il mazzo intero ha la sua in alto. 🗂 Pre-selezione mostra le carte mai viste una per una: tocca la carta per vedere il retro, poi → (o scorri a destra) = la so già, viene messa tra le imparate e tornerà fra 20–60 giorni; ← (o scorri a sinistra) = da imparare, resta nuova.",
+                    "Sur téléphone, pas de boutons : touche la moitié gauche du recto pour un indice, la moitié droite pour la réponse (en mode Normal, touche la carte pour la retourner).": "Sul telefono, niente pulsanti: tocca la metà sinistra del fronte per un suggerimento, la metà destra per la risposta (in modalità Normale, tocca la carta per girarla).",
+                    "Sur téléphone, glisse la carte pour la noter : à gauche À revoir, à droite Correct, vers le haut Facile, vers le bas Difficile (haut et bas demandent un geste plus long, pour éviter les erreurs). Les compteurs nouvelles / à repasser / à réviser sont en haut, à côté de la barre de progression.": "Sul telefono, scorri la carta per votarla: a sinistra Da rivedere, a destra Corretto, in alto Facile, in basso Difficile (alto e basso chiedono un gesto più lungo, per evitare errori). I contatori nuove / da ripassare / da rivedere sono in alto, accanto alla barra di avanzamento.",
+                    "sur téléphone, plus de boutons en bas pendant la question : touche à gauche du recto = indice, à droite = réponse, puis glisse la carte pour la noter ; compteurs en haut à côté de la barre ; boutons de note plus plats ; plus de macaron « Maintenir appuyé ».": "sul telefono, niente più pulsanti in basso durante la domanda: tocca a sinistra del fronte = suggerimento, a destra = risposta, poi scorri la carta per votarla; contatori in alto accanto alla barra; pulsanti di voto più piatti; niente più bollino « Tieni premuto ».",
+                    "(suite) 🔍 : barre de progression de chaque carte et du paquet, du rouge au vert ; 🗂 Pré-tri des cartes jamais vues (→ je connais, ← à apprendre) ; carrousel plus fluide avec des milliers de cartes ; plus d'étiquettes (faux ami…) sur les cartes, seulement dans les filtres ; mots raccourcis sur petit écran.": "(seguito) 🔍: barra di progresso di ogni carta e del mazzo, dal rosso al verde; 🗂 Pre-selezione delle carte mai viste (→ la so, ← da imparare); carosello più fluido con migliaia di carte; niente più etichette (faux ami…) sulle carte, solo nei filtri; parole abbreviate su schermo piccolo.",
                     "un peu plus. Les accents sont facultatifs. Dès qu'un mot est juste, on passe à la case suivante. Dans ⚙, « Entrée pour valider » : le mot n'est vérifié qu'à Entrée, et toute la carte rougit à chaque erreur (erreurs comptées sur toute la réponse). Une carte juste mais tapée bien plus lentement que d'habitude (3 fois ton temps habituel sur cette carte, et au moins 30 s, réglable dans ⚙) est notée « Difficile ». Le temps ne compte pas quand l'onglet ou la fenêtre n'est plus devant. Sur ordinateur, un": "un po' di più. Gli accenti sono facoltativi. Appena una parola è giusta, si passa alla casella successiva. In ⚙, « Invio per confermare »: la parola si controlla solo con Invio e tutta la carta diventa rossa a ogni errore (errori contati su tutta la risposta). Una carta giusta ma scritta molto più lentamente del solito (3 volte il tuo tempo abituale su questa carta, e almeno 30 s, regolabile in ⚙) viene valutata « Difficile ». Il tempo non conta quando la scheda o la finestra non è più davanti. Sul computer, un",
                     "compte à droite de la carte les mots justes d'affilée (sans aide) ; « À revoir » le casse. À gauche, les erreurs de la carte et les cartes ratées d'affilée. Les jours d'affilée s'affichent sur l'accueil. Il grandit et change de couleur et de forme à 5, 10, 25, 50 et 100. Quand tout est montré après de l'aide,": "conta a destra della carta le parole giuste di fila (senza aiuto); « Da rivedere » lo interrompe. A sinistra, gli errori della carta e le carte sbagliate di fila. I giorni di fila sono nella pagina iniziale. Cresce e cambia colore e forma a 5, 10, 25, 50 e 100. Quando tutto è mostrato dopo un aiuto,", "Affichés": "Visibili", "Cachés": "Nascosti",
                     "Dans la marge, comme dans un jeu de combat : les mots justes d'affilée (sans aide) et les jours d'affilée. « À revoir » casse le combo.": "Nel margine, come in un picchiaduro: le parole giuste di fila (senza aiuto) e i giorni di fila. « Da rivedere » rompe la combo.",
@@ -6381,7 +6652,7 @@
                     "Saisie": "Scrittura", "Normal": "Normale", "Dictée": "Dettato", "Mode d'étude": "Modalità di studio",
                     "Taper la réponse": "Scrivi la risposta", "Noter la carte": "Valuta la carta",
                     "✨ Complet": "✨ Completo", "Rendu complet : phrase d'exemple, nature / genre (réglage de cet appareil)": "Visualizzazione completa: frase d'esempio, categoria / genere (impostazione di questo dispositivo)",
-                    "verso": "retro", "💡 Indice": "💡 Suggerimento", "Indice": "Suggerimento", "Voir la réponse": "Vedi la risposta",
+                    "verso": "retro", "verso · touche pour le voir": "retro · tocca per vederlo", "nouvelle": "nuova", "en cours": "in corso", "Progression": "Progresso", "vues": "viste", "bien connues": "ben note", "connues": "note", "à apprendre": "da imparare", "À apprendre": "Da imparare", "Je connais": "La so", "je connais": "la so", "Plus aucune carte jamais vue à trier.": "Nessuna carta mai vista da ordinare.", "Pré-tri": "Pre-selezione", "Tri": "Selez.", "Trier les cartes jamais vues : → je connais (rangée « facile »), ← à apprendre": "Ordina le carte mai viste: → la so (messa tra le « facili »), ← da imparare", "touche pour voir la réponse": "tocca per vedere la risposta", "‹ 💡 indice · réponse ›": "‹ 💡 suggerimento · risposta ›", "💡 Indice": "💡 Suggerimento", "Indice": "Suggerimento", "Voir la réponse": "Vedi la risposta",
                     "Afficher la réponse": "Mostra la risposta", "📋 Tableau": "📋 Tabella", "Maintenir pour voir le tableau": "Tieni premuto per vedere la tabella",
                     "À revoir": "Da rivedere", "Difficile": "Difficile", "Correct": "Giusto", "Facile": "Facile",
                     "Maintenir Espace": "Tieni premuto Spazio", "Maintenir appuyé": "Tieni premuto", "Suivant": "Avanti", "Espace": "Spazio", "Entrée": "Invio", "Échap": "Esc",
@@ -6393,7 +6664,7 @@
                     "Annuler": "Annulla", "🚩 Marquer": "🚩 Segnala", "🚩 Commenter": "🚩 Commenta", "🚩 Modifier": "🚩 Modifica",
                     "Fermer (Échap)": "Chiudi (Esc)",
                     "📝 Relecture": "📝 Revisione", "Relire le paquet carte par carte et commenter (F6)": "Rileggi il mazzo carta per carta e commenta (F6)",
-                    "⬇ Commentaires": "⬇ Commenti", "🔎 Rechercher…": "🔎 Cerca…", "‹ Préc.": "‹ Prec.", "Suiv. ›": "Succ. ›", "← → pour défiler": "← → per scorrere",
+                    "⬇ Commentaires": "⬇ Commenti", "Commentaires": "Commenti", "Comm.": "Comm.", "🔎 Rechercher…": "🔎 Cerca…", "‹ Préc.": "‹ Prec.", "Suiv. ›": "Succ. ›", "← → pour défiler": "← → per scorrere",
                     "Options des chansons": "Opzioni delle canzoni", "Traduction FR": "Traduzione", "Contexte seul": "Solo contesto", "Premières lettres": "Prime lettere",
                     "Nouvelles lignes": "Nuove righe", "Strophe par strophe": "Strofa per strofa", "5 lignes": "5 righe", "Toute la chanson": "Tutta la canzone",
                     "« Nouvelles lignes » s'applique à la prochaine session.": "« Nuove righe » vale dalla prossima sessione.",
@@ -6653,7 +6924,10 @@
             {"id": 26, "d": "2026-11-09", "k": "paquets", "fr": "Le <b>Vocabulaire</b> va jusqu'au <b>rang 7 000</b> : 264 mots de plus.", "it": "Il <b>Vocabolario</b> arriva al <b>rango 7 000</b>: 264 parole in più."},
             {"id": 27, "d": "2026-11-09", "k": "paquets", "fr": "Le <b>Vocabulaire</b> va jusqu'au <b>rang 8 000</b> : 243 mots de plus.", "it": "Il <b>Vocabolario</b> arriva al <b>rango 8 000</b>: 243 parole in più."},
             {"id": 28, "d": "2026-11-09", "k": "paquets", "fr": "Le <b>Vocabulaire</b> va jusqu'au <b>rang 9 000</b> : 291 mots de plus.", "it": "Il <b>Vocabolario</b> arriva al <b>rango 9 000</b>: 291 parole in più."},
-            {"id": 29, "d": "2026-11-09", "k": "paquets", "fr": "Le <b>Vocabulaire</b> va jusqu'au <b>rang 10 000</b> : 271 mots de plus.", "it": "Il <b>Vocabolario</b> arriva al <b>rango 10 000</b>: 271 parole in più."}
+            {"id": 29, "d": "2026-11-09", "k": "paquets", "fr": "Le <b>Vocabulaire</b> va jusqu'au <b>rang 10 000</b> : 271 mots de plus.", "it": "Il <b>Vocabolario</b> arriva al <b>rango 10 000</b>: 271 parole in più."},
+            {"id": 30, "d": "2026-11-10", "k": "revision", "fr": "Sur téléphone : touche <b>à gauche</b> du recto pour un indice, <b>à droite</b> pour la réponse, puis <b>glisse la carte</b> pour la noter (← À revoir, → Correct, ↑ Facile, ↓ Difficile).", "it": "Sul telefono: tocca <b>a sinistra</b> del fronte per un suggerimento, <b>a destra</b> per la risposta, poi <b>scorri la carta</b> per votarla (← Da rivedere, → Corretto, ↑ Facile, ↓ Difficile)."},
+            {"id": 31, "d": "2026-11-10", "k": "affichage", "fr": "Sur téléphone, les <b>compteurs</b> sont en haut à côté de la barre et les boutons de note sont plus plats : plus de place pour la carte.", "it": "Sul telefono, i <b>contatori</b> sono in alto accanto alla barra e i pulsanti di voto sono più piatti: più spazio per la carta."},
+            {"id": 32, "d": "2026-11-10", "k": "paquets", "fr": "Dans 🔍 : une <b>barre de progression</b> par carte, du rouge au vert, et <b>🗂 Pré-tri</b> pour ranger d'un geste les mots que tu connais déjà.", "it": "In 🔍: una <b>barra di progresso</b> per carta, dal rosso al verde, e <b>🗂 Pre-selezione</b> per mettere da parte con un gesto le parole che sai già."}
         ];
         var NEWS_KINDS = { revision: ["Révision", "Ripasso"], cartes: ["Cartes", "Carte"], combos: ["Combos", "Combo"], affichage: ["Affichage", "Aspetto"],
             reglages: ["Réglages", "Impostazioni"], accueil: ["Accueil", "Home"], paquets: ["Paquets", "Mazzi"] };
