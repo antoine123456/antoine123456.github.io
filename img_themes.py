@@ -39,7 +39,9 @@ FIX = {
     # the article's image shows something else (or nothing that speaks)
     "el cerebro": "Skull_and_brain_normal_human.svg",
     "el cuervo": "Corvus_corax_(Common_Raven),_Yosemite_NP,_CA,_US_-_Diliff.jpg",
-    "el aliento": None, "la mejilla": None, "la mandíbula": None,
+    "el aliento": None, "la mandíbula": None,
+    # from the English Wikipedia (#201): « Tête » is a disambiguation page, « Tête humaine » an MRI
+    "la cabeza": "Proportions_of_the_Head.jpg", "la mejilla": "Cheek.jpg", "el puño": "Choque_de_puños.jpg",
 }
 
 
