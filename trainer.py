@@ -17,9 +17,11 @@ you are among the app's names (kept in ~/.config/espanol-trainer/trainer.json).
     python3 trainer.py --dry        # write nothing (try it out)
     python3 trainer.py --user       # pick the name again
 
-During a card: type the answer, Entrée. Then Entrée = the suggested rating,
-or 1 À revoir · 2 Difficile · 3 Correct · 4 Facile. « ? » or an empty answer
-shows the back. q (or Ctrl-D) stops: what's done is already saved.
+During a card: type the answer, Entrée. Right = Correct, next card; wrong =
+try again, three tries, then the answer and À revoir. Formulas and turned-over
+cards: Entrée turns it over, then Entrée = knew it, n = didn't. Pictures
+aren't shown (a card with only a picture isn't asked). q (or Ctrl-D) stops:
+what's done is already saved.
 The web app picks these reviews up when it reloads (the most recent review
 of a card wins); reload its tab after a terminal session.
 """
@@ -148,7 +150,6 @@ def load_cards(sid, files):
 
 def plain(h):
     h = re.sub(r"(?is)<style.*?</style>|<script.*?</script>", "", str(h or ""))
-    h = re.sub(r'(?is)<img[^>]*?src="([^"]+)"[^>]*>', lambda m: "\n🖼 " + m.group(1) + "\n", h)  # ⌘-click opens it
     h = re.sub(r"(?is)<sup>(.*?)</sup>", lambda m: "^" + (m.group(1) if len(m.group(1)) == 1 else "(" + m.group(1) + ")"), h)
     h = re.sub(r"(?is)<sub>(.*?)</sub>", r"_\1", h)
     h = re.sub(r"(?i)<br\s*/?>|</(div|p|li|tr|h\d)>", "\n", h)
@@ -219,19 +220,11 @@ def apply_rating(srs, q):
             s["due"] = TODAY + s["interval"]
     return s, requeue
 
-
-def when(s, requeue):
-    if requeue:
-        return "dans %d min" % requeue
-    d = s["interval"]
-    return "demain" if d == 1 else "dans %d j" % d if d < 30 else "dans %d mois" % round(d / 30)
-
 # ── terminal ────────────────────────────────────────────────────
 
 C = sys.stdout.isatty()
 def col(code, t): return "\033[%sm%s\033[0m" % (code, t) if C else t
 DIM, BOLD, GREEN, RED, CYAN = "2", "1", "32", "31", "36"
-RATE = {1: "À revoir", 2: "Difficile", 3: "Correct", 4: "Facile"}
 
 
 def ask(prompt):
@@ -271,7 +264,8 @@ def setup(again=False):
 def build_queue(by, names, srs, flagged, deck_filter, new_left):
     dids = sorted((d for d in by if not deck_filter or deck_filter.lower() in names.get(d, d).lower()),
                   key=lambda d: natural(names.get(d, d)))
-    cards = [c for d in dids for c in by[d] if str(c.get("id")) not in flagged]
+    cards = [c for d in dids for c in by[d] if str(c.get("id")) not in flagged
+             and front_of(c)]  # a picture alone can't be shown here
     seen = lambda i: i in srs and srs[i].get("state") != "new"
     due, new = [], []
     for c in cards:
@@ -287,55 +281,49 @@ def build_queue(by, names, srs, flagged, deck_filter, new_left):
     return due + new
 
 
+def front_of(card):
+    return plain(card.get("question")) or card.get("es") or ""
+
+
 def review(card, s):
-    """Shows one card, returns the rating (1-4) or None to stop."""
+    """Shows one card, returns 3 (Correct) or 1 (À revoir), or None to stop.
+    Three tries; a card that can't be typed (formula, turned over) is
+    turned over and you say if you knew it."""
     raw = card.get("words") or []
     sep = set(card.get("sep") or [])
     shown = " ".join(("/ " if k in sep and k else "") + str(w) for k, w in enumerate(raw) if str(w).strip())
     words = [w for w in raw if str(w).strip()]
     back = plain(card.get("answer")) or shown
     flip = card.get("flip") or card.get("eq") or not words
-    front = plain(card.get("question")) or card.get("es") or "?"
-    if card.get("img") and card["img"] not in front:
-        front += "\n🖼 " + card["img"]
     state = "nouvelle" if s is None or s.get("state") == "new" else s["state"]
     print()
     print(col(DIM, "── %s ──" % state))
-    print(col(BOLD, front))
+    print(col(BOLD, front_of(card)))
     if flip:
         if ask(col(DIM, "  Entrée = retourner ")) is None:
             return None
         print(col(CYAN, back))
-        suggested = 3
-    else:
+        r = ask(col(DIM, "  su ? Entrée = oui · n = non "))
+        if r is None or r.strip() == "q":
+            return None
+        return 1 if r.strip().lower() in ("n", "non", "1") else 3
+    k = 0
+    while k < 3:
         a = ask("› ")
         if a is None or a.strip() == "q":
             return None
-        if a.strip() and a.strip() != "?" and squash(a) == squash(" ".join(words)):
+        if not squash(a):
+            continue  # Entrée alone doesn't use a try
+        if squash(a) == squash(" ".join(words)):
             print(col(GREEN, "✓ " + shown))
-            suggested = 3
-        else:
-            if a.strip() and a.strip() != "?":
-                print(col(RED, "✗ ") + col(CYAN, shown))
-            else:
-                print(col(CYAN, shown))
-            suggested = 1
-        if back and squash(back) != squash(" ".join(words)):
-            print(col(DIM, back))
-    previews = []
-    for q in (1, 2, 3, 4):
-        ns, rq = apply_rating(s or default_srs(), q)
-        previews.append(("%d %s (%s)" % (q, RATE[q], when(ns, rq))) if q != suggested
-                        else col(BOLD, "%d %s (%s)" % (q, RATE[q], when(ns, rq))))
-    while True:
-        r = ask(col(DIM, "  " + " · ".join(previews) + "  [Entrée = %d] " % suggested))
-        if r is None or r.strip() == "q":
-            return None
-        r = r.strip()
-        if r == "":
-            return suggested
-        if r in ("1", "2", "3", "4"):
-            return int(r)
+            return 3
+        if k < 2:
+            print(col(RED, "✗") + col(DIM, " encore %d essai%s" % (2 - k, "s" if k == 0 else "")))
+        k += 1
+    print(col(RED, "✗ ") + col(CYAN, shown))
+    if back and squash(back) != squash(" ".join(words)):
+        print(col(DIM, back))
+    return 1
 
 
 def main():
