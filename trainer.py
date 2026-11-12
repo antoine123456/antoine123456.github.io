@@ -334,6 +334,12 @@ def review(card, s):
     print(col(CYAN, "  " + shown))
     if back and squash(back) != squash(" ".join(words)):
         print(col(DIM, ind(back)))
+    # then wiped, scrollback too: the card comes back soon, the answer mustn't be there to copy
+    if ask(col(DIM, "  Entrée ")) is None:
+        return None
+    if C:
+        sys.stdout.write("\033[H\033[2J\033[3J")
+        sys.stdout.flush()
     return 1
 
 
