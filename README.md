@@ -217,7 +217,7 @@ python3 trainer.py --user       # pick the name again
   don't count.
 - **Checking:** a right answer is rated Correct and the next card comes. A
   wrong one can be retyped, up to three tries; after that the answer shows and
-  the card is rated À revoir.
+  the card is rated À revoir. `?` shows the answer at once (À revoir too).
 - **Self-rated cards:** for the 🌊 formulas and turned-over cards, Entrée turns
   the card over, then Entrée = knew it and `n` = didn't.
 - **Stopping:** `q` stops.

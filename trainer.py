@@ -17,7 +17,7 @@ you are among the app's names (kept in ~/.config/espanol-trainer/trainer.json).
     python3 trainer.py --dry        # write nothing (try it out)
     python3 trainer.py --user       # pick the name again
 
-During a card: type the answer, Entrée. Right = Correct, next card; wrong =
+During a card: type the answer, Entrée (« ? » = show the answer, À revoir). Right = Correct, next card; wrong =
 try again, three tries, then the answer and À revoir. Formulas and turned-over
 cards: Entrée turns it over, then Entrée = knew it, n = didn't. Pictures
 aren't shown (a card with only a picture isn't asked). q (or Ctrl-D) stops:
@@ -325,6 +325,8 @@ def review(card, s):
         a = ask("  › ")
         if a is None or a.strip() == "q":
             return None
+        if a.strip() == "?":
+            break  # « ? »: the answer now, the card À revoir
         if not squash(a):
             continue  # Entrée alone doesn't use a try
         if squash(a) in right:
