@@ -298,6 +298,16 @@ def review(card, s):
     sep = set(card.get("sep") or [])
     shown = " ".join(("/ " if k in sep and k else "") + str(w) for k, w in enumerate(raw) if str(w).strip())
     words = [w for w in raw if str(w).strip()]
+    # alternatives (« toi / à toi / te »): any one of them is right, or all of them
+    groups, cur = [], []
+    for k, w in enumerate(raw):
+        if k in sep and cur:
+            groups.append(cur)
+            cur = []
+        if str(w).strip():
+            cur.append(str(w))
+    groups.append(cur)
+    right = {squash(" ".join(g)) for g in groups if g} | {squash(" ".join(words))}
     back = plain(card.get("answer")) or shown
     flip = card.get("flip") or card.get("eq") or not words
     print()
@@ -317,13 +327,11 @@ def review(card, s):
             return None
         if not squash(a):
             continue  # Entrée alone doesn't use a try
-        if squash(a) == squash(" ".join(words)):
+        if squash(a) in right:
             print(col(GREEN, "  ✓ " + shown))
             return 3
-        if k < 2:
-            print(col(RED, "  ✗"))
-        k += 1
-    print(col(RED, "  ✗ ") + col(CYAN, shown))
+        k += 1  # not accepted: just asked again (no ✗)
+    print(col(CYAN, "  " + shown))
     if back and squash(back) != squash(" ".join(words)):
         print(col(DIM, ind(back)))
     return 1
