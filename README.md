@@ -195,6 +195,38 @@ either side of the pair) are silently skipped instead of duplicated.
 
 ---
 
+## Terminal trainer (`trainer.py`)
+
+A minimalist version of the app in the terminal (#215): the front of the
+card, you type the back. It has no sound and shows pictures as a link.
+Progress is the same as the app's: Firestore (`users/<name>/sources/<deck>`),
+written card after card with the same scheduler. Only the reviewed card's
+`srs` entry is written, so the other cards stay untouched. Standard library
+only:
+
+```bash
+python3 trainer.py              # 1st time: who are you? then the list of decks
+python3 trainer.py vocab        # first deck whose name has « vocab »
+python3 trainer.py vocab -d "Niveau 2" -n 10   # sub-decks with « Niveau 2 », 10 new cards
+python3 trainer.py --dry        # write nothing
+python3 trainer.py --user       # pick the name again
+```
+
+- **During a card:** type the answer and press Entrée. Accents and punctuation
+  don't count.
+- **Rating:** after the answer, Entrée gives the suggested rating, or type 1–4.
+  An empty answer, or `?`, shows the back.
+- **Self-rated cards:** the 🌊 formulas and turned-over cards are shown and
+  then self-rated.
+- **Stopping:** `q` stops.
+- **Name:** the chosen name is kept in `~/.config/espanol-trainer/trainer.json`.
+
+The app takes the terminal's reviews when it loads, and a card's most recent
+review wins. Reload the app's tab after a terminal session, or an open tab may
+send its older copy back.
+
+---
+
 ## Future work
 > can you put that to "project", separate in so-called "ui","machanic","learning" various themes, yeah as you said (keep the readme clean from my ai comments, don't push the comments)
 - **Lighter reveal for typed-correct words.** When a card is completed by typing alone (no reveal used), consider only highlighting the rectangle around each solved word instead of the current display — mirrors how little real Anki shows you when you already knew the answer.
