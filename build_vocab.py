@@ -428,6 +428,7 @@ def main():
     tag_vocab.main()
     import img_themes  # pictures for the animals and the body parts (#199)
     img_themes.main()
+    rev = add_reverse()  # FR → ES cards (#221)
 
     write_review(review)
 
@@ -435,8 +436,8 @@ def main():
     n_i = sum(1 for c in cards if c.get("img"))
     n_a = sum(1 for c in cards if c.get("audioQuestion"))
     print(f"{len(cards)} mots · {n_a} avec audio · {n_s} avec phrase · {n_i} avec image → vocabulaire.json")
-    build_apkg(cards)
-    build_apkg(cards_it, "it")
+    build_apkg(cards, rev=rev["fr"])
+    build_apkg(cards_it, "it", rev=rev["it"])
 
 
 # ── Planche de relecture des images ─────────────────────────────────────────
@@ -533,6 +534,68 @@ def write_review(review):
         f.write(REVIEW_HEAD + "".join(figs) + REVIEW_TAIL)
 
 
+# ── FR → ES (#221) ──────────────────────────────────────────────────────────
+# Each word also asked the other way round: the meaning on the front, the
+# Spanish to type. Not for the transparent words (#195: la universidad →
+# l'université, nothing to learn that way). The reverse card has the id of its
+# twin + 1 (they all end in 1) and comes right after it in the level; it
+# waits until its twin has been seen (card.pre, #213), then takes its turn
+# among the new cards — the easy way first, the hard way once the word is known.
+REV_TAG = {"fr": ("transparent", "fr→es"), "it": ("trasparente", "it→es")}
+
+
+def es_typed(es):
+    """(words, sep, notes) to type for the Spanish side: the part in brackets
+    is shown, not typed (su (sus) → su); « ; » between alternatives (se; os)."""
+    note = re.search(r"\s*\(([^)]*)\)", es)
+    base = (es[:note.start()] + es[note.end():]).strip() if note else es
+    words, sep = [], []
+    for k, alt in enumerate(a for a in re.split(r"\s*;\s*", base) if a.strip()):
+        if k:
+            sep.append(len(words))
+        words += [w for w in re.split(r"[\s,]+", alt.strip(" ,.!?¡¿")) if w]
+    return words, sep, ({str(len(words) - 1): "(" + note.group(1) + ")"} if note else {})
+
+
+def add_reverse():
+    """Adds the FR → ES cards to vocabulaire.json and vocabolario.json;
+    returns {lang: ids of the cards that have one}."""
+    out = {}
+    for lang in ("fr", "it"):
+        path = os.path.join(HERE, LANGS[lang]["json"])
+        if not os.path.exists(path):
+            out[lang] = set()
+            continue
+        data = json.load(open(path, encoding="utf-8"))
+        skip, tag = REV_TAG[lang]
+        have = set()
+        for d in data["decks"]:
+            cards = []
+            for c in d["cards"]:
+                if c.get("rev"):
+                    continue  # rebuilt below
+                cards.append(c)
+                if skip in c.get("tags", []):
+                    continue
+                words, sep, notes = es_typed(c["es"])
+                r = {k: v for k, v in c.items() if k not in ("sep", "notes", "audioQuestion", "words", "question", "answer")}
+                r.update(id=str(int(c["id"]) + 1), rev=True, pre=[c["id"]], words=words,
+                         question=html.escape(c["fr"]), answer=html.escape(c["es"]),
+                         tags=c.get("tags", []) + [tag])
+                if sep: r["sep"] = sep
+                if notes: r["notes"] = notes
+                if c.get("audioQuestion"): r["audioAnswer"] = c["audioQuestion"]  # the word is heard after, not before
+                cards.append(r)
+                have.add(c["id"])
+            d["cards"] = cards
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
+        n = sum(len(d["cards"]) for d in data["decks"])
+        print(f"{len(have)} cartes {tag} ajoutées ({n} cartes en tout) → {LANGS[lang]['json']}")
+        out[lang] = have
+    return out
+
+
 # ── .apkg (Anki) ────────────────────────────────────────────────────────────
 FRONT = """<div class="rf-word">{{Mot}}</div>
 {{#Phrase}}<div class="rf-sent">{{Phrase}}</div>{{/Phrase}}
@@ -544,6 +607,17 @@ BACK = """{{FrontSide}}
 {{#Traduction}}<div class="rf-tr">{{Traduction}}</div>{{/Traduction}}
 {{AudioPhrase}}
 {{#Image}}<div class="rf-img">{{Image}}</div>{{/Image}}"""
+# FR → ES (#221): only for the notes whose « Inverse » is filled (not the transparent words)
+FRONT_REV = """{{#Inverse}}<div class="rf-word">{{Sens}}</div>
+{{#Nature}}<div class="rf-pos">{{Nature}}</div>{{/Nature}}
+{{#Traduction}}<div class="rf-sent">{{Traduction}}</div>{{/Traduction}}{{/Inverse}}"""
+BACK_REV = """{{FrontSide}}
+<hr id=answer>
+<div class="rf-mean">{{Mot}}</div>
+{{Audio}}
+{{#Phrase}}<div class="rf-tr">{{Phrase}}</div>{{/Phrase}}
+{{AudioPhrase}}
+{{#Image}}<div class="rf-img">{{Image}}</div>{{/Image}}"""
 CSS = """.card { font-family: -apple-system, "Segoe UI", sans-serif; text-align: center; font-size: 18px; }
 .rf-word { font-size: 40px; font-weight: 600; margin: 4px 0 8px; }
 .rf-sent { font-size: 19px; line-height: 1.5; }
@@ -552,10 +626,10 @@ CSS = """.card { font-family: -apple-system, "Segoe UI", sans-serif; text-align:
 .rf-pos { font-size: 11px; opacity: .55; text-transform: uppercase; letter-spacing: .8px; margin: 4px 0 10px; }
 .rf-tr { font-size: 15px; opacity: .7; font-style: italic; }
 .rf-img img { max-height: 220px; border-radius: 10px; margin-top: 12px; }"""
-FIELDS = ["Clé", "Mot", "Sens", "Nature", "Phrase", "Traduction", "Audio", "AudioPhrase", "Image"]
+FIELDS = ["Clé", "Mot", "Sens", "Nature", "Phrase", "Traduction", "Audio", "AudioPhrase", "Image", "Inverse"]
 
 
-def build_apkg(cards, lang="fr"):
+def build_apkg(cards, lang="fr", rev=()):
     L = LANGS[lang]
     try:
         from anki.collection import Collection
@@ -575,6 +649,9 @@ def build_apkg(cards, lang="fr"):
                 mm.add_field(m, mm.new_field(name))
             t = mm.new_template("Mot → sens")
             t["qfmt"], t["afmt"] = FRONT, BACK
+            mm.add_template(m, t)
+            t = mm.new_template("Sens → mot")
+            t["qfmt"], t["afmt"] = FRONT_REV, BACK_REV
             mm.add_template(m, t)
             m["css"] = CSS
             m["sortf"] = 0
@@ -598,11 +675,14 @@ def build_apkg(cards, lang="fr"):
                         n[field] = f"[sound:{fn}]"
                 if c.get("img"):
                     n["Image"] = f'<img src="{c["img"]}">'
+                if c["id"] in rev:
+                    n["Inverse"] = "1"
                 n.tags = ["vocabulaire"] + ([c["pos"].split()[0]] if c.get("pos") else [])
                 col.add_note(n, level_dids[c.get("lvl") or level_of(c["key"])])
-                # Mêmes ids que dans l'appli (ankisync fait le lien après import).
-                cid = col.db.scalar("select id from cards where nid = ?", n.id)
-                col.db.execute("update cards set id = ? where id = ?", int(c["id"]), cid)
+                # Mêmes ids que dans l'appli (ankisync fait le lien après import) :
+                # la carte FR → ES (ord 1) = id + 1.
+                for ord_, cid in col.db.all("select ord, id from cards where nid = ?", n.id):
+                    col.db.execute("update cards set id = ? where id = ?", int(c["id"]) + ord_, cid)
                 col.db.execute("update notes set id = ? where id = ?", int(c["id"]) - 1, n.id)
                 col.db.execute("update cards set nid = ? where nid = ?", int(c["id"]) - 1, n.id)
             opts = ExportAnkiPackageOptions(with_scheduling=False, with_deck_configs=False,

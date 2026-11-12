@@ -276,6 +276,9 @@ def build_queue(by, names, srs, flagged, deck_filter, new_left):
         elif s["state"] in ("learning", "relearning") or s.get("due", 0) <= TODAY:
             due.append(c)
     random.shuffle(due)
+    # FR → ES cards (#221) every other place, as in the app
+    fwd, rev = [c for c in new if not c.get("rev")], [c for c in new if c.get("rev")]
+    new = [c for pair in zip(fwd, rev) for c in pair] + fwd[len(rev):] + rev[len(fwd):]
     new = new[:new_left]
     random.shuffle(new)
     return due + new
