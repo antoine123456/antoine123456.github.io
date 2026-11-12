@@ -198,7 +198,8 @@ either side of the pair) are silently skipped instead of duplicated.
 ## Terminal trainer (`trainer.py`)
 
 A minimalist version of the app in the terminal (#215): the front of the
-card, you type the back. It has no sound and shows pictures as a link.
+card, you type the back. It has no sound and no pictures (a card with only a
+picture isn't asked).
 Progress is the same as the app's: Firestore (`users/<name>/sources/<deck>`),
 written card after card with the same scheduler. Only the reviewed card's
 `srs` entry is written, so the other cards stay untouched. Standard library
@@ -214,10 +215,11 @@ python3 trainer.py --user       # pick the name again
 
 - **During a card:** type the answer and press Entrée. Accents and punctuation
   don't count.
-- **Rating:** after the answer, Entrée gives the suggested rating, or type 1–4.
-  An empty answer, or `?`, shows the back.
-- **Self-rated cards:** the 🌊 formulas and turned-over cards are shown and
-  then self-rated.
+- **Checking:** a right answer is rated Correct and the next card comes. A
+  wrong one can be retyped, up to three tries; after that the answer shows and
+  the card is rated À revoir.
+- **Self-rated cards:** for the 🌊 formulas and turned-over cards, Entrée turns
+  the card over, then Entrée = knew it and `n` = didn't.
 - **Stopping:** `q` stops.
 - **Name:** the chosen name is kept in `~/.config/espanol-trainer/trainer.json`.
 
