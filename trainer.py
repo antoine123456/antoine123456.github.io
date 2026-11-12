@@ -281,6 +281,11 @@ def build_queue(by, names, srs, flagged, deck_filter, new_left):
     return due + new
 
 
+def ind(t):
+    """Indented by two spaces, every line: the question reads whole, away from the edge."""
+    return "\n".join("  " + l for l in str(t).split("\n"))
+
+
 def front_of(card):
     return plain(card.get("question")) or card.get("es") or ""
 
@@ -295,34 +300,32 @@ def review(card, s):
     words = [w for w in raw if str(w).strip()]
     back = plain(card.get("answer")) or shown
     flip = card.get("flip") or card.get("eq") or not words
-    state = "nouvelle" if s is None or s.get("state") == "new" else s["state"]
     print()
-    print(col(DIM, "── %s ──" % state))
-    print(col(BOLD, front_of(card)))
+    print(col(BOLD, ind(front_of(card))))
     if flip:
         if ask(col(DIM, "  Entrée = retourner ")) is None:
             return None
-        print(col(CYAN, back))
+        print(col(CYAN, ind(back)))
         r = ask(col(DIM, "  su ? Entrée = oui · n = non "))
         if r is None or r.strip() == "q":
             return None
         return 1 if r.strip().lower() in ("n", "non", "1") else 3
     k = 0
     while k < 3:
-        a = ask("› ")
+        a = ask("  › ")
         if a is None or a.strip() == "q":
             return None
         if not squash(a):
             continue  # Entrée alone doesn't use a try
         if squash(a) == squash(" ".join(words)):
-            print(col(GREEN, "✓ " + shown))
+            print(col(GREEN, "  ✓ " + shown))
             return 3
         if k < 2:
-            print(col(RED, "✗") + col(DIM, " encore %d essai%s" % (2 - k, "s" if k == 0 else "")))
+            print(col(RED, "  ✗"))
         k += 1
-    print(col(RED, "✗ ") + col(CYAN, shown))
+    print(col(RED, "  ✗ ") + col(CYAN, shown))
     if back and squash(back) != squash(" ".join(words)):
-        print(col(DIM, back))
+        print(col(DIM, ind(back)))
     return 1
 
 
