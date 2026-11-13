@@ -6,3 +6,4 @@ lets create another repo to create the served version call it reconnaissance
 where can i host it with a domain name for not so much money ?
 that served version would have the same default decks and instead of import json just put the link or the full the apkg (there s online available decks on the anki website)
 the added apkg would then be stored on my server, add on the dashboard the possibility to limit that
+ajouter des tags verbes et objets au vocabulaire espagnol
