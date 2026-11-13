@@ -1843,6 +1843,19 @@
         }
         .b-sort-bar .b-sort-known { color: var(--green); border-color: var(--border-tint-green); }
         .b-slide.sorted-known { border-color: var(--green); background: var(--tint-green); }
+        /* 🗂 Pré-tri as a list */
+        .b-sort-listbar { align-items: center; font-size: 13px; color: var(--text-2); }
+        .b-sort-listbar #b-sort-count { margin-right: auto; }
+        .b-list .b-sort-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; align-items: center; cursor: default; touch-action: pan-y; transition: transform .2s, background .2s; }
+        .b-sort-row.swiping { transition: none; }
+        .b-sort-btns { display: flex; gap: 6px; }
+        .b-sort-btns button { font: inherit; font-size: 12px; font-weight: 600; padding: 4px 9px; border-radius: 999px; border: 1.5px solid var(--border-2); background: var(--surface); cursor: pointer; white-space: nowrap; }
+        .b-sort-btns .b-sort-l { color: var(--red); }
+        .b-sort-btns .b-sort-k { color: var(--green); }
+        .b-list .b-sort-row.sorted-known, .b-list .b-sort-row.swipe-known { background: var(--tint-green); }
+        .b-list .b-sort-row.sorted-learn, .b-list .b-sort-row.swipe-learn { background: var(--tint-red); }
+        .b-sort-row.sorted-known .b-sort-k { background: var(--green); border-color: var(--green); color: #fff; }
+        .b-sort-row.sorted-learn .b-sort-l { background: var(--red); border-color: var(--red); color: #fff; }
         .b-slide.sorted-learn { border-color: var(--red); background: var(--tint-red); }
         .b-slide.swiping { transition: none; }
         /* the back stays blurred until the card is touched: guess first */
@@ -4869,7 +4882,7 @@
             browse.list = browse.all.filter(function (b) {
                 if (browse.tag && b.tags.indexOf(browse.tag) === -1) return false;
                 // 🗂 pré-tri: only the cards never sorted before (« à apprendre » is kept on the card, presorted) (#193)
-                if (browse.sort) { var st = browse.srs[b.card.id]; if (!isNewCard(b.card) || (st && st.presorted)) return false; }
+                if (browse.sort) { var st = browse.srs[b.card.id]; if (!(b.card.id in browse.sorted) && (!isNewCard(b.card) || (st && st.presorted))) return false; } // sorted just now: kept, to change one's mind
                 else if (browse.know && knowLevel(browse.srs[b.card.id]) !== browse.know) return false;
                 var t = noAcc(b.text);
                 return terms.every(function (term) { return t.indexOf(term) !== -1; });
@@ -5000,21 +5013,24 @@
             if (known) { var iv = 20 + Math.floor(Math.random() * 41); srs[id] = { state: "review", step: 0, interval: iv, ease: 2.5, due: TODAY + iv, reps: 1, lapses: 0, easyCount: 1, lastReview: Date.now(), known: true }; }
             else { sortSrsBack(id, srs); srs[id].presorted = true; } // stays new, not offered to 🗂 again
         }
-        function sortCard(known) {
-            var b = browse.list[browse.idx];
+        function sortCard(known, i) {
+            var inList = browse.sortList;
+            if (i == null) i = browse.idx;
+            var b = browse.list[i];
             if (!browse.sort || !b) return;
             var id = b.card.id, was = browse.sorted[id];
-            if (was === known) { stepBrowse(1); return; }
+            if (was === known) { if (!inList) stepBrowse(1); return; }
             var srs = loadSRS(browse.sid);
             if (!(id in browse.sortPrev)) browse.sortPrev[id] = srs[id] ? Object.assign({}, srs[id]) : null;
             sortSet(id, srs, known);
             saveSRS(browse.sid, srs); browse.srs = srs;
-            browse.sortHist.push({ id: id, idx: browse.idx, was: was });
+            browse.sortHist.push({ id: id, idx: i, was: was });
             browse.sorted[id] = known;
             dlog("pré-tri", { source: browse.sid, carte: b.card.id, connue: known });
-            var sl = document.querySelector('.b-slide[data-i="' + browse.idx + '"]');
-            if (sl) { sl.classList.remove("sorted-known", "sorted-learn"); sl.classList.add(known ? "sorted-known" : "sorted-learn"); delete sl.dataset.filled; fillSlide(sl); }
             updateSortCount();
+            if (inList) { markSortRow(i); return; } // 🗂 list: the row is coloured and stays, the other button changes the choice
+            var sl = document.querySelector('.b-slide[data-i="' + i + '"]');
+            if (sl) { sl.classList.remove("sorted-known", "sorted-learn"); sl.classList.add(known ? "sorted-known" : "sorted-learn"); delete sl.dataset.filled; fillSlide(sl); }
             if (browse.idx >= browse.list.length - 1) { setTimeout(sortFinished, 350); return; }
             setTimeout(function () { stepBrowse(1); }, 250);
         }
@@ -5035,6 +5051,7 @@
             else { browse.sorted[h.id] = h.was; sortSet(h.id, srs, h.was); }
             saveSRS(browse.sid, srs); browse.srs = srs;
             dlog("pré-tri annulé", { source: browse.sid, carte: h.id });
+            if (browse.sortList) { markSortRow(h.idx); updateSortCount(); toast("↩ " + t9n("Tri annulé")); return; }
             var sl = document.querySelector('.b-slide[data-i="' + h.idx + '"]');
             if (sl) {
                 sl.classList.remove("sorted-known", "sorted-learn");
@@ -5058,6 +5075,7 @@
         document.addEventListener("keydown", function (e) {
             if (!browse.sort || document.getElementById("browse").style.display !== "flex" || e.target.tagName === "INPUT") return;
             if (e.key.toLowerCase() === "z" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); e.stopImmediatePropagation(); undoSort(); }
+            else if (browse.sortList) return; // 🗂 list: the buttons or a swipe on the row
             else if (e.key === "ArrowRight") { e.preventDefault(); e.stopImmediatePropagation(); sortCard(true); }
             else if (e.key === "ArrowLeft") { e.preventDefault(); e.stopImmediatePropagation(); sortCard(false); }
             else if (e.key === "ArrowUp" || e.key === "ArrowDown") { e.preventDefault(); e.stopImmediatePropagation(); if (e.key === "ArrowUp") browseEdit(browse.idx); else sortDrop(); } // as in 📝 Relecture: ↑ edit, ↓ drop (#187, #193)
@@ -5067,7 +5085,7 @@
             var sw = null;
             document.addEventListener("touchstart", function (e) {
                 sw = null;
-                if (!browse.sort || e.touches.length !== 1) return;
+                if (!browse.sort || browse.sortList || e.touches.length !== 1) return;
                 var sl = e.target.closest("#b-track .b-slide.active");
                 if (!sl || e.target.closest("button, a")) return;
                 sw = { sl: sl, x: e.touches[0].clientX, y: e.touches[0].clientY, dx: 0 };
@@ -5088,6 +5106,67 @@
                 if (Math.abs(s.dx) >= 70) sortCard(s.dx > 0);
             });
         })();
+        // 🗂 Pré-tri as a list: one row per card, ✓ Connue / ✗ À apprendre
+        // on each, or swipe the row (→ known, ← to learn). A sorted row is
+        // coloured and stays, so the other button changes the choice; ↩ undoes.
+        try { browse.sortList = localStorage.getItem("ankitrain_v1_sortlist") === "1"; } catch (e) {}
+        function setSortList(on) {
+            browse.sortList = on;
+            try { localStorage.setItem("ankitrain_v1_sortlist", on ? "1" : "0"); } catch (e) {}
+            renderBrowse();
+        }
+        function markSortRow(i) {
+            var row = document.querySelector('.b-sort-row[data-i="' + i + '"]'), b = browse.list[i];
+            if (!row || !b) return;
+            var v = browse.sorted[b.card.id];
+            row.classList.toggle("sorted-known", v === true); row.classList.toggle("sorted-learn", v === false);
+        }
+        function renderSortList(el) {
+            el.innerHTML = '<div class="b-sort-bar b-sort-listbar"><span id="b-sort-count"></span>'
+                + '<button class="b-sort-undo" onclick="undoSort()" title="' + t9n("Annuler le dernier tri (Ctrl/⌘+Z)") + '">↩</button>'
+                + '<button class="b-sort-undo" onclick="setSortList(false)" title="' + t9n("Trier carte par carte") + '">🃏 ' + t9n("Cartes") + '</button></div>'
+                + '<div class="b-list b-sort-list">' + browse.list.map(function (b, i) {
+                    var c = b.card, v = browse.sorted[c.id];
+                    var hasAudio = (c.audioQuestion && c.audioQuestion.length) || (c.audioAnswer && c.audioAnswer.length);
+                    return '<div class="b-row b-sort-row' + (v === true ? ' sorted-known' : v === false ? ' sorted-learn' : '') + '" data-i="' + i + '"'
+                        + (hasAudio ? ' onclick="if (!event.target.closest(\'button\')) playBrowseAudio(' + i + ')"' : '') + '>'
+                        + '<div class="b-row-front">' + esc(htmlToText(displayQuestion(c.question))) + '</div>'
+                        + '<div class="b-row-back">' + esc(htmlToText(b.back)) + '</div>'
+                        + '<div class="b-sort-btns"><button class="b-sort-l" onclick="sortCard(false, ' + i + ')" title="' + t9n("À apprendre") + ' (←)">✗ <span class="lbl-long">' + t9n("À apprendre") + '</span></button>'
+                        + '<button class="b-sort-k" onclick="sortCard(true, ' + i + ')" title="' + t9n("Connue") + ' (→)">✓ <span class="lbl-long">' + t9n("Connue") + '</span></button></div>'
+                        + '</div>';
+                }).join("") + '</div>';
+            updateSortCount();
+            document.getElementById("b-count").textContent = browse.list.length + " cartes";
+        }
+        // swipe a row: it follows the finger, far enough = sorted
+        (function () {
+            var sw = null;
+            document.addEventListener("touchstart", function (e) {
+                sw = null;
+                if (!browse.sort || !browse.sortList || e.touches.length !== 1) return;
+                var row = e.target.closest(".b-sort-row");
+                if (!row || e.target.closest("button")) return;
+                sw = { row: row, x: e.touches[0].clientX, y: e.touches[0].clientY, dx: 0, h: null };
+            }, { passive: true });
+            document.addEventListener("touchmove", function (e) {
+                if (!sw) return;
+                var dx = e.touches[0].clientX - sw.x, dy = e.touches[0].clientY - sw.y;
+                if (sw.h == null) { if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return; sw.h = Math.abs(dx) > Math.abs(dy); }
+                if (!sw.h) { sw = null; return; } // a vertical scroll
+                if (e.cancelable) e.preventDefault();
+                sw.dx = dx;
+                sw.row.classList.add("swiping");
+                sw.row.style.transform = "translateX(" + dx + "px)";
+                sw.row.classList.toggle("swipe-known", dx > 70); sw.row.classList.toggle("swipe-learn", dx < -70);
+            }, { passive: false });
+            document.addEventListener("touchend", function () {
+                if (!sw) return;
+                var s = sw; sw = null;
+                s.row.classList.remove("swiping", "swipe-known", "swipe-learn"); s.row.style.transform = "";
+                if (Math.abs(s.dx) >= 70) sortCard(s.dx > 0, +s.row.dataset.i);
+            });
+        })();
 
         // Builds empty slide shells for the whole list; each one is filled
         // (front + back, via the Shadow DOM renderer) only when it gets
@@ -5103,6 +5182,7 @@
                 return;
             }
             if (!browse.carousel && !browse.review && !browse.sort) { renderBrowseList(el); return; }
+            if (browse.sort && browse.sortList) { renderSortList(el); return; }
             var slides = browse.list.map(function (b, i) {
                 return '<div class="s-question b-slide' + (i === 0 ? ' active' : '') + '" data-i="' + i + '"></div>';
             }).join("");
@@ -5116,6 +5196,7 @@
                 + '<button class="b-sort-undo" onclick="undoSort()" title="' + t9n("Annuler le dernier tri (Ctrl/⌘+Z)") + '">↩</button>'
                 + '<button class="b-sort-undo" onclick="browseEdit(browse.idx)" title="' + t9n("Modifier la carte (↑)") + '">✏️</button>'
                 + '<button class="b-sort-undo" onclick="sortDrop()" title="' + t9n("Retirer la carte du paquet (↓)") + '">🗑</button>'
+                + '<button class="b-sort-undo" onclick="setSortList(true)" title="' + t9n("Trier en liste") + '">☰</button>'
                 + '<button class="b-sort-known" onclick="sortCard(true)">' + '<span class="lbl-long">' + t9n("Je connais") + '</span><span class="lbl-short">' + t9n("Connue") + '</span> →</button></div>');
             var track = document.getElementById("b-track");
             browse.observer = new IntersectionObserver(function (entries) {
@@ -7208,7 +7289,7 @@
                     "(nuit, correction) après 3 erreurs sur le dernier mot, la carte passe toute seule à la suivante (notée « À revoir »).": "(notte, correzione) dopo 3 errori sull'ultima parola, la carta passa da sola alla successiva (valutata « Da rivedere »).",
                     "toutes": "tutte", "Tous les niveaux": "Tutti i livelli", "Nouvelles": "Nuove", "En cours": "In corso", "À consolider": "Da consolidare", "Bien connues": "Ben note",
                     "Ordre du paquet": "Ordine del mazzo", "Moins connues d'abord": "Prima le meno note", "Mieux connues d'abord": "Prima le più note",
-                    "(nuit, fin+) 🔍 filtrer et trier par niveau de connaissance (📶 et ↕ sous la recherche).": "(notte, fine+) 🔍 filtrare e ordinare per livello di conoscenza (📶 e ↕ sotto la ricerca).", "(après-midi) 🗂 Pré-tri : seulement les cartes jamais triées ; changer d'avis (‹ Préc.), ↑ modifier, ↓ retirer, Ctrl/⌘+Z pour annuler ; 🔍 tout le haut reste affiché, nom du paquet sur la ligne des boutons.": "(pomeriggio) 🗂 Pre-selezione: solo le carte mai ordinate; cambiare idea (‹ Préc.), ↑ modificare, ↓ togliere, Ctrl/⌘+Z per annullare; 🔍 tutta la parte alta resta visibile, nome del mazzo sulla riga dei pulsanti.", "Rien à annuler.": "Niente da annullare.", "(nuit) 🌊 Helmholtz : on tape la formule (mode équation, barre de symboles), les nombres en chiffres, une équation par ligne, et chaque carte attend ses prérequis.": "(notte) 🌊 Helmholtz: si scrive la formula (modalità equazione, barra dei simboli), i numeri in cifre, un'equazione per riga, e ogni carta aspetta i suoi prerequisiti.", "la formule…": "la formula…", "(tard, raccourci) ➕ pendant la révision, F9 (ou ＋ en haut) ajoute un mot au Vocabulaire perso : celui de la carte, ou les mots sélectionnés.": "(tardi, scorciatoia) ➕ durante il ripasso, F9 (o ＋ in alto) aggiunge una parola al Vocabolario personale: quella della carta, o le parole selezionate.", "ajouter un mot au 📝 Vocabulaire perso (celui de la carte, ou les mots sélectionnés)": "aggiungere una parola al 📝 Vocabolario personale (quella della carta, o le parole selezionate)", "Ajouter au vocabulaire perso (F9)": "Aggiungi al vocabolario personale (F9)", "(tard, correction) ⌨️ Maintenir Espace garde bien le verso : aussi sur une carte ratée, une carte sans verso enrichi, et quand Espace est enfoncé juste avant.": "(tardi, correzione) ⌨️ Tenere premuto Spazio tiene davvero il retro: anche su una carta sbagliata, una carta senza retro arricchito, e quando Spazio è premuto appena prima.", "(tard, accueil) 📅 accueil : une heatmap des révisions en bas (un carré par jour sur un an, moyenne, record, série actuelle), à la place du combo des jours.": "(tardi, pagina iniziale) 📅 pagina iniziale: una heatmap dei ripassi in fondo (un quadrato per giorno su un anno, media, record, serie attuale), al posto della combo dei giorni.", "Moyenne": "Media", "cartes / jour": "carte / giorno", "Jours étudiés": "Giorni di studio", "Record": "Record", "jours d'affilée": "giorni di fila", "Série actuelle": "Serie attuale", "jours": "giorni", "jour": "giorno", "cartes": "carte", "carte": "carta", "(tard, fin) 🏷 Vocabulaire : tag « objet » (192 mots : téléphone, couteau, parapluie…), avec une image pour la plupart.": "(tardi, fine) 🏷 Vocabolario: tag « oggetto » (192 parole: telefono, coltello, ombrello…), con un'immagine per la maggior parte.", "(tard, suite) 🐶 Vocabulaire : les cris des animaux (maullar, mugir, relinchar, rugir…), tag « cris d'animaux ».": "(tardi, seguito) 🐶 Vocabolario: i versi degli animali (maullar, mugir, relinchar, rugir…), tag « versi degli animali ».", "(tard) 🚩 cartes corrigées (aquí está = voici, ya no = ne… plus, image de más) : leur marque s'enlève toute seule, ici et dans Anki.": "(tardi) 🚩 carte corrette (aquí está, ya no, immagine di más): il loro segno se ne va da solo, qui e in Anki.", "(soir, et encore) 🖼 Vocabulaire : des images pour les animaux et les parties du corps (92 mots de plus).": "(sera, e ancora) 🖼 Vocabolario: immagini per gli animali e le parti del corpo (92 parole in più).", "(soir, encore) ✏️ image par lien seulement : champ « Image (lien) » dans Modifier la carte (une page Wikimedia marche aussi), plus d'envoi de photo.": "(sera, ancora) ✏️ immagine solo tramite link: campo « Immagine (link) » in Modifica la carta (va bene anche una pagina Wikimedia), niente più invio di foto.", "Image (lien)": "Immagine (link)", "Le lien de l'image doit commencer par https://": "Il link dell'immagine deve iniziare con https://", "(soir, fin) 🎉 Session terminée : temps estimé au départ et temps effectif.": "(sera, fine) 🎉 Sessione finita: tempo stimato all'inizio e tempo effettivo.", "(soir, suite) 🏷 Vocabulaire : tag « transparent » pour les mots qui se devinent depuis le français (la capacidad = capacité), jamais un faux ami.": "(sera, seguito) 🏷 Vocabolario: tag « trasparente » per le parole che si indovinano dall'italiano (la sensación = sensazione), mai un falso amico.", "(soir) ✏️ 📷 une photo sur la carte (Modifier la carte) ; 🗂 le pré-tri suit le tag et la recherche choisis.": "(sera) ✏️ 📷 una foto sulla carta (Modifica la carta); 🗂 la pre-selezione segue il tag e la ricerca scelti.", "Ajouter une photo": "Aggiungi una foto", "Changer la photo": "Cambia la foto", "Retirer la photo": "Togli la foto", "Image illisible.": "Immagine illeggibile.", "Plus de place pour les photos sur cet appareil.": "Niente più spazio per le foto su questo dispositivo.", "Photo ajoutée": "Foto aggiunta", "Photo retirée": "Foto tolta", "Modifier la carte (↑)": "Modifica la carta (↑)", "Retirer la carte du paquet (↓)": "Togli la carta dal mazzo (↓)", "Tri annulé": "Scelta annullata", "Annuler le dernier tri (Ctrl/⌘+Z)": "Annulla l'ultima scelta (Ctrl/⌘+Z)", "↩ pour corriger, 🗂 pour sortir": "↩ per correggere, 🗂 per uscire", "Filtrer par tag": "Filtra per tag", "Chercher un tag…": "Cerca un tag…",
+                    "(nuit, fin+) 🔍 filtrer et trier par niveau de connaissance (📶 et ↕ sous la recherche).": "(notte, fine+) 🔍 filtrare e ordinare per livello di conoscenza (📶 e ↕ sotto la ricerca).", "(après-midi) 🗂 Pré-tri : seulement les cartes jamais triées ; changer d'avis (‹ Préc.), ↑ modifier, ↓ retirer, Ctrl/⌘+Z pour annuler ; 🔍 tout le haut reste affiché, nom du paquet sur la ligne des boutons.": "(pomeriggio) 🗂 Pre-selezione: solo le carte mai ordinate; cambiare idea (‹ Préc.), ↑ modificare, ↓ togliere, Ctrl/⌘+Z per annullare; 🔍 tutta la parte alta resta visibile, nome del mazzo sulla riga dei pulsanti.", "Rien à annuler.": "Niente da annullare.", "(nuit) 🌊 Helmholtz : on tape la formule (mode équation, barre de symboles), les nombres en chiffres, une équation par ligne, et chaque carte attend ses prérequis.": "(notte) 🌊 Helmholtz: si scrive la formula (modalità equazione, barra dei simboli), i numeri in cifre, un'equazione per riga, e ogni carta aspetta i suoi prerequisiti.", "la formule…": "la formula…", "(tard, raccourci) ➕ pendant la révision, F9 (ou ＋ en haut) ajoute un mot au Vocabulaire perso : celui de la carte, ou les mots sélectionnés.": "(tardi, scorciatoia) ➕ durante il ripasso, F9 (o ＋ in alto) aggiunge una parola al Vocabolario personale: quella della carta, o le parole selezionate.", "ajouter un mot au 📝 Vocabulaire perso (celui de la carte, ou les mots sélectionnés)": "aggiungere una parola al 📝 Vocabolario personale (quella della carta, o le parole selezionate)", "Ajouter au vocabulaire perso (F9)": "Aggiungi al vocabolario personale (F9)", "(tard, correction) ⌨️ Maintenir Espace garde bien le verso : aussi sur une carte ratée, une carte sans verso enrichi, et quand Espace est enfoncé juste avant.": "(tardi, correzione) ⌨️ Tenere premuto Spazio tiene davvero il retro: anche su una carta sbagliata, una carta senza retro arricchito, e quando Spazio è premuto appena prima.", "(tard, accueil) 📅 accueil : une heatmap des révisions en bas (un carré par jour sur un an, moyenne, record, série actuelle), à la place du combo des jours.": "(tardi, pagina iniziale) 📅 pagina iniziale: una heatmap dei ripassi in fondo (un quadrato per giorno su un anno, media, record, serie attuale), al posto della combo dei giorni.", "Moyenne": "Media", "cartes / jour": "carte / giorno", "Jours étudiés": "Giorni di studio", "Record": "Record", "jours d'affilée": "giorni di fila", "Série actuelle": "Serie attuale", "jours": "giorni", "jour": "giorno", "cartes": "carte", "carte": "carta", "(tard, fin) 🏷 Vocabulaire : tag « objet » (192 mots : téléphone, couteau, parapluie…), avec une image pour la plupart.": "(tardi, fine) 🏷 Vocabolario: tag « oggetto » (192 parole: telefono, coltello, ombrello…), con un'immagine per la maggior parte.", "(tard, suite) 🐶 Vocabulaire : les cris des animaux (maullar, mugir, relinchar, rugir…), tag « cris d'animaux ».": "(tardi, seguito) 🐶 Vocabolario: i versi degli animali (maullar, mugir, relinchar, rugir…), tag « versi degli animali ».", "(tard) 🚩 cartes corrigées (aquí está = voici, ya no = ne… plus, image de más) : leur marque s'enlève toute seule, ici et dans Anki.": "(tardi) 🚩 carte corrette (aquí está, ya no, immagine di más): il loro segno se ne va da solo, qui e in Anki.", "(soir, et encore) 🖼 Vocabulaire : des images pour les animaux et les parties du corps (92 mots de plus).": "(sera, e ancora) 🖼 Vocabolario: immagini per gli animali e le parti del corpo (92 parole in più).", "(soir, encore) ✏️ image par lien seulement : champ « Image (lien) » dans Modifier la carte (une page Wikimedia marche aussi), plus d'envoi de photo.": "(sera, ancora) ✏️ immagine solo tramite link: campo « Immagine (link) » in Modifica la carta (va bene anche una pagina Wikimedia), niente più invio di foto.", "Image (lien)": "Immagine (link)", "Le lien de l'image doit commencer par https://": "Il link dell'immagine deve iniziare con https://", "(soir, fin) 🎉 Session terminée : temps estimé au départ et temps effectif.": "(sera, fine) 🎉 Sessione finita: tempo stimato all'inizio e tempo effettivo.", "(soir, suite) 🏷 Vocabulaire : tag « transparent » pour les mots qui se devinent depuis le français (la capacidad = capacité), jamais un faux ami.": "(sera, seguito) 🏷 Vocabolario: tag « trasparente » per le parole che si indovinano dall'italiano (la sensación = sensazione), mai un falso amico.", "(soir) ✏️ 📷 une photo sur la carte (Modifier la carte) ; 🗂 le pré-tri suit le tag et la recherche choisis.": "(sera) ✏️ 📷 una foto sulla carta (Modifica la carta); 🗂 la pre-selezione segue il tag e la ricerca scelti.", "Ajouter une photo": "Aggiungi una foto", "Changer la photo": "Cambia la foto", "Retirer la photo": "Togli la foto", "Image illisible.": "Immagine illeggibile.", "Plus de place pour les photos sur cet appareil.": "Niente più spazio per le foto su questo dispositivo.", "Photo ajoutée": "Foto aggiunta", "Photo retirée": "Foto tolta", "Modifier la carte (↑)": "Modifica la carta (↑)", "Retirer la carte du paquet (↓)": "Togli la carta dal mazzo (↓)", "Tri annulé": "Scelta annullata", "Trier carte par carte": "Ordina carta per carta", "Cartes": "Carte", "Trier en liste": "Ordina in elenco", "Annuler le dernier tri (Ctrl/⌘+Z)": "Annulla l'ultima scelta (Ctrl/⌘+Z)", "↩ pour corriger, 🗂 pour sortir": "↩ per correggere, 🗂 per uscire", "Filtrer par tag": "Filtra per tag", "Chercher un tag…": "Cerca un tag…",
                     "pour commenter une carte,": "per commentare una carta,", "(✏️) pour la modifier,": "(✏️) per modificarla,", "(🗑) pour la retirer du paquet (": "(🗑) per toglierla dal mazzo (", "la remet).": "la rimette).",
                     "📝 Relecture : modifier la carte · la retirer du paquet (Ctrl+Z : annuler)": "📝 Revisione: modifica la carta · toglila dal mazzo (Ctrl+Z: annulla)",
                     "✏️ Modifier la carte": "✏️ Modifica la carta", "Ctrl+Entrée : enregistrer · Échap : annuler": "Ctrl+Invio: salva · Esc: annulla", "✓ Enregistrer": "✓ Salva",
@@ -7544,7 +7625,8 @@
             {"id": 50, "d": "2026-11-10", "k": "cartes", "fr": "<b>Maintenir Espace</b> garde maintenant le verso affiché dans tous les cas : carte ratée, carte simple, ou Espace enfoncé juste avant la réponse.", "it": "<b>Tenere premuto Spazio</b> ora tiene il retro in ogni caso: carta sbagliata, carta semplice, o Spazio premuto appena prima della risposta."},
             {"id": 51, "d": "2026-11-10", "k": "cartes", "fr": "Pendant la révision, <b>F9</b> (ou <b>＋</b> en haut) ajoute un mot à ton <b>Vocabulaire perso</b> : celui de la carte, ou un mot que tu as sélectionné dans la phrase.", "it": "Durante il ripasso, <b>F9</b> (o <b>＋</b> in alto) aggiunge una parola al tuo <b>Vocabolario personale</b>: quella della carta, o una parola selezionata nella frase."},
             {"id": 52, "d": "2026-11-10", "k": "cartes", "fr": "<b>🌊 Helmholtz</b>, comme un paquet Anki de physique : tu <b>tapes la formule</b> (λ = c/f, avec une barre de symboles), une équation par ligne au verso, et une carte n'arrive qu'après celles sur lesquelles elle <b>s'appuie</b>.", "it": "<b>🌊 Helmholtz</b>, come un mazzo Anki di fisica: <b>scrivi la formula</b> (λ = c/f, con una barra di simboli), un'equazione per riga sul retro, e una carta arriva solo dopo quelle su cui si <b>basa</b>."},
-            {"id": 53, "d": "2026-11-12", "k": "cartes", "fr": "Le <b>Vocabulaire</b> se révise aussi <b>dans l'autre sens</b> : le sens en français, tu tapes l'espagnol. Une carte arrive une fois le mot déjà vu, une nouvelle carte sur deux — et pas pour les mots <b>transparents</b>, qui se devinent.", "it": "Il <b>Vocabolario</b> si ripassa anche <b>nell'altro senso</b>: il significato in italiano, scrivi lo spagnolo. Una carta arriva quando la parola è già stata vista, una nuova carta su due — e non per le parole <b>trasparenti</b>, che si indovinano."}
+            {"id": 53, "d": "2026-11-12", "k": "cartes", "fr": "Le <b>Vocabulaire</b> se révise aussi <b>dans l'autre sens</b> : le sens en français, tu tapes l'espagnol. Une carte arrive une fois le mot déjà vu, une nouvelle carte sur deux — et pas pour les mots <b>transparents</b>, qui se devinent.", "it": "Il <b>Vocabolario</b> si ripassa anche <b>nell'altro senso</b>: il significato in italiano, scrivi lo spagnolo. Una carta arriva quando la parola è già stata vista, una nuova carta su due — e non per le parole <b>trasparenti</b>, che si indovinano."},
+            {"id": 54, "d": "2026-11-13", "k": "cartes", "fr": "<b>🗂 Pré-tri en liste</b> : ☰ dans le pré-tri montre les cartes jamais vues en liste ; sur chaque ligne, <b>✓ Connue</b> ou <b>✗ À apprendre</b>, ou glisse la ligne (→ connue, ← à apprendre). 🃏 revient carte par carte.", "it": "<b>🗂 Pre-selezione in elenco</b>: ☰ nella pre-selezione mostra le carte mai viste in elenco; su ogni riga, <b>✓ Nota</b> o <b>✗ Da imparare</b>, o scorri la riga (→ nota, ← da imparare). 🃏 torna carta per carta."}
         ];
         var NEWS_KINDS = { revision: ["Révision", "Ripasso"], cartes: ["Cartes", "Carte"], combos: ["Combos", "Combo"], affichage: ["Affichage", "Aspetto"],
             reglages: ["Réglages", "Impostazioni"], accueil: ["Accueil", "Home"], paquets: ["Paquets", "Mazzi"] };
