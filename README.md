@@ -122,13 +122,22 @@ Other findings the design leans on: the **testing effect** and **spaced repetiti
 
 ## Publish to GitHub Pages
 
+The app is at **https://antoine123456.github.io/typeinanki/** (#226). Repo
+`antoine123456/typeinanki` serves it, and its `main` is a copy of branch
+`firebase-debug`. To deploy, after pushing `main`:
+
 ```bash
-git add index.html extract.py README.md
-git commit -m "feat: Anki Trainer"
-git push
+cd ../espanol-trainer-firebase        # worktree of firebase-debug
+git merge main -m "Merge main"        # keep the NS + "…" localStorage keys on conflicts
+git push origin firebase-debug
+git push typeinanki firebase-debug:main
 ```
 
-Then, in the repo's **Settings → Pages**, set the source to this branch, `/ (root)`. `extract.py` never needs to run in the browser — only `index.html` and the JSON files you import (kept in your own browser's `localStorage`) are needed there.
+The site root, https://antoine123456.github.io/, is served from branch `site`
+of this repo: a list of links, where other pages can go. Its `404.html` sends
+the app's old addresses (`/?fantome=…`, `/app.html`…) to `/typeinanki/`. All
+the app's links are relative, so it works under any path. It's still the same
+domain, so the data saved in the browser carried over.
 
 ---
 
