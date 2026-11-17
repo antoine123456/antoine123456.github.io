@@ -237,6 +237,13 @@ python3 trainer.py --user       # pick the name again
   Entrée is enough.
 - **Name:** the chosen name is kept in `~/.config/espanol-trainer/trainer.json`.
 
+Same cards in the same order as the app: the terminal draws the day's queue
+with the app's seed (day + deck), its shuffle, its stage locks and its 🚩
+marks. So you can start a session in the app and finish it in the terminal,
+or the other way round: each review is saved at once, and the other side
+picks up where it stopped. The app's ⚙ limits are kept in the browser: the
+terminal assumes 20 new cards a day (`-n` if you changed it).
+
 The app takes the terminal's reviews when it loads, and a card's most recent
 review wins. Reload the app's tab after a terminal session, or an open tab may
 send its older copy back.

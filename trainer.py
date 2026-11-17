@@ -29,10 +29,10 @@ The web app picks these reviews up when it reloads (the most recent review
 of a card wins); reload its tab after a terminal session.
 """
 import argparse
+import calendar
 import html
 import json
 import os
-import random
 import re
 import sys
 import time
@@ -275,11 +275,142 @@ def setup(again=False):
     return cfg["user"]
 
 
-def build_queue(by, names, srs, flagged, deck_filter, new_left):
-    dids = sorted((d for d in by if not deck_filter or deck_filter.lower() in names.get(d, d).lower()),
-                  key=lambda d: natural(names.get(d, d)))
-    cards = [c for d in dids for c in by[d] if str(c.get("id")) not in flagged
-             and front_of(c)]  # a picture alone can't be shown here
+# ── same order as the app (#224) ───────────────────────────────
+# startStudy() in index.html: due cards sorted by id then shuffled, new ones
+# taken in deck order and shuffled, both with a seed drawn from the day and
+# the deck. The same draw here, so the card the app shows is the one the
+# terminal shows: start on one, finish on the other.
+M32 = 0xFFFFFFFF
+
+
+def imul(a, b):
+    return (a * b) & M32
+
+
+def day_seed(key):
+    """daySeed(): FNV-1a over the UTF-16 code units of « TODAY|key »."""
+    h = 2166136261
+    b = (str(TODAY) + "|" + key).encode("utf-16-le")
+    for i in range(0, len(b), 2):
+        h = imul(h ^ (b[i] | b[i + 1] << 8), 16777619)
+    return h
+
+
+def seeded_shuffle(a, seed):
+    """shuffle(a, seed): Fisher–Yates with the app's mulberry32."""
+    x = seed & M32
+
+    def rnd():
+        nonlocal x
+        x = (x + 0x6D2B79F5) & M32
+        t = imul(x ^ (x >> 15), x | 1)
+        t ^= (t + imul(t ^ (t >> 7), t | 61)) & M32
+        return ((t ^ (t >> 14)) & M32) / 4294967296
+
+    for i in range(len(a) - 1, 0, -1):
+        j = int(rnd() * (i + 1))
+        a[i], a[j] = a[j], a[i]
+    return a
+
+
+STAGE_UNLOCK_RATIO = 0.8
+
+
+def locked_new_ids(by, names, srs, flagged):
+    """lockedNewIds(): the new cards of a later stage (« Espagnol 3 » after
+    « Espagnol 2 », or the tag etapeN) wait until 80 % of the stage before is known."""
+    chains, groups, deck_stage = {}, {}, {}
+    for did, name in names.items():
+        k = name.rfind("::")
+        if k < 0:
+            continue
+        m = re.match(r"^(.*?)\s*(\d+)$", name[k + 2:])
+        if not m or not m.group(1):
+            continue
+        groups.setdefault(name[:k] + "::" + m.group(1), []).append((did, int(m.group(2))))
+    for key, xs in groups.items():
+        if len(xs) >= 2:
+            for did, n in xs:
+                deck_stage[did] = (key, n)
+    for did, cards in by.items():
+        for c in cards:
+            cid = str(c.get("id"))
+            if cid in flagged or c.get("rev"):
+                continue
+            m = re.search(r"(?:^| )etape(\d+)(?= |$)", " ".join(c.get("tags") or []), re.I)
+            chain, n = ("#etape", int(m.group(1))) if m else deck_stage.get(did, (None, None))
+            if chain is None:
+                continue
+            st = chains.setdefault(chain, {}).setdefault(n, {"done": 0, "total": 0, "fresh": []})
+            x = srs.get(cid)
+            st["total"] += 1
+            if x and x.get("state") == "review":
+                st["done"] += 1
+            if not x or x.get("state") == "new":
+                st["fresh"].append(cid)
+    locked = set()
+    for stages in chains.values():
+        nums = sorted(stages)
+        open_upto = nums[0]
+        for n in nums:
+            if n > open_upto:
+                break
+            if n == open_upto and stages[n]["done"] >= STAGE_UNLOCK_RATIO * stages[n]["total"]:
+                open_upto += 1
+        for n in nums:
+            if n > open_upto:
+                locked.update(stages[n]["fresh"])
+    return locked
+
+
+def js_natural_key(name):
+    """naturalCompare(): localeCompare, numeric, case and accents ignored."""
+    return [(0, int(t), "") if t.isdigit() else (1, 0, squash_keep(t)) for t in re.split(r"(\d+)", name)]
+
+
+def squash_keep(t):
+    t = unicodedata.normalize("NFD", t.lower())
+    return "".join(ch for ch in t if unicodedata.category(ch) != "Mn")
+
+
+def study_deck(names, deck_filter):
+    """The deck the app starts from its home page: the top of the tree (or,
+    with -d, the shortest deck path holding that text) — part of the seed."""
+    paths = set()
+    for n in names.values():
+        parts = n.split("::")
+        paths.update("::".join(parts[:i]) for i in range(1, len(parts) + 1))
+    if deck_filter:
+        hits = sorted((p for p in paths if deck_filter.lower() in p.lower()), key=len)
+        return hits[0] if hits else None
+    roots = {n.split("::")[0] for n in names.values()}
+    return roots.pop() if len(roots) == 1 else None
+
+
+def live_flags(fl):
+    """The 🚩 cards still out: dropFixed() — a mark older than the card's fix
+    (fixed.json, #200) no longer counts."""
+    try:
+        fixed = json.load(open(os.path.join(HERE, "fixed.json"), encoding="utf-8")).get("cards") or {}
+    except Exception:
+        fixed = {}
+    out = set()
+    for cid, v in fl.items():
+        o = v if isinstance(v, dict) else {}
+        f = fixed.get(cid)
+        if f and not o.get("drop"):
+            fixed_ms = calendar.timegm(time.strptime(f, "%Y-%m-%dT%H:%M:%SZ")) * 1000
+            if (o.get("at") or 0) < fixed_ms:
+                continue
+        out.add(cid)
+    return out
+
+
+def build_queue(by, names, srs, flagged, deck_name, new_left, sid):
+    is_child = lambda n: deck_name is None or n == deck_name or n.startswith(deck_name + "::")
+    dids = sorted((d for d in by if is_child(names.get(d, d))), key=lambda d: js_natural_key(names.get(d, d)))
+    locked = locked_new_ids(by, names, srs, flagged)
+    cards = [c for d in dids for c in by[d] if str(c.get("id")) not in flagged and str(c.get("id")) not in locked]
     seen = lambda i: i in srs and srs[i].get("state") != "new"
     due, new = [], []
     for c in cards:
@@ -289,12 +420,13 @@ def build_queue(by, names, srs, flagged, deck_filter, new_left):
                 new.append(c)
         elif s["state"] in ("learning", "relearning") or s.get("due", 0) <= TODAY:
             due.append(c)
-    random.shuffle(due)
+    seed = day_seed(sid + "|" + (deck_name or "") + "|")
+    due.sort(key=lambda c: str(c["id"]))  # JS string order (ids are digits, same length)
+    seeded_shuffle(due, seed)
     # FR → ES cards (#221) every other place, as in the app
     fwd, rev = [c for c in new if not c.get("rev")], [c for c in new if c.get("rev")]
     new = [c for pair in zip(fwd, rev) for c in pair] + fwd[len(rev):] + rev[len(fwd):]
-    new = new[:new_left]
-    random.shuffle(new)
+    new = seeded_shuffle(new[:new_left], seed + 1)
     return due + new
 
 
@@ -437,7 +569,7 @@ def main():
     sid = src["id"]
     meta = get_doc("users/%s/sources/%s" % (USER, sid))
     srs = meta.get("srs") or {}
-    flagged = set((meta.get("flagged") or {}).keys())
+    flagged = live_flags(meta.get("flagged") or {})
     nc = meta.get("newCount") or {}
     nc = nc if nc.get("day") == TODAY else {"day": TODAY, "count": 0}
     by, names = load_cards(sid, files)
@@ -446,7 +578,9 @@ def main():
             for c in cards:
                 if str(c.get("id")) == cid:
                     c.update((e or {}).get("f") or {})
-    queue = build_queue(by, names, srs, flagged, args.sub, max(0, args.new - nc["count"]))
+    deck_name = study_deck(names, args.sub)
+    queue = build_queue(by, names, srs, flagged, deck_name, max(0, args.new - nc["count"]), sid)
+    queue = [c for c in queue if front_of(c)]  # a picture alone can't be shown here (after the draw: same order)
     n_new = sum(1 for c in queue if str(c["id"]) not in srs or srs[str(c["id"])].get("state") == "new")
     print(col(BOLD, "%s" % src["name"]) + col(DIM, " — %d à revoir, %d nouvelles%s" % (
         len(queue) - n_new, n_new, " (essai : rien n'est écrit)" if args.dry else "")))
