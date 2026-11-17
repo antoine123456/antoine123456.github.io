@@ -19,7 +19,8 @@ you are among the app's names (kept in ~/.config/espanol-trainer/trainer.json).
 
 The deck reviewed last (in the app or here) is the default in the list: Entrée takes it.
 During a card: type the answer, Entrée (« ? » = show the answer, À revoir;
-« dump » = the whole list left, cards and answers). After a miss, « + » adds
+« dump » = the whole list left, cards and answers; « stats » = the cards
+left; « info » = the keywords and a short guide). After a miss, « + » adds
 what you typed to the card's answers (or « + another meaning »): the card
 counts as Correct, and that answer is accepted from then on, on every device. After a missed card, the
 cards left are shown on top: new · learning · review (blue · red · green). Right = Correct, next card; wrong =
@@ -503,7 +504,25 @@ def dump(cards, srs):
               + front_of(c).replace("\n", " · ") + col(DIM, " → " + answer_of(c)))
 
 
-def review(card, s, on_dump=None, on_add=None):
+INFO = """  Tape la réponse, Entrée. Juste = Correct ; sinon redemandée, 3 essais, puis
+  la réponse (effacée après Entrée) et À revoir. Accents et ponctuation ne comptent pas ;
+  une seule des réponses « / » suffit.
+  Formules et cartes retournées : Entrée retourne, puis Entrée = su, n = pas su.
+
+  Mots clés (à taper comme réponse, sans perdre d'essai) :
+    ?      la réponse tout de suite (À revoir)
+    stats  les cartes restantes : nouvelles · en apprentissage · à revoir (bleu · rouge · vert)
+    dump   toute la liste restante, cartes et réponses
+    info   cette aide
+    q      arrêter (Ctrl-D aussi) — chaque carte est déjà enregistrée
+  Après une erreur : +  ajoute ta réponse aux réponses de la carte (« + autre sens » : celle-là),
+                        la carte compte comme Correct.
+
+  Lancer : ankiterm [paquet] [-d sous-paquet] [-n nouvelles] [--dry] [--user]
+  Même ordre que l'app : commence d'un côté, finis de l'autre (recharge l'onglet de l'app)."""
+
+
+def review(card, s, on_dump=None, on_add=None, on_stats=None):
     """Shows one card, returns 3 (Correct) or 1 (À revoir), or None to stop.
     Three tries; a card that can't be typed (formula, turned over) is
     turned over and you say if you knew it."""
@@ -543,6 +562,12 @@ def review(card, s, on_dump=None, on_add=None):
             break  # « ? »: the answer now, the card À revoir
         if a.strip().lower() == "dump" and on_dump:
             on_dump()  # doesn't use a try
+            continue
+        if a.strip().lower() == "stats" and on_stats:
+            print(on_stats())  # cards left: new · learning · review
+            continue
+        if a.strip().lower() == "info":
+            print(col(DIM, INFO))
             continue
         if not squash(a):
             continue  # Entrée alone doesn't use a try
@@ -629,7 +654,7 @@ def main():
     queue = [c for c in queue if front_of(c)]  # a picture alone can't be shown here (after the draw: same order)
     n_new = sum(1 for c in queue if str(c["id"]) not in srs or srs[str(c["id"])].get("state") == "new")
     print(col(BOLD, "%s" % src["name"]) + col(DIM, " — %d à revoir, %d nouvelles%s" % (
-        len(queue) - n_new, n_new, " (essai : rien n'est écrit)" if args.dry else "")))
+        len(queue) - n_new, n_new, " (essai : rien n'est écrit)" if args.dry else "")) + col(DIM, "  · info = aide"))
     if not queue:
         print("Rien à réviser aujourd'hui 🎉")
         return
@@ -641,6 +666,7 @@ def main():
         before = srs.get(cid)
         t0 = time.time()
         q = review(card, before, on_dump=lambda: dump([card] + queue, srs),
+                   on_stats=lambda: counts_line([card] + queue, srs),
                    on_add=lambda text: add_answer(sid, card, text, edits, args.dry))
         if q is None:
             break
