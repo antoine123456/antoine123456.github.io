@@ -242,6 +242,8 @@ python3 trainer.py --user       # pick the name again
 - **`stats`:** shows the cards left: new · learning · review, in blue · red ·
   green.
 - **`info`:** shows the keywords and a short guide.
+- **`save`:** says « enregistré ». Each card is already saved as soon as it's
+  answered, so there's nothing left to send.
 - **No try used:** `dump`, `stats` and `info` don't use up one of the three
   tries.
 - **Adding a meaning:** after a miss, `+` adds your last answer to the card's
