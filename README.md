@@ -239,6 +239,11 @@ python3 trainer.py --user       # pick the name again
 - **Self-rated cards:** for the 🌊 formulas and turned-over cards, Entrée turns
   the card over, then Entrée = knew it and `n` = didn't.
 - **`dump`:** typed as an answer, lists every card left, with its answer.
+- **Adding a meaning:** after a miss, `+` adds your last answer to the card's
+  accepted answers, or `+ another meaning` adds that one instead. Use it when
+  your meaning was right but not in the list: the card counts as Correct. It's
+  saved as an edit in Firestore (`card.alt`), so the terminal accepts it
+  everywhere; the app doesn't use it yet.
 - **After a miss:** the cards left show on top, as under the app's cards:
   new · learning · review, in blue · red · green.
 - **Stopping:** `q` stops.

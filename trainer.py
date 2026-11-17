@@ -19,7 +19,9 @@ you are among the app's names (kept in ~/.config/espanol-trainer/trainer.json).
 
 The deck reviewed last (in the app or here) is the default in the list: Entrée takes it.
 During a card: type the answer, Entrée (« ? » = show the answer, À revoir;
-« dump » = the whole list left, cards and answers). After a missed card, the
+« dump » = the whole list left, cards and answers). After a miss, « + » adds
+what you typed to the card's answers (or « + another meaning »): the card
+counts as Correct, and that answer is accepted from then on, on every device. After a missed card, the
 cards left are shown on top: new · learning · review (blue · red · green). Right = Correct, next card; wrong =
 try again, three tries, then the answer and À revoir. Formulas and turned-over
 cards: Entrée turns it over, then Entrée = knew it, n = didn't. Pictures
@@ -421,6 +423,24 @@ def last_reviewed(sources):
     return sid if t else None
 
 
+def add_answer(sid, card, text, edits, dry):
+    """Another accepted answer for this card (card.alt), saved as an edit like
+    the app's 📝 Relecture ones (edits.<id> = {f, at}: the latest one wins), so
+    every device has it."""
+    cid = str(card["id"])
+    f = dict((edits.get(cid) or {}).get("f") or {})
+    f["alt"] = list(f.get("alt") or []) + [text]
+    edits[cid] = {"f": f, "at": int(time.time() * 1000)}
+    card["alt"] = f["alt"]
+    if dry:
+        return
+    try:
+        fs("PATCH", "users/%s/sources/%s" % (USER, sid), [("updateMask.fieldPaths", field_path("edits", cid))],
+           {"fields": {"edits": to_fs({cid: edits[cid]})}})
+    except Exception as e:
+        print(col(RED, "  ⚠ pas enregistré : %s" % e))
+
+
 def build_queue(by, names, srs, flagged, deck_name, new_left, sid):
     is_child = lambda n: deck_name is None or n == deck_name or n.startswith(deck_name + "::")
     dids = sorted((d for d in by if is_child(names.get(d, d))), key=lambda d: js_natural_key(names.get(d, d)))
@@ -483,7 +503,7 @@ def dump(cards, srs):
               + front_of(c).replace("\n", " · ") + col(DIM, " → " + answer_of(c)))
 
 
-def review(card, s, on_dump=None):
+def review(card, s, on_dump=None, on_add=None):
     """Shows one card, returns 3 (Correct) or 1 (À revoir), or None to stop.
     Three tries; a card that can't be typed (formula, turned over) is
     turned over and you say if you knew it."""
@@ -501,6 +521,7 @@ def review(card, s, on_dump=None):
             cur.append(str(w))
     groups.append(cur)
     right = {squash(" ".join(g)) for g in groups if g} | {squash(" ".join(words))}
+    right |= {squash(x) for x in card.get("alt") or []}  # meanings added after a miss (#227)
     back = plain(card.get("answer")) or shown
     flip = card.get("flip") or card.get("eq") or not words
     print()
@@ -513,7 +534,7 @@ def review(card, s, on_dump=None):
         if r is None or r.strip() == "q":
             return None
         return 1 if r.strip().lower() in ("n", "non", "1") else 3
-    k = 0
+    k, last = 0, ""
     while k < 3:
         a = ask("  › ")
         if a is None or a.strip() == "q":
@@ -528,13 +549,22 @@ def review(card, s, on_dump=None):
         if squash(a) in right:
             print(col(GREEN, "  ✓ " + shown))
             return 3
+        last = a.strip()
         k += 1  # not accepted: just asked again (no ✗)
-    print(col(CYAN, "  " + shown))
+    print(col(CYAN, "  " + shown + "".join(" / " + x for x in card.get("alt") or [])))
     if back and squash(back) != squash(" ".join(words)):
         print(col(DIM, ind(back)))
-    # then wiped, scrollback too: the card comes back soon, the answer mustn't be there to copy
-    if ask(col(DIM, "  Entrée ")) is None:
+    # your meaning was right but not in the list (#227): « + » adds it, the card counts as Correct
+    r = ask(col(DIM, "  Entrée" + (" · + = ajouter « %s » aux réponses " % last if last and on_add else " ")))
+    if r is None:
         return None
+    if r.strip().startswith("+") and on_add:
+        extra = r.strip()[1:].strip() or last  # « + autre sens » adds that one instead
+        if extra:
+            on_add(extra)
+            print(col(GREEN, "  ✓ « %s » ajouté" % extra))
+            return 3
+    # then wiped, scrollback too: the card comes back soon, the answer mustn't be there to copy
     if C:
         sys.stdout.write("\033[H\033[2J\033[3J")
         sys.stdout.flush()
@@ -588,7 +618,8 @@ def main():
     nc = meta.get("newCount") or {}
     nc = nc if nc.get("day") == TODAY else {"day": TODAY, "count": 0}
     by, names = load_cards(sid, files)
-    for cid, e in (meta.get("edits") or {}).items():  # cards changed in 📝 Relecture
+    edits = meta.get("edits") or {}
+    for cid, e in edits.items():  # cards changed in 📝 Relecture (and meanings added here)
         for cards in by.values():
             for c in cards:
                 if str(c.get("id")) == cid:
@@ -609,7 +640,8 @@ def main():
         cid = str(card["id"])
         before = srs.get(cid)
         t0 = time.time()
-        q = review(card, before, on_dump=lambda: dump([card] + queue, srs))
+        q = review(card, before, on_dump=lambda: dump([card] + queue, srs),
+                   on_add=lambda text: add_answer(sid, card, text, edits, args.dry))
         if q is None:
             break
         was_new = before is None or before.get("state") == "new"
