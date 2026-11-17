@@ -239,6 +239,11 @@ python3 trainer.py --user       # pick the name again
 - **Self-rated cards:** for the 🌊 formulas and turned-over cards, Entrée turns
   the card over, then Entrée = knew it and `n` = didn't.
 - **`dump`:** typed as an answer, lists every card left, with its answer.
+- **`stats`:** shows the cards left: new · learning · review, in blue · red ·
+  green.
+- **`info`:** shows the keywords and a short guide.
+- **No try used:** `dump`, `stats` and `info` don't use up one of the three
+  tries.
 - **Adding a meaning:** after a miss, `+` adds your last answer to the card's
   accepted answers, or `+ another meaning` adds that one instead. Use it when
   your meaning was right but not in the list: the card counts as Correct. It's
