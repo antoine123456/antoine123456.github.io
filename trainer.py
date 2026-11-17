@@ -17,7 +17,10 @@ you are among the app's names (kept in ~/.config/espanol-trainer/trainer.json).
     python3 trainer.py --dry        # write nothing (try it out)
     python3 trainer.py --user       # pick the name again
 
-During a card: type the answer, Entrée (« ? » = show the answer, À revoir). Right = Correct, next card; wrong =
+The deck of the last session is the default in the list: Entrée takes it.
+During a card: type the answer, Entrée (« ? » = show the answer, À revoir;
+« dump » = the whole list left, cards and answers). After a missed card, the
+cards left are shown on top: new · learning · review (blue · red · green). Right = Correct, next card; wrong =
 try again, three tries, then the answer and À revoir. Formulas and turned-over
 cards: Entrée turns it over, then Entrée = knew it, n = didn't. Pictures
 aren't shown (a card with only a picture isn't asked). q (or Ctrl-D) stops:
@@ -224,7 +227,7 @@ def apply_rating(srs, q):
 
 C = sys.stdout.isatty()
 def col(code, t): return "\033[%sm%s\033[0m" % (code, t) if C else t
-DIM, BOLD, GREEN, RED, CYAN = "2", "1", "32", "31", "36"
+DIM, BOLD, GREEN, RED, CYAN, BLUE = "2", "1", "32", "31", "36", "34"
 
 
 def ask(prompt):
@@ -233,6 +236,18 @@ def ask(prompt):
     except EOFError:
         print()
         return None
+
+
+def load_cfg():
+    try:
+        return json.load(open(CONFIG))
+    except Exception:
+        return {}
+
+
+def save_cfg(cfg):
+    os.makedirs(os.path.dirname(CONFIG), exist_ok=True)
+    json.dump(cfg, open(CONFIG, "w"))
 
 
 def setup(again=False):
@@ -255,8 +270,7 @@ def setup(again=False):
     if not a or not a.strip().isdigit() or not 1 <= int(a) <= len(names):
         sys.exit()
     cfg["user"] = names[int(a) - 1]
-    os.makedirs(os.path.dirname(CONFIG), exist_ok=True)
-    json.dump(cfg, open(CONFIG, "w"))
+    save_cfg(cfg)
     print(col(DIM, "→ %s (gardé dans %s ; --user pour changer)" % (cfg["user"], CONFIG)))
     return cfg["user"]
 
@@ -293,7 +307,36 @@ def front_of(card):
     return plain(card.get("question")) or card.get("es") or ""
 
 
-def review(card, s):
+def state_of(s):
+    st = (s or {}).get("state", "new")
+    return "new" if st == "new" else "learn" if st in ("learning", "relearning") else "review"
+
+
+def counts_line(queue, srs):
+    """New · learning · review left, blue · red · green, as under the app's cards."""
+    n = {"new": 0, "learn": 0, "review": 0}
+    for c in queue:
+        n[state_of(srs.get(str(c["id"])))] += 1
+    return "  " + " ".join(col(code, str(n[k])) for k, code in (("new", BLUE), ("learn", RED), ("review", GREEN)))
+
+
+def answer_of(card):
+    if card.get("flip"):  # turned over: what the back says, not the key words
+        return plain(card.get("answer")).split("\n")[0]
+    sep = set(card.get("sep") or [])
+    return " ".join(("/ " if k in sep and k else "") + str(w) for k, w in enumerate(card.get("words") or []) if str(w).strip()) \
+        or plain(card.get("answer")).replace("\n", " · ")
+
+
+def dump(cards, srs):
+    """« dump »: the whole review list left, card and answer."""
+    for i, c in enumerate(cards, 1):
+        st = state_of(srs.get(str(c["id"])))
+        print(col(DIM, "  %3d " % i) + col({"new": BLUE, "learn": RED, "review": GREEN}[st], "●") + " "
+              + front_of(c).replace("\n", " · ") + col(DIM, " → " + answer_of(c)))
+
+
+def review(card, s, on_dump=None):
     """Shows one card, returns 3 (Correct) or 1 (À revoir), or None to stop.
     Three tries; a card that can't be typed (formula, turned over) is
     turned over and you say if you knew it."""
@@ -330,6 +373,9 @@ def review(card, s):
             return None
         if a.strip() == "?":
             break  # « ? »: the answer now, the card À revoir
+        if a.strip().lower() == "dump" and on_dump:
+            on_dump()  # doesn't use a try
+            continue
         if not squash(a):
             continue  # Entrée alone doesn't use a try
         if squash(a) in right:
@@ -371,12 +417,22 @@ def main():
             sys.exit("Aucun paquet ne contient « %s »." % args.deck)
         src = pick[0]
     else:
+        # the deck of the last session is the default: Entrée takes it
+        last = (load_cfg().get("last") or {}).get(USER)
+        dflt = next((i for i, s in enumerate(sources, 1) if s["id"] == last), None)
         for i, s in enumerate(sources, 1):
-            print("%2d  %s%s" % (i, s["name"], col(DIM, "  💤") if s["id"] in asleep else ""))
-        a = ask("Paquet ? ")
-        if not a or not a.strip().isdigit() or not 1 <= int(a) <= len(sources):
+            line = "%2d  %s%s" % (i, s["name"], col(DIM, "  💤") if s["id"] in asleep else "")
+            print(col(BOLD, line + "  ←") if i == dflt else line)
+        a = ask("Paquet ? " + ("[%d] " % dflt if dflt else ""))
+        if a is None:
+            return
+        a = a.strip() or (str(dflt) if dflt else "")
+        if not a.isdigit() or not 1 <= int(a) <= len(sources):
             return
         src = sources[int(a) - 1]
+    cfg = load_cfg()
+    cfg.setdefault("last", {})[USER] = src["id"]
+    save_cfg(cfg)
 
     sid = src["id"]
     meta = get_doc("users/%s/sources/%s" % (USER, sid))
@@ -404,7 +460,7 @@ def main():
         cid = str(card["id"])
         before = srs.get(cid)
         t0 = time.time()
-        q = review(card, before)
+        q = review(card, before, on_dump=lambda: dump([card] + queue, srs))
         if q is None:
             break
         was_new = before is None or before.get("state") == "new"
@@ -422,6 +478,8 @@ def main():
         done += 1
         if requeue:  # learning step: back a few cards later (as in the app)
             queue.insert(min(len(queue), requeue), card)
+        if q == 1 and queue:  # missed (the screen was wiped): what's left, on top
+            print(counts_line(queue, srs))
     mins = (time.time() - t_start) / 60
     print()
     print(col(DIM, "%d carte(s) en %.0f min%s" % (done, mins, "" if args.dry else " — enregistré dans Firestore")))
