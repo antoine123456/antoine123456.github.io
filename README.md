@@ -229,7 +229,12 @@ python3 trainer.py --user       # pick the name again
   the card is rated À revoir. `?` shows the answer at once (À revoir too).
 - **Self-rated cards:** for the 🌊 formulas and turned-over cards, Entrée turns
   the card over, then Entrée = knew it and `n` = didn't.
+- **`dump`:** typed as an answer, lists every card left, with its answer.
+- **After a miss:** the cards left show on top, as under the app's cards:
+  new · learning · review, in blue · red · green.
 - **Stopping:** `q` stops.
+- **Deck:** the deck of the last session is the default in the list, so
+  Entrée is enough.
 - **Name:** the chosen name is kept in `~/.config/espanol-trainer/trainer.json`.
 
 The app takes the terminal's reviews when it loads, and a card's most recent
@@ -255,6 +260,7 @@ send its older copy back.
 - instead of automatically switch to the newt blank, wait for "space"
 - keep this "future work" in track with the github project
 - temps de transition apres correct parfois long ? simplement temps de l'audio 
+- maybe orange instead of red if typed after the hint ?
 
 ### Learning
 - add per tree sub collection having some info about it or tag (recognize tree - info - etc) then also add possibility to filter tag
