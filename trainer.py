@@ -42,7 +42,7 @@ try:
 except ImportError:
     pass
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.dirname(os.path.realpath(__file__))  # through the ankiterm link too
 API_KEY = "AIzaSyDMn9fYdjo3rpo2k1Q89pQ2dsIi12c0kJk"  # public, same as index.html
 BASE = "https://firestore.googleapis.com/v1/projects/type-in-anki/databases/(default)/documents"
 USER = None  # chosen at first use (setup())
