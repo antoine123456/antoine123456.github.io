@@ -17,7 +17,7 @@ you are among the app's names (kept in ~/.config/espanol-trainer/trainer.json).
     python3 trainer.py --dry        # write nothing (try it out)
     python3 trainer.py --user       # pick the name again
 
-The deck of the last session is the default in the list: Entrée takes it.
+The deck reviewed last (in the app or here) is the default in the list: Entrée takes it.
 During a card: type the answer, Entrée (« ? » = show the answer, À revoir;
 « dump » = the whole list left, cards and answers). After a missed card, the
 cards left are shown on top: new · learning · review (blue · red · green). Right = Correct, next card; wrong =
@@ -406,6 +406,21 @@ def live_flags(fl):
     return out
 
 
+def last_reviewed(sources):
+    """The deck with the most recent review (srs.lastReview), app or terminal."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    def latest(src):
+        try:
+            srs = get_doc("users/%s/sources/%s" % (USER, src["id"])).get("srs") or {}
+        except Exception:
+            return 0, src["id"]
+        return max(((v or {}).get("lastReview") or 0 for v in srs.values()), default=0), src["id"]
+    with ThreadPoolExecutor(8) as ex:
+        t, sid = max(ex.map(latest, sources), default=(0, None))
+    return sid if t else None
+
+
 def build_queue(by, names, srs, flagged, deck_name, new_left, sid):
     is_child = lambda n: deck_name is None or n == deck_name or n.startswith(deck_name + "::")
     dids = sorted((d for d in by if is_child(names.get(d, d))), key=lambda d: js_natural_key(names.get(d, d)))
@@ -549,8 +564,8 @@ def main():
             sys.exit("Aucun paquet ne contient « %s »." % args.deck)
         src = pick[0]
     else:
-        # the deck of the last session is the default: Entrée takes it
-        last = (load_cfg().get("last") or {}).get(USER)
+        # the deck reviewed last — in the app or here — is the default: Entrée takes it
+        last = last_reviewed(sources) or (load_cfg().get("last") or {}).get(USER)
         dflt = next((i for i, s in enumerate(sources, 1) if s["id"] == last), None)
         for i, s in enumerate(sources, 1):
             line = "%2d  %s%s" % (i, s["name"], col(DIM, "  💤") if s["id"] in asleep else "")
