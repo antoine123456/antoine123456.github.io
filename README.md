@@ -205,6 +205,15 @@ written card after card with the same scheduler. Only the reviewed card's
 `srs` entry is written, so the other cards stay untouched. Standard library
 only:
 
+Install it as the `ankiterm` command (a link in `~/.local/bin`, already on the
+PATH, so no shell config to edit):
+
+```bash
+chmod +x trainer.py && ln -sf "$PWD/trainer.py" ~/.local/bin/ankiterm
+```
+
+Then `ankiterm` from anywhere takes the same arguments as `python3 trainer.py`:
+
 ```bash
 python3 trainer.py              # 1st time: who are you? then the list of decks
 python3 trainer.py vocab        # first deck whose name has « vocab »
