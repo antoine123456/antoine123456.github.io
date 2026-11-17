@@ -20,7 +20,8 @@ you are among the app's names (kept in ~/.config/espanol-trainer/trainer.json).
 The deck reviewed last (in the app or here) is the default in the list: Entrée takes it.
 During a card: type the answer, Entrée (« ? » = show the answer, À revoir;
 « dump » = the whole list left, cards and answers; « stats » = the cards
-left; « info » = the keywords and a short guide). After a miss, « + » adds
+left; « save » = saved (it already is, card after card); « info » = the
+keywords and a short guide). After a miss, « + » adds
 what you typed to the card's answers (or « + another meaning »): the card
 counts as Correct, and that answer is accepted from then on, on every device. After a missed card, the
 cards left are shown on top: new · learning · review (blue · red · green). Right = Correct, next card; wrong =
@@ -504,22 +505,21 @@ def dump(cards, srs):
               + front_of(c).replace("\n", " · ") + col(DIM, " → " + answer_of(c)))
 
 
-INFO = """  Tape la réponse, Entrée. Juste = Correct ; sinon redemandée, 3 essais, puis
-  la réponse (effacée après Entrée) et À revoir. Accents et ponctuation ne comptent pas ;
-  une seule des réponses « / » suffit.
-  Formules et cartes retournées : Entrée retourne, puis Entrée = su, n = pas su.
+INFO = """
+  Réponds, puis Entrée.
+  3 essais, puis la réponse.
 
-  Mots clés (à taper comme réponse, sans perdre d'essai) :
-    ?      la réponse tout de suite (À revoir)
-    stats  les cartes restantes : nouvelles · en apprentissage · à revoir (bleu · rouge · vert)
-    dump   toute la liste restante, cartes et réponses
-    info   cette aide
-    q      arrêter (Ctrl-D aussi) — chaque carte est déjà enregistrée
-  Après une erreur : +  ajoute ta réponse aux réponses de la carte (« + autre sens » : celle-là),
-                        la carte compte comme Correct.
+  ?      la réponse
+  +      après une erreur :
+         mon sens était bon
+  stats  cartes restantes
+  dump   toute la liste
+  save   enregistrer
+  info   cette aide
+  q      arrêter
 
-  Lancer : ankiterm [paquet] [-d sous-paquet] [-n nouvelles] [--dry] [--user]
-  Même ordre que l'app : commence d'un côté, finis de l'autre (recharge l'onglet de l'app)."""
+  Ordre partagé avec l'app.
+"""
 
 
 def review(card, s, on_dump=None, on_add=None, on_stats=None):
@@ -565,6 +565,10 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None):
             continue
         if a.strip().lower() == "stats" and on_stats:
             print(on_stats())  # cards left: new · learning · review
+            continue
+        if a.strip().lower() == "save":
+            # each card is already saved when answered: nothing left to send
+            print(col(GREEN, "  ✓ enregistré"))
             continue
         if a.strip().lower() == "info":
             print(col(DIM, INFO))
