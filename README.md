@@ -233,8 +233,8 @@ python3 trainer.py --user       # pick the name again
 - **After a miss:** the cards left show on top, as under the app's cards:
   new · learning · review, in blue · red · green.
 - **Stopping:** `q` stops.
-- **Deck:** the deck of the last session is the default in the list, so
-  Entrée is enough.
+- **Deck:** the deck reviewed last, in the app or here, is the default in
+  the list, so Entrée is enough.
 - **Name:** the chosen name is kept in `~/.config/espanol-trainer/trainer.json`.
 
 Same cards in the same order as the app: the terminal draws the day's queue
