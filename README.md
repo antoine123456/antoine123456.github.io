@@ -271,6 +271,21 @@ send its older copy back.
 
 ---
 
+## Tags of idee.md (`tags_snippets.py`)
+
+The `## Tags` section of `idee.md` is a table, one line per tag with its
+description. `tags_snippets.py` reads that table and writes
+`.vscode/markdown.code-snippets`, so typing `@v` in a Markdown file offers
+`@v1` with its description. It needs no Claude and no package. To run it:
+
+- **In VS Code:** F1 → « Tasks: Run Task » → « Tags → snippets » (it also runs
+  when the folder opens).
+- **In a terminal:** `python3 tags_snippets.py [idee.md]`.
+
+It also lists the tags used in the file but missing from the table.
+
+---
+
 ## Future work
 > can you put that to "project", separate in so-called "ui","machanic","learning" various themes, yeah as you said (keep the readme clean from my ai comments, don't push the comments)
 - **Lighter reveal for typed-correct words.** When a card is completed by typing alone (no reveal used), consider only highlighting the rectangle around each solved word instead of the current display — mirrors how little real Anki shows you when you already knew the answer.
