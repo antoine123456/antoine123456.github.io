@@ -541,6 +541,8 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None):
     groups.append(cur)
     right = {squash(" ".join(g)) for g in groups if g} | {squash(" ".join(words))}
     right |= {squash(x) for x in card.get("alt") or []}  # meanings added after a miss (#227)
+    # « après-midi » is masculine or feminine: « cette après-midi » too (#230), as in the app
+    right |= {x.replace(squash("cet après-midi"), squash("cette après-midi")) for x in right}
     back = plain(card.get("answer")) or shown
     flip = card.get("flip") or card.get("eq") or not words
     print()

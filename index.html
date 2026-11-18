@@ -6129,7 +6129,7 @@
                 section.appendChild(col);
                 if (kept[i].note) section.appendChild(noteEl(kept[i].note));
 
-                var entry = { word: word, expected: [word], inp: inp, box: box, hint: hint, attempts: attempts, solved: false, revealed: false, errors: 0, _errTimer: null };
+                var entry = { word: word, expected: [word].concat(alsoRight(words, i)), inp: inp, box: box, hint: hint, attempts: attempts, solved: false, revealed: false, errors: 0, _errTimer: null };
                 wordRows.push(entry);
                 inp.addEventListener("input", makeCheck(entry, i));
                 inp.addEventListener("keydown", makeKey(i));
@@ -6235,6 +6235,13 @@
             // the full word is accepted too.
             var full = String(expected).replace(/([aeiouáéíóú])['’]([aoá])/gi, "$1d$2");
             return full !== expected && si === squashWord(full);
+        }
+        // Other spellings that are right too, for one box (#230): « après-midi » is
+        // masculine or feminine — « cette après-midi » as well as « cet après-midi ».
+        function alsoRight(words, i) {
+            var next = String(words[i + 1] || "").toLowerCase();
+            if (String(words[i]).toLowerCase() === "cet" && next === "après-midi") return ["cette"];
+            return [];
         }
         function check(entry) {
             if (!entry.inp.value.trim()) return null;
