@@ -541,6 +541,8 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None):
     groups.append(cur)
     right = {squash(" ".join(g)) for g in groups if g} | {squash(" ".join(words))}
     right |= {squash(x) for x in card.get("alt") or []}  # meanings added after a miss (#227)
+    # « après-midi » is masculine or feminine: « cette après-midi » too (#230), as in the app
+    right |= {x.replace(squash("cet après-midi"), squash("cette après-midi")) for x in right}
     back = plain(card.get("answer")) or shown
     flip = card.get("flip") or card.get("eq") or not words
     print()
@@ -589,7 +591,11 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None):
         return None
     if r.strip().startswith("+") and on_add:
         extra = r.strip()[1:].strip() or last  # « + autre sens » adds that one instead
-        if extra:
+        # a double check (#232): Entrée or « o » = yes, anything else = no
+        sure = extra and ask(col(DIM, "  ajouter « %s » ? Entrée = oui · n = non " % extra))
+        if sure is None:
+            return None
+        if extra and sure.strip().lower() in ("", "o", "oui", "y", "yes"):
             on_add(extra)
             print(col(GREEN, "  ✓ « %s » ajouté" % extra))
             return 3
