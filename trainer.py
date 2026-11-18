@@ -591,7 +591,11 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None):
         return None
     if r.strip().startswith("+") and on_add:
         extra = r.strip()[1:].strip() or last  # « + autre sens » adds that one instead
-        if extra:
+        # a double check (#232): Entrée or « o » = yes, anything else = no
+        sure = extra and ask(col(DIM, "  ajouter « %s » ? Entrée = oui · n = non " % extra))
+        if sure is None:
+            return None
+        if extra and sure.strip().lower() in ("", "o", "oui", "y", "yes"):
             on_add(extra)
             print(col(GREEN, "  ✓ « %s » ajouté" % extra))
             return 3
