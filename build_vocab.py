@@ -85,6 +85,9 @@ OVERRIDES = {
               "nit": "ya no = ciò che era vero non lo è più.",
               "s": "<b>ya no</b> vivo aquí", "sf": "je n'habite plus ici", "sit": "non abito più qui"},
     "aquí está": {"fr": "voici"},  # « c'est ici » was too literal (#200)
+    # Pending (#231): alguna vez = une fois / déjà, never « jamais »; tanto = tant too
+    "alguna vez": {"fr": "une fois; déjà"},
+    "tanto": {"fr": "tellement; tant"},
     "más": {"img": "https://commons.wikimedia.org/wiki/Special:FilePath/%22wow%22_price_tag.jpg?width=500"},  # a price tag, for « más barato » (#200)
     "algún (alguna)": {"fr": "quelque",
                        "n": "algún devant un nom masculin (algún día = un jour), alguna au féminin ; au pluriel algunos / algunas = quelques. Dans une question : un (¿tienes algún libro? = tu as un livre ?).",
