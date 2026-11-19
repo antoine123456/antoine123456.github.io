@@ -33,11 +33,13 @@ The web app picks these reviews up when it reloads (the most recent review
 of a card wins); reload its tab after a terminal session.
 """
 import argparse
+import builtins
 import calendar
 import html
 import json
 import os
 import re
+import shutil
 import sys
 import time
 import unicodedata
@@ -234,12 +236,39 @@ def col(code, t): return "\033[%sm%s\033[0m" % (code, t) if C else t
 DIM, BOLD, GREEN, RED, CYAN, BLUE, YELLOW = "2", "1", "32", "31", "36", "34", "33"
 
 
+# Lines written so far (#242): a missed card comes back only once its answer
+# has scrolled out of the window, instead of the screen being wiped.
+LINES = 0
+ANSI = re.compile(r"\033\[[0-9;]*m")
+
+
+def rows(text):
+    """Terminal rows taken by the finished lines of text (long ones wrap)."""
+    cols = max(20, shutil.get_terminal_size((80, 24)).columns)
+    return sum(max(1, -(-len(ANSI.sub("", l)) // cols)) for l in text.split("\n")[:-1])
+
+
+def print(*a, sep=" ", end="\n", **k):  # the built-in one, counting the rows
+    global LINES
+    builtins.print(*a, sep=sep, end=end, **k)
+    if k.get("file") in (None, sys.stdout):
+        LINES += rows(sep.join(map(str, a)) + end)
+
+
 def ask(prompt):
+    global LINES
     try:
-        return input(prompt)
+        a = input(prompt)
     except EOFError:
         print()
         return None
+    LINES += rows(prompt + a + "\n")  # the echoed answer and Entrée
+    return a
+
+
+def out_of_sight(at):
+    """Has what was written at line `at` left the window?"""
+    return LINES - at >= shutil.get_terminal_size((80, 24)).lines
 
 
 def load_cfg():
@@ -675,10 +704,7 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None):
             on_add(extra)
             print(col(GREEN, "  ✓ « %s » ajouté" % extra))
             return 3
-    # then wiped, scrollback too: the card comes back soon, the answer mustn't be there to copy
-    if C:
-        sys.stdout.write("\033[H\033[2J\033[3J")
-        sys.stdout.flush()
+    # no wipe (#242): the card waits until its answer has scrolled out of sight (main)
     return 1
 
 
@@ -746,8 +772,14 @@ def main():
         return
 
     done, t_start = 0, time.time()
+    missed_at = {}  # card id → line count when its answer was shown (#242)
     while queue:
-        card = queue.pop(0)
+        # a missed card waits until its answer is out of sight: the next one goes first
+        i = next((i for i, c in enumerate(queue) if out_of_sight(missed_at.get(str(c["id"]), -10**9))), None)
+        if i is None:  # nothing else to show: push the answer up and out
+            print("\n" * max(0, shutil.get_terminal_size((80, 24)).lines - (LINES - missed_at[str(queue[0]["id"])])), end="")
+            i = 0
+        card = queue.pop(i)
         cid = str(card["id"])
         before = srs.get(cid)
         t0 = time.time()
@@ -772,8 +804,10 @@ def main():
         done += 1
         if requeue:  # learning step: back a few cards later (as in the app)
             queue.insert(min(len(queue), requeue), card)
-        if q == 1 and queue:  # missed (the screen was wiped): what's left, on top
-            print(counts_line(queue, srs))
+        if q == 1:
+            missed_at[cid] = LINES
+            if queue:  # missed: what's left
+                print(counts_line(queue, srs))
     mins = (time.time() - t_start) / 60
     print()
     print(col(DIM, "%d carte(s) en %.0f min%s" % (done, mins, "" if args.dry else " — enregistré dans Firestore")))

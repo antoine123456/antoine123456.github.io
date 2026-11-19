@@ -254,8 +254,11 @@ python3 trainer.py --user       # pick the name again
   your meaning was right but not in the list: the card counts as Correct. It's
   saved as an edit in Firestore (`card.alt`), so the terminal accepts it
   everywhere; the app doesn't use it yet.
-- **After a miss:** the cards left show on top, as under the app's cards:
-  new · learning · review, in blue · red · green.
+- **After a miss:** the cards left show, as under the app's cards:
+  new · learning · review, in blue · red · green. The screen isn't wiped:
+  the missed card comes back only once its answer has scrolled out of the
+  window (other cards go first; if none is left, blank lines push it up), so
+  it can't be copied from the screen.
 - **Stopping:** `q` stops.
 - **Deck:** the deck reviewed last, in the app or here, is the default in
   the list, so Entrée is enough.
