@@ -262,8 +262,10 @@ Same cards in the same order as the app: the terminal draws the day's queue
 with the app's seed (day + deck), its shuffle, its stage locks and its 🚩
 marks. So you can start a session in the app and finish it in the terminal,
 or the other way round: each review is saved at once, and the other side
-picks up where it stopped. The app's ⚙ limits are kept in the browser: the
-terminal assumes 20 new cards a day (`-n` if you changed it).
+picks up where it stopped. The app's ⚙ settings are synced (`users/<user>.settings`),
+so the terminal allows as many new cards as the app: its « nouvelles cartes
+par jour », or in time mode the number the app worked out today. `-n` still
+overrides it.
 
 The app takes the terminal's reviews when it loads, and a card's most recent
 review wins. Reload the app's tab after a terminal session, or an open tab may

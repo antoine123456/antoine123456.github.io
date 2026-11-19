@@ -443,6 +443,20 @@ def add_answer(sid, card, text, edits, dry):
         print(col(RED, "  ⚠ pas enregistré : %s" % e))
 
 
+def new_left(asked, introduced):
+    """New cards still allowed today, as the app counts them (#239): its ⚙
+    setting, synced in users/<user>.settings — by count, minus the ones
+    already introduced today; in time mode, the number it worked out from the
+    time left (newNow, today only). -n wins."""
+    if asked is not None:
+        return max(0, asked - introduced)
+    st = get_doc("users/%s" % USER).get("settings") or {}
+    now = st.get("newNow") or {}
+    if st.get("measure") == "time" and now.get("day") == TODAY:
+        return max(0, int(now.get("n", 0)))
+    return max(0, int(st.get("newPerDay", 20)) - introduced)
+
+
 def build_queue(by, names, srs, flagged, deck_name, new_left, sid):
     is_child = lambda n: deck_name is None or n == deck_name or n.startswith(deck_name + "::")
     dids = sorted((d for d in by if is_child(names.get(d, d))), key=lambda d: js_natural_key(names.get(d, d)))
@@ -610,7 +624,7 @@ def main():
     ap = argparse.ArgumentParser(description="Réviser dans le terminal (même progression que l'app).")
     ap.add_argument("deck", nargs="?", help="un bout du nom du paquet (sinon : la liste)")
     ap.add_argument("-d", "--sub", help="seulement les sous-paquets dont le nom contient ce texte")
-    ap.add_argument("-n", "--new", type=int, default=20, help="nouvelles cartes par jour (20)")
+    ap.add_argument("-n", "--new", type=int, help="nouvelles cartes par jour (défaut : le réglage ⚙ de l'app, sinon 20)")
     ap.add_argument("--dry", action="store_true", help="ne rien écrire dans Firestore")
     ap.add_argument("--user", action="store_true", help="choisir à nouveau qui révise")
     args = ap.parse_args()
@@ -660,7 +674,7 @@ def main():
                 if str(c.get("id")) == cid:
                     c.update((e or {}).get("f") or {})
     deck_name = study_deck(names, args.sub)
-    queue = build_queue(by, names, srs, flagged, deck_name, max(0, args.new - nc["count"]), sid)
+    queue = build_queue(by, names, srs, flagged, deck_name, new_left(args.new, nc["count"]), sid)
     queue = [c for c in queue if front_of(c)]  # a picture alone can't be shown here (after the draw: same order)
     n_new = sum(1 for c in queue if str(c["id"]) not in srs or srs[str(c["id"])].get("state") == "new")
     print(col(BOLD, "%s" % src["name"]) + col(DIM, " — %d à revoir, %d nouvelles%s" % (
