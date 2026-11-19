@@ -2372,3 +2372,28 @@
 50009	rebuznar	verbe	braire	ragliare	el burro <b>rebuzna</b> en el establo	l'âne brait dans l'étable	l'asino raglia nella stalla
 50010	graznar	verbe	croasser	gracchiare	el cuervo <b>grazna</b> en el árbol	le corbeau croasse dans l'arbre	il corvo gracchia sull'albero
 50011	ronronear	verbe	ronronner	fare le fusa	el gato <b>ronronea</b> en mis brazos	le chat ronronne dans mes bras	il gatto fa le fusa tra le mie braccia
+301	te aviso	expression	je te préviens; je te tiens au courant	ti avviso	si hay algún cambio, <b>te aviso</b>	s'il y a un changement, je te préviens	se c'è qualche cambiamento, ti avviso
+302	te mantendré informado	expression	je te tiendrai au courant	ti terrò informato	no te preocupes, <b>te mantendré informado</b>	ne t'inquiète pas, je te tiendrai au courant	non preoccuparti, ti terrò informato
+303	te llamo luego	expression	je t'appelle plus tard	ti chiamo dopo	ahora no puedo hablar, <b>te llamo luego</b>	je ne peux pas parler maintenant, je t'appelle plus tard	ora non posso parlare, ti chiamo dopo
+304	te escribo	expression	je t'écris	ti scrivo	cuando llegue a casa <b>te escribo</b>	quand j'arrive à la maison, je t'écris	quando arrivo a casa ti scrivo
+305	te lo mando	expression	je te l'envoie	te lo mando	tengo el documento, <b>te lo mando</b> ahora	j'ai le document, je te l'envoie maintenant	ho il documento, te lo mando adesso
+306	te confirmo	expression	je te confirme	ti confermo	<b>te confirmo</b> la hora mañana	je te confirme l'heure demain	ti confermo l'ora domani
+307	te cuento	expression	je te raconte; je te dis	ti racconto	luego <b>te cuento</b> cómo fue la reunión	après je te raconte comment s'est passée la réunion	dopo ti racconto com'è andata la riunione
+308	me encargo yo	expression	je m'en occupe	me ne occupo io	no te preocupes por las entradas, <b>me encargo yo</b>	ne t'inquiète pas pour les billets, je m'en occupe	non preoccuparti dei biglietti, me ne occupo io
+309	me pongo a ello	expression	je m'y mets	mi ci metto	tengo mucho trabajo, <b>me pongo a ello</b>	j'ai beaucoup de travail, je m'y mets	ho molto lavoro, mi ci metto
+310	lo reviso	expression	je vérifie; je le relis	lo controllo	mándame el texto y <b>lo reviso</b>	envoie-moi le texte et je le relis	mandami il testo e lo controllo
+311	lo pienso	expression	j'y réfléchis	ci penso	no sé si ir, <b>lo pienso</b> y te digo	je ne sais pas si j'y vais, j'y réfléchis et je te dis	non so se andare, ci penso e ti dico
+312	lo intento	expression	j'essaie	ci provo	es difícil, pero <b>lo intento</b>	c'est difficile, mais j'essaie	è difficile, ma ci provo
+313	ahora vuelvo	expression	je reviens tout de suite	torno subito	voy al baño, <b>ahora vuelvo</b>	je vais aux toilettes, je reviens tout de suite	vado in bagno, torno subito
+314	ya voy	expression	j'arrive	arrivo	¡<b>ya voy</b>! un momento	j'arrive ! un instant	arrivo! un momento
+315	me voy	expression	je m'en vais; j'y vais	me ne vado; vado	es tarde, <b>me voy</b>	il est tard, je m'en vais	è tardi, me ne vado
+316	te espero	expression	je t'attends	ti aspetto	<b>te espero</b> en la entrada	je t'attends à l'entrée	ti aspetto all'ingresso
+317	paso a buscarte	expression	je passe te chercher	passo a prenderti	<b>paso a buscarte</b> a las ocho	je passe te chercher à huit heures	passo a prenderti alle otto
+318	te echo una mano	expression	je te donne un coup de main	ti do una mano	si quieres, <b>te echo una mano</b> con la mudanza	si tu veux, je te donne un coup de main pour le déménagement	se vuoi, ti do una mano con il trasloco
+319	me apunto	expression	je suis partant; je m'inscris	ci sto	¿vais al cine? <b>me apunto</b>	vous allez au cinéma ? je suis partant	andate al cinema? ci sto
+320	quedamos	expression	on se voit; on se retrouve	ci vediamo	¿<b>quedamos</b> el sábado?	on se voit samedi ?	ci vediamo sabato?
+321	lo dejo para mañana	expression	je le remets à demain	lo rimando a domani	estoy cansado, <b>lo dejo para mañana</b>	je suis fatigué, je le remets à demain	sono stanco, lo rimando a domani
+322	me pongo en contacto contigo	expression	je te contacte	mi metto in contatto con te	<b>me pongo en contacto contigo</b> la semana que viene	je te contacte la semaine prochaine	mi metto in contatto con te la settimana prossima
+323	date prisa	expression	dépêche-toi	sbrigati	<b>date prisa</b>, que perdemos el tren	dépêche-toi, on va rater le train	sbrigati, che perdiamo il treno
+324	vamos a ver	expression	on va voir	vediamo	no sé si funcionará, <b>vamos a ver</b>	je ne sais pas si ça marchera, on va voir	non so se funzionerà, vediamo
+326	te debo una	expression	je t'en dois une	te ne devo una	gracias por ayudarme, <b>te debo una</b>	merci de m'avoir aidé, je t'en dois une	grazie per avermi aiutato, te ne devo una

@@ -143,7 +143,8 @@ IT = {"nom": "nome", "verbe": "verbo", "adjectif": "aggettivo", "adverbe": "avve
       "vêtements": "vestiti", "ville": "città", "transports": "trasporti", "nature": "natura", "temps": "tempo",
       "loisirs": "svago", "école": "scuola", "travail": "lavoro e soldi", "crime": "crimine e giustizia",
       "guerre": "guerra", "sentiments": "sentimenti", "couleurs": "colori", "nombres": "numeri",
-      "transparent": "trasparente", "objet": "oggetto", "cris d'animaux": "versi degli animali"}
+      "transparent": "trasparente", "objet": "oggetto", "cris d'animaux": "versi degli animali",
+      "actions courantes": "azioni quotidiane"}
 
 # the French word matches, the Spanish one means something else (livre = la libra, the money)
 NOT_THEME = {"objet": {"la libra", "la clave", "el canal", "la regla"}}
@@ -151,6 +152,12 @@ NOT_THEME = {"objet": {"la libra", "la clave", "el canal", "la regla"}}
 # the animals' cries (#203): « cris d'animaux », and with the animals
 CRIES = {"ladrar", "maullar", "mugir", "relinchar", "rugir", "cacarear", "piar", "gruñir", "balar", "croar",
          "aullar", "zumbar", "rebuznar", "graznar", "ronronear", "el ladrido", "el rugido"}
+
+# everyday actions said as a whole (#237): « te mantendré informado », « me encargo yo »… — « verbe » too
+ACTIONS = {"te aviso", "te mantendré informado", "te llamo luego", "te escribo", "te lo mando", "te confirmo",
+           "te cuento", "me encargo yo", "me pongo a ello", "lo reviso", "lo pienso", "lo intento", "ahora vuelvo",
+           "ya voy", "me voy", "te espero", "paso a buscarte", "te echo una mano", "me apunto", "quedamos",
+           "lo dejo para mañana", "me pongo en contacto contigo", "date prisa", "vamos a ver", "te debo una"}
 
 # « transparent » (#198): Spanish endings → French / Italian ones
 ENDINGS = {
@@ -234,6 +241,8 @@ def tags_for(c):
         tags.append("nombres")
     if c["es"].strip() in CRIES:
         tags += [t for t in ("animaux", "cris d'animaux") if t not in tags]
+    if c["es"].strip() in ACTIONS:
+        tags += [t for t in ("verbe", "actions courantes") if t not in tags]
     return tags
 
 
