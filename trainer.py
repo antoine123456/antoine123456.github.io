@@ -570,7 +570,7 @@ INFO = """
   3 essais, puis la réponse.
 
   ?      la réponse
-  +      dès la 1re erreur :
+  +      après une erreur :
          mon sens était bon
          (+ autre sens : celui-là)
   tab    tableau du verbe
@@ -729,14 +729,12 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None):
             return 1 if helped else 3
         last = a.strip()
         k += 1  # not accepted: just asked again (no ✗)
-        if k == 1 and on_add:  # the offer comes at the first miss, not after the third
-            print(col(DIM, "  + = ajouter « %s » aux réponses" % last))
     # in red, as the learning count shown after it: the card goes back there
     print(col(RED, "  " + shown + "".join(" / " + x for x in card.get("alt") or [])))
     if back and squash(back) != squash(" ".join(words)):
         print(col(DIM, ind(back)))
     # your meaning was right but not in the list (#227): « + » adds it, the card counts as Correct
-    r = ask(col(DIM, "  Entrée "))  # « + » still works here (offered at the first miss)
+    r = ask(col(DIM, "  Entrée" + (" · + = ajouter « %s » aux réponses " % last if last and on_add else " ")))
     if r is None:
         return None
     if r.strip().startswith("+") and on_add:

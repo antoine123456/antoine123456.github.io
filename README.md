@@ -250,8 +250,7 @@ python3 trainer.py --user       # pick the name again
   answered, so there's nothing left to send.
 - **No try used:** `dump`, `stats`, `temps`, `tab`, `info` and `+` don't use up one of the three
   tries.
-- **Adding a meaning:** from the first wrong try (« + = ajouter « … » » shows
-  then), `+` adds your last answer to the card's
+- **Adding a meaning:** after a miss, `+` adds your last answer to the card's
   accepted answers, or `+ another meaning` adds that one instead. Use it when
   your meaning was right but not in the list: the card counts as Correct. It's
   saved as an edit in Firestore (`card.alt`), so the terminal accepts it
