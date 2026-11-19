@@ -12,4 +12,3 @@ __pycache__/
 !helmholtz_media/
 *.apkg
 .cache/
-kanban.html
