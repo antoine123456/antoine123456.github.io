@@ -524,12 +524,29 @@ def state_of(s):
     return "new" if st == "new" else "learn" if st in ("learning", "relearning") else "review"
 
 
+def time_left(queue, srs):
+    """Minutes left, from each card's usual time (s.ms): a new card counts
+    with its repeats (×3), a learning one ×1.5; no time yet = the median."""
+    known = sorted(v["ms"] for v in srs.values() if isinstance(v, dict) and v.get("ms"))
+    mid = known[len(known) // 2] if known else 15000
+    tot = 0
+    for c in queue:
+        s = srs.get(str(c["id"])) or {}
+        st = state_of(s)
+        ms = mid if st == "new" else (s.get("ms") or mid)
+        tot += ms * (3 if st == "new" else 1.5 if st == "learn" else 1)
+    return tot / 60000
+
+
 def counts_line(queue, srs):
-    """New · learning · review left, blue · red · green, as under the app's cards."""
+    """New · learning · review left, blue · red · green, as under the app's
+    cards, and the time left (« temps »)."""
     n = {"new": 0, "learn": 0, "review": 0}
     for c in queue:
         n[state_of(srs.get(str(c["id"])))] += 1
-    return "  " + " ".join(col(code, str(n[k])) for k, code in (("new", BLUE), ("learn", RED), ("review", GREEN)))
+    m = time_left(queue, srs)
+    t = "< 1 min" if m < 1 else "≈ %d min" % round(m)
+    return "  " + " ".join(col(code, str(n[k])) for k, code in (("new", BLUE), ("learn", RED), ("review", GREEN))) + col(DIM, "  · " + t)
 
 
 def answer_of(card):
@@ -553,12 +570,15 @@ INFO = """
   3 essais, puis la réponse.
 
   ?      la réponse
-  +      après une erreur :
+  +      dès la 1re erreur :
          mon sens était bon
+         (+ autre sens : celui-là)
   tab    tableau du verbe
          (Grammaire ; la carte
          passe « à revoir »)
   stats  cartes restantes
+  temps  temps restant (aussi
+         avec les cartes restantes)
   dump   toute la liste
   save   enregistrer
   info   cette aide
@@ -653,6 +673,21 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None):
             return None
         return 1 if r.strip().lower() in ("n", "non", "1") else 3
     k, last, helped = 0, "", False
+
+    def add(r):
+        """« + » (#227), « + autre sens »: confirmed (#232), then the card counts as Correct.
+        True = added, False = not, None = stop."""
+        extra = r.strip()[1:].strip() or last
+        if not extra:
+            return False
+        sure = ask(col(DIM, "  ajouter « %s » ? Entrée = oui · n = non " % extra))
+        if sure is None:
+            return None
+        if sure.strip().lower() in ("", "o", "oui", "y", "yes"):
+            on_add(extra)
+            print(col(GREEN, "  ✓ « %s » ajouté" % extra))
+            return True
+        return False
     while k < 3:
         a = ask("  › ")
         if a is None or a.strip() == "q":
@@ -662,7 +697,14 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None):
         if a.strip().lower() == "dump" and on_dump:
             on_dump()  # doesn't use a try
             continue
-        if a.strip().lower() == "stats" and on_stats:
+        if a.strip().startswith("+") and on_add:
+            ok = add(a)  # from the first miss on, without using up the tries
+            if ok is None:
+                return None
+            if ok:
+                return 3
+            continue
+        if a.strip().lower() in ("stats", "temps") and on_stats:
             print(on_stats())  # cards left: new · learning · review
             continue
         if a.strip().lower() == "save":
@@ -687,22 +729,21 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None):
             return 1 if helped else 3
         last = a.strip()
         k += 1  # not accepted: just asked again (no ✗)
-    print(col(CYAN, "  " + shown + "".join(" / " + x for x in card.get("alt") or [])))
+        if k == 1 and on_add:  # the offer comes at the first miss, not after the third
+            print(col(DIM, "  + = ajouter « %s » aux réponses" % last))
+    # in red, as the learning count shown after it: the card goes back there
+    print(col(RED, "  " + shown + "".join(" / " + x for x in card.get("alt") or [])))
     if back and squash(back) != squash(" ".join(words)):
         print(col(DIM, ind(back)))
     # your meaning was right but not in the list (#227): « + » adds it, the card counts as Correct
-    r = ask(col(DIM, "  Entrée" + (" · + = ajouter « %s » aux réponses " % last if last and on_add else " ")))
+    r = ask(col(DIM, "  Entrée "))  # « + » still works here (offered at the first miss)
     if r is None:
         return None
     if r.strip().startswith("+") and on_add:
-        extra = r.strip()[1:].strip() or last  # « + autre sens » adds that one instead
-        # a double check (#232): Entrée or « o » = yes, anything else = no
-        sure = extra and ask(col(DIM, "  ajouter « %s » ? Entrée = oui · n = non " % extra))
-        if sure is None:
+        ok = add(r)
+        if ok is None:
             return None
-        if extra and sure.strip().lower() in ("", "o", "oui", "y", "yes"):
-            on_add(extra)
-            print(col(GREEN, "  ✓ « %s » ajouté" % extra))
+        if ok:
             return 3
     # no wipe (#242): the card waits until its answer has scrolled out of sight (main)
     return 1
