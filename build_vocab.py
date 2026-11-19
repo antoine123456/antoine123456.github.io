@@ -545,6 +545,7 @@ def write_review(review):
 # waits until its twin has been seen (card.pre, #213), then takes its turn
 # among the new cards — the easy way first, the hard way once the word is known.
 REV_TAG = {"fr": ("transparent", "fr→es"), "it": ("trasparente", "it→es")}
+FWD_TAG = {"fr": "es→fr", "it": "es→it"}  # the usual way, to filter it too (#238)
 
 
 def es_typed(es):
@@ -577,14 +578,16 @@ def add_reverse():
             for c in d["cards"]:
                 if c.get("rev"):
                     continue  # rebuilt below
+                base = [t for t in c.get("tags", []) if t != FWD_TAG[lang]]
+                c["tags"] = base + [FWD_TAG[lang]]
                 cards.append(c)
-                if skip in c.get("tags", []):
+                if skip in base:
                     continue
                 words, sep, notes = es_typed(c["es"])
                 r = {k: v for k, v in c.items() if k not in ("sep", "notes", "audioQuestion", "words", "question", "answer")}
                 r.update(id=str(int(c["id"]) + 1), rev=True, pre=[c["id"]], words=words,
                          question=html.escape(c["fr"]), answer=html.escape(c["es"]),
-                         tags=c.get("tags", []) + [tag])
+                         tags=base + [tag])
                 if sep: r["sep"] = sep
                 if notes: r["notes"] = notes
                 if c.get("audioQuestion"): r["audioAnswer"] = c["audioQuestion"]  # the word is heard after, not before
