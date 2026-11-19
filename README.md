@@ -242,9 +242,12 @@ python3 trainer.py --user       # pick the name again
 - **`stats`:** shows the cards left: new · learning · review, in blue · red ·
   green.
 - **`info`:** shows the keywords and a short guide.
+- **`tab`:** on a Grammaire conjugation card, the table of that verb and tense
+  (stem plain, ending in green, this card's person marked ›), like F1 in the
+  app. The table shows the answer, so the card ends « À revoir ».
 - **`save`:** says « enregistré ». Each card is already saved as soon as it's
   answered, so there's nothing left to send.
-- **No try used:** `dump`, `stats` and `info` don't use up one of the three
+- **No try used:** `dump`, `stats`, `tab` and `info` don't use up one of the three
   tries.
 - **Adding a meaning:** after a miss, `+` adds your last answer to the card's
   accepted answers, or `+ another meaning` adds that one instead. Use it when

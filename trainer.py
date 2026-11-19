@@ -231,7 +231,7 @@ def apply_rating(srs, q):
 
 C = sys.stdout.isatty()
 def col(code, t): return "\033[%sm%s\033[0m" % (code, t) if C else t
-DIM, BOLD, GREEN, RED, CYAN, BLUE = "2", "1", "32", "31", "36", "34"
+DIM, BOLD, GREEN, RED, CYAN, BLUE, YELLOW = "2", "1", "32", "31", "36", "34", "33"
 
 
 def ask(prompt):
@@ -526,6 +526,9 @@ INFO = """
   ?      la réponse
   +      après une erreur :
          mon sens était bon
+  tab    tableau du verbe
+         (Grammaire ; la carte
+         passe « à revoir »)
   stats  cartes restantes
   dump   toute la liste
   save   enregistrer
@@ -536,7 +539,58 @@ INFO = """
 """
 
 
-def review(card, s, on_dump=None, on_add=None, on_stats=None):
+# Conjugation table (#241), as F1 in the app (#53): the cards of the same verb
+# and tense (tag « conjugaison », front « <b>verbe</b> … <i>personne</i> »),
+# the stem they share plain, the ending in colour, this card's person marked.
+CONJ_PERSONS = ["yo", "tú", "él / ella / usted", "nosotros", "vosotros", "ellos / ellas / ustedes"]
+
+
+def conj_key(c):
+    tags = c.get("tags") or []
+    if "conjugaison" not in tags:
+        return None
+    q = str(c.get("question") or "")
+    verb = (re.search(r"<b>([^<]+)</b>", q) or [None, None])[1]
+    tense = next((t for t in tags if t not in ("conjugaison", verb) and not re.match(r"etape", t, re.I)), None)
+    person = (re.search(r"<i>([^<]+)</i>", q) or [None, None])[1]
+    return (verb, tense, person.strip()) if verb and tense and person else None
+
+
+def conj_table(card, cards):
+    k = conj_key(card)
+    if not k:
+        return None
+    forms, label, meaning = {}, "", ""
+    for c in cards:
+        x = conj_key(c)
+        if not x or x[:2] != k[:2]:
+            continue
+        forms[x[2]] = plain(c.get("answer")) or " ".join(c.get("words") or [])
+        if not label:
+            q = str(c.get("question"))
+            label = plain(re.sub(r"·.*$", "", re.sub(r"^.*<br>", "", q, flags=re.S), flags=re.S)).strip()
+            meaning = (re.search(r"\(([^)]+)\)", q) or [None, ""])[1]
+    persons = [p for p in CONJ_PERSONS if p in forms]
+    if len(persons) < 2:
+        return None
+    stem = forms[persons[0]]
+    for f in (forms[p] for p in persons[1:]):
+        i = 0
+        while i < len(stem) and i < len(f) and stem[i].lower() == f[i].lower():
+            i += 1
+        stem = stem[:i]
+    if len(stem) < 2:
+        stem = ""
+    out = ["  " + col(BOLD, k[0]) + (" (%s)" % meaning if meaning else "") + " · " + label]
+    w = max(len(p) for p in persons)
+    for p in persons:
+        f = forms[p]
+        line = "  %s  %s%s" % (p.ljust(w), f[:len(stem)], col(GREEN, f[len(stem):]))
+        out.append(col(YELLOW, "› ") + line[2:] if p == k[2] else line)
+    return "\n".join(out)
+
+
+def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None):
     """Shows one card, returns 3 (Correct) or 1 (À revoir), or None to stop.
     Three tries; a card that can't be typed (formula, turned over) is
     turned over and you say if you knew it."""
@@ -569,7 +623,7 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None):
         if r is None or r.strip() == "q":
             return None
         return 1 if r.strip().lower() in ("n", "non", "1") else 3
-    k, last = 0, ""
+    k, last, helped = 0, "", False
     while k < 3:
         a = ask("  › ")
         if a is None or a.strip() == "q":
@@ -586,14 +640,22 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None):
             # each card is already saved when answered: nothing left to send
             print(col(GREEN, "  ✓ enregistré"))
             continue
+        if a.strip().lower() == "tab":
+            t = on_tab() if on_tab else None
+            if t:
+                print(t)
+                helped = True  # the table shows the answer: « À revoir », as F1 in the app
+            else:
+                print(col(DIM, "  pas de tableau pour cette carte"))
+            continue
         if a.strip().lower() == "info":
             print(col(DIM, INFO))
             continue
         if not squash(a):
             continue  # Entrée alone doesn't use a try
         if squash(a) in right:
-            print(col(GREEN, "  ✓ " + shown))
-            return 3
+            print(col(GREEN, "  ✓ " + shown) + (col(DIM, "  (avec le tableau : à revoir)") if helped else ""))
+            return 1 if helped else 3
         last = a.strip()
         k += 1  # not accepted: just asked again (no ✗)
     print(col(CYAN, "  " + shown + "".join(" / " + x for x in card.get("alt") or [])))
@@ -691,6 +753,7 @@ def main():
         t0 = time.time()
         q = review(card, before, on_dump=lambda: dump([card] + queue, srs),
                    on_stats=lambda: counts_line([card] + queue, srs),
+                   on_tab=lambda: conj_table(card, [c for cs in by.values() for c in cs]),
                    on_add=lambda text: add_answer(sid, card, text, edits, args.dry))
         if q is None:
             break
