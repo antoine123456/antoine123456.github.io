@@ -33,11 +33,13 @@ The web app picks these reviews up when it reloads (the most recent review
 of a card wins); reload its tab after a terminal session.
 """
 import argparse
+import builtins
 import calendar
 import html
 import json
 import os
 import re
+import shutil
 import sys
 import time
 import unicodedata
@@ -231,15 +233,42 @@ def apply_rating(srs, q):
 
 C = sys.stdout.isatty()
 def col(code, t): return "\033[%sm%s\033[0m" % (code, t) if C else t
-DIM, BOLD, GREEN, RED, CYAN, BLUE = "2", "1", "32", "31", "36", "34"
+DIM, BOLD, GREEN, RED, CYAN, BLUE, YELLOW = "2", "1", "32", "31", "36", "34", "33"
+
+
+# Lines written so far (#242): a missed card comes back only once its answer
+# has scrolled out of the window, instead of the screen being wiped.
+LINES = 0
+ANSI = re.compile(r"\033\[[0-9;]*m")
+
+
+def rows(text):
+    """Terminal rows taken by the finished lines of text (long ones wrap)."""
+    cols = max(20, shutil.get_terminal_size((80, 24)).columns)
+    return sum(max(1, -(-len(ANSI.sub("", l)) // cols)) for l in text.split("\n")[:-1])
+
+
+def print(*a, sep=" ", end="\n", **k):  # the built-in one, counting the rows
+    global LINES
+    builtins.print(*a, sep=sep, end=end, **k)
+    if k.get("file") in (None, sys.stdout):
+        LINES += rows(sep.join(map(str, a)) + end)
 
 
 def ask(prompt):
+    global LINES
     try:
-        return input(prompt)
+        a = input(prompt)
     except EOFError:
         print()
         return None
+    LINES += rows(prompt + a + "\n")  # the echoed answer and Entrée
+    return a
+
+
+def out_of_sight(at):
+    """Has what was written at line `at` left the window?"""
+    return LINES - at >= shutil.get_terminal_size((80, 24)).lines
 
 
 def load_cfg():
@@ -526,6 +555,9 @@ INFO = """
   ?      la réponse
   +      après une erreur :
          mon sens était bon
+  tab    tableau du verbe
+         (Grammaire ; la carte
+         passe « à revoir »)
   stats  cartes restantes
   dump   toute la liste
   save   enregistrer
@@ -536,7 +568,58 @@ INFO = """
 """
 
 
-def review(card, s, on_dump=None, on_add=None, on_stats=None):
+# Conjugation table (#241), as F1 in the app (#53): the cards of the same verb
+# and tense (tag « conjugaison », front « <b>verbe</b> … <i>personne</i> »),
+# the stem they share plain, the ending in colour, this card's person marked.
+CONJ_PERSONS = ["yo", "tú", "él / ella / usted", "nosotros", "vosotros", "ellos / ellas / ustedes"]
+
+
+def conj_key(c):
+    tags = c.get("tags") or []
+    if "conjugaison" not in tags:
+        return None
+    q = str(c.get("question") or "")
+    verb = (re.search(r"<b>([^<]+)</b>", q) or [None, None])[1]
+    tense = next((t for t in tags if t not in ("conjugaison", verb) and not re.match(r"etape", t, re.I)), None)
+    person = (re.search(r"<i>([^<]+)</i>", q) or [None, None])[1]
+    return (verb, tense, person.strip()) if verb and tense and person else None
+
+
+def conj_table(card, cards):
+    k = conj_key(card)
+    if not k:
+        return None
+    forms, label, meaning = {}, "", ""
+    for c in cards:
+        x = conj_key(c)
+        if not x or x[:2] != k[:2]:
+            continue
+        forms[x[2]] = plain(c.get("answer")) or " ".join(c.get("words") or [])
+        if not label:
+            q = str(c.get("question"))
+            label = plain(re.sub(r"·.*$", "", re.sub(r"^.*<br>", "", q, flags=re.S), flags=re.S)).strip()
+            meaning = (re.search(r"\(([^)]+)\)", q) or [None, ""])[1]
+    persons = [p for p in CONJ_PERSONS if p in forms]
+    if len(persons) < 2:
+        return None
+    stem = forms[persons[0]]
+    for f in (forms[p] for p in persons[1:]):
+        i = 0
+        while i < len(stem) and i < len(f) and stem[i].lower() == f[i].lower():
+            i += 1
+        stem = stem[:i]
+    if len(stem) < 2:
+        stem = ""
+    out = ["  " + col(BOLD, k[0]) + (" (%s)" % meaning if meaning else "") + " · " + label]
+    w = max(len(p) for p in persons)
+    for p in persons:
+        f = forms[p]
+        line = "  %s  %s%s" % (p.ljust(w), f[:len(stem)], col(GREEN, f[len(stem):]))
+        out.append(col(YELLOW, "› ") + line[2:] if p == k[2] else line)
+    return "\n".join(out)
+
+
+def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None):
     """Shows one card, returns 3 (Correct) or 1 (À revoir), or None to stop.
     Three tries; a card that can't be typed (formula, turned over) is
     turned over and you say if you knew it."""
@@ -569,7 +652,7 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None):
         if r is None or r.strip() == "q":
             return None
         return 1 if r.strip().lower() in ("n", "non", "1") else 3
-    k, last = 0, ""
+    k, last, helped = 0, "", False
     while k < 3:
         a = ask("  › ")
         if a is None or a.strip() == "q":
@@ -586,14 +669,22 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None):
             # each card is already saved when answered: nothing left to send
             print(col(GREEN, "  ✓ enregistré"))
             continue
+        if a.strip().lower() == "tab":
+            t = on_tab() if on_tab else None
+            if t:
+                print(t)
+                helped = True  # the table shows the answer: « À revoir », as F1 in the app
+            else:
+                print(col(DIM, "  pas de tableau pour cette carte"))
+            continue
         if a.strip().lower() == "info":
             print(col(DIM, INFO))
             continue
         if not squash(a):
             continue  # Entrée alone doesn't use a try
         if squash(a) in right:
-            print(col(GREEN, "  ✓ " + shown))
-            return 3
+            print(col(GREEN, "  ✓ " + shown) + (col(DIM, "  (avec le tableau : à revoir)") if helped else ""))
+            return 1 if helped else 3
         last = a.strip()
         k += 1  # not accepted: just asked again (no ✗)
     print(col(CYAN, "  " + shown + "".join(" / " + x for x in card.get("alt") or [])))
@@ -613,10 +704,7 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None):
             on_add(extra)
             print(col(GREEN, "  ✓ « %s » ajouté" % extra))
             return 3
-    # then wiped, scrollback too: the card comes back soon, the answer mustn't be there to copy
-    if C:
-        sys.stdout.write("\033[H\033[2J\033[3J")
-        sys.stdout.flush()
+    # no wipe (#242): the card waits until its answer has scrolled out of sight (main)
     return 1
 
 
@@ -684,13 +772,20 @@ def main():
         return
 
     done, t_start = 0, time.time()
+    missed_at = {}  # card id → line count when its answer was shown (#242)
     while queue:
-        card = queue.pop(0)
+        # a missed card waits until its answer is out of sight: the next one goes first
+        i = next((i for i, c in enumerate(queue) if out_of_sight(missed_at.get(str(c["id"]), -10**9))), None)
+        if i is None:  # nothing else to show: push the answer up and out
+            print("\n" * max(0, shutil.get_terminal_size((80, 24)).lines - (LINES - missed_at[str(queue[0]["id"])])), end="")
+            i = 0
+        card = queue.pop(i)
         cid = str(card["id"])
         before = srs.get(cid)
         t0 = time.time()
         q = review(card, before, on_dump=lambda: dump([card] + queue, srs),
                    on_stats=lambda: counts_line([card] + queue, srs),
+                   on_tab=lambda: conj_table(card, [c for cs in by.values() for c in cs]),
                    on_add=lambda text: add_answer(sid, card, text, edits, args.dry))
         if q is None:
             break
@@ -709,8 +804,10 @@ def main():
         done += 1
         if requeue:  # learning step: back a few cards later (as in the app)
             queue.insert(min(len(queue), requeue), card)
-        if q == 1 and queue:  # missed (the screen was wiped): what's left, on top
-            print(counts_line(queue, srs))
+        if q == 1:
+            missed_at[cid] = LINES
+            if queue:  # missed: what's left
+                print(counts_line(queue, srs))
     mins = (time.time() - t_start) / 60
     print()
     print(col(DIM, "%d carte(s) en %.0f min%s" % (done, mins, "" if args.dry else " — enregistré dans Firestore")))
