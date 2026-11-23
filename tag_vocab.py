@@ -165,7 +165,8 @@ STATES = {"enfermo", "cansado", "empapado", "enfadado", "mojado", "aburrido", "p
           "sorprendido", "enamorado", "celoso", "tranquilo", "emocionado", "avergonzado", "confuso", "perdido",
           "herido", "muerto", "embarazada", "hambriento", "satisfecho", "orgulloso", "decepcionado", "deprimido",
           "relajado", "enojado", "molesto", "loco", "sucio", "alegre", "furioso", "dispuesto", "equivocado",
-          "convencido", "interesado"}
+          "convencido", "interesado", "triste", "encantado", "sentado", "agradecido", "confundido", "acostumbrado",
+          "callado", "agotado", "resfriado", "mareado", "estresado", "despistado", "agobiado"}
 
 # « transparent » (#198): Spanish endings → French / Italian ones
 ENDINGS = {
