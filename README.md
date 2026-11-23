@@ -254,7 +254,8 @@ python3 trainer.py --user       # pick the name again
   accepted answers, or `+ another meaning` adds that one instead. Use it when
   your meaning was right but not in the list: the card counts as Correct. It's
   saved as an edit in Firestore (`card.alt`), so the terminal accepts it
-  everywhere; the app doesn't use it yet.
+  everywhere, and the app accepts it too: in the one box, or typed across the
+  word boxes.
 - **After a miss:** the answer shows in red (like the learning count after
   it: the card goes back there), then the cards left and the time left show, as under the app's cards:
   new · learning · review, in blue · red · green. The screen isn't wiped:
