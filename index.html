@@ -1431,7 +1431,7 @@
             #study .s-time-label { grid-column: 1 / -1; grid-row: 4; margin-top: 0; line-height: 1; }
             /* hidden but keeping its height, so the card doesn't grow then shrink
                when the rating pills come (unless they are off in ⚙: then never there) */
-            #study .s-bottom[data-state="question"], #study .s-bottom[data-state="next"], #study .s-bottom[data-state=""] { visibility: hidden; }
+            #study .s-bottom[data-state="question"], #study .s-bottom[data-state=""] { visibility: hidden; }
             body.phone-nobtn #study .s-bottom { display: none; }
             #study .s-actions { height: 38px; margin-bottom: 0; }
             #study .t-rate { flex-direction: row; gap: 5px; padding: 0 6px; border-radius: 999px; }
@@ -1454,6 +1454,23 @@
         .s-question.rated-hard, .ly-active.rated-hard { border-color: var(--orange); background: var(--tint-orange); }
         .s-question.rated-good, .ly-active.rated-good { border-color: var(--green); background: var(--tint-green); }
         .s-question.rated-easy, .ly-active.rated-easy { border-color: var(--blue); background: var(--tint-blue); }
+        /* a frame that shows the rating at a glance (#252) */
+        .s-question.rated-again { box-shadow: 0 0 0 3px var(--red); } .s-question.rated-hard { box-shadow: 0 0 0 3px var(--orange); }
+        .s-question.rated-good { box-shadow: 0 0 0 3px var(--green); } .s-question.rated-easy { box-shadow: 0 0 0 3px var(--blue); }
+        /* the rating given, lit, and why in a bubble that floats up and fades (#252) */
+        .t-rate { position: relative; }
+        .t-rate.chosen.t-rate-again { --c: var(--red); } .t-rate.chosen.t-rate-hard { --c: var(--orange); }
+        .t-rate.chosen.t-rate-good { --c: var(--green); } .t-rate.chosen.t-rate-easy { --c: var(--blue); }
+        .t-rate.chosen { background: var(--c); border-color: var(--c); }
+        .t-rate.chosen .t-rate-label, .t-rate.chosen .t-rate-time, .t-rate.chosen .t-key { color: #fff; }
+        .rate-why { position: absolute; left: 50%; bottom: 100%; padding: 3px 10px; border-radius: 999px; background: var(--c); color: #fff;
+            font-size: 12px; font-weight: 700; white-space: nowrap; pointer-events: none; animation: rateWhy 2.1s ease-out forwards; }
+        @keyframes rateWhy {
+            0% { opacity: 0; transform: translate(-50%, 8px) scale(.8); }
+            15% { opacity: 1; transform: translate(-50%, -6px) scale(1); }
+            65% { opacity: 1; transform: translate(-50%, -16px); filter: blur(0); }
+            100% { opacity: 0; transform: translate(-50%, -38px) scale(1.1); filter: blur(3px); }
+        }
 
         /* ── Songs: lyrics view ── */
         .ly-view {
@@ -2349,6 +2366,7 @@
                     </div>
                     Tout tapé sans aide → <b>Correct</b> automatiquement. Après un indice ou la réponse, ces boutons apparaissent en bas ; la durée indique quand la carte reviendra.
                     <br>Une carte déjà vue (une nouvelle aussi, quand elle revient dans la séance) commence par une seule case pour toute la réponse, sans découpage en mots : le nombre de mots et leur longueur ne sont plus donnés. Ratée (Entrée), les cases mot par mot reviennent ; un indice ou la réponse aussi. Les notes automatiques suivent Anki : juste dans la case unique du premier coup = Facile (pour une carte vue avant aujourd'hui), juste avec les cases = Correct, trouvée seule mais avec effort (2 erreurs ou plus, case unique ratée, bien plus lent que d'habitude) = Difficile, réponse vue (indice, mot donné après les erreurs) = À revoir.
+                    <br>Dans la case unique, Entrée sans rien écrire passe aux cases mot par mot (Difficile) ; un mot tapé puis effacé compte comme un essai. Dans les cases, Entrée sur une case vide donne l'indice de ce mot. Les sens ajoutés dans le terminal (+) sont acceptés aussi. Après une note automatique, les quatre boutons restent affichés, celui de la note éclairé, avec la raison dans une bulle (aide, 3 erreurs, trop lent, du premier coup…) et le cadre de la carte à sa couleur ; un autre bouton donne cette note à la place.
                     <div class="g-demo">
                         <div class="g-card s-question rated-good" style="font-size:14px;padding:6px 10px;margin:0">carte réussie</div>
                         <div class="g-card s-question rated-again" style="font-size:14px;padding:6px 10px;margin:0">à revoir</div>
@@ -2422,6 +2440,7 @@
                 <div class="g-body">
                     <ul class="g-news">
                         <li><b>19 nov.</b> 📱 sur téléphone, noter au doigt : touche la carte à gauche = À revoir, à droite = Correct ; appui long à gauche = Difficile, à droite = Facile ; ⚙ « Boutons de note (téléphone) » pour cacher les boutons du bas.</li>
+                        <li><b>23 nov.</b> 🎯 après une note automatique, les boutons restent : celui de la note éclairé, la raison dans une bulle (aide, 3 erreurs, trop lent…), le cadre de la carte à sa couleur ; un autre bouton change la note. Entrée vide : case unique → cases ; case vide → indice. Les sens ajoutés dans le terminal marchent dans l'app.</li>
                         <li><b>23 nov.</b> 📋 fiche du paquet : textes du Vocabulaire raccourcis et graphique plus bas, tout tient sur une page ; les boutons du bas restent toujours visibles.</li>
                         <li><b>23 nov.</b> 🗣 Vocabulaire : 13 mots d'état qui manquaient (triste, encantado, sentado, agradecido, confundido, acostumbrado, callado, agotado, resfriado, mareado, estresado, despistado, agobiado), dans « états et émotions ».</li>
                         <li><b>23 nov.</b> ⌨️ une carte déjà vue commence par une seule case pour toute la réponse (sans découpage) ; ratée, les cases mot par mot reviennent. Notes automatiques comme dans Anki : case unique du 1er coup = Facile (carte vue avant aujourd'hui), cases = Correct, effort (erreurs, lent, case unique ratée) = Difficile, réponse vue = À revoir.</li>
@@ -5996,7 +6015,8 @@
             if (flip && card.rf) showRefoldZones(card, false);
 
             setBarState("question");
-            sess.bloc = sess.blocMissed = sess.blocOk = false;
+            sess.bloc = sess.blocMissed = sess.blocOk = sess.blocAsked = false;
+            sess.autoQ = 0; sess.autoWhy = "";
             if (!flip) { if (card.eq) buildEqRow(card.eq); else if (blocFirst(card)) buildBloc(card); else buildRows(card.words, card.sep, card.notes); syncAnswerFont(); }
             updateCompact();
             if (!flip) fitAnswerRow();
@@ -6107,14 +6127,37 @@
                     + '<button class="s-pill" onclick="showFullAnswer()">Voir la réponse <span class="t-key">F8</span></button>';
             } else if (state === "rating" && card) {
                 html = ratingButtonsHtml(previewIntervals(sess.srs[card.id]));
+            } else if (state === "next" && card && sess.autoQ) {
+                // After an automatic rating (#252): the four pills, the one given lit,
+                // with why in a bubble that floats up; another pill = that rating instead.
+                html = ratingButtonsHtml(previewIntervals(sess.srs[card.id]));
             } else if (state === "next" && settings().spaceMode === "next") {
                 html = '<button class="s-pill" onclick="continueAfterAnswer()">Suivant <span class="t-key">Espace</span></button>';
-            } else if (state === "next") {
-                html = '<button class="s-pill s-hold' + (holdBack ? ' on' : '') + '" onpointerdown="event.preventDefault(); setHold(true)" onpointerup="setHold(false)" onpointerleave="setHold(false)" onpointercancel="setHold(false)">'
-                    + '⏸ <span class="s-hold-kb">Maintenir Espace</span><span class="s-hold-touch">Maintenir appuyé</span></button>';
             }
             el.innerHTML = html;
+            if (state === "next" && sess.autoQ) showRatingWhy(sess.autoQ, sess.autoWhy);
             scheduleCompactCheck();
+        }
+
+        function showRatingWhy(q, why) {
+            var btn = document.querySelector('#s-actions .t-rate[data-q="' + q + '"]');
+            if (!btn) return;
+            btn.classList.add("chosen");
+            if (!why || !animationsOn()) return;
+            var b = document.createElement("span"); b.className = "rate-why";
+            b.textContent = UI_LANG === "it" && /^\d+ erreurs$/.test(why) ? why.replace("erreurs", "errori") : t9n(why);
+            btn.appendChild(b);
+            setTimeout(function () { if (b.parentNode) b.remove(); }, 2200);
+        }
+        // Another pill while the back shows: that rating instead, and on (#252).
+        function rateInstead(q) {
+            var keep = q === sess.autoQ;
+            if (!keep) {
+                dlog("note changée", { de: sess.autoQ, a: q });
+                sess.autoQ = q; highlightCard(q);
+                pendingNext = function () { flash(function () { advanceCard(q); }); };
+            }
+            continueAfterAnswer();
         }
 
         // Card border + tint in the rating's color.
@@ -6136,6 +6179,7 @@
         }
 
         function rate(q, viaButton) {
+            if (barState === "next" && pendingNext && sess.autoQ) { rateInstead(q); return; }
             if (advancing) return;
             sess.quick = false;
             sess.tt = { t0: Date.now(), quick: false, kind: "notée à la main" };
@@ -6431,7 +6475,7 @@
                 if (t.length) { groups[groups.length - 1].push(t[0]); all.push(t[0]); }
             });
             // « toi / à toi / te »: any one of them, or all of them
-            return [all.join(" ")].concat(groups.length > 1 ? groups.map(function (g) { return g.join(" "); }) : []);
+            return [all.join(" ")].concat(groups.length > 1 ? groups.map(function (g) { return g.join(" "); }) : [], card.alt || []); // + meanings added in the terminal (#252)
         }
         function buildBloc(card) {
             var section = document.getElementById("t-words"); if (!section) return;
@@ -6447,12 +6491,17 @@
             var right = function () { var v = squashWord(inp.value); return !!v && targets.some(function (t) { return squashWord(t) === v; }); };
             inp.addEventListener("input", function () {
                 inp.className = "wc-inp bloc-inp";
+                if (/\S\s/.test(inp.value)) inp._word = true; // a whole word, then a space
+                // that wiped out again = a try, as in the boxes (#20, #252)
+                if (!inp.value.trim() && inp._word) { sess.blocMissed = true; errorHit(); dlog("bloc effacé", { id: card.id }); leaveBloc(false); return; }
                 if (settings().validate !== "enter" && right()) leaveBloc(true);
             });
             inp.addEventListener("keydown", function (e) {
                 if (e.key !== "Enter") return;
                 e.preventDefault();
-                if (!inp.value.trim() || advancing) return;
+                if (advancing) return;
+                // Entrée with nothing typed: the boxes word by word, asked for (#252)
+                if (!inp.value.trim()) { sess.blocMissed = sess.blocAsked = true; leaveBloc(false); return; }
                 if (right()) { leaveBloc(true); return; }
                 // missed in one box: the boxes word by word come (no try used there)
                 sess.blocMissed = true;
@@ -6589,6 +6638,8 @@
                 if (e.key !== "Enter") return;
                 e.preventDefault();
                 var entry = wordRows[i];
+                // nothing typed in this box: its hint, as 💡 (#252)
+                if (entry && !entry.solved && !entry.given && !entry.revealed && !entry.inp.value.trim() && !entry.eq) { hintFromPill(); return; }
                 // « Entrée pour valider » (#100): Entrée checks the word — always for a formula (#212)
                 if ((settings().validate === "enter" || (entry && entry.eq)) && entry && !entry.solved && !entry.given && entry.inp.value.trim()) {
                     validateEntry(entry, i);
@@ -6597,7 +6648,19 @@
                 focusNext(i);
             };
         }
+        // All the boxes together = a meaning added in the terminal (card.alt, #252):
+        // « pas de soucis » for « pas de problème » — every box solved.
+        function altWhole() {
+            var card = sess.queue[sess.qIdx], alt = (card && card.alt) || [];
+            if (!alt.length) return false;
+            var typed = squashWord(wordRows.map(function (e) { return e.inp.value; }).join(" "));
+            if (!typed || !alt.some(function (a) { return squashWord(a) === typed; })) return false;
+            wordRows.forEach(function (e) { if (!e.solved && !e.given) markSolved(e); });
+            tryComplete();
+            return true;
+        }
         function validateEntry(entry, i) {
+            if (altWhole()) return;
             if (check(entry)) { markSolved(entry); focusNext(i); }
             else { addError(entry, i); if (!entry.given) entry.inp.select(); }
         }
@@ -6684,6 +6747,7 @@
                 // into this blank and turned it wrong — issue #3).
                 focusNext(i);
             } else {
+                if (altWhole()) return;
                 entry.inp.className = "wc-inp err";
                 entry.solved = false;
                 entry.box.classList.remove("solved");
@@ -6849,9 +6913,15 @@
             var errs = settings().validate === "enter" ? (sess.cardMisses || 0)
                 : wordRows.reduce(function (n, e) { return n + (e.errors || 0); }, 0);
             var slow = settings().slowSeconds, s0 = sess.srs[sess.queue[sess.qIdx].id];
-            var q = revealed ? 1 : 3;
-            if (q === 3 && (sess.blocMissed || errs >= 2 || (slow && cardElapsed() > slowLimitMs(sess.queue[sess.qIdx])))) q = 2;
-            else if (q === 3 && sess.blocOk && !errs && s0 && s0.lastReview && s0.lastReview < new Date().setHours(0, 0, 0, 0)) q = 4;
+            var tooSlow = !!(slow && cardElapsed() > slowLimitMs(sess.queue[sess.qIdx]));
+            var q = 3, why = "sans aide";
+            if (revealed) { q = 1; why = sess.failedByErrors ? settings().maxErrors + " erreurs" : "aide"; }
+            else if (sess.blocMissed) { q = 2; why = sess.blocAsked ? "découpage demandé" : "case unique ratée"; }
+            else if (errs >= 2) { q = 2; why = errs + " erreurs"; }
+            else if (tooSlow) { q = 2; why = "trop lent"; }
+            else if (sess.blocOk && !errs && s0 && s0.lastReview && s0.lastReview < new Date().setHours(0, 0, 0, 0)) { q = 4; why = "du premier coup"; }
+            else if (errs === 1) why = "1 erreur";
+            sess.autoQ = q; sess.autoWhy = why; // shown on the lit rating pill (#252)
             flashForPendingRating(q);
             // Missed on errors: the hands were still typing — nothing typed now acts (#157).
             if (q === 1 && sess.failedByErrors) keyLock.on = true;
@@ -6865,6 +6935,7 @@
                 // a plain back can be held too (#207): Space kept down → it stays until released
                 var go0 = function () { flash(function () { advanceCard(q); }); };
                 pendingNext = go0;
+                setBarState("next"); // the rating pills, the one given lit (#252)
                 armHold();
                 playCardAudio("a", function () {
                     ttMark("audio");
@@ -7673,7 +7744,7 @@
                     "(suite) la carte notée part vers un coin ; combos inversés (justes à droite, erreurs à gauche) et comptés tout de suite ; la case rougit à chaque erreur ; ⚙ délai avant la carte suivante.": "(seguito) la carta valutata vola verso un angolo; combo invertite (giuste a destra, errori a sinistra) e contate subito; la casella diventa rossa a ogni errore; ⚙ tempo prima della carta successiva.",
                     "Délai avant la carte suivante": "Tempo prima della carta successiva", "Auto": "Auto", "Toujours lent": "Sempre lento", "Toujours rapide": "Sempre veloce",
                     "Temps laissé au verso, une fois le son fini. Auto : une carte vue pour la première fois, ou ratée, garde le temps de relire (≈ 2,5 s) ; une carte déjà vue et juste (même revenue dans la séance) passe vite (≈ 0,7 s, comptées pendant le son), avec une transition plus courte.": "Tempo lasciato al retro, finito l'audio. Auto: una carta vista per la prima volta, o sbagliata, tiene il tempo per rileggere (≈ 2,5 s); una carta già vista e giusta (anche tornata nella sessione) passa in fretta (≈ 0,7 s, contati durante l'audio), con una transizione più breve.", "joue l'enregistrement de la phrase d'exemple ; s'il n'y en a pas (phrases écrites pour le Vocabulaire), la voix du navigateur la lit.": "riproduce la registrazione della frase d'esempio; se non c'è (frasi scritte per il Vocabolario), la legge la voce del browser.",
-                    "6 nov.": "6 nov.", "9 nov.": "9 nov.", "10 nov.": "10 nov.", "12 nov.": "12 nov.", "18 nov.": "18 nov.", "19 nov.": "19 nov.", "23 nov.": "23 nov.", "📋 fiche du paquet : textes du Vocabulaire raccourcis et graphique plus bas, tout tient sur une page ; les boutons du bas restent toujours visibles.": "📋 scheda del mazzo: testi del Vocabolario accorciati e grafico più basso, tutto sta in una pagina; i pulsanti in basso restano sempre visibili.", "🗣 Vocabulaire : 13 mots d'état qui manquaient (triste, encantado, sentado, agradecido, confundido, acostumbrado, callado, agotado, resfriado, mareado, estresado, despistado, agobiado), dans « états et émotions ».": "🗣 Vocabolario: 13 parole di stato che mancavano (triste, encantado, sentado, agradecido, confundido, acostumbrado, callado, agotado, resfriado, mareado, estresado, despistado, agobiado), in « stati ed emozioni ».", "⌨️ une carte déjà vue commence par une seule case pour toute la réponse (sans découpage) ; ratée, les cases mot par mot reviennent. Notes automatiques comme dans Anki : case unique du 1er coup = Facile (carte vue avant aujourd'hui), cases = Correct, effort (erreurs, lent, case unique ratée) = Difficile, réponse vue = À revoir.": "⌨️ una carta già vista comincia con una sola casella per tutta la risposta (senza divisione); sbagliata, tornano le caselle parola per parola. Voti automatici come in Anki: casella unica al 1º colpo = Facile (carta vista prima di oggi), caselle = Corretto, fatica (errori, lento, casella unica sbagliata) = Difficile, risposta vista = Da rivedere.", "Une carte déjà vue (une nouvelle aussi, quand elle revient dans la séance) commence par une seule case pour toute la réponse, sans découpage en mots : le nombre de mots et leur longueur ne sont plus donnés. Ratée (Entrée), les cases mot par mot reviennent ; un indice ou la réponse aussi. Les notes automatiques suivent Anki : juste dans la case unique du premier coup = Facile (pour une carte vue avant aujourd'hui), juste avec les cases = Correct, trouvée seule mais avec effort (2 erreurs ou plus, case unique ratée, bien plus lent que d'habitude) = Difficile, réponse vue (indice, mot donné après les erreurs) = À revoir.": "Una carta già vista (anche una nuova, quando torna nella sessione) comincia con una sola casella per tutta la risposta, senza divisione in parole: il numero di parole e la loro lunghezza non sono più dati. Sbagliata (Invio), tornano le caselle parola per parola; anche con un suggerimento o la risposta. I voti automatici seguono Anki: giusta nella casella unica al primo colpo = Facile (per una carta vista prima di oggi), giusta con le caselle = Corretto, trovata da solo ma con fatica (2 errori o più, casella unica sbagliata, molto più lento del solito) = Difficile, risposta vista (suggerimento, parola data dopo gli errori) = Da rivedere.", "toute la réponse…": "tutta la risposta…", "🏷 Vocabulaire : tag « états et émotions » (enfermo, cansado, empapado, enfadado, harto… 43 adjectifs avec estar), aussi sous « adjectif » ; à filtrer dans 🔍 ou à pré-trier.": "🏷 Vocabolario: tag « stati ed emozioni » (enfermo, cansado, empapado, enfadado, harto… 43 aggettivi con estar), anche sotto « aggettivo »; da filtrare in 🔍 o da preselezionare.", "📱 sur téléphone, la place de la réponse est gardée dès le recto : rien ne glisse quand elle s'affiche (la barre du bas garde aussi sa hauteur) ; sur ordinateur, les mots ne remontent plus.": "📱 sul telefono, il posto della risposta è tenuto fin dal fronte: niente scivola quando appare (anche la barra in basso tiene la sua altezza); sul computer, le parole non risalgono più.", "⚙ changer un réglage en pleine révision ne change plus la carte affichée : il vaut à partir de la suivante.": "⚙ cambiare un'impostazione durante il ripasso non cambia più la carta mostrata: vale dalla successiva.", "Changer un réglage pendant la révision ne touche pas la carte affichée : il s'applique à partir de la carte suivante. La place de la réponse (phrase, image) est gardée dès le recto, pour que rien ne bouge quand elle s'affiche.": "Cambiare un'impostazione durante il ripasso non tocca la carta mostrata: vale dalla carta successiva. Il posto della risposta (frase, immagine) è tenuto fin dal fronte, così niente si sposta quando appare.", "📱 sur téléphone, la carte qu'on glisse pour la noter continue dans le sens du geste et sort de l'écran (avant, elle revenait d'un coup au centre puis repartait) ; pas assez loin, elle revient en douceur.": "📱 sul telefono, la carta che scorri per votarla continua nel senso del gesto ed esce dallo schermo (prima tornava di colpo al centro e poi ripartiva); non abbastanza lontano, torna indietro dolcemente.", "📱 sur téléphone, noter au doigt : touche la carte à gauche = À revoir, à droite = Correct ; appui long à gauche = Difficile, à droite = Facile ; ⚙ « Boutons de note (téléphone) » pour cacher les boutons du bas.": "📱 sul telefono, votare col dito: tocca la carta a sinistra = Da rivedere, a destra = Corretto; pressione lunga a sinistra = Difficile, a destra = Facile; ⚙ « Pulsanti di voto (telefono) » per nascondere i pulsanti in basso.", "🏷 🔍 le menu des tags : une seule colonne qui défile vers le bas (sur téléphone, une deuxième colonne dépassait sur le côté).": "🏷 🔍 il menu dei tag: una sola colonna che scorre verso il basso (sul telefono, una seconda colonna usciva di lato).", "⚙ les réglages suivent d'un appareil à l'autre ; le terminal (ankiterm) donne autant de nouvelles cartes que l'app (il en donnait toujours 20).": "⚙ le impostazioni seguono da un dispositivo all'altro; il terminale (ankiterm) dà tante carte nuove quante l'app (ne dava sempre 20).", "Les réglages ⚙ suivent d'un appareil à l'autre (le dernier changé l'emporte), et la version terminal (ankiterm) donne le même nombre de nouvelles cartes que l'app.": "Le impostazioni ⚙ seguono da un dispositivo all'altro (vince l'ultima modificata), e la versione terminale (ankiterm) dà lo stesso numero di carte nuove dell'app.", "🏷 🔍 : filtrer par plusieurs tags à la fois (verbe + fr→es…), une carte doit les avoir tous ; Vocabulaire : tag « es→fr » pour le sens habituel.": "🏷 🔍: filtrare per più tag insieme (verbo + it→es…), una carta deve averli tutti; Vocabolario: tag « es→it » per il senso abituale.", "🗣 Vocabulaire : 25 phrases d'action du quotidien (te mantendré informado, te aviso, me encargo yo, ahora vuelvo…), tag « actions courantes », aussi sous « verbe ».": "🗣 Vocabolario: 25 frasi d'azione di tutti i giorni (te mantendré informado, te aviso, me encargo yo, ahora vuelvo…), tag « azioni quotidiane », anche sotto « verbo ».", "⏱ fiche du paquet : le temps de révision en grand, à droite des trois chiffres.": "⏱ scheda del mazzo: il tempo di ripasso in grande, a destra dei tre numeri.", "🔄 📝 Vocabulaire perso : un mot ajouté sur un appareil arrive aussi sur les autres (avant, l'appareil qui synchronisait en dernier gardait seulement ses propres mots).": "🔄 📝 Vocabolario personale: una parola aggiunta su un dispositivo arriva anche sugli altri (prima, il dispositivo che sincronizzava per ultimo teneva solo le sue parole).", "🇫🇷 → 🇪🇸 le Vocabulaire dans l'autre sens : le sens en français, tu tapes l'espagnol (2 869 cartes, pas pour les mots transparents) ; chaque carte attend que le mot ait été vu, une nouvelle carte sur deux.": "🇮🇹 → 🇪🇸 il Vocabolario nell'altro senso: il significato in italiano, scrivi lo spagnolo (2 561 carte, non per le parole trasparenti); ogni carta aspetta che la parola sia stata vista, una nuova carta su due.", "Le Vocabulaire se révise aussi dans l'autre sens : le sens en français au recto (avec la nature du mot et la phrase traduite, pour savoir lequel), tu tapes l'espagnol. Une carte 🇫🇷 → 🇪🇸 n'arrive qu'une fois le mot vu dans le sens 🇪🇸 → 🇫🇷, et prend une place sur deux parmi les nouvelles cartes du jour. Les mots transparents (la universidad = l'université) n'en ont pas. Le tag « fr→es » les montre à part, « es→fr » montre celles du sens habituel.": "Il Vocabolario si ripassa anche nell'altro senso: il significato in italiano sul fronte (con la categoria della parola e la frase tradotta, per capire quale), scrivi lo spagnolo. Una carta 🇮🇹 → 🇪🇸 arriva solo dopo aver visto la parola nel senso 🇪🇸 → 🇮🇹, e prende un posto su due tra le nuove carte del giorno. Le parole trasparenti (la universidad = l'università) non ce l'hanno. Il tag « it→es » le mostra a parte, « es→it » quelle del senso abituale.", "La fiche du paquet montre en grand, à droite des trois chiffres, le temps de révision estimé, d'après ton temps habituel sur chaque carte (en mode « temps » : les minutes qui restent aujourd'hui). À la fin, 🎉 Session terminée montre le temps estimé au départ et le temps effectif (sans le temps passé hors de l'appli). Pour une formule (paquet 🌊 Helmholtz), une seule case : écris-la comme tu veux (lambda = c/f, w pour ω, ^2, sqrt…) ou avec la barre de symboles ; une formule trop longue se retourne et tu te notes. Une carte qui s'appuie sur d'autres attend qu'elles soient vues.": "La scheda del mazzo mostra in grande, a destra dei tre numeri, il tempo di ripasso stimato, in base al tuo tempo abituale su ogni carta (in modalità « tempo »: i minuti che restano oggi). Alla fine, 🎉 Sessione finita mostra il tempo stimato all'inizio e il tempo effettivo (senza il tempo passato fuori dall'app). Per una formula (mazzo 🌊 Helmholtz), una sola casella: scrivila come vuoi (lambda = c/f, w per ω, ^2, sqrt…) o con la barra dei simboli; una formula troppo lunga si gira e ti valuti. Una carta che si basa su altre aspetta che siano viste.", "(soir, fin) fiche du paquet : durée estimée de la séance en mode « nombre de cartes ».": "(sera, fine) scheda del mazzo: durata stimata della sessione in modalità « numero di carte ».", "(nuit) 📝 Relecture : ↑ modifier la carte, ↓ la retirer du paquet.": "(notte) 📝 Revisione: ↑ modifica la carta, ↓ toglila dal mazzo.",
+                    "6 nov.": "6 nov.", "9 nov.": "9 nov.", "10 nov.": "10 nov.", "12 nov.": "12 nov.", "18 nov.": "18 nov.", "19 nov.": "19 nov.", "23 nov.": "23 nov.", "🎯 après une note automatique, les boutons restent : celui de la note éclairé, la raison dans une bulle (aide, 3 erreurs, trop lent…), le cadre de la carte à sa couleur ; un autre bouton change la note. Entrée vide : case unique → cases ; case vide → indice. Les sens ajoutés dans le terminal marchent dans l'app.": "🎯 dopo un voto automatico, i pulsanti restano: quello del voto illuminato, il motivo in una bolla (aiuto, 3 errori, troppo lento…), la cornice della carta del suo colore; un altro pulsante cambia il voto. Invio vuoto: casella unica → caselle; casella vuota → suggerimento. I significati aggiunti nel terminale funzionano nell'app.", "Dans la case unique, Entrée sans rien écrire passe aux cases mot par mot (Difficile) ; un mot tapé puis effacé compte comme un essai. Dans les cases, Entrée sur une case vide donne l'indice de ce mot. Les sens ajoutés dans le terminal (+) sont acceptés aussi. Après une note automatique, les quatre boutons restent affichés, celui de la note éclairé, avec la raison dans une bulle (aide, 3 erreurs, trop lent, du premier coup…) et le cadre de la carte à sa couleur ; un autre bouton donne cette note à la place.": "Nella casella unica, Invio senza scrivere niente passa alle caselle parola per parola (Difficile); una parola scritta e poi cancellata conta come un tentativo. Nelle caselle, Invio su una casella vuota dà il suggerimento di quella parola. Anche i significati aggiunti nel terminale (+) sono accettati. Dopo un voto automatico, i quattro pulsanti restano visibili, quello del voto illuminato, con il motivo in una bolla (aiuto, 3 errori, troppo lento, al primo colpo…) e la cornice della carta del suo colore; un altro pulsante dà quel voto al suo posto.", "sans aide": "senza aiuto", "aide": "aiuto", "découpage demandé": "divisione chiesta", "case unique ratée": "casella unica sbagliata", "trop lent": "troppo lento", "du premier coup": "al primo colpo", "1 erreur": "1 errore", "📋 fiche du paquet : textes du Vocabulaire raccourcis et graphique plus bas, tout tient sur une page ; les boutons du bas restent toujours visibles.": "📋 scheda del mazzo: testi del Vocabolario accorciati e grafico più basso, tutto sta in una pagina; i pulsanti in basso restano sempre visibili.", "🗣 Vocabulaire : 13 mots d'état qui manquaient (triste, encantado, sentado, agradecido, confundido, acostumbrado, callado, agotado, resfriado, mareado, estresado, despistado, agobiado), dans « états et émotions ».": "🗣 Vocabolario: 13 parole di stato che mancavano (triste, encantado, sentado, agradecido, confundido, acostumbrado, callado, agotado, resfriado, mareado, estresado, despistado, agobiado), in « stati ed emozioni ».", "⌨️ une carte déjà vue commence par une seule case pour toute la réponse (sans découpage) ; ratée, les cases mot par mot reviennent. Notes automatiques comme dans Anki : case unique du 1er coup = Facile (carte vue avant aujourd'hui), cases = Correct, effort (erreurs, lent, case unique ratée) = Difficile, réponse vue = À revoir.": "⌨️ una carta già vista comincia con una sola casella per tutta la risposta (senza divisione); sbagliata, tornano le caselle parola per parola. Voti automatici come in Anki: casella unica al 1º colpo = Facile (carta vista prima di oggi), caselle = Corretto, fatica (errori, lento, casella unica sbagliata) = Difficile, risposta vista = Da rivedere.", "Une carte déjà vue (une nouvelle aussi, quand elle revient dans la séance) commence par une seule case pour toute la réponse, sans découpage en mots : le nombre de mots et leur longueur ne sont plus donnés. Ratée (Entrée), les cases mot par mot reviennent ; un indice ou la réponse aussi. Les notes automatiques suivent Anki : juste dans la case unique du premier coup = Facile (pour une carte vue avant aujourd'hui), juste avec les cases = Correct, trouvée seule mais avec effort (2 erreurs ou plus, case unique ratée, bien plus lent que d'habitude) = Difficile, réponse vue (indice, mot donné après les erreurs) = À revoir.": "Una carta già vista (anche una nuova, quando torna nella sessione) comincia con una sola casella per tutta la risposta, senza divisione in parole: il numero di parole e la loro lunghezza non sono più dati. Sbagliata (Invio), tornano le caselle parola per parola; anche con un suggerimento o la risposta. I voti automatici seguono Anki: giusta nella casella unica al primo colpo = Facile (per una carta vista prima di oggi), giusta con le caselle = Corretto, trovata da solo ma con fatica (2 errori o più, casella unica sbagliata, molto più lento del solito) = Difficile, risposta vista (suggerimento, parola data dopo gli errori) = Da rivedere.", "toute la réponse…": "tutta la risposta…", "🏷 Vocabulaire : tag « états et émotions » (enfermo, cansado, empapado, enfadado, harto… 43 adjectifs avec estar), aussi sous « adjectif » ; à filtrer dans 🔍 ou à pré-trier.": "🏷 Vocabolario: tag « stati ed emozioni » (enfermo, cansado, empapado, enfadado, harto… 43 aggettivi con estar), anche sotto « aggettivo »; da filtrare in 🔍 o da preselezionare.", "📱 sur téléphone, la place de la réponse est gardée dès le recto : rien ne glisse quand elle s'affiche (la barre du bas garde aussi sa hauteur) ; sur ordinateur, les mots ne remontent plus.": "📱 sul telefono, il posto della risposta è tenuto fin dal fronte: niente scivola quando appare (anche la barra in basso tiene la sua altezza); sul computer, le parole non risalgono più.", "⚙ changer un réglage en pleine révision ne change plus la carte affichée : il vaut à partir de la suivante.": "⚙ cambiare un'impostazione durante il ripasso non cambia più la carta mostrata: vale dalla successiva.", "Changer un réglage pendant la révision ne touche pas la carte affichée : il s'applique à partir de la carte suivante. La place de la réponse (phrase, image) est gardée dès le recto, pour que rien ne bouge quand elle s'affiche.": "Cambiare un'impostazione durante il ripasso non tocca la carta mostrata: vale dalla carta successiva. Il posto della risposta (frase, immagine) è tenuto fin dal fronte, così niente si sposta quando appare.", "📱 sur téléphone, la carte qu'on glisse pour la noter continue dans le sens du geste et sort de l'écran (avant, elle revenait d'un coup au centre puis repartait) ; pas assez loin, elle revient en douceur.": "📱 sul telefono, la carta che scorri per votarla continua nel senso del gesto ed esce dallo schermo (prima tornava di colpo al centro e poi ripartiva); non abbastanza lontano, torna indietro dolcemente.", "📱 sur téléphone, noter au doigt : touche la carte à gauche = À revoir, à droite = Correct ; appui long à gauche = Difficile, à droite = Facile ; ⚙ « Boutons de note (téléphone) » pour cacher les boutons du bas.": "📱 sul telefono, votare col dito: tocca la carta a sinistra = Da rivedere, a destra = Corretto; pressione lunga a sinistra = Difficile, a destra = Facile; ⚙ « Pulsanti di voto (telefono) » per nascondere i pulsanti in basso.", "🏷 🔍 le menu des tags : une seule colonne qui défile vers le bas (sur téléphone, une deuxième colonne dépassait sur le côté).": "🏷 🔍 il menu dei tag: una sola colonna che scorre verso il basso (sul telefono, una seconda colonna usciva di lato).", "⚙ les réglages suivent d'un appareil à l'autre ; le terminal (ankiterm) donne autant de nouvelles cartes que l'app (il en donnait toujours 20).": "⚙ le impostazioni seguono da un dispositivo all'altro; il terminale (ankiterm) dà tante carte nuove quante l'app (ne dava sempre 20).", "Les réglages ⚙ suivent d'un appareil à l'autre (le dernier changé l'emporte), et la version terminal (ankiterm) donne le même nombre de nouvelles cartes que l'app.": "Le impostazioni ⚙ seguono da un dispositivo all'altro (vince l'ultima modificata), e la versione terminale (ankiterm) dà lo stesso numero di carte nuove dell'app.", "🏷 🔍 : filtrer par plusieurs tags à la fois (verbe + fr→es…), une carte doit les avoir tous ; Vocabulaire : tag « es→fr » pour le sens habituel.": "🏷 🔍: filtrare per più tag insieme (verbo + it→es…), una carta deve averli tutti; Vocabolario: tag « es→it » per il senso abituale.", "🗣 Vocabulaire : 25 phrases d'action du quotidien (te mantendré informado, te aviso, me encargo yo, ahora vuelvo…), tag « actions courantes », aussi sous « verbe ».": "🗣 Vocabolario: 25 frasi d'azione di tutti i giorni (te mantendré informado, te aviso, me encargo yo, ahora vuelvo…), tag « azioni quotidiane », anche sotto « verbo ».", "⏱ fiche du paquet : le temps de révision en grand, à droite des trois chiffres.": "⏱ scheda del mazzo: il tempo di ripasso in grande, a destra dei tre numeri.", "🔄 📝 Vocabulaire perso : un mot ajouté sur un appareil arrive aussi sur les autres (avant, l'appareil qui synchronisait en dernier gardait seulement ses propres mots).": "🔄 📝 Vocabolario personale: una parola aggiunta su un dispositivo arriva anche sugli altri (prima, il dispositivo che sincronizzava per ultimo teneva solo le sue parole).", "🇫🇷 → 🇪🇸 le Vocabulaire dans l'autre sens : le sens en français, tu tapes l'espagnol (2 869 cartes, pas pour les mots transparents) ; chaque carte attend que le mot ait été vu, une nouvelle carte sur deux.": "🇮🇹 → 🇪🇸 il Vocabolario nell'altro senso: il significato in italiano, scrivi lo spagnolo (2 561 carte, non per le parole trasparenti); ogni carta aspetta che la parola sia stata vista, una nuova carta su due.", "Le Vocabulaire se révise aussi dans l'autre sens : le sens en français au recto (avec la nature du mot et la phrase traduite, pour savoir lequel), tu tapes l'espagnol. Une carte 🇫🇷 → 🇪🇸 n'arrive qu'une fois le mot vu dans le sens 🇪🇸 → 🇫🇷, et prend une place sur deux parmi les nouvelles cartes du jour. Les mots transparents (la universidad = l'université) n'en ont pas. Le tag « fr→es » les montre à part, « es→fr » montre celles du sens habituel.": "Il Vocabolario si ripassa anche nell'altro senso: il significato in italiano sul fronte (con la categoria della parola e la frase tradotta, per capire quale), scrivi lo spagnolo. Una carta 🇮🇹 → 🇪🇸 arriva solo dopo aver visto la parola nel senso 🇪🇸 → 🇮🇹, e prende un posto su due tra le nuove carte del giorno. Le parole trasparenti (la universidad = l'università) non ce l'hanno. Il tag « it→es » le mostra a parte, « es→it » quelle del senso abituale.", "La fiche du paquet montre en grand, à droite des trois chiffres, le temps de révision estimé, d'après ton temps habituel sur chaque carte (en mode « temps » : les minutes qui restent aujourd'hui). À la fin, 🎉 Session terminée montre le temps estimé au départ et le temps effectif (sans le temps passé hors de l'appli). Pour une formule (paquet 🌊 Helmholtz), une seule case : écris-la comme tu veux (lambda = c/f, w pour ω, ^2, sqrt…) ou avec la barre de symboles ; une formule trop longue se retourne et tu te notes. Une carte qui s'appuie sur d'autres attend qu'elles soient vues.": "La scheda del mazzo mostra in grande, a destra dei tre numeri, il tempo di ripasso stimato, in base al tuo tempo abituale su ogni carta (in modalità « tempo »: i minuti che restano oggi). Alla fine, 🎉 Sessione finita mostra il tempo stimato all'inizio e il tempo effettivo (senza il tempo passato fuori dall'app). Per una formula (mazzo 🌊 Helmholtz), una sola casella: scrivila come vuoi (lambda = c/f, w per ω, ^2, sqrt…) o con la barra dei simboli; una formula troppo lunga si gira e ti valuti. Una carta che si basa su altre aspetta che siano viste.", "(soir, fin) fiche du paquet : durée estimée de la séance en mode « nombre de cartes ».": "(sera, fine) scheda del mazzo: durata stimata della sessione in modalità « numero di carte ».", "(nuit) 📝 Relecture : ↑ modifier la carte, ↓ la retirer du paquet.": "(notte) 📝 Revisione: ↑ modifica la carta, ↓ toglila dal mazzo.",
                     "(nuit, suite) 🔍 liste : une ligne par carte, clic → 📝 Relecture, en-tête toujours visible, tags dans un menu au bout de la recherche.": "(notte, seguito) 🔍 elenco: una riga per carta, clic → 📝 Revisione, intestazione sempre visibile, tag in un menu alla fine della ricerca.",
                     ": parcourir les cartes (carrousel pour les images, liste pour les mots : une ligne par carte, un clic l'ouvre en 📝 Relecture, au même endroit en revenant ; 🏷 au bout de la recherche pour filtrer par tag, plusieurs à la fois (une carte doit les avoir tous) ; 📶 et ↕ sous la recherche : filtrer et trier par niveau de connaissance) ;": ": sfogliare le carte (carosello per le immagini, elenco per le parole: una riga per carta, un clic la apre in 📝 Revisione, allo stesso punto al ritorno; 🏷 alla fine della ricerca per filtrare per tag, anche più d'uno insieme (una carta deve averli tutti); 📶 e ↕ sotto la ricerca: filtrare e ordinare per livello di conoscenza);",
                     "(nuit, fin) Vocabulaire : tags de nature (nom, verbe, adjectif…) et de thème (animaux, nourriture, corps, métiers…), à choisir dans le menu 🏷 de 🔍.": "(notte, fine) Vocabolario: tag di categoria (nome, verbo, aggettivo…) e di tema (animali, cibo, corpo, mestieri…), da scegliere nel menu 🏷 di 🔍.",
@@ -8021,7 +8092,8 @@
             {"id": 55, "d": "2026-11-19", "k": "cartes", "fr": "Dans 🔍, le menu 🏷 prend <b>plusieurs tags à la fois</b> : une carte doit les avoir tous (par exemple <i>verbe</i> + <i>fr→es</i>). Le Vocabulaire a aussi le tag <b>« es→fr »</b> pour le sens habituel.", "it": "In 🔍, il menu 🏷 prende <b>più tag insieme</b>: una carta deve averli tutti (per esempio <i>verbo</i> + <i>it→es</i>). Il Vocabolario ha anche il tag <b>« es→it »</b> per il senso abituale."},
             {"id": 56, "d": "2026-11-19", "k": "reglages", "fr": "Les <b>réglages ⚙</b> suivent d'un appareil à l'autre : le dernier changé l'emporte. La version terminal (ankiterm) donne le même nombre de nouvelles cartes que l'app.", "it": "Le <b>impostazioni ⚙</b> seguono da un dispositivo all'altro: vince l'ultima modificata. La versione terminale (ankiterm) dà lo stesso numero di carte nuove dell'app."},
             {"id": 57, "d": "2026-11-19", "k": "revision", "fr": "Sur téléphone, <b>note la carte au doigt</b> : touche <b>à gauche</b> = À revoir, <b>à droite</b> = Correct ; <b>appui long</b> à gauche = Difficile, à droite = Facile. Dans ⚙, <b>« Boutons de note (téléphone) » : Cachés</b> laisse plus de place à la carte.", "it": "Sul telefono, <b>vota la carta col dito</b>: tocca <b>a sinistra</b> = Da rivedere, <b>a destra</b> = Corretto; <b>pressione lunga</b> a sinistra = Difficile, a destra = Facile. In ⚙, <b>« Pulsanti di voto (telefono) »: Nascosti</b> lascia più spazio alla carta."},
-            {"id": 58, "d": "2026-11-23", "k": "revision", "fr": "Une carte déjà vue commence par <b>une seule case</b> pour toute la réponse, sans découpage en mots ; ratée, les cases mot par mot reviennent. Les notes automatiques suivent Anki : <b>du premier coup dans la case unique = Facile</b>, avec les cases = Correct, trouvée avec effort = Difficile, réponse vue = À revoir.", "it": "Una carta già vista comincia con <b>una sola casella</b> per tutta la risposta, senza divisione in parole; sbagliata, tornano le caselle parola per parola. I voti automatici seguono Anki: <b>al primo colpo nella casella unica = Facile</b>, con le caselle = Corretto, trovata con fatica = Difficile, risposta vista = Da rivedere."}
+            {"id": 58, "d": "2026-11-23", "k": "revision", "fr": "Une carte déjà vue commence par <b>une seule case</b> pour toute la réponse, sans découpage en mots ; ratée, les cases mot par mot reviennent. Les notes automatiques suivent Anki : <b>du premier coup dans la case unique = Facile</b>, avec les cases = Correct, trouvée avec effort = Difficile, réponse vue = À revoir.", "it": "Una carta già vista comincia con <b>una sola casella</b> per tutta la risposta, senza divisione in parole; sbagliata, tornano le caselle parola per parola. I voti automatici seguono Anki: <b>al primo colpo nella casella unica = Facile</b>, con le caselle = Corretto, trovata con fatica = Difficile, risposta vista = Da rivedere."},
+            {"id": 59, "d": "2026-11-23", "k": "revision", "fr": "Après une note automatique, <b>le bouton de la note s'éclaire</b> et une bulle dit pourquoi (aide, 3 erreurs, trop lent, du premier coup…) ; le cadre de la carte prend sa couleur. Un autre bouton change la note.", "it": "Dopo un voto automatico, <b>il pulsante del voto si illumina</b> e una bolla dice perché (aiuto, 3 errori, troppo lento, al primo colpo…); la cornice della carta prende il suo colore. Un altro pulsante cambia il voto."}
         ];
         var NEWS_KINDS = { revision: ["Révision", "Ripasso"], cartes: ["Cartes", "Carte"], combos: ["Combos", "Combo"], affichage: ["Affichage", "Aspetto"],
             reglages: ["Réglages", "Impostazioni"], accueil: ["Accueil", "Home"], paquets: ["Paquets", "Mazzi"] };
