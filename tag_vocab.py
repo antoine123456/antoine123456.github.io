@@ -144,7 +144,7 @@ IT = {"nom": "nome", "verbe": "verbo", "adjectif": "aggettivo", "adverbe": "avve
       "loisirs": "svago", "école": "scuola", "travail": "lavoro e soldi", "crime": "crimine e giustizia",
       "guerre": "guerra", "sentiments": "sentimenti", "couleurs": "colori", "nombres": "numeri",
       "transparent": "trasparente", "objet": "oggetto", "cris d'animaux": "versi degli animali",
-      "actions courantes": "azioni quotidiane"}
+      "actions courantes": "azioni quotidiane", "états et émotions": "stati ed emozioni"}
 
 # the French word matches, the Spanish one means something else (livre = la libra, the money)
 NOT_THEME = {"objet": {"la libra", "la clave", "el canal", "la regla"}}
@@ -158,6 +158,14 @@ ACTIONS = {"te aviso", "te mantendré informado", "te llamo luego", "te escribo"
            "te cuento", "me encargo yo", "me pongo a ello", "lo reviso", "lo pienso", "lo intento", "ahora vuelvo",
            "ya voy", "me voy", "te espero", "paso a buscarte", "te echo una mano", "me apunto", "quedamos",
            "lo dejo para mañana", "me pongo en contacto contigo", "date prisa", "vamos a ver", "te debo una"}
+
+# how one is (#248): « estar » + adjective — enfermo, cansado, empapado… — « adjectif » too
+STATES = {"enfermo", "cansado", "empapado", "enfadado", "mojado", "aburrido", "preocupado", "contento", "harto",
+          "ocupado", "nervioso", "dormido", "despierto", "listo", "feliz", "sano", "borracho", "asustado",
+          "sorprendido", "enamorado", "celoso", "tranquilo", "emocionado", "avergonzado", "confuso", "perdido",
+          "herido", "muerto", "embarazada", "hambriento", "satisfecho", "orgulloso", "decepcionado", "deprimido",
+          "relajado", "enojado", "molesto", "loco", "sucio", "alegre", "furioso", "dispuesto", "equivocado",
+          "convencido", "interesado"}
 
 # « transparent » (#198): Spanish endings → French / Italian ones
 ENDINGS = {
@@ -241,9 +249,14 @@ def tags_for(c):
         tags.append("nombres")
     if c["es"].strip() in CRIES:
         tags += [t for t in ("animaux", "cris d'animaux") if t not in tags]
+    if c["es"].strip() in STATES:
+        tags += [t for t in ("adjectif", "états et émotions") if t not in tags]
     if c["es"].strip() in ACTIONS:
         tags += [t for t in ("verbe", "actions courantes") if t not in tags]
     return tags
+
+
+WAYS = {"es→fr", "fr→es", "es→it", "it→es"}
 
 
 def main():
@@ -257,7 +270,8 @@ def main():
             by_key[(c.get("key"), c["es"])] = list(new)
             if "faux ami" not in keep and transparent(c["es"], c["fr"]):
                 new.append("transparent")
-            c["tags"] = keep + new
+            way = [t for t in keep if t in WAYS]  # « es→fr » / « fr→es » stay last, as build_vocab puts them
+            c["tags"] = [t for t in keep if t not in WAYS] + new + way
             for t in new:
                 counts[t] = counts.get(t, 0) + 1
     with open(path, "w", encoding="utf-8") as f:
@@ -268,9 +282,10 @@ def main():
         for deck in it["decks"]:
             for c in deck["cards"]:
                 keep = [t for t in c.get("tags", []) if t not in IT.values()]
-                c["tags"] = keep + [IT[t] for t in by_key.get((c.get("key"), c["es"]), [])]
+                way = [t for t in keep if t in WAYS]
+                c["tags"] = [t for t in keep if t not in WAYS] + [IT[t] for t in by_key.get((c.get("key"), c["es"]), [])] + way
                 if not {"faux ami", "falso amico"} & set(keep) and transparent(c["es"], c["fr"], "it"):
-                    c["tags"].append("trasparente")  # compared with the Italian meaning
+                    c["tags"].insert(len(c["tags"]) - len(way), "trasparente")  # compared with the Italian meaning
                     counts["trasparente (it)"] = counts.get("trasparente (it)", 0) + 1
         with open(path_it, "w", encoding="utf-8") as f:
             json.dump(it, f, ensure_ascii=False, separators=(",", ":"))
