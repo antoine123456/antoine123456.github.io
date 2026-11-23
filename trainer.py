@@ -573,6 +573,8 @@ INFO = """
   +      après une erreur :
          mon sens était bon
          (+ autre sens : celui-là)
+         en 1er sur la carte suivante :
+         pour la carte ratée d'avant
   tab    tableau du verbe
          (Grammaire ; la carte
          passe « à revoir »)
@@ -639,7 +641,7 @@ def conj_table(card, cards):
     return "\n".join(out)
 
 
-def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None):
+def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None, on_prev=None):
     """Shows one card, returns 3 (Correct) or 1 (À revoir), or None to stop.
     Three tries; a card that can't be typed (formula, turned over) is
     turned over and you say if you knew it."""
@@ -697,6 +699,11 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None):
         if a.strip().lower() == "dump" and on_dump:
             on_dump()  # doesn't use a try
             continue
+        if a.strip().startswith("+") and on_prev and not last:
+            # nothing tried here yet: « + » is for the card missed just before (#253)
+            if on_prev(a.strip()[1:].strip()) is None:
+                return None
+            continue
         if a.strip().startswith("+") and on_add:
             ok = add(a)  # from the first miss on, without using up the tries
             if ok is None:
@@ -729,6 +736,7 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None):
             return 1 if helped else 3
         last = a.strip()
         k += 1  # not accepted: just asked again (no ✗)
+    card["_last"] = last  # « + » on the next card can still add it (#253)
     # in red, as the learning count shown after it: the card goes back there
     print(col(RED, "  " + shown + "".join(" / " + x for x in card.get("alt") or [])))
     if back and squash(back) != squash(" ".join(words)):
@@ -812,6 +820,43 @@ def main():
 
     done, t_start = 0, time.time()
     missed_at = {}  # card id → line count when its answer was shown (#242)
+    prev = None  # the card just missed: « + » on the next one adds a meaning to it (#253)
+
+    def add_to_prev(text):
+        """« + » (or « + sens ») typed first on a card: that meaning goes to the card
+        missed just before, which is then rated Correct instead of À revoir.
+        True = added, False = not, None = stop."""
+        nonlocal prev
+        if not prev:
+            print(col(DIM, "  pas de carte ratée juste avant"))
+            return False
+        pc, extra = prev["card"], text or prev["last"]
+        if not extra:
+            print(col(DIM, "  rien à ajouter : + suivi du sens"))
+            return False
+        sure = ask(col(DIM, "  ajouter « %s » à « %s » ? Entrée = oui · n = non " % (extra, front_of(pc))))
+        if sure is None:
+            return None
+        if sure.strip().lower() not in ("", "o", "oui", "y", "yes"):
+            return False
+        add_answer(sid, pc, extra, edits, args.dry)
+        pid = str(pc["id"])
+        s2, req2 = apply_rating(prev["before"] or default_srs(), 3)  # Correct after all
+        s2["lastReview"] = int(time.time() * 1000)
+        if srs.get(pid, {}).get("ms"):
+            s2["ms"] = srs[pid]["ms"]
+        srs[pid] = s2
+        try:
+            save_review(sid, pid, s2, nc, args.dry)
+        except Exception as e:
+            print(col(RED, "  ⚠ pas enregistré : %s" % e))
+        queue[:] = [c for c in queue if str(c["id"]) != pid]  # no more « à repasser » for it
+        if req2:
+            queue.insert(min(len(queue), req2), pc)
+        missed_at.pop(pid, None)
+        print(col(GREEN, "  ✓ « %s » ajouté à « %s » : comptée Correct" % (extra, front_of(pc))))
+        prev = None
+        return True
     while queue:
         # a missed card waits until its answer is out of sight: the next one goes first
         i = next((i for i, c in enumerate(queue) if out_of_sight(missed_at.get(str(c["id"]), -10**9))), None)
@@ -825,7 +870,8 @@ def main():
         q = review(card, before, on_dump=lambda: dump([card] + queue, srs),
                    on_stats=lambda: counts_line([card] + queue, srs),
                    on_tab=lambda: conj_table(card, [c for cs in by.values() for c in cs]),
-                   on_add=lambda text: add_answer(sid, card, text, edits, args.dry))
+                   on_add=lambda text: add_answer(sid, card, text, edits, args.dry),
+                   on_prev=add_to_prev if prev else None)
         if q is None:
             break
         was_new = before is None or before.get("state") == "new"
@@ -843,6 +889,7 @@ def main():
         done += 1
         if requeue:  # learning step: back a few cards later (as in the app)
             queue.insert(min(len(queue), requeue), card)
+        prev = {"card": card, "before": before, "last": card.get("_last", "")} if q == 1 else None
         if q == 1:
             missed_at[cid] = LINES
             if queue:  # missed: what's left
