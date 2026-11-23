@@ -419,6 +419,19 @@ def main():
 
     cards_it = translated(cards, "it") + pro_it
     cards = cards + pro_fr
+    # Words that get mixed up (#256, confusables.py): the difference in the blue
+    # note on the back, and the group's other words for 🔍.
+    import confusables
+    conf, n_conf = confusables.by_word(), 0
+    for lst, k in ((cards, 0), (cards_it, 1)):
+        for c in lst:
+            g = conf.get(c["es"].strip())
+            if not g:
+                continue
+            c["n"] = (c["n"] + " " if c.get("n") else "") + g[k]
+            c["cf"] = g[2]
+            n_conf += k == 0
+    print(f"{n_conf} mots avec une note « ne pas confondre » (confusables.py)")
     for c in cards:
         c.pop("sit", None)
         c.pop("nit", None)
