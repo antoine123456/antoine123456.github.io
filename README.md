@@ -256,6 +256,9 @@ python3 trainer.py --user       # pick the name again
   saved as an edit in Firestore (`card.alt`), so the terminal accepts it
   everywhere, and the app accepts it too: in the one box, or typed across the
   word boxes.
+- **Too late for `+`?** Typed first on the next card (before any try there),
+  `+` (or `+ another meaning`) adds the meaning to the card missed just
+  before, which is then rated Correct instead of À revoir.
 - **After a miss:** the answer shows in red (like the learning count after
   it: the card goes back there), then the cards left and the time left show, as under the app's cards:
   new · learning · review, in blue · red · green. The screen isn't wiped:
