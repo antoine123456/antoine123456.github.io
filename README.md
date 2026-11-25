@@ -206,6 +206,8 @@ either side of the pair) are silently skipped instead of duplicated.
 
 ## Terminal trainer (`trainer.py`)
 
+A presentation, with a sample session: [docs/ankiterm.md](docs/ankiterm.md).
+
 A minimalist version of the app in the terminal (#215): the front of the
 card, you type the back. It has no sound and no pictures (a card with only a
 picture isn't asked).
