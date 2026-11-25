@@ -480,6 +480,8 @@ def new_left(asked, introduced):
     if asked is not None:
         return max(0, asked - introduced)
     st = get_doc("users/%s" % USER).get("settings") or {}
+    global SLOW_S
+    SLOW_S = int(st.get("slowSeconds", 30) or 0)  # ⚙ « trop lent », as in the app (#261)
     now = st.get("newNow") or {}
     if st.get("measure") == "time" and now.get("day") == TODAY:
         return max(0, int(now.get("n", 0)))
@@ -568,23 +570,34 @@ def dump(cards, srs):
 INFO = """
   Réponds, puis Entrée.
   3 essais, puis la réponse.
+  Notes comme dans l'app :
+  du 1er coup (carte déjà vue)
+  = Facile, juste = Correct,
+  2 erreurs ou lent = Difficile,
+  tableau ou réponse = À revoir.
 
-  ?      la réponse
-  +      après une erreur :
-         mon sens était bon
-         (+ autre sens : celui-là)
-         en 1er sur la carte suivante :
-         pour la carte ratée d'avant
-  tab    tableau du verbe
-         (Grammaire ; la carte
-         passe « à revoir »)
-  stats  cartes restantes
-  temps  temps restant (aussi
-         avec les cartes restantes)
-  dump   toute la liste
-  save   enregistrer
-  info   cette aide
-  q      arrêter
+  Mots-clés : « :mot » ou sa
+  1re lettre (:t, :h…), pour
+  ne pas les prendre pour une
+  réponse ; les mots seuls
+  marchent aussi.
+  ?          la réponse
+  +          après une erreur :
+             mon sens était bon
+             (+ autre sens : celui-là)
+             en 1er sur la carte
+             suivante : pour la
+             carte ratée d'avant
+  :t  tab    tableau du verbe
+             (Grammaire ; la carte
+             passe « à revoir »)
+  :s  stats  cartes et temps
+  :ti temps  restants
+  :d  dump   toute la liste
+  :h  :i     cette aide
+  :q  q      arrêter
+  Entrée deux fois : la carte
+  à nouveau.
 
   Ordre partagé avec l'app.
 """
@@ -641,8 +654,29 @@ def conj_table(card, cards):
     return "\n".join(out)
 
 
+# Keywords (#261): « :mot » or its first letters can't be taken for an answer —
+# :h :i :help :info = aide, :t :tab = tableau, :ti :temps / :s :stats = what's left,
+# :d :dump, :q = stop. The plain words still work (and i, h, t, ? alone).
+KEYWORDS = {"help": ("h", "help", "i", "info", "aide"), "tab": ("t", "tab"), "stats": ("s", "stats", "ti", "temps"),
+            "dump": ("d", "dump"), "save": ("save",), "quit": ("q", "quit"), "answer": ("?",)}
+PLAIN = {"help": ("h", "help", "i", "info", "aide"), "tab": ("t", "tab"), "stats": ("stats", "temps"),
+         "dump": ("dump",), "save": ("save",), "quit": ("q",), "answer": ("?",)}
+SLOW_S = 30  # ⚙ « trop lent » of the app (slowSeconds), read in main
+
+
+def keyword(a):
+    a = a.strip().lower()
+    table, a = (KEYWORDS, a[1:]) if a.startswith(":") else (PLAIN, a)
+    return next((k for k, ws in table.items() if a in ws), None)
+
+
+def day_start_ms():
+    t = time.localtime()
+    return int(time.mktime((t.tm_year, t.tm_mon, t.tm_mday, 0, 0, 0, 0, 0, -1)) * 1000)
+
+
 def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None, on_prev=None):
-    """Shows one card, returns 3 (Correct) or 1 (À revoir), or None to stop.
+    """Shows one card, returns its rating 1–4 (as the app, #261), or None to stop.
     Three tries; a card that can't be typed (formula, turned over) is
     turned over and you say if you knew it."""
     raw = card.get("words") or []
@@ -674,7 +708,13 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None, on_pr
         if r is None or r.strip() == "q":
             return None
         return 1 if r.strip().lower() in ("n", "non", "1") else 3
-    k, last, helped = 0, "", False
+    # « A mí me ___ el chocolate » (#261): « me gusta » is right too, as « gusta »
+    gap = plain(card.get("question") or "").split("\n")[0]
+    if "___" in gap:
+        pre, post = gap.split("___", 1)
+        pre_w, post_w = (pre.split() or [""])[-1], (post.split() or [""])[0]
+        right |= {squash(pre_w + " " + g) for g in list(right)} | {squash(g + " " + post_w) for g in list(right)}
+    k, last, helped, empties, t0 = 0, "", False, 0, time.time()
 
     def add(r):
         """« + » (#227), « + autre sens »: confirmed (#232), then the card counts as Correct.
@@ -690,13 +730,22 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None, on_pr
             print(col(GREEN, "  ✓ « %s » ajouté" % extra))
             return True
         return False
+
+    def show_tab():
+        t = on_tab() if on_tab else None
+        print(t if t else col(DIM, "  pas de tableau pour cette carte"))
+        return bool(t)
+
     while k < 3:
         a = ask("  › ")
-        if a is None or a.strip() == "q":
+        if a is None:
             return None
-        if a.strip() == "?":
+        w = keyword(a)
+        if w == "quit":
+            return None
+        if w == "answer":
             break  # « ? »: the answer now, the card À revoir
-        if a.strip().lower() == "dump" and on_dump:
+        if w == "dump" and on_dump:
             on_dump()  # doesn't use a try
             continue
         if a.strip().startswith("+") and on_prev and not last:
@@ -711,40 +760,75 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None, on_pr
             if ok:
                 return 3
             continue
-        if a.strip().lower() in ("stats", "temps") and on_stats:
-            print(on_stats())  # cards left: new · learning · review
+        if w == "stats" and on_stats:
+            print(on_stats())  # cards left: new · learning · review, and the time left
             continue
-        if a.strip().lower() == "save":
+        if w == "save":
             # each card is already saved when answered: nothing left to send
             print(col(GREEN, "  ✓ enregistré"))
             continue
-        if a.strip().lower() == "tab":
-            t = on_tab() if on_tab else None
-            if t:
-                print(t)
-                helped = True  # the table shows the answer: « À revoir », as F1 in the app
-            else:
-                print(col(DIM, "  pas de tableau pour cette carte"))
+        if w == "tab":
+            helped = show_tab() or helped  # the table shows the answer: « À revoir », as F1 in the app
             continue
-        if a.strip().lower() == "info":
+        if w == "help":
             print(col(DIM, INFO))
             continue
         if not squash(a):
+            # Entrée twice with nothing typed: the card again, if it has gone up (#261)
+            empties += 1
+            if empties >= 2:
+                print(col(BOLD, ind(front_of(card))))
+                empties = 0
             continue  # Entrée alone doesn't use a try
+        empties = 0
         if squash(a) in right:
-            print(col(GREEN, "  ✓ " + shown) + (col(DIM, "  (avec le tableau : à revoir)") if helped else ""))
-            return 1 if helped else 3
+            # the same ratings as the app (#249, #261): the answer seen = À revoir; found with
+            # effort (2 misses, far slower than usual) = Difficile; at once, on a card seen
+            # before today = Facile; else Correct
+            spent, usual = time.time() - t0, ((s or {}).get("ms") or 0) / 1000
+            slow = spent > max(SLOW_S, 3 * usual) if SLOW_S else False
+            seen = (s or {}).get("state", "new") != "new" and (s or {}).get("lastReview", 0) < day_start_ms()
+            if helped:
+                q, why = 1, "avec le tableau"
+            elif k >= 2:
+                q, why = 2, "%d erreurs" % k
+            elif slow:
+                q, why = 2, "trop lent"
+            elif k == 0 and seen:
+                q, why = 4, "du premier coup"
+            else:
+                q, why = 3, "1 erreur" if k else "sans aide"
+            colour, label = {1: (RED, "À revoir"), 2: (YELLOW, "Difficile"), 3: (GREEN, "Correct"), 4: (BLUE, "Facile")}[q]
+            print(col(colour, "  ✓ " + shown) + col(DIM, "  " + label + " : " + why))
+            return q
         last = a.strip()
         k += 1  # not accepted: just asked again (no ✗)
     card["_last"] = last  # « + » on the next card can still add it (#253)
     # in red, as the learning count shown after it: the card goes back there
-    print(col(RED, "  " + shown + "".join(" / " + x for x in card.get("alt") or [])))
+    print(col(RED, "  → " + shown + "".join(" / " + x for x in card.get("alt") or [])) + col(DIM, "  À revoir"))
     if back and squash(back) != squash(" ".join(words)):
         print(col(DIM, ind(back)))
-    # your meaning was right but not in the list (#227): « + » adds it, the card counts as Correct
-    r = ask(col(DIM, "  Entrée" + (" · + = ajouter « %s » aux réponses " % last if last and on_add else " ")))
-    if r is None:
-        return None
+    # your meaning was right but not in the list (#227): « + » adds it, the card counts as Correct;
+    # « tab » still shows the table here (#261)
+    offer = ["Entrée = suivante"]
+    if last and on_add:
+        offer.append("+ = ajouter « %s »" % last)
+    if on_tab and conj_key(card):
+        offer.append("tab = tableau")
+    while True:
+        r = ask(col(DIM, "  " + " · ".join(offer) + " "))
+        if r is None:
+            return None
+        w = keyword(r)
+        if w == "tab":
+            show_tab()
+            continue
+        if w == "help":
+            print(col(DIM, INFO))
+            continue
+        if w == "quit":
+            return None
+        break
     if r.strip().startswith("+") and on_add:
         ok = add(r)
         if ok is None:
@@ -753,7 +837,6 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None, on_pr
             return 3
     # no wipe (#242): the card waits until its answer has scrolled out of sight (main)
     return 1
-
 
 def main():
     ap = argparse.ArgumentParser(description="Réviser dans le terminal (même progression que l'app).")
@@ -857,11 +940,26 @@ def main():
         print(col(GREEN, "  ✓ « %s » ajouté à « %s » : comptée Correct" % (extra, front_of(pc))))
         prev = None
         return True
+    table_at = {}  # (verb, tense) → line count when its table was shown (#261)
+    active = 0.0  # seconds really spent: a card counts 60 s at most (#261)
+
+    def shown_at(c):
+        """When this card's answer was last on screen: missed, or in a table."""
+        k = conj_key(c)
+        return max(missed_at.get(str(c["id"]), -10**9), table_at.get(k, -10**9) if k else -10**9)
+
+    def tab_for(c):
+        t = conj_table(c, [x for cs in by.values() for x in cs])
+        if t:
+            table_at[conj_key(c)] = LINES + rows(t + "\n")  # its forms wait until it's out of sight
+        return t
+
     while queue:
-        # a missed card waits until its answer is out of sight: the next one goes first
-        i = next((i for i, c in enumerate(queue) if out_of_sight(missed_at.get(str(c["id"]), -10**9))), None)
+        # a missed card — or one whose form is in a table still on screen — waits until
+        # its answer is out of sight: the next one goes first
+        i = next((i for i, c in enumerate(queue) if out_of_sight(shown_at(c))), None)
         if i is None:  # nothing else to show: push the answer up and out
-            print("\n" * max(0, shutil.get_terminal_size((80, 24)).lines - (LINES - missed_at[str(queue[0]["id"])])), end="")
+            print("\n" * max(0, shutil.get_terminal_size((80, 24)).lines - (LINES - shown_at(queue[0]))), end="")
             i = 0
         card = queue.pop(i)
         cid = str(card["id"])
@@ -869,11 +967,12 @@ def main():
         t0 = time.time()
         q = review(card, before, on_dump=lambda: dump([card] + queue, srs),
                    on_stats=lambda: counts_line([card] + queue, srs),
-                   on_tab=lambda: conj_table(card, [c for cs in by.values() for c in cs]),
+                   on_tab=lambda: tab_for(card),
                    on_add=lambda text: add_answer(sid, card, text, edits, args.dry),
                    on_prev=add_to_prev if prev else None)
         if q is None:
             break
+        active += min(60, time.time() - t0)
         was_new = before is None or before.get("state") == "new"
         s, requeue = apply_rating(before or default_srs(), q)
         s["lastReview"] = int(time.time() * 1000)  # the most recent review wins in the app's merge
@@ -894,7 +993,7 @@ def main():
             missed_at[cid] = LINES
             if queue:  # missed: what's left
                 print(counts_line(queue, srs))
-    mins = (time.time() - t_start) / 60
+    mins = active / 60  # not the wall clock: a session left open doesn't count (#261)
     print()
     print(col(DIM, "%d carte(s) en %.0f min%s" % (done, mins, "" if args.dry else " — enregistré dans Firestore")))
 

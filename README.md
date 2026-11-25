@@ -233,9 +233,20 @@ python3 trainer.py --user       # pick the name again
 
 - **During a card:** type the answer and press Entrée. Accents and punctuation
   don't count.
-- **Checking:** a right answer is rated Correct and the next card comes. A
-  wrong one can be retyped, up to three tries; after that the answer shows and
-  the card is rated À revoir. `?` shows the answer at once (À revoir too).
+- **Checking:** a wrong answer can be retyped, up to three tries; after that
+  the answer shows (in red) and the card is rated À revoir. `?` shows the answer
+  at once (À revoir too). A right answer is rated as in the app: at once on a
+  card seen before today = Facile (✓ in blue), else Correct (green); after 2
+  misses, or far slower than usual (the app's ⚙ « trop lent ») = Difficile
+  (yellow); with the table = À revoir. The rating and why follow the ✓.
+- **Keywords:** `:word` or its first letter(s) can't be taken for an answer —
+  `:h` / `:i` help, `:t` table, `:s` / `:ti` what's left, `:d` dump, `:q` stop.
+  The plain words (`info`, `help`, `tab`, `stats`, `temps`, `dump`, `q`) and
+  `i`, `h`, `t` alone still work.
+- **Entrée twice** with nothing typed shows the card again.
+- **Gap sentences:** « A mí me ___ el chocolate » takes « gusta » or « me gusta ».
+- **Time:** the end count adds up each card's time, 60 s at most per card, so a
+  session left open doesn't count.
 - **Self-rated cards:** for the 🌊 formulas and turned-over cards, Entrée turns
   the card over, then Entrée = knew it and `n` = didn't.
 - **`dump`:** typed as an answer, lists every card left, with its answer.
@@ -248,7 +259,7 @@ python3 trainer.py --user       # pick the name again
   app. The table shows the answer, so the card ends « À revoir ».
 - **`save`:** says « enregistré ». Each card is already saved as soon as it's
   answered, so there's nothing left to send.
-- **No try used:** `dump`, `stats`, `temps`, `tab`, `info` and `+` don't use up one of the three
+- **No try used:** the keywords and `+` don't use up one of the three
   tries.
 - **Adding a meaning:** after a miss, `+` adds your last answer to the card's
   accepted answers, or `+ another meaning` adds that one instead. Use it when
@@ -259,10 +270,10 @@ python3 trainer.py --user       # pick the name again
 - **Too late for `+`?** Typed first on the next card (before any try there),
   `+` (or `+ another meaning`) adds the meaning to the card missed just
   before, which is then rated Correct instead of À revoir.
-- **After a miss:** the answer shows in red (like the learning count after
+- **After a miss:** `tab` still shows the table at the « Entrée = suivante » prompt. The answer shows in red (like the learning count after
   it: the card goes back there), then the cards left and the time left show, as under the app's cards:
   new · learning · review, in blue · red · green. The screen isn't wiped:
-  the missed card comes back only once its answer has scrolled out of the
+  the missed card — and, after `tab`, the other forms of that table — comes back only once its answer has scrolled out of the
   window (other cards go first; if none is left, blank lines push it up), so
   it can't be copied from the screen.
 - **Stopping:** `q` stops.
