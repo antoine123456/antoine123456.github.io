@@ -79,10 +79,10 @@ PAREN = {
     "nous pouvons toujours — l'adverbe avant le verbe": "possiamo sempre — l'avverbio prima del verbo",
     "quelque chose de grand — l'adjectif après, sans « de »": "qualcosa di grande — l'aggettivo dopo, senza « de »",
     "une très belle ville — l'adjectif après le nom": "una città molto bella — l'aggettivo dopo il nome",
-    "regarder (la télé) — yo : ver": "guardare (la tv) — yo: ver",
-    "regarde ! — tú : mirar": "guarda! — tú: mirar",
-    "voir — yo": "vedere — yo",
-    "regarder (avec attention) — yo": "guardare (con attenzione) — yo",
+    "ver / mirar — yo : regarder la télé": "ver / mirar — yo: guardare la tv",
+    "ver / mirar — tú : regarde !": "ver / mirar — tú: guarda!",
+    "ver / mirar — yo : voir": "ver / mirar — yo: vedere",
+    "ver / mirar — yo : regarder (avec attention)": "ver / mirar — yo: guardare (con attenzione)",
     "avoir — auxiliaire": "avere — ausiliare",
 }
 # Cards added to grammaire.json after the first build (deber, #155): their own
