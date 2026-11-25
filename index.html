@@ -3850,22 +3850,30 @@
                 if (cloud && cloud.asleep && (cloud.asleep.at || 0) > (asleepState().at || 0)) {
                     try { localStorage.setItem(LS_ASLEEP, JSON.stringify({ ids: cloud.asleep.ids || [], at: cloud.asleep.at })); } catch (e) { }
                 }
-                // One deck reset from afar (#177): resetSources = {sourceId: time}; a time
-                // newer than the last one seen here drops this deck's local progress first,
-                // so the old reviews aren't merged back (the cloud copy was emptied too).
-                var resetWrites = [];
+                // One deck reset from afar (#177): resetSources = {sourceId: time}. A time
+                // newer than the last one seen here drops this deck's reviews made BEFORE
+                // it — here only. Before (#260) it dropped everything, here and in the
+                // cloud: a device that had never seen the reset (a new browser, VS Code's)
+                // wiped all the progress made since, on every device.
                 if (cloud && cloud.resetSources && !READONLY) Object.keys(cloud.resetSources).forEach(function (sid) {
-                    var key = NS + "reset_src_" + sid, seen = 0;
+                    var key = NS + "reset_src_" + sid, seen = 0, at = cloud.resetSources[sid];
                     try { seen = +localStorage.getItem(key) || 0; } catch (e) { }
-                    if (cloud.resetSources[sid] <= seen) return;
-                    [LS_SRS, LS_NEWCOUNT].forEach(function (k) { try { localStorage.removeItem(k + sid); } catch (e) { } });
-                    try { localStorage.setItem(key, String(cloud.resetSources[sid])); } catch (e) { }
-                    // and the cloud copy again, in case an old tab sent its reviews back meanwhile
-                    resetWrites.push(userRef.collection("sources").doc(sid).set({ srs: {}, newCount: { day: TODAY, count: 0 } }, { mergeFields: ["srs", "newCount"] }).catch(function () { }));
-                    dlog("paquet remis à zéro", { utilisateur: USER, source: sid });
+                    if (at <= seen) return;
+                    var srs = loadSRS(sid), kept = {}, dropped = 0;
+                    Object.keys(srs).forEach(function (cid) { if ((srs[cid].lastReview || 0) >= at) kept[cid] = srs[cid]; else dropped++; });
+                    if (dropped) saveSRSRaw(sid, kept);
+                    try { localStorage.setItem(key, String(at)); } catch (e) { }
+                    dlog("paquet remis à zéro", { utilisateur: USER, source: sid, retirees: dropped, gardees: Object.keys(kept).length });
                 });
+                // the cloud's reviews made before such a reset don't come back either (#260)
+                function sinceReset(sid, srs) {
+                    var at = cloud && cloud.resetSources && cloud.resetSources[sid];
+                    if (!at || !srs) return srs || {};
+                    var out = {};
+                    Object.keys(srs).forEach(function (cid) { if ((srs[cid].lastReview || 0) >= at) out[cid] = srs[cid]; });
+                    return out;
+                }
                 var localSources = loadSources();
-                if (resetWrites.length) return Promise.all(resetWrites).then(function () { return afterResets(); });
                 return afterResets();
                 function afterResets() {
 
@@ -3887,7 +3895,7 @@
                             var cards = r[1] || (isBundledSource(sid) ? null : {});
                             localSources.push({ id: sid, name: cs.name, decks: cs.decks, isDefault: !!cs.isDefault });
                             if (cards) saveCardsRaw(sid, cards);
-                            saveSRSRaw(sid, meta.srs || {});
+                            saveSRSRaw(sid, sinceReset(sid, meta.srs));
                             saveNewCountRaw(sid, meta.newCount || { day: TODAY, count: 0 });
                             saveFlaggedRaw(sid, meta.flagged || {});
                             saveEditsRaw(sid, meta.edits || {});
@@ -3915,7 +3923,7 @@
                         var meta = r[0].exists ? r[0].data() : { srs: {}, newCount: {}, flagged: {} };
                         if (own && r[1]) mergeOwnCards(local, cs, r[1]);
                         if (local) {
-                            saveSRSRaw(local.id, mergeSRS(loadSRS(local.id), meta.srs || {}));
+                            saveSRSRaw(local.id, mergeSRS(loadSRS(local.id), sinceReset(local.id, meta.srs)));
                             saveFlaggedRaw(local.id, mergeFlagged(loadFlagged(local.id), meta.flagged || {}));
                             saveEditsRaw(local.id, mergeEdits(loadEdits(local.id), meta.edits || {}));
                             // Higher of the two daily counters for today, so
@@ -3928,7 +3936,7 @@
                             var sid = cs.isDefault ? "default" : cs.id;
                             localSources.push({ id: sid, name: cs.name, decks: cs.decks, isDefault: !!cs.isDefault });
                             if (r[1]) saveCardsRaw(sid, r[1]);
-                            saveSRSRaw(sid, meta.srs || {});
+                            saveSRSRaw(sid, sinceReset(sid, meta.srs));
                             saveNewCountRaw(sid, meta.newCount || { day: TODAY, count: 0 });
                             saveFlaggedRaw(sid, meta.flagged || {});
                             saveEditsRaw(sid, meta.edits || {});
