@@ -975,6 +975,17 @@ def main():
         return
 
     done, t_start = 0, time.time()
+    seen_ids, unsaved = set(), {}  # cards answered; reviews Firestore didn't take yet (#264)
+
+    def retry_unsaved(last=False):
+        for k in list(unsaved):
+            try:
+                save_review(sid, k, srs.get(k, unsaved[k]), nc, args.dry)
+                unsaved.pop(k)
+                print(col(DIM, "  ✓ enregistré après coup"))
+            except Exception:
+                if not last:
+                    return  # still offline: later
     missed_at = {}  # card id → line count when its answer was shown (#242)
     prev = None  # the card just missed: « + » on the next one adds a meaning to it (#253)
 
@@ -1051,7 +1062,8 @@ def main():
         q = review(card, before, on_dump=lambda: dump([card] + queue, srs),
                    on_stats=lambda: counts_line([card] + queue, srs),
                    on_tab=lambda: tab_for(card),
-                   on_add=lambda text: add_answer(sid, card, text, edits, args.dry),
+                   # « + » adds a meaning: vocabulary only — a conjugation or a gap has one right answer (#264)
+                   on_add=(lambda text: add_answer(sid, card, text, edits, args.dry)) if card.get("es") else None,
                    on_prev=add_to_prev if prev else None,
                    on_log=lambda: log_today(sid))
         if q is None:
@@ -1067,12 +1079,16 @@ def main():
             nc["count"] += 1
         try:
             save_review(sid, cid, s, nc, args.dry)
-        except Exception as e:  # keep going; say it
-            print(col(RED, "  ⚠ pas enregistré : %s" % e))
+            unsaved.pop(cid, None)
+        except Exception as e:  # keep going; it is tried again after the next cards (#264)
+            unsaved[cid] = s
+            print(col(RED, "  ⚠ pas encore enregistré (%s) : nouvel essai plus tard" % e))
+        retry_unsaved()
         done += 1
+        seen_ids.add(cid)
         if requeue:  # learning step: back a few cards later (as in the app)
             queue.insert(min(len(queue), requeue), card)
-        prev = {"card": card, "before": before, "last": card.get("_last", "")} if q == 1 else None
+        prev = {"card": card, "before": before, "last": card.get("_last", "")} if q == 1 and card.get("es") else None
         write_log(sid, card, q, s, requeue, SPENT, args.dry)
         if q == 1:
             missed_at[cid] = LINES
@@ -1081,7 +1097,17 @@ def main():
                 print(counts_line(queue, srs))
     mins = active / 60  # not the wall clock: a session left open doesn't count (#261)
     print()
-    print(col(DIM, "%d carte(s) en %.0f min%s" % (done, mins, "" if args.dry else " — enregistré dans Firestore")))
+    for _ in range(3):  # last tries before leaving (#264)
+        if not unsaved:
+            break
+        retry_unsaved(last=True)
+        if unsaved:
+            time.sleep(2)
+    if unsaved:
+        print(col(RED, "⚠ %d révision(s) pas enregistrée(s) (réseau) : elles seront à refaire" % len(unsaved)))
+    # answers, not cards: a card missed comes back (#264)
+    print(col(DIM, "%d réponse(s), %d carte(s), en %.0f min%s" % (done, len(seen_ids), mins,
+                                                               "" if args.dry or unsaved else " — enregistré dans Firestore")))
 
 
 if __name__ == "__main__":

@@ -253,6 +253,7 @@ python3 trainer.py --user       # pick the name again
 - **Same answer, not twice in a row:** a card whose answer was just on screen
   (missed on another card — « han » for the gap sentence and for haber — or in
   a table) waits until it has scrolled out of sight.
+- **Offline:** a review Firestore didn't take (« timed out ») is sent again after the next cards, and before leaving; the end line says if some couldn't be.
 - **Log:** every card answered goes into `~/.config/espanol-trainer/log.tsv`
   (when, deck, card, rating, when it comes back, seconds); `:l` shows today's
   cards, those seen several times first. A `--dry` session writes nothing there.
@@ -273,7 +274,7 @@ python3 trainer.py --user       # pick the name again
   answered, so there's nothing left to send.
 - **No try used:** the keywords and `+` don't use up one of the three
   tries.
-- **Adding a meaning:** after a miss, `+` adds your last answer to the card's
+- **Adding a meaning** (Vocabulaire only — a conjugation or a gap sentence has one right answer): after a miss, `+` adds your last answer to the card's
   accepted answers, or `+ another meaning` adds that one instead. Use it when
   your meaning was right but not in the list: the card counts as Correct. It's
   saved as an edit in Firestore (`card.alt`), so the terminal accepts it
