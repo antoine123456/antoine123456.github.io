@@ -246,9 +246,19 @@ python3 trainer.py --user       # pick the name again
   The plain words (`info`, `help`, `tab`, `stats`, `temps`, `dump`, `q`) and
   `i`, `h`, `t` alone still work.
 - **Entrée twice** with nothing typed shows the card again.
+- **When it comes back:** after the ✓ (or the answer, after a miss), as Anki
+  shows it above its buttons: « Correct (4j) », « À revoir (<1m) ».
+- **Pause:** `:p` stops the clock until Entrée. Each wait for an answer counts
+  60 s at most anyway, so a break while a card is up doesn't count either.
+- **Same answer, not twice in a row:** a card whose answer was just on screen
+  (missed on another card — « han » for the gap sentence and for haber — or in
+  a table) waits until it has scrolled out of sight.
+- **Log:** every card answered goes into `~/.config/espanol-trainer/log.tsv`
+  (when, deck, card, rating, when it comes back, seconds); `:l` shows today's
+  cards, those seen several times first. A `--dry` session writes nothing there.
 - **Gap sentences:** « A mí me ___ el chocolate » takes « gusta » or « me gusta ».
-- **Time:** the end count adds up each card's time, 60 s at most per card, so a
-  session left open doesn't count.
+- **Time:** the end count adds up the time spent on each card (60 s at most per
+  answer, nothing during `:p`), so a session left open doesn't count.
 - **Self-rated cards:** for the 🌊 formulas and turned-over cards, Entrée turns
   the card over, then Entrée = knew it and `n` = didn't.
 - **`dump`:** typed as an answer, lists every card left, with its answer.

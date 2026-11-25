@@ -255,13 +255,21 @@ def print(*a, sep=" ", end="\n", **k):  # the built-in one, counting the rows
         LINES += rows(sep.join(map(str, a)) + end)
 
 
-def ask(prompt):
-    global LINES
+# Time really spent on the card (#263): each wait for an answer counts 60 s at most —
+# a break while the card is up doesn't count — and nothing during « :p » (pause).
+SPENT, IDLE_CAP = 0.0, 60
+
+
+def ask(prompt, counted=True):
+    global LINES, SPENT
+    t = time.time()
     try:
         a = input(prompt)
     except EOFError:
         print()
         return None
+    if counted:
+        SPENT += min(IDLE_CAP, time.time() - t)
     LINES += rows(prompt + a + "\n")  # the echoed answer and Entrée
     return a
 
@@ -269,6 +277,49 @@ def ask(prompt):
 def out_of_sight(at):
     """Has what was written at line `at` left the window?"""
     return LINES - at >= shutil.get_terminal_size((80, 24)).lines
+
+
+# A log of every card answered here (#263): ~/.config/espanol-trainer/log.tsv —
+# when, deck, card, front, rating, when it comes back, seconds. « :log » shows
+# today's cards, those seen several times first.
+LOG = os.path.join(os.path.dirname(CONFIG), "log.tsv")
+LOG_HEAD = "quand\tpaquet\tid\trecto\tnote\trevient\tsecondes\n"
+
+
+def write_log(sid, card, q, s, requeue, spent, dry):
+    if dry:
+        return  # a try (--dry) writes nothing, not even here
+    try:
+        new = not os.path.exists(LOG)
+        os.makedirs(os.path.dirname(LOG), exist_ok=True)
+        with open(LOG, "a", encoding="utf-8") as f:
+            if new:
+                f.write(LOG_HEAD)
+            back = "<%dm" % requeue if requeue else "%dj" % s.get("interval", 1)
+            f.write("\t".join([time.strftime("%Y-%m-%d %H:%M:%S"), sid, str(card["id"]),
+                                front_of(card).split("\n")[0][:60], {1: "À revoir", 2: "Difficile", 3: "Correct", 4: "Facile"}[q],
+                                back, "%.0f" % spent]) + "\n")
+    except OSError:
+        pass
+
+
+def log_today(sid):
+    """Today's cards of this deck in the log, those seen several times first."""
+    today, seen = time.strftime("%Y-%m-%d"), {}
+    try:
+        for line in open(LOG, encoding="utf-8").read().splitlines()[1:]:
+            f = line.split("\t")
+            if len(f) >= 6 and f[0].startswith(today) and f[1].split(" ")[0] == sid:
+                seen.setdefault(f[2], [f[3], []])[1].append(f[4])
+    except OSError:
+        return col(DIM, "  pas encore de journal")
+    if not seen:
+        return col(DIM, "  rien aujourd'hui dans ce paquet")
+    rows_ = sorted(seen.values(), key=lambda v: -len(v[1]))
+    out = [col(DIM, "  aujourd'hui : %d cartes, %d réponses — %s" % (len(seen), sum(len(v[1]) for v in rows_), LOG))]
+    for front, notes in rows_[:15]:
+        out.append("  %2d×  %-34s %s" % (len(notes), front[:34], col(DIM, " · ".join(notes))))
+    return "\n".join(out)
 
 
 def load_cfg():
@@ -594,6 +645,11 @@ INFO = """
   :s  stats  cartes et temps
   :ti temps  restants
   :d  dump   toute la liste
+  :p  pause  arrête le chrono
+             (Entrée pour reprendre)
+  :l  log    les cartes du jour
+             (vues plusieurs fois
+             en premier)
   :h  :i     cette aide
   :q  q      arrêter
   Entrée deux fois : la carte
@@ -658,9 +714,10 @@ def conj_table(card, cards):
 # :h :i :help :info = aide, :t :tab = tableau, :ti :temps / :s :stats = what's left,
 # :d :dump, :q = stop. The plain words still work (and i, h, t, ? alone).
 KEYWORDS = {"help": ("h", "help", "i", "info", "aide"), "tab": ("t", "tab"), "stats": ("s", "stats", "ti", "temps"),
-            "dump": ("d", "dump"), "save": ("save",), "quit": ("q", "quit"), "answer": ("?",)}
+            "dump": ("d", "dump"), "save": ("save",), "quit": ("q", "quit"), "answer": ("?",),
+            "pause": ("p", "pause", "b"), "log": ("l", "log")}
 PLAIN = {"help": ("h", "help", "i", "info", "aide"), "tab": ("t", "tab"), "stats": ("stats", "temps"),
-         "dump": ("dump",), "save": ("save",), "quit": ("q",), "answer": ("?",)}
+         "dump": ("dump",), "save": ("save",), "quit": ("q",), "answer": ("?",), "pause": ("pause",), "log": ("log",)}
 SLOW_S = 30  # ⚙ « trop lent » of the app (slowSeconds), read in main
 
 
@@ -670,12 +727,19 @@ def keyword(a):
     return next((k for k, ws in table.items() if a in ws), None)
 
 
+def back_in(s, q):
+    """When the card comes back after this rating, as Anki shows it above its
+    buttons (#263): « <1m », « <10m », « 4j »…"""
+    s2, rq = apply_rating(s or default_srs(), q)
+    return "<%dm" % rq if rq else "%dj" % s2.get("interval", 1)
+
+
 def day_start_ms():
     t = time.localtime()
     return int(time.mktime((t.tm_year, t.tm_mon, t.tm_mday, 0, 0, 0, 0, 0, -1)) * 1000)
 
 
-def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None, on_prev=None):
+def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None, on_prev=None, on_log=None):
     """Shows one card, returns its rating 1–4 (as the app, #261), or None to stop.
     Three tries; a card that can't be typed (formula, turned over) is
     turned over and you say if you knew it."""
@@ -773,6 +837,15 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None, on_pr
         if w == "help":
             print(col(DIM, INFO))
             continue
+        if w == "pause":
+            # the clock stops until Entrée (#263)
+            if ask(col(DIM, "  ⏸ pause — Entrée pour reprendre "), counted=False) is None:
+                return None
+            print(col(BOLD, ind(front_of(card))))
+            continue
+        if w == "log" and on_log:
+            print(on_log())
+            continue
         if not squash(a):
             # Entrée twice with nothing typed: the card again, if it has gone up (#261)
             empties += 1
@@ -785,7 +858,7 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None, on_pr
             # the same ratings as the app (#249, #261): the answer seen = À revoir; found with
             # effort (2 misses, far slower than usual) = Difficile; at once, on a card seen
             # before today = Facile; else Correct
-            spent, usual = time.time() - t0, ((s or {}).get("ms") or 0) / 1000
+            spent, usual = SPENT, ((s or {}).get("ms") or 0) / 1000
             slow = spent > max(SLOW_S, 3 * usual) if SLOW_S else False
             seen = (s or {}).get("state", "new") != "new" and (s or {}).get("lastReview", 0) < day_start_ms()
             if helped:
@@ -799,13 +872,13 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None, on_pr
             else:
                 q, why = 3, "1 erreur" if k else "sans aide"
             colour, label = {1: (RED, "À revoir"), 2: (YELLOW, "Difficile"), 3: (GREEN, "Correct"), 4: (BLUE, "Facile")}[q]
-            print(col(colour, "  ✓ " + shown) + col(DIM, "  " + label + " : " + why))
+            print(col(colour, "  ✓ " + shown) + col(DIM, "  %s (%s) : %s" % (label, back_in(s, q), why)))
             return q
         last = a.strip()
         k += 1  # not accepted: just asked again (no ✗)
     card["_last"] = last  # « + » on the next card can still add it (#253)
     # in red, as the learning count shown after it: the card goes back there
-    print(col(RED, "  → " + shown + "".join(" / " + x for x in card.get("alt") or [])) + col(DIM, "  À revoir"))
+    print(col(RED, "  → " + shown + "".join(" / " + x for x in card.get("alt") or [])) + col(DIM, "  À revoir (%s)" % back_in(s, 1)))
     if back and squash(back) != squash(" ".join(words)):
         print(col(DIM, ind(back)))
     # your meaning was right but not in the list (#227): « + » adds it, the card counts as Correct;
@@ -941,17 +1014,25 @@ def main():
         prev = None
         return True
     table_at = {}  # (verb, tense) → line count when its table was shown (#261)
+    answer_at = {}  # an answer → line count when it was last on screen (#263)
+    akey = lambda c: squash(" ".join(str(w) for w in (c.get("words") or []) if str(w).strip()))
     active = 0.0  # seconds really spent: a card counts 60 s at most (#261)
 
     def shown_at(c):
         """When this card's answer was last on screen: missed, or in a table."""
         k = conj_key(c)
-        return max(missed_at.get(str(c["id"]), -10**9), table_at.get(k, -10**9) if k else -10**9)
+        # the same answer just shown on another card (« han » for haber and for the gap
+        # sentence) waits too (#263)
+        return max(missed_at.get(str(c["id"]), -10**9), table_at.get(k, -10**9) if k else -10**9,
+                   answer_at.get(akey(c), -10**9))
 
     def tab_for(c):
         t = conj_table(c, [x for cs in by.values() for x in cs])
         if t:
             table_at[conj_key(c)] = LINES + rows(t + "\n")  # its forms wait until it's out of sight
+            for x in (y for cs in by.values() for y in cs):
+                if conj_key(x) and conj_key(x)[:2] == conj_key(c)[:2]:
+                    answer_at[akey(x)] = table_at[conj_key(c)]
         return t
 
     while queue:
@@ -965,18 +1046,21 @@ def main():
         cid = str(card["id"])
         before = srs.get(cid)
         t0 = time.time()
+        global SPENT
+        SPENT = 0.0
         q = review(card, before, on_dump=lambda: dump([card] + queue, srs),
                    on_stats=lambda: counts_line([card] + queue, srs),
                    on_tab=lambda: tab_for(card),
                    on_add=lambda text: add_answer(sid, card, text, edits, args.dry),
-                   on_prev=add_to_prev if prev else None)
+                   on_prev=add_to_prev if prev else None,
+                   on_log=lambda: log_today(sid))
         if q is None:
             break
-        active += min(60, time.time() - t0)
+        active += SPENT
         was_new = before is None or before.get("state") == "new"
         s, requeue = apply_rating(before or default_srs(), q)
         s["lastReview"] = int(time.time() * 1000)  # the most recent review wins in the app's merge
-        ms = min(60000, int((time.time() - t0) * 1000))
+        ms = min(60000, int(SPENT * 1000))
         s["ms"] = round(s["ms"] * 0.7 + ms * 0.3) if s.get("ms") else ms
         srs[cid] = s
         if was_new:
@@ -989,8 +1073,10 @@ def main():
         if requeue:  # learning step: back a few cards later (as in the app)
             queue.insert(min(len(queue), requeue), card)
         prev = {"card": card, "before": before, "last": card.get("_last", "")} if q == 1 else None
+        write_log(sid, card, q, s, requeue, SPENT, args.dry)
         if q == 1:
             missed_at[cid] = LINES
+            answer_at[akey(card)] = LINES
             if queue:  # missed: what's left
                 print(counts_line(queue, srs))
     mins = active / 60  # not the wall clock: a session left open doesn't count (#261)
