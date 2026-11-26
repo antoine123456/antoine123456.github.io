@@ -719,6 +719,7 @@ KEYWORDS = {"help": ("h", "help", "i", "info", "aide"), "tab": ("t", "tab"), "st
 PLAIN = {"help": ("h", "help", "i", "info", "aide"), "tab": ("t", "tab"), "stats": ("stats", "temps"),
          "dump": ("dump",), "save": ("save",), "quit": ("q",), "answer": ("?",), "pause": ("pause",), "log": ("log",)}
 SLOW_S = 30  # ⚙ « trop lent » of the app (slowSeconds), read in main
+OFFERED = False  # « Entrée = suivante · + · tab » shown once a session (#265)
 
 
 def keyword(a):
@@ -758,6 +759,10 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None, on_pr
     groups.append(cur)
     right = {squash(" ".join(g)) for g in groups if g} | {squash(" ".join(words))}
     right |= {squash(x) for x in card.get("alt") or []}  # meanings added after a miss (#227)
+    # every meaning written on the card is right, not only the first one typed (#88):
+    # « je te tiens au courant » for te aviso, « quelque » for algún (#265)
+    if card.get("fr") and not card.get("rev"):
+        right |= {squash(re.sub(r"\(.*?\)", "", m)) for m in re.split(r"[;,]", card["fr"]) if squash(re.sub(r"\(.*?\)", "", m))}
     # « après-midi » is masculine or feminine: « cette après-midi » too (#230), as in the app
     right |= {x.replace(squash("cet après-midi"), squash("cette après-midi")) for x in right}
     back = plain(card.get("answer")) or shown
@@ -872,7 +877,8 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None, on_pr
             else:
                 q, why = 3, "1 erreur" if k else "sans aide"
             colour, label = {1: (RED, "À revoir"), 2: (YELLOW, "Difficile"), 3: (GREEN, "Correct"), 4: (BLUE, "Facile")}[q]
-            print(col(colour, "  ✓ " + shown) + col(DIM, "  %s (%s) : %s" % (label, back_in(s, q), why)))
+            every = card["fr"] if card.get("fr") and not card.get("rev") and squash(card["fr"]) != squash(shown) else shown
+            print(col(colour, "  ✓ " + every) + col(DIM, "  %s (%s) : %s" % (label, back_in(s, q), why)))
             return q
         last = a.strip()
         k += 1  # not accepted: just asked again (no ✗)
@@ -883,13 +889,17 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None, on_pr
         print(col(DIM, ind(back)))
     # your meaning was right but not in the list (#227): « + » adds it, the card counts as Correct;
     # « tab » still shows the table here (#261)
+    # the whole line once a session, then just ↵ — it was on every miss (#265)
+    global OFFERED
     offer = ["Entrée = suivante"]
     if last and on_add:
         offer.append("+ = ajouter « %s »" % last)
     if on_tab and conj_key(card):
         offer.append("tab = tableau")
+    line = "  " + " · ".join(offer) + " " if not OFFERED else "  ↵ "
+    OFFERED = True
     while True:
-        r = ask(col(DIM, "  " + " · ".join(offer) + " "))
+        r = ask(col(DIM, line))
         if r is None:
             return None
         w = keyword(r)
