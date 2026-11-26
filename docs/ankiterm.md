@@ -54,6 +54,14 @@ ajoute ce sens-là. Si c'est trop tard, `+` tapé en premier sur la carte suivan
 vaut pour la carte ratée juste avant. Ces sens sont enregistrés dans le cloud,
 et l'app les accepte aussi.
 
+## Le défi
+
+`ankiterm --defi verbe` : une minute pour écrire de mémoire le plus possible de
+mots espagnols de ce tag (verbe, adjectif, états et émotions…). Chaque mot est
+vérifié dans le Vocabulaire et son sens s'affiche ; le record de chaque tag est
+gardé, et à la fin les mots les plus fréquents que tu n'as pas cités sont proposés.
+`ankiterm --defi` seul affiche la liste des tags.
+
 ## Lancer
 
 ```sh

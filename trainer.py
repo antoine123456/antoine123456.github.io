@@ -655,6 +655,9 @@ INFO = """
   Entrée deux fois : la carte
   à nouveau.
 
+  Défi : ankiterm --defi verbe
+  (une minute, le plus de verbes).
+
   Ordre partagé avec l'app.
 """
 
@@ -921,6 +924,85 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None, on_pr
     # no wipe (#242): the card waits until its answer has scrolled out of sight (main)
     return 1
 
+# ── Défi (#266): one minute, as many Spanish words of a tag as you can think of ──
+DEFI_S = 60
+ARTICLE = re.compile(r"^(el|la|los|las|un|una|lo)\s+", re.I)
+
+
+def defi(tag):
+    """Free recall: words typed from memory, checked against the Vocabulaire's
+    cards of that tag; the best score per tag is kept."""
+    data = json.load(open(os.path.join(HERE, "vocabulaire.json"), encoding="utf-8"))
+    cards = [c for d in data["decks"] for c in d["cards"] if not c.get("rev")]
+    count = {}
+    for c in cards:
+        for t in c.get("tags") or []:
+            if t not in ("vocabulaire", "es→fr", "fr→es", "transparent"):
+                count[t] = count.get(t, 0) + 1
+    tags = sorted(count, key=lambda t: -count[t])
+    if tag not in count:
+        print(col(BOLD, "Défi : une minute, le plus de mots espagnols d'un tag."))
+        for i, t in enumerate(tags[:24], 1):
+            print("  %2d  %-22s %s" % (i, t, col(DIM, str(count[t]))))
+        a = ask("Tag ? (numéro ou nom) ")
+        if a is None:
+            return
+        a = a.strip()
+        tag = tags[int(a) - 1] if a.isdigit() and 1 <= int(a) <= len(tags) else a
+        if tag not in count:
+            print("pas de tag « %s »" % tag)
+            return
+    # Spanish word (without its article, its « (feminine) ») → its card, for the tag and for all
+    def keys(es):
+        base = re.sub(r"\s*\(.*?\)", "", es).strip()
+        return {squash(base), squash(ARTICLE.sub("", base))} | {squash(x) for x in re.split(r"[/,]", base) if x.strip()}
+    of_tag, anywhere = {}, {}
+    for c in cards:
+        for k in keys(c["es"]):
+            anywhere.setdefault(k, c)
+            if tag in (c.get("tags") or []):
+                of_tag.setdefault(k, c)
+    cfg = load_cfg()
+    best = (cfg.get("defi") or {}).get(tag, 0)
+    print(col(BOLD, "\n%s — %d s, le plus de mots possible" % (tag, DEFI_S)) + col(DIM, "  (record : %d) · Entrée pour commencer" % best))
+    if ask("") is None:
+        return
+    start, found = time.time(), []
+    while True:
+        left = DEFI_S - (time.time() - start)
+        if left <= 0:
+            break
+        a = ask(col(DIM, "  %2d s " % left) + "› ")
+        if a is None:
+            break
+        if time.time() - start > DEFI_S:
+            print(col(DIM, "  (trop tard)"))
+            break
+        k = squash(ARTICLE.sub("", a.strip()))
+        if not k:
+            continue
+        c = of_tag.get(k)
+        if c and c["id"] in {x["id"] for x in found}:
+            print(col(DIM, "  déjà dit"))
+        elif c:
+            found.append(c)
+            print(col(GREEN, "  ✓ %s" % c["es"]) + col(DIM, "  " + c["fr"]))
+        elif k in anywhere:
+            print(col(YELLOW, "  ✗ %s : pas « %s »" % (anywhere[k]["es"], tag)) + col(DIM, "  " + anywhere[k]["fr"]))
+        else:
+            print(col(RED, "  ✗ pas dans le Vocabulaire"))
+    n = len(found)
+    print(col(BOLD, "\n%d mot(s) en %d s" % (n, DEFI_S)) + (col(BLUE, "  — record !") if n > best else col(DIM, "  (record : %d)" % best)))
+    if n > best:
+        cfg.setdefault("defi", {})[tag] = n
+        save_cfg(cfg)
+    # the most frequent words of the tag not given: the deck is in frequency order
+    seen_ids = {c["id"] for c in found}
+    miss = [c for c in cards if tag in (c.get("tags") or []) and c["id"] not in seen_ids][:8]
+    if miss:
+        print(col(DIM, "à retenir : ") + " · ".join("%s (%s)" % (c["es"], c["fr"].split(",")[0]) for c in miss))
+
+
 def main():
     ap = argparse.ArgumentParser(description="Réviser dans le terminal (même progression que l'app).")
     ap.add_argument("deck", nargs="?", help="un bout du nom du paquet (sinon : la liste)")
@@ -928,8 +1010,12 @@ def main():
     ap.add_argument("-n", "--new", type=int, help="nouvelles cartes par jour (défaut : le réglage ⚙ de l'app, sinon 20)")
     ap.add_argument("--dry", action="store_true", help="ne rien écrire dans Firestore")
     ap.add_argument("--user", action="store_true", help="choisir à nouveau qui révise")
+    ap.add_argument("--defi", nargs="?", const="", metavar="TAG",
+                    help="défi : en une minute, le plus de mots espagnols de ce tag (verbe, adjectif…)")
     args = ap.parse_args()
     global USER
+    if args.defi is not None:
+        return defi(args.defi)  # no progress involved: no user needed
     USER = setup(args.user)
 
     user = get_doc("users/" + USER)
