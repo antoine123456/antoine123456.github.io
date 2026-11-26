@@ -247,6 +247,7 @@ python3 trainer.py --user       # pick the name again
   `:h` / `:i` help, `:t` table, `:s` / `:ti` what's left, `:d` dump, `:q` stop.
   The plain words (`info`, `help`, `tab`, `stats`, `temps`, `dump`, `q`) and
   `i`, `h`, `t` alone still work.
+- **Last seen:** next to each card, how long since it was last answered (« vue il y a 3 j », or « nouvelle »).
 - **Entrée twice** with nothing typed shows the card again.
 - **When it comes back:** after the ✓ (or the answer, after a miss), as Anki
   shows it above its buttons: « Correct (4j) », « À revoir (<1m) ».

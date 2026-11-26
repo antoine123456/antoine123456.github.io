@@ -10,7 +10,7 @@ téléphone.
 
 ## Une séance
 
-On tape la réponse, puis Entrée. On a trois essais : une réponse fausse se
+À côté de chaque carte, depuis quand tu ne l'as pas vue (« vue il y a 3 j », ou « nouvelle »). On tape la réponse, puis Entrée. On a trois essais : une réponse fausse se
 retape, rien n'est barré. Après le troisième essai, la bonne réponse s'affiche
 en rouge.
 

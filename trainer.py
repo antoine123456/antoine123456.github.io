@@ -731,6 +731,21 @@ def keyword(a):
     return next((k for k, ws in table.items() if a in ws), None)
 
 
+def seen_ago(s):
+    """How long since this card was last answered, next to it (#267): « nouvelle »,
+    « vue il y a 12 min », « il y a 3 j »…"""
+    t = (s or {}).get("lastReview")
+    if not t or (s or {}).get("state", "new") == "new":
+        return "nouvelle"
+    m = max(0, (time.time() * 1000 - t) / 60000)
+    if m < 60:
+        return "vue il y a %d min" % max(1, m)
+    if m < 24 * 60:
+        return "vue il y a %d h" % (m // 60)
+    d = m // (24 * 60)
+    return "vue il y a %d j" % d if d < 60 else "vue il y a %d mois" % (d // 30)
+
+
 def back_in(s, q):
     """When the card comes back after this rating, as Anki shows it above its
     buttons (#263): « <1m », « <10m », « 4j »…"""
@@ -771,7 +786,7 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None, on_pr
     back = plain(card.get("answer")) or shown
     flip = card.get("flip") or card.get("eq") or not words
     print()
-    print(col(BOLD, ind(front_of(card))))
+    print(col(BOLD, ind(front_of(card))) + col(DIM, "  · " + seen_ago(s)))
     if flip:
         if ask(col(DIM, "  Entrée = retourner ")) is None:
             return None
