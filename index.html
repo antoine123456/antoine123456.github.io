@@ -3620,13 +3620,17 @@
 
             sources.forEach(function (src) {
                 var srcRef = userRef.collection("sources").doc(String(src.id));
-                batch.set(srcRef, {
-                    srs: src._push || {}, // only what is newer here (#279)
+                // ⚠ never « srs: {} »: Firestore takes an empty map as a value and REPLACES the
+                // whole srs with it — that wiped every deck (#281). Only the newer cards are sent,
+                // and no srs field at all when there are none.
+                var data = {
                     newCount: loadNewCount(src.id),
                     flagged: loadFlagged(src.id),
                     edits: loadEdits(src.id),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
+                };
+                if (src._push && Object.keys(src._push).length) data.srs = src._push;
+                batch.set(srcRef, data, { merge: true });
             });
 
             return batch.commit().then(function () {
