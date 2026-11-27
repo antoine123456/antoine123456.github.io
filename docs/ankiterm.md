@@ -44,6 +44,7 @@ aussi.
 | `:s` `:ti` `temps` | les cartes restantes et le temps restant |
 | `:h` `:i` `info` | l'aide |
 | `:d` `dump` | toutes les cartes restantes, avec leur réponse |
+| `:e [mot]` | un petit explorateur du Vocabulaire et de la Grammaire, qui démarre sur une recherche (aussi `ankiterm --dico`) |
 | `:v mot` | les détails d'un mot : sens, exemple, ≠, où il en est, le verbe d'une forme (veo → ver) |
 | `:l` `log` | les cartes du jour, celles vues plusieurs fois d'abord |
 | `:p` `pause` | arrête le chrono jusqu'à Entrée |
@@ -79,6 +80,7 @@ les 14 jours qui viennent.
 ankiterm                          # tous les paquets du jour, l'un après l'autre
 ankiterm -l                       # la liste des paquets
 ankiterm --voir veo               # les détails d'un mot
+ankiterm --dico                   # chercher un mot dans le Vocabulaire et la Grammaire
 ankiterm Vocabulaire              # un bout du nom du paquet
 ankiterm Grammaire -d Conjugaison # seulement les sous-paquets qui contiennent « Conjugaison »
 ankiterm Vocabulaire -n 10        # 10 nouvelles cartes (sinon : le réglage ⚙ de l'app)

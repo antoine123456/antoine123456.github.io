@@ -237,6 +237,7 @@ python3 trainer.py vocab -d "Niveau 2" -n 10   # sub-decks with « Niveau 2 », 
 python3 trainer.py --dry        # write nothing
 python3 trainer.py --user       # pick the name again
 python3 trainer.py --voir veo   # a word's details (veo → ver)
+python3 trainer.py --dico       # a small explorer of the Vocabulaire and the Grammaire
 python3 trainer.py --journal    # day by day: answers, new cards, right at once, intervals given
 ```
 
@@ -263,6 +264,7 @@ python3 trainer.py --journal    # day by day: answers, new cards, right at once,
   a table) waits until it has scrolled out of sight.
 - **Offline:** a review Firestore didn't take (« timed out ») is sent again after the next cards, and before leaving; what still couldn't be is kept in `trainer.json` and sent at the next start (the newer answer wins).
 - **A word's details (`:v mot`, or `ankiterm --voir mot`):** its Vocabulaire card (meanings, word class, sentence, the ≠ note and the words it gets mixed up with), where each direction stands (last seen, when it comes back, lapses), and the verb a form comes from — veo → ver, tenemos → tener, presente, nosotros. Doesn't use a try.
+- **Explorer (`:e [mot]`, or `ankiterm --dico [mot]`):** a very small explorer of the Vocabulaire and the Grammaire, straight on a search: a bit of a word, Spanish or French (accents ignored), the exact word first, 15 at most; a number shows that word's details (as `:v`), another text searches again, Entrée goes back to the card.
 - **Both directions, not the same day:** as in the app (#269), a word answered one way today sends its other direction to tomorrow.
 - **Challenge (`ankiterm --defi [tag]`):** one minute to type, from memory, as many Spanish words of a tag as you can (verbe, adjectif, états et émotions…), each checked against the Vocabulaire; the best score per tag is kept, and the most frequent words you didn't give are listed at the end.
 - **Log:** every card answered goes into `~/.config/espanol-trainer/log.tsv`
