@@ -283,10 +283,10 @@ def out_of_sight(at):
 # when, deck, card, front, rating, when it comes back, seconds. « :log » shows
 # today's cards, those seen several times first.
 LOG = os.path.join(os.path.dirname(CONFIG), "log.tsv")
-LOG_HEAD = "quand\tpaquet\tid\trecto\tnote\trevient\tsecondes\n"
+LOG_HEAD = "quand\tpaquet\tid\trecto\tnote\trevient\tsecondes\tavant\n"
 
 
-def write_log(sid, card, q, s, requeue, spent, dry):
+def write_log(sid, card, q, s, requeue, spent, dry, before=None):
     if dry:
         return  # a try (--dry) writes nothing, not even here
     try:
@@ -298,7 +298,9 @@ def write_log(sid, card, q, s, requeue, spent, dry):
             back = "<%dm" % requeue if requeue else "%dj" % s.get("interval", 1)
             f.write("\t".join([time.strftime("%Y-%m-%d %H:%M:%S"), sid, str(card["id"]),
                                 front_of(card).split("\n")[0][:60], {1: "À revoir", 2: "Difficile", 3: "Correct", 4: "Facile"}[q],
-                                back, "%.0f" % spent]) + "\n")
+                                back, "%.0f" % spent,
+                                # where it stood before (#273): nouvelle, apprentissage, or its interval « 4j »
+                                {"new": "nouvelle", "learn": "apprentissage"}.get(state_of(before), "%dj" % (before or {}).get("interval", 0))]) + "\n")
     except OSError:
         pass
 
@@ -320,6 +322,57 @@ def log_today(sid):
     for front, notes in rows_[:15]:
         out.append("  %2d×  %-34s %s" % (len(notes), front[:34], col(DIM, " · ".join(notes))))
     return "\n".join(out)
+
+
+def journal(days=14):
+    """ankiterm --journal (P8, #273): day by day, from the terminal's log, to check the
+    algorithm — answers and cards, new ones, how often a card came back the same day,
+    the cards known before answered right the first time (Anki aims at 85–90 %), and
+    the intervals given; then the cards due in the coming days, from Firestore."""
+    try:
+        rows_ = [l.split("\t") for l in open(LOG, encoding="utf-8").read().splitlines()[1:]]
+    except OSError:
+        return col(DIM, "pas encore de journal (%s) : il se remplit en révisant ici" % LOG)
+    by_day = {}
+    for f in rows_:
+        if len(f) >= 7:
+            by_day.setdefault(f[0][:10], []).append(f)
+    bucket = lambda b: ("<1j" if b.startswith("<") else "1-3j" if int(b[:-1]) <= 3 else "4-10j" if int(b[:-1]) <= 10
+                        else "11-30j" if int(b[:-1]) <= 30 else ">30j")
+    out = [col(BOLD, "jour        réponses cartes nouv. ×/carte  1er coup  min   intervalles donnés (<1j 1-3j 4-10j 11-30j >30j)")]
+    for day in sorted(by_day)[-days:]:
+        fs_ = by_day[day]
+        first, cards = {}, {}
+        for f in fs_:
+            first.setdefault(f[2], f)
+            cards[f[2]] = cards.get(f[2], 0) + 1
+        new = sum(1 for f in first.values() if len(f) > 7 and f[7] == "nouvelle")
+        # known before: an interval in « avant » (lines from before #273 have none: every first answer)
+        known = [f for f in first.values() if len(f) <= 7 or f[7].endswith("j")]
+        ok = sum(1 for f in known if f[4] != "À revoir")
+        ivs = [0] * 5
+        for f in fs_:
+            if re.match(r"^(<\d+m|\d+j)$", f[5]):
+                ivs[("<1j", "1-3j", "4-10j", "11-30j", ">30j").index(bucket(f[5]))] += 1
+        mins = sum(min(60, float(f[6] or 0)) for f in fs_) / 60
+        out.append("%s  %8d %6d %5s %7.1f  %7s  %4.0f   %s" % (
+            day, len(fs_), len(cards), new if any(len(f) > 7 for f in fs_) else "–", len(fs_) / len(cards),
+            "%d %%" % round(100 * ok / len(known)) if known else "–", mins, "  ".join("%4d" % n for n in ivs)))
+    out.append(col(DIM, "×/carte : réponses par carte (une carte ratée revient le jour même) · 1er coup : cartes déjà connues "
+                        "trouvées à leur 1re réponse du jour, Anki vise 85–90 %% · le journal : %s" % LOG))
+    return "\n".join(out)
+
+
+def due_ahead(srs, days=14):
+    """Cards due on each of the coming days (review cards), from today's progress."""
+    n = [0] * days
+    for x in srs.values():
+        if isinstance(x, dict) and x.get("state") == "review":
+            d = max(0, int(x.get("due", TODAY)) - TODAY)
+            if d < days:
+                n[d] += 1
+    return "à venir (vocabulaire, cartes dues) : " + " ".join(
+        "%s %d" % ("auj." if i == 0 else "+%d" % i, k) for i, k in enumerate(n))
 
 
 def load_cfg():
@@ -539,6 +592,39 @@ def new_left(asked, introduced):
     return max(0, int(st.get("newPerDay", 20)) - introduced)
 
 
+def twins(cards):
+    """A card and its other direction (#269): the FR → ES card (rev) and the
+    one it waits for (pre), both ways."""
+    t = {}
+    for c in cards:
+        if c.get("rev") and len(c.get("pre") or []) == 1:
+            t[str(c["id"])] = str(c["pre"][0])
+            t[str(c["pre"][0])] = str(c["id"])
+    return t
+
+
+def resting(s):
+    """New or day-scheduled: a card that can wait until tomorrow (#269) — not
+    one in learning steps, which comes back in a few minutes anyway."""
+    return not s or s.get("state", "new") in ("new", "review")
+
+
+def bury_twins(queue, srs, twin):
+    """As Anki buries siblings (#269): a card whose other direction was
+    answered today, or is earlier in the queue, waits until tomorrow — « así
+    que » then « donc » a minute later shows the answer of the other."""
+    start, taken, out = day_start_ms(), set(), []
+    for c in queue:
+        i, t = str(c["id"]), twin.get(str(c["id"]))
+        ts = srs.get(t) or {}
+        today = ts.get("state", "new") != "new" and (ts.get("lastReview") or 0) >= start
+        if t and resting(srs.get(i)) and (today or t in taken):
+            continue
+        taken.add(i)
+        out.append(c)
+    return out
+
+
 def build_queue(by, names, srs, flagged, deck_name, new_left, sid):
     is_child = lambda n: deck_name is None or n == deck_name or n.startswith(deck_name + "::")
     dids = sorted((d for d in by if is_child(names.get(d, d))), key=lambda d: js_natural_key(names.get(d, d)))
@@ -560,7 +646,7 @@ def build_queue(by, names, srs, flagged, deck_name, new_left, sid):
     fwd, rev = [c for c in new if not c.get("rev")], [c for c in new if c.get("rev")]
     new = [c for pair in zip(fwd, rev) for c in pair] + fwd[len(rev):] + rev[len(fwd):]
     new = seeded_shuffle(new[:new_left], seed + 1)
-    return due + new
+    return bury_twins(due + new, srs, twins(cards))
 
 
 def ind(t):
@@ -647,6 +733,9 @@ INFO = """
   :d  dump   toute la liste
   :p  pause  arrête le chrono
              (Entrée pour reprendre)
+  :v mot     les détails d'un
+             mot (sens, exemple, ≠,
+             veo → ver, où il en est)
   :l  log    les cartes du jour
              (vues plusieurs fois
              en premier)
@@ -731,6 +820,67 @@ def keyword(a):
     return next((k for k, ws in table.items() if a in ws), None)
 
 
+_LOOK = {}
+
+
+def look(word, srs_of=None):
+    """« :v mot » / ankiterm --voir mot (P7, #272): what the decks say about a word —
+    the Vocabulaire card (meanings, word class, sentence, the ≠ note and the words
+    it's mixed up with, where it stands), and the verb a form comes from (veo →
+    ver, presente, yo). srs_of(source id) → its progress, or None."""
+    w = squash(word)
+    if not w:
+        return col(DIM, "  :v suivi d'un mot (espagnol ou français)")
+    for sid in ("vocabulaire", "grammaire"):
+        if sid not in _LOOK:
+            d = json.load(open(os.path.join(HERE, bundled_files()[sid]), encoding="utf-8"))
+            _LOOK[sid] = [c for dk in d.get("decks") or [] for c in dk.get("cards") or []]
+    bare = lambda t: squash(re.sub(r"^(el|la|los|las|un|una)\s+", "", t, flags=re.I))
+    vocab = [c for c in _LOOK["vocabulaire"] if not c.get("rev")]
+    hits = [c for c in vocab if w in (squash(c["es"]), bare(c["es"]))]
+    hits += [c for c in vocab if c not in hits and w in {squash(x) for x in re.split(r"\s*[,;/]\s*", c.get("fr") or "")}]
+    forms = []
+    for c in _LOOK["grammaire"]:
+        k = conj_key(c)
+        if k and squash(" ".join(str(x) for x in c.get("words") or [])) == w and k not in forms:
+            forms.append(k)
+    out = []
+    for verb, tense, person in forms:
+        out.append(col(BOLD, "  %s" % word.strip()) + " = " + col(BOLD, verb) + col(DIM, " · %s · %s" % (tense, person)))
+        hits += [c for c in vocab if c not in hits and squash(c["es"]) == squash(verb)]
+    if not hits and not forms:  # a form no card has: its verb, guessed from the ending (veo → ver, miro → mirar)
+        verbs = {squash(c["es"]): c for c in vocab if (c.get("pos") or "").startswith("verbe")}
+        ends = sorted(("o", "as", "a", "amos", "áis", "an", "es", "e", "emos", "éis", "en", "imos", "ís", "é", "aste",
+                       "ó", "aron", "í", "iste", "ió", "ieron", "aba", "ía", "ando", "iendo", "ado", "ido"), key=len, reverse=True)
+        for e in ends:
+            if w.endswith(squash(e)) and len(w) > len(e) + 1:
+                stem = w[:len(w) - len(squash(e))]
+                for inf in (stem + "ar", stem + "er", stem + "ir", stem + "r"):
+                    if inf in verbs and verbs[inf] not in hits:
+                        hits.append(verbs[inf])
+                        out.append(col(DIM, "  « %s » : sans doute une forme de " % word.strip()) + col(BOLD, verbs[inf]["es"]))
+    srs = (srs_of("vocabulaire") if srs_of else None) or {}
+    for c in hits[:4]:
+        out.append(col(BOLD, "  " + c["es"]) + " — " + c.get("fr", "") + (col(DIM, "  (%s)" % c["pos"]) if c.get("pos") else ""))
+        if c.get("s"):
+            out.append(col(DIM, "    " + plain(c["s"]) + (" — " + c["sf"] if c.get("sf") else "")))
+        if c.get("n"):
+            out.append(col(BLUE, "    " + c["n"]))
+        if c.get("cf"):
+            out.append(col(DIM, "    ≠ " + " · ".join(c["cf"])))
+        for cid, way in ((str(c["id"]), "es→fr"), (str(int(c["id"]) + 1), "fr→es")):
+            x = srs.get(cid)
+            if x and x.get("state", "new") != "new":
+                due = x.get("due", TODAY) - TODAY
+                out.append(col(DIM, "    %s : %s, revient %s · %d oubli(s)" % (
+                    way, seen_ago(x), "aujourd'hui" if due <= 0 or x.get("state") != "review" else "dans %d j" % due,
+                    x.get("lapses", 0))))
+    if not out:
+        near = sorted({c["es"] for c in vocab if squash(c["es"]).startswith(w[:4])}, key=len)[:6]
+        return col(DIM, "  rien pour « %s »%s" % (word.strip(), " — peut-être : " + ", ".join(near) if near else ""))
+    return "\n".join(out)
+
+
 def seen_ago(s):
     """How long since this card was last answered, next to it (#267): « nouvelle »,
     « vue il y a 12 min », « il y a 3 j »…"""
@@ -758,7 +908,7 @@ def day_start_ms():
     return int(time.mktime((t.tm_year, t.tm_mon, t.tm_mday, 0, 0, 0, 0, 0, -1)) * 1000)
 
 
-def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None, on_prev=None, on_log=None):
+def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None, on_prev=None, on_log=None, on_look=None):
     """Shows one card, returns its rating 1–4 (as the app, #261), or None to stop.
     Three tries; a card that can't be typed (formula, turned over) is
     turned over and you say if you knew it."""
@@ -809,7 +959,8 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None, on_pr
         extra = r.strip()[1:].strip() or last
         if not extra:
             return False
-        sure = ask(col(DIM, "  ajouter « %s » ? Entrée = oui · n = non " % extra))
+        # the card named (#270): « + » typed on the card after the one it was meant for
+        sure = ask(col(DIM, "  ajouter « %s » à « %s » ? Entrée = oui · n = non " % (extra, front_of(card))))
         if sure is None:
             return None
         if sure.strip().lower() in ("", "o", "oui", "y", "yes"):
@@ -830,6 +981,10 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None, on_pr
         w = keyword(a)
         if w == "quit":
             return None
+        m = re.match(r"^:(?:v|voir)\s+(.+)$", a.strip(), re.I)
+        if m:  # a word's details (P7, #272): doesn't use a try
+            print(look(m.group(1), on_look))
+            continue
         if w == "answer":
             break  # « ? »: the answer now, the card À revoir
         if w == "dump" and on_dump:
@@ -837,9 +992,12 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None, on_pr
             continue
         if a.strip().startswith("+") and on_prev and not last:
             # nothing tried here yet: « + » is for the card missed just before (#253)
-            if on_prev(a.strip()[1:].strip()) is None:
+            r = on_prev(a.strip()[1:].strip())
+            if r is None:
                 return None
-            continue
+            if r is not False or not on_add or not a.strip()[1:].strip():
+                continue
+            # « n »: not for that card — then maybe for this one (#270)
         if a.strip().startswith("+") and on_add:
             ok = add(a)  # from the first miss on, without using up the tries
             if ok is None:
@@ -897,6 +1055,7 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None, on_pr
             colour, label = {1: (RED, "À revoir"), 2: (YELLOW, "Difficile"), 3: (GREEN, "Correct"), 4: (BLUE, "Facile")}[q]
             every = card["fr"] if card.get("fr") and not card.get("rev") and squash(card["fr"]) != squash(shown) else shown
             print(col(colour, "  ✓ " + every) + col(DIM, "  %s (%s) : %s" % (label, back_in(s, q), why)))
+            card["_last"] = last  # a try not taken: « + » on the next card can add it (#270)
             return q
         last = a.strip()
         k += 1  # not accepted: just asked again (no ✗)
@@ -1023,8 +1182,11 @@ def main():
     ap.add_argument("deck", nargs="?", help="un bout du nom du paquet (sinon : la liste)")
     ap.add_argument("-d", "--sub", help="seulement les sous-paquets dont le nom contient ce texte")
     ap.add_argument("-n", "--new", type=int, help="nouvelles cartes par jour (défaut : le réglage ⚙ de l'app, sinon 20)")
+    ap.add_argument("-l", "--liste", action="store_true", help="la liste des paquets pour en choisir un (sinon : tous ceux du jour, à la suite)")
     ap.add_argument("--dry", action="store_true", help="ne rien écrire dans Firestore")
     ap.add_argument("--user", action="store_true", help="choisir à nouveau qui révise")
+    ap.add_argument("--journal", action="store_true", help="jour par jour : réponses, cartes, nouvelles, taux du 1er coup, intervalles donnés, cartes à venir")
+    ap.add_argument("--voir", metavar="MOT", help="les détails d'un mot : sens, exemple, ≠, verbe d'une forme (veo → ver), où il en est")
     ap.add_argument("--defi", nargs="?", const="", metavar="TAG",
                     help="défi : en une minute, le plus de mots espagnols de ce tag (verbe, adjectif…)")
     args = ap.parse_args()
@@ -1032,6 +1194,15 @@ def main():
     if args.defi is not None:
         return defi(args.defi)  # no progress involved: no user needed
     USER = setup(args.user)
+    if args.journal:
+        print(journal())
+        try:
+            print(col(DIM, due_ahead(get_doc("users/%s/sources/vocabulaire" % USER).get("srs") or {})))
+        except Exception:
+            pass
+        return
+    if args.voir:
+        return print(look(args.voir, lambda x: get_doc("users/%s/sources/%s" % (USER, x)).get("srs") or {}))
 
     user = get_doc("users/" + USER)
     sources = [s for s in user.get("sources") or [] if s.get("id") != "test-transitions"]
@@ -1043,7 +1214,13 @@ def main():
         pick = [s for s in sources if args.deck.lower() in s["name"].lower() or args.deck == s["id"]]
         if not pick:
             sys.exit("Aucun paquet ne contient « %s »." % args.deck)
-        src = pick[0]
+        srcs, auto = pick[:1], False
+    elif not args.liste:
+        # P6 (#271): straight to the decks with cards today, the one reviewed last first;
+        # not the 💤 ones (asleep in the app)
+        last = last_reviewed(sources) or (load_cfg().get("last") or {}).get(USER)
+        srcs = sorted((s for s in sources if s["id"] not in asleep), key=lambda s: s["id"] != last)
+        auto = True
     else:
         # the deck reviewed last — in the app or here — is the default: Entrée takes it
         last = last_reviewed(sources) or (load_cfg().get("last") or {}).get(USER)
@@ -1057,168 +1234,227 @@ def main():
         a = a.strip() or (str(dflt) if dflt else "")
         if not a.isdigit() or not 1 <= int(a) <= len(sources):
             return
-        src = sources[int(a) - 1]
-    cfg = load_cfg()
-    cfg.setdefault("last", {})[USER] = src["id"]
-    save_cfg(cfg)
+        srcs, auto = [sources[int(a) - 1]], False
+    def session(src):
+        """One deck: its cards today, until done or « q ». « empty »: nothing today."""
+        cfg = load_cfg()
+        cfg.setdefault("last", {})[USER] = src["id"]
+        save_cfg(cfg)
 
-    sid = src["id"]
-    meta = get_doc("users/%s/sources/%s" % (USER, sid))
-    srs = meta.get("srs") or {}
-    flagged = live_flags(meta.get("flagged") or {})
-    nc = meta.get("newCount") or {}
-    nc = nc if nc.get("day") == TODAY else {"day": TODAY, "count": 0}
-    by, names = load_cards(sid, files)
-    edits = meta.get("edits") or {}
-    for cid, e in edits.items():  # cards changed in 📝 Relecture (and meanings added here)
-        for cards in by.values():
-            for c in cards:
-                if str(c.get("id")) == cid:
-                    c.update((e or {}).get("f") or {})
-    deck_name = study_deck(names, args.sub)
-    queue = build_queue(by, names, srs, flagged, deck_name, new_left(args.new, nc["count"]), sid)
-    queue = [c for c in queue if front_of(c)]  # a picture alone can't be shown here (after the draw: same order)
-    n_new = sum(1 for c in queue if str(c["id"]) not in srs or srs[str(c["id"])].get("state") == "new")
-    print(col(BOLD, "%s" % src["name"]) + col(DIM, " — %d à revoir, %d nouvelles%s" % (
-        len(queue) - n_new, n_new, " (essai : rien n'est écrit)" if args.dry else "")) + col(DIM, "  · info = aide"))
-    if not queue:
-        print("Rien à réviser aujourd'hui 🎉")
-        return
+        sid = src["id"]
+        meta = get_doc("users/%s/sources/%s" % (USER, sid))
+        srs = meta.get("srs") or {}
+        # answers kept on disk when Firestore was out of reach (#276): the newer ones win
+        kept = {k: v for k, v in (((load_cfg().get("unsaved") or {}).get(USER) or {}).get(sid) or {}).items()
+                if (v.get("lastReview") or 0) > ((srs.get(k) or {}).get("lastReview") or 0)}
+        srs.update(kept)
+        flagged = live_flags(meta.get("flagged") or {})
+        nc = meta.get("newCount") or {}
+        nc = nc if nc.get("day") == TODAY else {"day": TODAY, "count": 0}
+        by, names = load_cards(sid, files)
+        edits = meta.get("edits") or {}
+        for cid, e in edits.items():  # cards changed in 📝 Relecture (and meanings added here)
+            for cards in by.values():
+                for c in cards:
+                    if str(c.get("id")) == cid:
+                        c.update((e or {}).get("f") or {})
+        deck_name = study_deck(names, args.sub)
+        queue = build_queue(by, names, srs, flagged, deck_name, new_left(args.new, nc["count"]), sid)
+        twin = twins(queue)  # each card and its other direction (#269)
+        queue = [c for c in queue if front_of(c)]  # a picture alone can't be shown here (after the draw: same order)
+        n_new = sum(1 for c in queue if str(c["id"]) not in srs or srs[str(c["id"])].get("state") == "new")
+        print(col(BOLD, "%s" % src["name"]) + col(DIM, " — %d à revoir, %d nouvelles%s" % (
+            len(queue) - n_new, n_new, " (essai : rien n'est écrit)" if args.dry else "")) + col(DIM, "  · info = aide"))
+        if not queue:
+            for k in list(kept):  # answers kept from an offline session (#276): sent all the same
+                try:
+                    save_review(sid, k, kept.pop(k), nc, args.dry)
+                except Exception:
+                    break
+            if not kept:
+                cfg = load_cfg()
+                ((cfg.get("unsaved") or {}).get(USER) or {}).pop(sid, None)
+                save_cfg(cfg)
+            if not auto:
+                print("Rien à réviser aujourd'hui 🎉")
+            return "empty"
 
-    done, t_start = 0, time.time()
-    seen_ids, unsaved = set(), {}  # cards answered; reviews Firestore didn't take yet (#264)
+        done, t_start, stopped = 0, time.time(), False
+        seen_ids, unsaved = set(), {}  # cards answered; reviews Firestore didn't take yet (#264)
 
-    def retry_unsaved(last=False):
-        for k in list(unsaved):
+        def retry_unsaved(last=False):
+            for k in list(unsaved):
+                try:
+                    save_review(sid, k, srs.get(k, unsaved[k]), nc, args.dry)
+                    unsaved.pop(k)
+                    print(col(DIM, "  ✓ enregistré après coup"))
+                except Exception:
+                    if not last:
+                        return  # still offline: later
+
+        def keep_unsaved():
+            """What Firestore didn't take stays on disk, sent at the next start (#276)."""
+            cfg = load_cfg()
+            mine = cfg.setdefault("unsaved", {}).setdefault(USER, {})
+            if unsaved and not args.dry:
+                mine[sid] = {k: srs.get(k, v) for k, v in unsaved.items()}
+            else:
+                mine.pop(sid, None)
+            save_cfg(cfg)
+
+        if kept:
+            unsaved.update(kept)
+            retry_unsaved(last=True)
+            print(col(DIM, "  ✓ %d réponse(s) d'une séance hors ligne envoyée(s)" % (len(kept) - len(unsaved))
+                      + (", %d pas encore" % len(unsaved) if unsaved else "")))
+            keep_unsaved()
+        missed_at = {}  # card id → line count when its answer was shown (#242)
+        prev = None  # the card just missed: « + » on the next one adds a meaning to it (#253)
+
+        def add_to_prev(text):
+            """« + » (or « + sens ») typed first on a card: that meaning goes to the card
+            just before, if one of its tries wasn't taken — rated Correct instead of
+            À revoir when it was missed (#253), else its rating stays (#270).
+            True = added, False = not, None = stop."""
+            nonlocal prev
+            if not prev:
+                print(col(DIM, "  pas de carte ratée juste avant"))
+                return False
+            pc, extra = prev["card"], text or prev["last"]
+            if not extra:
+                print(col(DIM, "  rien à ajouter : + suivi du sens"))
+                return False
+            sure = ask(col(DIM, "  ajouter « %s » à « %s » ? Entrée = oui · n = non " % (extra, front_of(pc))))
+            if sure is None:
+                return None
+            if sure.strip().lower() not in ("", "o", "oui", "y", "yes"):
+                return False
+            add_answer(sid, pc, extra, edits, args.dry)
+            pid = str(pc["id"])
+            if prev.get("q", 1) != 1:  # found in the end: only the meaning is added
+                print(col(GREEN, "  ✓ « %s » ajouté à « %s »" % (extra, front_of(pc))))
+                prev = None
+                return True
+            s2, req2 = apply_rating(prev["before"] or default_srs(), 3)  # Correct after all
+            s2["lastReview"] = int(time.time() * 1000)
+            if srs.get(pid, {}).get("ms"):
+                s2["ms"] = srs[pid]["ms"]
+            srs[pid] = s2
             try:
-                save_review(sid, k, srs.get(k, unsaved[k]), nc, args.dry)
-                unsaved.pop(k)
-                print(col(DIM, "  ✓ enregistré après coup"))
-            except Exception:
-                if not last:
-                    return  # still offline: later
-    missed_at = {}  # card id → line count when its answer was shown (#242)
-    prev = None  # the card just missed: « + » on the next one adds a meaning to it (#253)
+                save_review(sid, pid, s2, nc, args.dry)
+            except Exception as e:
+                print(col(RED, "  ⚠ pas enregistré : %s" % e))
+            queue[:] = [c for c in queue if str(c["id"]) != pid]  # no more « à repasser » for it
+            if req2:
+                queue.insert(min(len(queue), req2), pc)
+            missed_at.pop(pid, None)
+            print(col(GREEN, "  ✓ « %s » ajouté à « %s » : comptée Correct" % (extra, front_of(pc))))
+            prev = None
+            return True
+        table_at = {}  # (verb, tense) → line count when its table was shown (#261)
+        answer_at = {}  # an answer → line count when it was last on screen (#263)
+        akey = lambda c: squash(" ".join(str(w) for w in (c.get("words") or []) if str(w).strip()))
+        active = 0.0  # seconds really spent: a card counts 60 s at most (#261)
 
-    def add_to_prev(text):
-        """« + » (or « + sens ») typed first on a card: that meaning goes to the card
-        missed just before, which is then rated Correct instead of À revoir.
-        True = added, False = not, None = stop."""
-        nonlocal prev
-        if not prev:
-            print(col(DIM, "  pas de carte ratée juste avant"))
-            return False
-        pc, extra = prev["card"], text or prev["last"]
-        if not extra:
-            print(col(DIM, "  rien à ajouter : + suivi du sens"))
-            return False
-        sure = ask(col(DIM, "  ajouter « %s » à « %s » ? Entrée = oui · n = non " % (extra, front_of(pc))))
-        if sure is None:
-            return None
-        if sure.strip().lower() not in ("", "o", "oui", "y", "yes"):
-            return False
-        add_answer(sid, pc, extra, edits, args.dry)
-        pid = str(pc["id"])
-        s2, req2 = apply_rating(prev["before"] or default_srs(), 3)  # Correct after all
-        s2["lastReview"] = int(time.time() * 1000)
-        if srs.get(pid, {}).get("ms"):
-            s2["ms"] = srs[pid]["ms"]
-        srs[pid] = s2
-        try:
-            save_review(sid, pid, s2, nc, args.dry)
-        except Exception as e:
-            print(col(RED, "  ⚠ pas enregistré : %s" % e))
-        queue[:] = [c for c in queue if str(c["id"]) != pid]  # no more « à repasser » for it
-        if req2:
-            queue.insert(min(len(queue), req2), pc)
-        missed_at.pop(pid, None)
-        print(col(GREEN, "  ✓ « %s » ajouté à « %s » : comptée Correct" % (extra, front_of(pc))))
-        prev = None
-        return True
-    table_at = {}  # (verb, tense) → line count when its table was shown (#261)
-    answer_at = {}  # an answer → line count when it was last on screen (#263)
-    akey = lambda c: squash(" ".join(str(w) for w in (c.get("words") or []) if str(w).strip()))
-    active = 0.0  # seconds really spent: a card counts 60 s at most (#261)
+        def shown_at(c):
+            """When this card's answer was last on screen: missed, or in a table."""
+            k = conj_key(c)
+            # the same answer just shown on another card (« han » for haber and for the gap
+            # sentence) waits too (#263)
+            return max(missed_at.get(str(c["id"]), -10**9), table_at.get(k, -10**9) if k else -10**9,
+                       answer_at.get(akey(c), -10**9))
 
-    def shown_at(c):
-        """When this card's answer was last on screen: missed, or in a table."""
-        k = conj_key(c)
-        # the same answer just shown on another card (« han » for haber and for the gap
-        # sentence) waits too (#263)
-        return max(missed_at.get(str(c["id"]), -10**9), table_at.get(k, -10**9) if k else -10**9,
-                   answer_at.get(akey(c), -10**9))
+        def tab_for(c):
+            t = conj_table(c, [x for cs in by.values() for x in cs])
+            if t:
+                table_at[conj_key(c)] = LINES + rows(t + "\n")  # its forms wait until it's out of sight
+                for x in (y for cs in by.values() for y in cs):
+                    if conj_key(x) and conj_key(x)[:2] == conj_key(c)[:2]:
+                        answer_at[akey(x)] = table_at[conj_key(c)]
+            return t
 
-    def tab_for(c):
-        t = conj_table(c, [x for cs in by.values() for x in cs])
-        if t:
-            table_at[conj_key(c)] = LINES + rows(t + "\n")  # its forms wait until it's out of sight
-            for x in (y for cs in by.values() for y in cs):
-                if conj_key(x) and conj_key(x)[:2] == conj_key(c)[:2]:
-                    answer_at[akey(x)] = table_at[conj_key(c)]
-        return t
-
-    while queue:
-        # a missed card — or one whose form is in a table still on screen — waits until
-        # its answer is out of sight: the next one goes first
-        i = next((i for i, c in enumerate(queue) if out_of_sight(shown_at(c))), None)
-        if i is None:  # nothing else to show: push the answer up and out
-            print("\n" * max(0, shutil.get_terminal_size((80, 24)).lines - (LINES - shown_at(queue[0]))), end="")
-            i = 0
-        card = queue.pop(i)
-        cid = str(card["id"])
-        before = srs.get(cid)
-        t0 = time.time()
-        global SPENT
-        SPENT = 0.0
-        q = review(card, before, on_dump=lambda: dump([card] + queue, srs),
-                   on_stats=lambda: counts_line([card] + queue, srs),
-                   on_tab=lambda: tab_for(card),
-                   # « + » adds a meaning: vocabulary only — a conjugation or a gap has one right answer (#264)
-                   on_add=(lambda text: add_answer(sid, card, text, edits, args.dry)) if card.get("es") else None,
-                   on_prev=add_to_prev if prev else None,
-                   on_log=lambda: log_today(sid))
-        if q is None:
-            break
-        active += SPENT
-        was_new = before is None or before.get("state") == "new"
-        s, requeue = apply_rating(before or default_srs(), q)
-        s["lastReview"] = int(time.time() * 1000)  # the most recent review wins in the app's merge
-        ms = min(60000, int(SPENT * 1000))
-        s["ms"] = round(s["ms"] * 0.7 + ms * 0.3) if s.get("ms") else ms
-        srs[cid] = s
-        if was_new:
-            nc["count"] += 1
-        try:
-            save_review(sid, cid, s, nc, args.dry)
-            unsaved.pop(cid, None)
-        except Exception as e:  # keep going; it is tried again after the next cards (#264)
-            unsaved[cid] = s
-            print(col(RED, "  ⚠ pas encore enregistré (%s) : nouvel essai plus tard" % e))
-        retry_unsaved()
-        done += 1
-        seen_ids.add(cid)
-        if requeue:  # learning step: back a few cards later (as in the app)
-            queue.insert(min(len(queue), requeue), card)
-        prev = {"card": card, "before": before, "last": card.get("_last", "")} if q == 1 and card.get("es") else None
-        write_log(sid, card, q, s, requeue, SPENT, args.dry)
-        if q == 1:
-            missed_at[cid] = LINES
-            answer_at[akey(card)] = LINES
-            if queue:  # missed: what's left
-                print(counts_line(queue, srs))
-    mins = active / 60  # not the wall clock: a session left open doesn't count (#261)
-    print()
-    for _ in range(3):  # last tries before leaving (#264)
-        if not unsaved:
-            break
-        retry_unsaved(last=True)
+        while queue:
+            # a missed card — or one whose form is in a table still on screen — waits until
+            # its answer is out of sight: the next one goes first
+            i = next((i for i, c in enumerate(queue) if out_of_sight(shown_at(c))), None)
+            if i is None:  # nothing else to show: push the answer up and out
+                print("\n" * max(0, shutil.get_terminal_size((80, 24)).lines - (LINES - shown_at(queue[0]))), end="")
+                i = 0
+            card = queue.pop(i)
+            cid = str(card["id"])
+            before = srs.get(cid)
+            t0 = time.time()
+            global SPENT
+            SPENT = 0.0
+            q = review(card, before, on_dump=lambda: dump([card] + queue, srs),
+                       on_stats=lambda: counts_line([card] + queue, srs),
+                       on_tab=lambda: tab_for(card),
+                       # « + » adds a meaning: vocabulary only — a conjugation or a gap has one right answer (#264)
+                       on_add=(lambda text: add_answer(sid, card, text, edits, args.dry)) if card.get("es") else None,
+                       on_prev=add_to_prev if prev else None,
+                       on_log=lambda: log_today(sid),
+                       on_look=lambda x: srs if x == sid else (get_doc("users/%s/sources/%s" % (USER, x)).get("srs") or {}))
+            if q is None:
+                stopped = True
+                break
+            active += SPENT
+            was_new = before is None or before.get("state") == "new"
+            s, requeue = apply_rating(before or default_srs(), q)
+            s["lastReview"] = int(time.time() * 1000)  # the most recent review wins in the app's merge
+            ms = min(60000, int(SPENT * 1000))
+            s["ms"] = round(s["ms"] * 0.7 + ms * 0.3) if s.get("ms") else ms
+            srs[cid] = s
+            if was_new:
+                nc["count"] += 1
+            try:
+                save_review(sid, cid, s, nc, args.dry)
+                unsaved.pop(cid, None)
+            except Exception as e:  # keep going; it is tried again after the next cards (#264)
+                unsaved[cid] = s
+                print(col(RED, "  ⚠ pas encore enregistré (%s) : nouvel essai plus tard" % e))
+            retry_unsaved()
+            done += 1
+            seen_ids.add(cid)
+            # its other direction, if still to come today, waits until tomorrow (#269)
+            queue[:] = [x for x in queue if not (str(x["id"]) == twin.get(cid) and resting(srs.get(twin[cid])))]
+            if requeue:  # learning step: back a few cards later (as in the app)
+                queue.insert(min(len(queue), requeue), card)
+            # missed, or a try not taken before the right answer (#270): « + » on the next card is for it
+            prev = ({"card": card, "before": before, "last": card.get("_last", ""), "q": q}
+                    if card.get("es") and (q == 1 or card.get("_last")) else None)
+            write_log(sid, card, q, s, requeue, SPENT, args.dry, before)
+            if q == 1:
+                missed_at[cid] = LINES
+                answer_at[akey(card)] = LINES
+                if queue:  # missed: what's left
+                    print(counts_line(queue, srs))
+        mins = active / 60  # not the wall clock: a session left open doesn't count (#261)
+        print()
+        for _ in range(3):  # last tries before leaving (#264)
+            if not unsaved:
+                break
+            retry_unsaved(last=True)
+            if unsaved:
+                time.sleep(2)
         if unsaved:
-            time.sleep(2)
-    if unsaved:
-        print(col(RED, "⚠ %d révision(s) pas enregistrée(s) (réseau) : elles seront à refaire" % len(unsaved)))
-    # answers, not cards: a card missed comes back (#264)
-    print(col(DIM, "%d réponse(s), %d carte(s), en %.0f min%s" % (done, len(seen_ids), mins,
-                                                               "" if args.dry or unsaved else " — enregistré dans Firestore")))
+            print(col(RED, "⚠ %d révision(s) pas encore dans Firestore (réseau) : gardées ici, envoyées au prochain lancement" % len(unsaved)))
+        keep_unsaved()
+        # answers, not cards: a card missed comes back (#264)
+        print(col(DIM, "%d réponse(s), %d carte(s), en %.0f min%s" % (done, len(seen_ids), mins,
+                                                                   "" if args.dry or unsaved else " — enregistré dans Firestore")))
+        return "quit" if stopped else "done"
+
+    # P6 (#271): with no deck named, every deck with cards today, one after the other —
+    # the one reviewed last first; « --liste » shows the list to pick one, as before
+    results = []
+    for src in srcs:
+        if results and results[-1] != "empty":
+            print()
+        results.append(session(src))
+        if results[-1] == "quit":
+            return
+    if auto and all(r == "empty" for r in results):
+        print("Rien à réviser aujourd'hui 🎉")
 
 
 if __name__ == "__main__":

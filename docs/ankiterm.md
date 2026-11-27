@@ -44,6 +44,9 @@ aussi.
 | `:s` `:ti` `temps` | les cartes restantes et le temps restant |
 | `:h` `:i` `info` | l'aide |
 | `:d` `dump` | toutes les cartes restantes, avec leur réponse |
+| `:v mot` | les détails d'un mot : sens, exemple, ≠, où il en est, le verbe d'une forme (veo → ver) |
+| `:l` `log` | les cartes du jour, celles vues plusieurs fois d'abord |
+| `:p` `pause` | arrête le chrono jusqu'à Entrée |
 | `?` | la réponse tout de suite |
 | `:q` `q` | arrêter (tout est déjà enregistré) |
 | Entrée deux fois | la carte à nouveau, si elle est remontée |
@@ -51,7 +54,8 @@ aussi.
 **Mon sens était bon** : après une erreur, `+` ajoute la dernière réponse tapée
 aux réponses acceptées de la carte, qui compte alors Correct. `+ autre sens`
 ajoute ce sens-là. Si c'est trop tard, `+` tapé en premier sur la carte suivante
-vaut pour la carte ratée juste avant. Ces sens sont enregistrés dans le cloud,
+vaut pour la carte d'avant (ratée, ou trouvée après un essai refusé) : la
+question nomme la carte, `n` le propose pour celle-ci. Ces sens sont enregistrés dans le cloud,
 et l'app les accepte aussi.
 
 ## Le défi
@@ -62,10 +66,19 @@ vérifié dans le Vocabulaire et son sens s'affiche ; le record de chaque tag es
 gardé, et à la fin les mots les plus fréquents que tu n'as pas cités sont proposés.
 `ankiterm --defi` seul affiche la liste des tags.
 
+## Le journal
+
+`ankiterm --journal` : jour par jour, pour vérifier l'algorithme — réponses,
+cartes, nouvelles, réponses par carte, les cartes connues trouvées du premier
+coup (Anki vise 85–90 %), les intervalles donnés, puis les cartes à revoir dans
+les 14 jours qui viennent.
+
 ## Lancer
 
 ```sh
-ankiterm                          # la liste des paquets
+ankiterm                          # tous les paquets du jour, l'un après l'autre
+ankiterm -l                       # la liste des paquets
+ankiterm --voir veo               # les détails d'un mot
 ankiterm Vocabulaire              # un bout du nom du paquet
 ankiterm Grammaire -d Conjugaison # seulement les sous-paquets qui contiennent « Conjugaison »
 ankiterm Vocabulaire -n 10        # 10 nouvelles cartes (sinon : le réglage ⚙ de l'app)
@@ -74,7 +87,9 @@ ankiterm --user                   # choisir à nouveau qui révise
 ```
 
 Le nombre de nouvelles cartes par jour suit le réglage ⚙ de l'app, synchronisé
-d'un appareil à l'autre. Le temps affiché à la fin ne compte que le temps passé
+d'un appareil à l'autre. Comme dans Anki, les deux sens d'un mot ne passent
+pas le même jour. Sans réseau, les réponses sont gardées et envoyées au
+lancement suivant. Le temps affiché à la fin ne compte que le temps passé
 sur les cartes (60 s au plus par carte), pas une séance restée ouverte.
 
 ## Installer

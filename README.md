@@ -94,6 +94,8 @@ ankisync() {
 - **F6** (no on-screen button) marks the card to fix: it leaves the session and is never offered again (🚩 on the home screen lists the marked cards). The stats export (📤) carries them, and the next `ankisync` flags them red, tags them `a_corriger`, suspends them in Anki and lists them for review.
 - **Staged cards** (tag `etapeN`, e.g. the bundled **Grammaire** source, `grammaire.json`, extracted from Anki's `🇪🇸 Espagnol::Grammaire`): stage N's new cards stay locked (🔒 badge) until at least 80 % of every earlier stage's cards are in review. `ankisync` applies the same rule in Anki: locked new cards are suspended with the tag `etape_verrou` and unsuspended once their stage opens.
 - **Automatic ratings** (#249, as Anki / FSRS mean them): the answer seen (hint, word given after 3 misses) = À revoir; found alone with effort (2 misses or more, the one box missed, far slower than usual) = Difficile; with the word boxes = Correct; in the one box at once, on a card seen before today = Facile. The four pills then stay, the one given lit, with why in a bubble that floats up (aide, 3 erreurs, trop lent…), and the card gets a frame in its colour (red / orange / green / blue); another pill gives that rating instead.
+- **Both directions, not the same day** (#269): as Anki buries siblings, once a word is answered one way (🇪🇸 → 🇫🇷 or 🇫🇷 → 🇪🇸), its other direction waits until tomorrow (unless it's in learning steps) — else « así que » then « donc » a minute later gave the answer away.
+- **📴 Offline** (#276): `sw.js`, a service worker, keeps the page, the decks and the sounds / pictures already loaded, so the app opens without network once it has been opened with it. Answers were already kept on the device after each card and sent to Firestore when the network comes back.
 - **⌫** on a card where nothing has been typed yet shows the card before, whole, with its rating; Espace / Entrée go on.
 - **≠ Words that get mixed up** (`confusables.py`: todavía / siempre, saber / conocer, ver / mirar…): the difference is in the blue note on the back, with the group's other words; in 🔍 a click looks them up.
 - **🔍** on any deck row opens a read-only card browser: decks with pictures get a carousel (front and back together; swipe, mouse wheel, **← / →** or ‹ › to move), word/sentence decks a dense `front | back` list; the search box filters on both sides (accents ignored), **Esc** goes back. Nothing you do there touches scheduling. JSON made before `answer` existed shows the typed words as the back.
@@ -228,11 +230,14 @@ chmod +x trainer.py && ln -sf "$PWD/trainer.py" ~/.local/bin/ankiterm
 Then `ankiterm` from anywhere takes the same arguments as `python3 trainer.py`:
 
 ```bash
-python3 trainer.py              # 1st time: who are you? then the list of decks
+python3 trainer.py              # 1st time: who are you? then every deck with cards today, one after the other
+python3 trainer.py -l           # the list of decks, to pick one
 python3 trainer.py vocab        # first deck whose name has « vocab »
 python3 trainer.py vocab -d "Niveau 2" -n 10   # sub-decks with « Niveau 2 », 10 new cards
 python3 trainer.py --dry        # write nothing
 python3 trainer.py --user       # pick the name again
+python3 trainer.py --voir veo   # a word's details (veo → ver)
+python3 trainer.py --journal    # day by day: answers, new cards, right at once, intervals given
 ```
 
 - **During a card:** type the answer and press Entrée. Accents and punctuation
@@ -256,11 +261,19 @@ python3 trainer.py --user       # pick the name again
 - **Same answer, not twice in a row:** a card whose answer was just on screen
   (missed on another card — « han » for the gap sentence and for haber — or in
   a table) waits until it has scrolled out of sight.
-- **Offline:** a review Firestore didn't take (« timed out ») is sent again after the next cards, and before leaving; the end line says if some couldn't be.
+- **Offline:** a review Firestore didn't take (« timed out ») is sent again after the next cards, and before leaving; what still couldn't be is kept in `trainer.json` and sent at the next start (the newer answer wins).
+- **A word's details (`:v mot`, or `ankiterm --voir mot`):** its Vocabulaire card (meanings, word class, sentence, the ≠ note and the words it gets mixed up with), where each direction stands (last seen, when it comes back, lapses), and the verb a form comes from — veo → ver, tenemos → tener, presente, nosotros. Doesn't use a try.
+- **Both directions, not the same day:** as in the app (#269), a word answered one way today sends its other direction to tomorrow.
 - **Challenge (`ankiterm --defi [tag]`):** one minute to type, from memory, as many Spanish words of a tag as you can (verbe, adjectif, états et émotions…), each checked against the Vocabulaire; the best score per tag is kept, and the most frequent words you didn't give are listed at the end.
 - **Log:** every card answered goes into `~/.config/espanol-trainer/log.tsv`
-  (when, deck, card, rating, when it comes back, seconds); `:l` shows today's
-  cards, those seen several times first. A `--dry` session writes nothing there.
+  (when, deck, card, rating, when it comes back, seconds, where it stood before);
+  `:l` shows today's cards, those seen several times first. A `--dry` session
+  writes nothing there.
+- **Journal (`ankiterm --journal`):** to check the algorithm, day by day from the
+  log: answers and cards, new ones, answers per card, the known cards right at
+  their first answer of the day (Anki aims at 85–90 %), the intervals given
+  (<1j · 1-3j · 4-10j · 11-30j · >30j), then the Vocabulaire cards due on each of
+  the next 14 days.
 - **Gap sentences:** « A mí me ___ el chocolate » takes « gusta » or « me gusta ».
 - **Time:** the end count adds up the time spent on each card (60 s at most per
   answer, nothing during `:p`), so a session left open doesn't count.
@@ -285,8 +298,10 @@ python3 trainer.py --user       # pick the name again
   everywhere, and the app accepts it too: in the one box, or typed across the
   word boxes.
 - **Too late for `+`?** Typed first on the next card (before any try there),
-  `+` (or `+ another meaning`) adds the meaning to the card missed just
-  before, which is then rated Correct instead of À revoir.
+  `+` (or `+ another meaning`) adds the meaning to the card just before — if
+  it was missed (then rated Correct instead of À revoir), or found after a try
+  that wasn't taken (its rating stays). The question names the card
+  (« ajouter « au lieu de » à « en vez de » ? »); `n` offers it to this card instead.
 - **After a miss:** `tab` still shows the table at the « Entrée = suivante » prompt. The answer shows in red (like the learning count after
   it: the card goes back there), then the cards left and the time left show, as under the app's cards:
   new · learning · review, in blue · red · green. The screen isn't wiped:
@@ -294,8 +309,9 @@ python3 trainer.py --user       # pick the name again
   window (other cards go first; if none is left, blank lines push it up), so
   it can't be copied from the screen.
 - **Stopping:** `q` stops.
-- **Deck:** the deck reviewed last, in the app or here, is the default in
-  the list, so Entrée is enough.
+- **Deck:** with no deck named, every deck with cards today, one after the
+  other — the one reviewed last (in the app or here) first, not the 💤 ones;
+  `-l` shows the list instead, with the last one as default (Entrée).
 - **Name:** the chosen name is kept in `~/.config/espanol-trainer/trainer.json`.
 
 Same cards in the same order as the app: the terminal draws the day's queue
