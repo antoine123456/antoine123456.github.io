@@ -81,7 +81,7 @@ def svg(note, clef, acc=""):
     p = pos(note, clef)
     y = BOTTOM - p * STEP
     nx = 78
-    parts = ['<svg class="pt-staff" viewBox="0 0 120 115" width="300" height="288" role="img" aria-label="note">']
+    parts = ['<svg class="pt-staff" viewBox="0 8 120 102" width="300" height="255" role="img" aria-label="note">']
     for i in range(5):
         ly = TOP + i * 10
         parts.append('<line x1="4" x2="116" y1="%d" y2="%d"/>' % (ly, ly))
@@ -102,7 +102,7 @@ def svg(note, clef, acc=""):
 
 
 STYLE = ("<style>.pt{display:flex;flex-direction:column;align-items:center;gap:4px}"
-         ".pt-staff{max-width:100%;height:auto;color:inherit}"
+         ".pt-staff{max-width:100%;max-height:30vh;width:auto;height:auto;color:inherit}"
          ".pt-staff line{stroke:currentColor;stroke-width:1}"
          ".pt-staff .pt-ledger{stroke-width:1.2}"
          ".pt-staff .pt-glyph{fill:currentColor}"
@@ -117,10 +117,12 @@ def card(cid, note, clef, tags, acc=""):
     info = "%s · %s · %s (%s)" % (name, eng, where(p), CLEFS[clef]["name"])
     if note == "C4":
         info += " — le do du milieu du piano"
-    c = {"id": str(cid), "question": STYLE + '<div class="pt">' + svg(note, clef, acc) + '<div class="pt-q">Quelle note ?</div></div>',
+    c = {"id": str(cid), "question": STYLE + '<div class="pt">' + svg(note, clef, acc) + '</div>',
          "answer": name, "words": words, "tags": tags, "info": info}
+    c["wheel"] = 1  # answered on a wheel of notes (#283)
     if acc:
         c["alt"] = [FR[note[0]] + ACC_SIGN[acc], FR[note[0]] + acc]
+        c["wheelAcc"] = 1  # ♯ / ♭ in the middle of the wheel
     return c
 
 
