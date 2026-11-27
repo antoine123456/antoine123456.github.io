@@ -3577,7 +3577,37 @@
             if (!FIREBASE_ENABLED || !fbUser || !fbDb) return Promise.resolve();
             var sources = loadSources();
             var userRef = fbDb.collection("users").doc(fbUser.uid);
+            // 🔒 (#279) Never send an older review over a newer one: a tab left open sent its
+            // whole srs back and wiped 330 cards reviewed in the terminal (Firestore merges map
+            // fields one by one, so each old entry replaced the newer one). The cloud is read
+            // first: each card keeps its most recent review (here too), and only the cards
+            // reviewed more recently here are sent.
+            return Promise.all(sources.map(function (src) {
+                return userRef.collection("sources").doc(String(src.id)).get()
+                    .then(function (d) { return (d.exists && d.data().srs) || {}; });
+            })).then(function (clouds) { return pushWithCloud(sources, userRef, clouds); });
+        }
+        function newerSRS(local, cloud) {
+            var out = {};
+            Object.keys(local).forEach(function (cid) {
+                var c = cloud[cid];
+                if (!c || (local[cid].lastReview || 0) > (c.lastReview || 0)) out[cid] = local[cid];
+            });
+            return out;
+        }
+        function pushWithCloud(sources, userRef, clouds) {
             var batch = fbDb.batch();
+            sources.forEach(function (src, i) {
+                var local = loadSRS(src.id), merged = mergeSRS(local, clouds[i]);
+                if (Object.keys(merged).some(function (k) { return merged[k] !== local[k]; })) {
+                    saveSRSRaw(src.id, merged);
+                    if (sess.srsKey === String(src.id) && sess.srs) Object.keys(merged).forEach(function (k) {
+                        var x = sess.srs[k];
+                        if (!x || (merged[k].lastReview || 0) > (x.lastReview || 0)) sess.srs[k] = merged[k];
+                    });
+                }
+                src._push = newerSRS(merged, clouds[i]);
+            });
 
             batch.set(userRef, {
                 sources: sources.map(function (s) { return { id: String(s.id), name: s.name, decks: s.decks, isDefault: !!s.isDefault }; }),
@@ -3591,7 +3621,7 @@
             sources.forEach(function (src) {
                 var srcRef = userRef.collection("sources").doc(String(src.id));
                 batch.set(srcRef, {
-                    srs: loadSRS(src.id),
+                    srs: src._push || {}, // only what is newer here (#279)
                     newCount: loadNewCount(src.id),
                     flagged: loadFlagged(src.id),
                     edits: loadEdits(src.id),
