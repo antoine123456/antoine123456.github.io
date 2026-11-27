@@ -736,6 +736,8 @@ INFO = """
   :v mot     les détails d'un
              mot (sens, exemple, ≠,
              veo → ver, où il en est)
+  :e [mot]   petit explorateur
+             (Vocabulaire, Grammaire)
   :l  log    les cartes du jour
              (vues plusieurs fois
              en premier)
@@ -823,6 +825,14 @@ def keyword(a):
 _LOOK = {}
 
 
+def load_look():
+    """The Vocabulaire and the Grammaire, read once, for :v and :e."""
+    for sid in ("vocabulaire", "grammaire"):
+        if sid not in _LOOK:
+            d = json.load(open(os.path.join(HERE, bundled_files()[sid]), encoding="utf-8"))
+            _LOOK[sid] = [c for dk in d.get("decks") or [] for c in dk.get("cards") or []]
+
+
 def look(word, srs_of=None):
     """« :v mot » / ankiterm --voir mot (P7, #272): what the decks say about a word —
     the Vocabulaire card (meanings, word class, sentence, the ≠ note and the words
@@ -831,10 +841,7 @@ def look(word, srs_of=None):
     w = squash(word)
     if not w:
         return col(DIM, "  :v suivi d'un mot (espagnol ou français)")
-    for sid in ("vocabulaire", "grammaire"):
-        if sid not in _LOOK:
-            d = json.load(open(os.path.join(HERE, bundled_files()[sid]), encoding="utf-8"))
-            _LOOK[sid] = [c for dk in d.get("decks") or [] for c in dk.get("cards") or []]
+    load_look()
     bare = lambda t: squash(re.sub(r"^(el|la|los|las|un|una)\s+", "", t, flags=re.I))
     vocab = [c for c in _LOOK["vocabulaire"] if not c.get("rev")]
     hits = [c for c in vocab if w in (squash(c["es"]), bare(c["es"]))]
@@ -879,6 +886,58 @@ def look(word, srs_of=None):
         near = sorted({c["es"] for c in vocab if squash(c["es"]).startswith(w[:4])}, key=len)[:6]
         return col(DIM, "  rien pour « %s »%s" % (word.strip(), " — peut-être : " + ", ".join(near) if near else ""))
     return "\n".join(out)
+
+
+def explore(first=None, srs_of=None):
+    """« :e » / ankiterm --dico (#278): a very small explorer of the Vocabulaire and the
+    Grammaire, straight on a search — a bit of a word, Spanish or French, accents
+    ignored; the exact word first. A number shows that word's details (as :v),
+    another text searches again, Entrée alone (or q) goes back."""
+    load_look()
+    vocab = [c for c in _LOOK["vocabulaire"] if not c.get("rev")]
+    gram = [c for c in _LOOK["grammaire"] if c.get("words")]
+    q, hits = first, []
+    while True:
+        if q is None:
+            q = ask(col(CYAN, "  🔍 "), counted=False)
+            if q is None or q.strip().lower() in ("", "q", ":q"):
+                return
+        q = q.strip()
+        if q.isdigit() and hits:
+            if 1 <= int(q) <= len(hits):
+                kind, c = hits[int(q) - 1]
+                if kind == "v":
+                    print(look(c["es"], srs_of))
+                else:
+                    print(col(BOLD, "  " + plain(c.get("question") or "")) + "\n" + col(GREEN, "  " + " ".join(map(str, c["words"]))))
+            q = None
+            continue
+        w = squash(q)
+        found = []
+        for c in vocab:
+            es, fr = squash(c["es"]), squash(c.get("fr") or "")
+            if w in es or w in fr:
+                exact = w in (es, re.sub(r"^(el|la|los|las|un|una) ", "", es)) or w in {squash(x) for x in re.split(r"\s*[,;/]\s*", c.get("fr") or "")}
+                found.append((0 if exact else 1 if es.startswith(w) else 2, len(c["es"]), "v", c))
+        for c in gram:
+            ans = " ".join(map(str, c["words"]))
+            if w in squash(ans):
+                found.append((0 if squash(ans) == w else 3, len(ans), "g", c))
+        found.sort(key=lambda x: x[:2])
+        hits = [(k, c) for _, _, k, c in found[:15]]
+        if not hits:
+            print(col(DIM, "  rien pour « %s »" % q))
+        for i, (k, c) in enumerate(hits, 1):
+            if k == "v":
+                left, right = c["es"], c.get("fr") or ""
+            else:
+                left, right = " ".join(map(str, c["words"])), "Grammaire : " + plain(c.get("question") or "").replace("\n", " ")
+            print(col(DIM, "  %2d " % i) + col(BOLD, "%-26s" % left[:26]) + " " + right[:70])
+        if len(found) > 15:
+            print(col(DIM, "  … %d de plus : précise" % (len(found) - 15)))
+        if hits:
+            print(col(DIM, "  un numéro = le détail · un autre mot · Entrée = retour"))
+        q = None
 
 
 def seen_ago(s):
@@ -981,6 +1040,11 @@ def review(card, s, on_dump=None, on_add=None, on_stats=None, on_tab=None, on_pr
         w = keyword(a)
         if w == "quit":
             return None
+        m = re.match(r"^:(?:e|dico)(?:\s+(.+))?$", a.strip(), re.I)
+        if m:  # the explorer (#278), straight on a search: doesn't use a try
+            explore(m.group(1), on_look)
+            print(col(BOLD, ind(front_of(card))))
+            continue
         m = re.match(r"^:(?:v|voir)\s+(.+)$", a.strip(), re.I)
         if m:  # a word's details (P7, #272): doesn't use a try
             print(look(m.group(1), on_look))
@@ -1186,6 +1250,7 @@ def main():
     ap.add_argument("--dry", action="store_true", help="ne rien écrire dans Firestore")
     ap.add_argument("--user", action="store_true", help="choisir à nouveau qui révise")
     ap.add_argument("--journal", action="store_true", help="jour par jour : réponses, cartes, nouvelles, taux du 1er coup, intervalles donnés, cartes à venir")
+    ap.add_argument("--dico", nargs="?", const="", metavar="MOT", help="petit explorateur du Vocabulaire et de la Grammaire, qui démarre sur une recherche")
     ap.add_argument("--voir", metavar="MOT", help="les détails d'un mot : sens, exemple, ≠, verbe d'une forme (veo → ver), où il en est")
     ap.add_argument("--defi", nargs="?", const="", metavar="TAG",
                     help="défi : en une minute, le plus de mots espagnols de ce tag (verbe, adjectif…)")
@@ -1194,6 +1259,8 @@ def main():
     if args.defi is not None:
         return defi(args.defi)  # no progress involved: no user needed
     USER = setup(args.user)
+    if args.dico is not None:
+        return explore(args.dico or None, lambda x: get_doc("users/%s/sources/%s" % (USER, x)).get("srs") or {})
     if args.journal:
         print(journal())
         try:

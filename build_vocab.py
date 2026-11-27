@@ -362,6 +362,9 @@ def main():
 
     global EXCLUDE_TOKS
     EXCLUDE_TOKS = {" ".join(toks(x)).lower() for x in EXCLUDE}
+    # « su (sus) » and « su sus » (#277): the same word twice, the second from the FR → ES
+    # side that lost its brackets — it asked « son, sa, ses » to be typed « su sus »
+    bracketed = {" ".join(toks(x["es"])).lower() for x in items if "(" in x["es"]}
     gen = generated_sentences()
     cards, review = [], []  # review : (carte, nom de la phrase qui fournit l'image ou None)
     for i, w in enumerate(items, 1):
@@ -370,6 +373,8 @@ def main():
         # for « este (esto; esta) », which slipped through as a card to type whole
         if " ".join(toks(w["es"])).lower() in EXCLUDE_TOKS:
             continue
+        if "(" not in w["es"] and " ".join(toks(w["es"])).lower() in bracketed:
+            continue  # its id stays unused, the other cards keep theirs
         fix = OVERRIDES.get(w["es"], {})
         if fix.get("fr"):
             w["fr"] = fix["fr"]
@@ -617,6 +622,10 @@ def add_reverse():
                          tags=base + [tag])
                 if sep: r["sep"] = sep
                 if notes: r["notes"] = notes
+                # the other forms in brackets are right too (#277): su (sus) → « sus », ese (eso; esa) → « eso »
+                other = re.search(r"\(([^)]*)\)", c["es"])
+                if other:
+                    r["alt"] = (c.get("alt") or []) + [a for a in re.split(r"\s*;\s*", other.group(1).strip()) if a]
                 if c.get("audioQuestion"): r["audioAnswer"] = c["audioQuestion"]  # the word is heard after, not before
                 cards.append(r)
                 have.add(c["id"])
