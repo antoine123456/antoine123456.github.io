@@ -363,6 +363,62 @@ def journal(days=14):
     return "\n".join(out)
 
 
+def restore(dry):
+    """ankiterm --restaurer (#279): the reviews in log.tsv that Firestore lost (a tab of
+    the app sent an older copy over them) played again, card by card, from the state
+    Firestore still has, with the same scheduler — each « revient » of the log checked.
+    Only the cards behind the log are written; running it twice changes nothing."""
+    global TODAY
+    q_of = {"À revoir": 1, "Difficile": 2, "Correct": 3, "Facile": 4}
+    rows_ = [f for f in (l.split("\t") for l in open(LOG, encoding="utf-8").read().splitlines()[1:]) if len(f) >= 7]
+    by = {}
+    for f in rows_:
+        by.setdefault(f[1], []).append(f)
+    today = TODAY
+    for sid, fs in by.items():
+        meta = get_doc("users/%s/sources/%s" % (USER, sid))
+        srs, nc = meta.get("srs") or {}, meta.get("newCount") or {}
+        fixed, same, differ = {}, 0, []
+        for f in fs:
+            cid, ms = f[2], int(time.mktime(time.strptime(f[0], "%Y-%m-%d %H:%M:%S")) * 1000)
+            cur = fixed.get(cid) or srs.get(cid)
+            if cur and (cur.get("lastReview") or 0) >= ms - 1500:
+                continue  # Firestore already has this answer (or a later one)
+            TODAY = ms // DAY
+            s, requeue = apply_rating(cur or default_srs(), q_of[f[4]])
+            back = "<%dm" % requeue if requeue else "%dj" % s.get("interval", 1)
+            same += back == f[5]
+            if back != f[5]:
+                differ.append("%s %s: %s ≠ %s" % (f[0][11:16], f[3][:24], back, f[5]))
+            # the log says when it really came back: that wins (Firestore's older state may
+            # miss reviews made in the app meanwhile, and the replay then drifts)
+            m = re.match(r"^(?:<(\d+)m|(\d+)j)$", f[5])
+            if m and m.group(2):
+                s.update(state="review", step=0, interval=int(m.group(2)), due=TODAY + int(m.group(2)))
+            elif m and s["state"] == "review":
+                s["state"] = "relearning"
+            s["lastReview"] = ms
+            spent = min(60000, int(float(f[6] or 0) * 1000))
+            s["ms"] = round(s["ms"] * 0.7 + spent * 0.3) if s.get("ms") else spent
+            fixed[cid] = s
+        TODAY = today
+        print(col(BOLD, "%s : %d carte(s) à remettre" % (sid, len(fixed))) + col(DIM, " — %d réponse(s) rejouée(s) telles quelles, %d recalées sur le journal" % (same, len(differ))))
+        for d in differ[:5]:
+            print(col(DIM, "  " + d))
+        if dry or not fixed:
+            continue
+        ok = 0
+        for cid, s in fixed.items():
+            try:
+                save_review(sid, cid, s, nc, False)
+                ok += 1
+            except Exception as e:
+                print(col(RED, "  ⚠ %s : %s" % (cid, e)))
+        print(col(GREEN, "  ✓ %d remise(s) dans Firestore" % ok))
+    if dry:
+        print(col(DIM, "essai : rien n'est écrit (sans --dry pour remettre)"))
+
+
 def due_ahead(srs, days=14):
     """Cards due on each of the coming days (review cards), from today's progress."""
     n = [0] * days
@@ -1249,6 +1305,7 @@ def main():
     ap.add_argument("-l", "--liste", action="store_true", help="la liste des paquets pour en choisir un (sinon : tous ceux du jour, à la suite)")
     ap.add_argument("--dry", action="store_true", help="ne rien écrire dans Firestore")
     ap.add_argument("--user", action="store_true", help="choisir à nouveau qui révise")
+    ap.add_argument("--restaurer", action="store_true", help="remet dans Firestore les révisions du journal qu'une copie plus ancienne a écrasées (--dry : seulement compter)")
     ap.add_argument("--journal", action="store_true", help="jour par jour : réponses, cartes, nouvelles, taux du 1er coup, intervalles donnés, cartes à venir")
     ap.add_argument("--dico", nargs="?", const="", metavar="MOT", help="petit explorateur du Vocabulaire et de la Grammaire, qui démarre sur une recherche")
     ap.add_argument("--voir", metavar="MOT", help="les détails d'un mot : sens, exemple, ≠, verbe d'une forme (veo → ver), où il en est")
@@ -1261,6 +1318,8 @@ def main():
     USER = setup(args.user)
     if args.dico is not None:
         return explore(args.dico or None, lambda x: get_doc("users/%s/sources/%s" % (USER, x)).get("srs") or {})
+    if args.restaurer:
+        return restore(args.dry)
     if args.journal:
         print(journal())
         try:
