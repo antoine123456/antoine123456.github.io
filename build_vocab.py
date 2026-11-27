@@ -88,6 +88,9 @@ OVERRIDES = {
     # Pending (#231): alguna vez = une fois / déjà, never « jamais »; tanto = tant too
     "alguna vez": {"fr": "une fois; déjà"},
     "tanto": {"fr": "tellement; tant"},
+    # « manera » made even (P9, #275): « dans quel sens ? » was wrong for de qué manera
+    "de qué manera": {"fr": "de quelle manière ?; comment ?"},
+    "de alguna manera": {"fr": "d'une certaine façon; d'une manière ou d'une autre"},
     "más": {"img": "https://commons.wikimedia.org/wiki/Special:FilePath/%22wow%22_price_tag.jpg?width=500"},  # a price tag, for « más barato » (#200)
     "algún (alguna)": {"fr": "quelque",
                        "n": "algún devant un nom masculin (algún día = un jour), alguna au féminin ; au pluriel algunos / algunas = quelques. Dans une question : un (¿tienes algún libro? = tu as un livre ?).",
@@ -95,11 +98,15 @@ OVERRIDES = {
 }
 # Labels to study them apart from the home page (« Idées vocabulaire », #161).
 FAUX_AMIS = {"presumir", "proporcionar", "gracioso", "embarazada", "éxito", "largo", "contestar"}
+# « mon petit carnet » (#274): the expressions Antoine picked up himself (idee.md @monpetitcarnet),
+# a tag to study them apart — French deck only
+CARNET = {"lo que sea", "me pongo a ello"}
 LIAISON = {"entonces", "sin embargo", "además", "así que", "aunque", "pues", "al final", "mientras"}
 
 # Grammar, not vocabulary: already in the Grammaire deck (#155). Left out
 # without shifting the other cards' ids (each keeps its rank).
 EXCLUDE = {"debería", "estos (estas)", "este (esto; esta)"}
+EXCLUDE_TOKS = None  # filled in main(), once toks is imported
 
 
 def typed(meaning, comma=False):
@@ -353,11 +360,15 @@ def main():
                 return imgs[t], t
         return None, None
 
+    global EXCLUDE_TOKS
+    EXCLUDE_TOKS = {" ".join(toks(x)).lower() for x in EXCLUDE}
     gen = generated_sentences()
     cards, review = [], []  # review : (carte, nom de la phrase qui fournit l'image ou None)
     for i, w in enumerate(items, 1):
         w["i"] = i
-        if w["es"] in EXCLUDE:
+        # compared word by word (#268): the FR→ES side gives « este esto esta »
+        # for « este (esto; esta) », which slipped through as a card to type whole
+        if " ".join(toks(w["es"])).lower() in EXCLUDE_TOKS:
             continue
         fix = OVERRIDES.get(w["es"], {})
         if fix.get("fr"):
@@ -419,6 +430,9 @@ def main():
 
     cards_it = translated(cards, "it") + pro_it
     cards = cards + pro_fr
+    for c in cards:
+        if c["es"] in CARNET and "mon petit carnet" not in c["tags"]:
+            c["tags"].append("mon petit carnet")
     # Words that get mixed up (#256, confusables.py): the difference in the blue
     # note on the back, and the group's other words for 🔍.
     import confusables
