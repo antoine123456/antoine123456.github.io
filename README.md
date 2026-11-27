@@ -238,6 +238,7 @@ python3 trainer.py --dry        # write nothing
 python3 trainer.py --user       # pick the name again
 python3 trainer.py --voir veo   # a word's details (veo → ver)
 python3 trainer.py --dico       # a small explorer of the Vocabulaire and the Grammaire
+python3 trainer.py --restaurer  # put back the reviews of the log that an older copy overwrote (--dry: count only)
 python3 trainer.py --journal    # day by day: answers, new cards, right at once, intervals given
 ```
 
@@ -326,7 +327,13 @@ par jour », or in time mode the number the app worked out today. `-n` still
 overrides it.
 
 The app takes the terminal's reviews when it loads, and a card's most recent
-review wins. Reload the app's tab after a terminal session, or an open tab may
+review wins. Since #279 the app never sends an older review over a newer one: before
+each sync it reads the cloud, keeps each card's most recent review, and sends
+only the cards reviewed more recently on its side (before, a tab left open
+sent its whole copy back and wiped 328 cards reviewed in the terminal).
+`ankiterm --restaurer` replays `log.tsv` over what Firestore still has, card
+by card, each « revient » taken from the log, and writes only the cards
+behind it. Reload the app's tab after a terminal session, or an open tab may
 send its older copy back.
 
 ---
